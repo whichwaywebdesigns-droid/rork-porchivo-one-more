@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  /* ── Porchivo dark theme (matches Expo/Android app) ── */
+  :root {
+    --background: 223 65 15;
+    --foreground: 217 53 94;
+
+    --card: 223 54 16;
+    --card-foreground: 217 53 94;
+
+    --popover: 223 54 16;
+    --popover-foreground: 217 53 94;
+
+    --primary: 214 77 60;
+    --primary-foreground: 0 0 100;
+
+    --secondary: 222 52 21;
+    --secondary-foreground: 217 53 94;
+
+    --muted: 222 52 21;
+    --muted-foreground: 215 20 55;
+
+    --accent: 222 52 21;
+    --accent-foreground: 217 53 94;
+
+    --destructive: 0 70 60;
+    --destructive-foreground: 217 53 94;
+
+    --border: 222 49 23;
+    --input: 222 49 23;
+    --ring: 214 77 60;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 225 65 10;
+    --sidebar-foreground: 217 53 94;
+    --sidebar-primary: 214 77 60;
+    --sidebar-primary-foreground: 0 0 100;
+    --sidebar-accent: 222 52 21;
+    --sidebar-accent-foreground: 217 53 94;
+    --sidebar-border: 222 49 23;
+    --sidebar-ring: 214 77 60;
+  }
+
+  .dark {
+    --background: 223 65 15;
+    --foreground: 217 53 94;
+
+    --card: 223 54 16;
+    --card-foreground: 217 53 94;
+
+    --popover: 223 54 16;
+    --popover-foreground: 217 53 94;
+
+    --primary: 214 77 60;
+    --primary-foreground: 0 0 100;
+
+    --secondary: 222 52 21;
+    --secondary-foreground: 217 53 94;
+
+    --muted: 222 52 21;
+    --muted-foreground: 215 20 55;
+
+    --accent: 222 52 21;
+    --accent-foreground: 217 53 94;
+
+    --destructive: 0 70 60;
+    --destructive-foreground: 217 53 94;
+
+    --border: 222 49 23;
+    --input: 222 49 23;
+    --ring: 214 77 60;
+    --sidebar-background: 225 65 10;
+    --sidebar-foreground: 217 53 94;
+    --sidebar-primary: 214 77 60;
+    --sidebar-primary-foreground: 0 0 100;
+    --sidebar-accent: 222 52 21;
+    --sidebar-accent-foreground: 217 53 94;
+    --sidebar-border: 222 49 23;
+    --sidebar-ring: 214 77 60;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}

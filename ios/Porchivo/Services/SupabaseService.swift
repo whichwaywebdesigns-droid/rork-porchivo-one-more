@@ -1,0 +1,624 @@
+//
+//  SupabaseService.swift
+//  Porchivo
+//
+//  Direct Supabase REST + Auth client over URLSession — mirrors the Android
+//  SupabaseClient. No SDK dependency; same tables/RPCs/RLS as the Expo app.
+//
+//  Concurrency: DTOs are `nonisolated` Codable structs; the service is an
+//  actor so token/session state is serialized.
+//
+
+import Foundation
+
+// MARK: - DTOs (nonisolated for background decode/encode)
+
+nonisolated struct AuthSession: Codable, Equatable, Sendable {
+    var accessToken: String
+    var refreshToken: String
+    var expiresIn: TimeInterval
+    var expiresAt: TimeInterval
+    var tokenType: String
+    var user: AuthUser?
+
+    enum CodingKeys: String, CodingKey {
+        case accessToken = "access_token"
+        case refreshToken = "refresh_token"
+        case expiresIn = "expires_in"
+        case expiresAt = "expires_at"
+        case tokenType = "token_type"
+        case user
+    }
+
+    init(accessToken: String, refreshToken: String, expiresIn: TimeInterval,
+         expiresAt: TimeInterval, tokenType: String = "bearer", user: AuthUser? = nil) {
+        self.accessToken = accessToken
+        self.refreshToken = refreshToken
+        self.expiresIn = expiresIn
+        self.expiresAt = expiresAt
+        self.tokenType = tokenType
+        self.user = user
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        accessToken = try c.decode(String.self, forKey: .accessToken)
+        refreshToken = try c.decodeIfPresent(String.self, forKey: .refreshToken) ?? ""
+        expiresIn = try c.decodeIfPresent(TimeInterval.self, forKey: .expiresIn) ?? 0
+        expiresAt = try c.decodeIfPresent(TimeInterval.self, forKey: .expiresAt) ?? 0
+        tokenType = try c.decodeIfPresent(String.self, forKey: .tokenType) ?? "bearer"
+        user = try c.decodeIfPresent(AuthUser.self, forKey: .user)
+    }
+}
+
+nonisolated struct AuthUser: Codable, Equatable, Sendable {
+    let id: String
+    let email: String?
+    let aud: String?
+    let role: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id, email, aud, role
+    }
+
+    init(id: String, email: String? = nil, aud: String? = nil, role: String? = nil) {
+        self.id = id
+        self.email = email
+        self.aud = aud
+        self.role = role
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(String.self, forKey: .id)
+        email = try c.decodeIfPresent(String.self, forKey: .email)
+        aud = try c.decodeIfPresent(String.self, forKey: .aud)
+        role = try c.decodeIfPresent(String.self, forKey: .role)
+    }
+}
+
+nonisolated struct DbProfile: Codable, Sendable {
+    let id: String
+    var name: String?
+    var phone: String?
+    var email: String?
+    var avatarUrl: String?
+    var role: String?
+    var address: String?
+    var hasLocationConsent: Bool?
+    var hasPreciseLocationConsent: Bool?
+    var isPremium: Bool?
+    var subscriptionTier: String?
+    var isOnboarded: Bool?
+    var createdAt: String?
+    var updatedAt: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id, name, phone, email
+        case avatarUrl = "avatar_url"
+        case role, address
+        case hasLocationConsent = "has_location_consent"
+        case hasPreciseLocationConsent = "has_precise_location_consent"
+        case isPremium = "is_premium"
+        case subscriptionTier = "subscription_tier"
+        case isOnboarded = "is_onboarded"
+        case createdAt = "created_at"
+        case updatedAt = "updated_at"
+    }
+}
+
+nonisolated struct DbShipment: Codable, Sendable {
+    let id: String
+    let homeownerId: String
+    let homeownerName: String
+    var partnerId: String?
+    var partnerName: String?
+    var status: String
+    var carrier: String
+    var packagesExpected: String
+    var deliveryWindowStart: String
+    var deliveryWindowEnd: String
+    var addressText: String?
+    var homeLocationVisibleToPartner: Bool?
+    var notes: String?
+    var preferredReturnTime: String?
+    var trackingNumber: String?
+    var deliveryStatus: String
+    var createdAt: String?
+    var updatedAt: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case homeownerId = "homeowner_id"
+        case homeownerName = "homeowner_name"
+        case partnerId = "partner_id"
+        case partnerName = "partner_name"
+        case status, carrier
+        case packagesExpected = "packages_expected"
+        case deliveryWindowStart = "delivery_window_start"
+        case deliveryWindowEnd = "delivery_window_end"
+        case addressText = "address_text"
+        case homeLocationVisibleToPartner = "home_location_visible_to_partner"
+        case notes
+        case preferredReturnTime = "preferred_return_time"
+        case trackingNumber = "tracking_number"
+        case deliveryStatus = "delivery_status"
+        case createdAt = "created_at"
+        case updatedAt = "updated_at"
+    }
+}
+
+nonisolated struct DbNotification: Codable, Sendable {
+    let id: String
+    let shipmentId: String
+    let type: String
+    let title: String
+    let message: String
+    let recipientId: String
+    var read: Bool
+    var createdAt: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case shipmentId = "shipment_id"
+        case type, title, message
+        case recipientId = "recipient_id"
+        case read
+        case createdAt = "created_at"
+    }
+}
+
+nonisolated struct DbDirectoryRow: Codable, Sendable {
+    let id: String
+    let name: String?
+    let role: String?
+    let address: String?
+    let avatarUrl: String?
+    let isPremium: Bool?
+
+    enum CodingKeys: String, CodingKey {
+        case id, name, role, address
+        case avatarUrl = "avatar_url"
+        case isPremium = "is_premium"
+    }
+}
+
+nonisolated struct DbChatMessage: Codable, Sendable {
+    let id: String
+    let senderId: String
+    let senderName: String?
+    let senderAvatarUrl: String?
+    let body: String?
+    let createdAt: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case senderId = "sender_id"
+        case senderName = "sender_name"
+        case senderAvatarUrl = "sender_avatar_url"
+        case body
+        case createdAt = "created_at"
+    }
+}
+
+// MARK: - SupabaseService
+
+actor SupabaseService {
+    private let baseURL: URL
+    private let anonKey: String
+    private let session: URLSession
+    private let decoder: JSONDecoder
+    private let encoder: JSONEncoder
+
+    private(set) var currentSession: AuthSession?
+
+    static let shared: SupabaseService = {
+        let urlStr = Config.EXPO_PUBLIC_SUPABASE_URL.trimmingCharacters(in: .whitespaces)
+        let key = Config.EXPO_PUBLIC_SUPABASE_ANON_KEY
+        let fallbackURL = URL(string: "https://placeholder.supabase.co")
+            ?? URL(string: "https://example.com")!
+        return SupabaseService(baseURL: URL(string: urlStr) ?? fallbackURL,
+                               anonKey: key)
+    }()
+
+    init(baseURL: URL, anonKey: String) {
+        self.baseURL = baseURL
+        self.anonKey = anonKey
+        let cfg = URLSessionConfiguration.default
+        cfg.timeoutIntervalForRequest = 20
+        cfg.timeoutIntervalForResource = 25
+        cfg.waitsForConnectivity = true
+        self.session = URLSession(configuration: cfg)
+        self.decoder = JSONDecoder()
+        self.encoder = JSONEncoder()
+    }
+
+    var isConfigured: Bool {
+        !anonKey.isEmpty && baseURL.host?.contains("placeholder") == false
+    }
+
+    var currentUserId: String? { currentSession?.user?.id }
+    var isAuthenticated: Bool { currentSession != nil }
+
+    // MARK: Session persistence
+
+    func restoreSession() async -> AuthSession? {
+        if let saved = currentSession { return saved }
+        guard let data = (try? KeychainStore.loadSession()) ?? nil else { return nil }
+        guard let session = try? decoder.decode(AuthSession.self, from: data) else {
+            KeychainStore.clearSession()
+            return nil
+        }
+        let now = Date().timeIntervalSince1970
+        if session.expiresAt > 0 && session.expiresAt - 60 < now {
+            if let refreshed = await refreshSession(session.refreshToken) {
+                currentSession = refreshed
+                return refreshed
+            }
+            KeychainStore.clearSession()
+            return nil
+        }
+        currentSession = session
+        return session
+    }
+
+    private func persist(_ session: AuthSession) async {
+        currentSession = session
+        if let data = try? encoder.encode(session) {
+            try? KeychainStore.saveSession(data)
+        }
+    }
+
+    // MARK: Auth
+
+    func signInWithEmail(_ email: String, _ password: String) async -> Result<AuthSession, Error> {
+        let body: [String: Any] = ["email": email, "password": password]
+        return await authPost("token?grant_type=password", body: body) { [weak self] data in
+            guard let self else { throw URLError(.cannotConnectToHost) }
+            var session = try self.decoder.decode(AuthSession.self, from: data)
+            if session.expiresAt == 0, session.expiresIn > 0 {
+                session.expiresAt = Date().timeIntervalSince1970 + session.expiresIn
+            }
+            // Fetch user
+            if let user = try? await self.fetchUser(token: session.accessToken) {
+                session.user = user
+            }
+            await self.persist(session)
+            return session
+        }
+    }
+
+    func signUpWithEmail(_ email: String, _ password: String) async -> Result<AuthSession, Error> {
+        let body: [String: Any] = ["email": email, "password": password]
+        return await authPost("signup", body: body) { [weak self] data in
+            guard let self else { throw URLError(.cannotConnectToHost) }
+            let session = try self.decoder.decode(AuthSession.self, from: data)
+            if !session.accessToken.isEmpty {
+                await self.persist(session)
+            }
+            return session
+        }
+    }
+
+    private func refreshSession(_ refreshToken: String) async -> AuthSession? {
+        let body: [String: Any] = ["refresh_token": refreshToken]
+        let result: Result<AuthSession, Error> = await authPost("token?grant_type=refresh_token", body: body) { [weak self] data in
+            guard let self else { throw URLError(.cannotConnectToHost) }
+            var session = try self.decoder.decode(AuthSession.self, from: data)
+            if session.expiresAt == 0, session.expiresIn > 0 {
+                session.expiresAt = Date().timeIntervalSince1970 + session.expiresIn
+            }
+            if let old = await self.currentSession {
+                session.user = old.user
+            }
+            await self.persist(session)
+            return session
+        }
+        return try? result.get()
+    }
+
+    private func fetchUser(token: String) async throws -> AuthUser? {
+        var req = URLRequest(url: baseURL.appendingPathComponent("auth/v1/user"))
+        req.httpMethod = "GET"
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        req.setValue(anonKey, forHTTPHeaderField: "apikey")
+        let (data, response) = try await session.data(for: req)
+        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else { return nil }
+        return try decoder.decode(AuthUser.self, from: data)
+    }
+
+    func signOut() {
+        currentSession = nil
+        KeychainStore.clearSession()
+    }
+
+    // MARK: REST queries
+
+    /// Fetch the authenticated user's profile row.
+    func fetchProfile(userId: String) async -> Result<DbProfile?, Error> {
+        guard let comps = URLComponents(url: baseURL.appendingPathComponent("rest/v1/profiles"), resolvingAgainstBaseURL: false),
+              let url = comps.url else { return .failure(URLError(.badURL)) }
+        var c = comps
+        c.queryItems = [URLQueryItem(name: "id", value: "eq.\(userId)"), URLQueryItem(name: "limit", value: "1")]
+        return await restGet(url: c.url ?? url, singleton: true)
+    }
+
+    func updateProfile(userId: String, _ updates: [String: Any?]) async -> Result<DbProfile, Error> {
+        guard let comps = URLComponents(url: baseURL.appendingPathComponent("rest/v1/profiles"), resolvingAgainstBaseURL: false),
+              let url = comps.url else { return .failure(URLError(.badURL)) }
+        var c = comps
+        c.queryItems = [URLQueryItem(name: "id", value: "eq.\(userId)")]
+        return await restPatch(url: c.url ?? url, body: updates, singleton: true)
+    }
+
+    func fetchShipments(userId: String) async -> Result<[DbShipment], Error> {
+        guard let comps = URLComponents(url: baseURL.appendingPathComponent("rest/v1/shipments"), resolvingAgainstBaseURL: false),
+              let url = comps.url else { return .failure(URLError(.badURL)) }
+        var c = comps
+        c.queryItems = [
+            URLQueryItem(name: "or", value: "(homeowner_id.eq.\(userId),partner_id.eq.\(userId),status.eq.open)"),
+            URLQueryItem(name: "order", value: "created_at.desc"),
+        ]
+        return await restGet(url: c.url ?? url)
+    }
+
+    func insertShipment(_ body: [String: Any?]) async -> Result<DbShipment, Error> {
+        await restPost(url: baseURL.appendingPathComponent("rest/v1/shipments"), body: body, singleton: true)
+    }
+
+    func updateShipment(id: String, _ updates: [String: Any?]) async -> Result<DbShipment, Error> {
+        guard let comps = URLComponents(url: baseURL.appendingPathComponent("rest/v1/shipments"), resolvingAgainstBaseURL: false),
+              let url = comps.url else { return .failure(URLError(.badURL)) }
+        var c = comps
+        c.queryItems = [URLQueryItem(name: "id", value: "eq.\(id)")]
+        return await restPatch(url: c.url ?? url, body: updates, singleton: true)
+    }
+
+    func fetchNotifications(userId: String) async -> Result<[DbNotification], Error> {
+        guard let comps = URLComponents(url: baseURL.appendingPathComponent("rest/v1/notifications"), resolvingAgainstBaseURL: false),
+              let url = comps.url else { return .failure(URLError(.badURL)) }
+        var c = comps
+        c.queryItems = [
+            URLQueryItem(name: "recipient_id", value: "eq.\(userId)"),
+            URLQueryItem(name: "order", value: "created_at.desc"),
+        ]
+        return await restGet(url: c.url ?? url)
+    }
+
+    func markNotificationRead(id: String) async -> Result<Void, Error> {
+        guard let comps = URLComponents(url: baseURL.appendingPathComponent("rest/v1/notifications"), resolvingAgainstBaseURL: false),
+              let url = comps.url else { return .failure(URLError(.badURL)) }
+        var c = comps
+        c.queryItems = [URLQueryItem(name: "id", value: "eq.\(id)")]
+        return await restPatchMinimal(url: c.url ?? url, body: ["read": true])
+    }
+
+    func markAllNotificationsRead(userId: String) async -> Result<Void, Error> {
+        guard let comps = URLComponents(url: baseURL.appendingPathComponent("rest/v1/notifications"), resolvingAgainstBaseURL: false),
+              let url = comps.url else { return .failure(URLError(.badURL)) }
+        var c = comps
+        c.queryItems = [
+            URLQueryItem(name: "recipient_id", value: "eq.\(userId)"),
+            URLQueryItem(name: "read", value: "eq.false"),
+        ]
+        return await restPatchMinimal(url: c.url ?? url, body: ["read": true])
+    }
+
+    func acceptShipment(id: String) async -> Result<Void, Error> {
+        await rpcVoid("accept_shipment", body: ["p_shipment_id": id])
+    }
+
+    func fetchDirectory(orgMemberId: String) async -> Result<[DbDirectoryRow], Error> {
+        await rpc("get_org_directory", body: ["p_member_id": orgMemberId])
+    }
+
+    func fetchChatMessages(threadId: String, limit: Int = 100) async -> Result<[DbChatMessage], Error> {
+        guard let comps = URLComponents(url: baseURL.appendingPathComponent("rest/v1/chat_messages"), resolvingAgainstBaseURL: false),
+              let url = comps.url else { return .failure(URLError(.badURL)) }
+        var c = comps
+        c.queryItems = [
+            URLQueryItem(name: "thread_id", value: "eq.\(threadId)"),
+            URLQueryItem(name: "order", value: "created_at.asc"),
+            URLQueryItem(name: "limit", value: String(limit)),
+        ]
+        return await restGet(url: c.url ?? url)
+    }
+
+    func sendChatMessage(threadId: String, body: String, sender: User) async -> Result<DbChatMessage, Error> {
+        let payload: [String: Any?] = [
+            "thread_id": threadId,
+            "sender_id": sender.id,
+            "sender_name": sender.name,
+            "sender_avatar_url": sender.avatarUrl,
+            "body": body,
+        ]
+        return await restPost(url: baseURL.appendingPathComponent("rest/v1/chat_messages"), body: payload, singleton: true)
+    }
+
+    // MARK: Storage (avatars)
+
+    /// Uploads avatar bytes to the `avatars` bucket under `<userId>/<uuid>.<ext>`.
+    /// Returns the public URL of the uploaded object.
+    func uploadAvatar(userId: String, data: Data, ext: String) async -> Result<String, Error> {
+        let objectPath = "\(userId)/\(UUID().uuidString).\(ext)"
+        var req = URLRequest(url: baseURL.appendingPathComponent("storage/v1/object/avatars/\(objectPath)"))
+        req.httpMethod = "POST"
+        req.setValue(anonKey, forHTTPHeaderField: "apikey")
+        if let token = currentSession?.accessToken {
+            req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        req.setValue("image/\(ext)", forHTTPHeaderField: "Content-Type")
+        req.setValue("public-read", forHTTPHeaderField: "x-upsert")
+        req.httpBody = data
+        do {
+            let (_, resp) = try await session.data(for: req)
+            guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+                return .failure(URLError(.cannotWriteToFile))
+            }
+            let publicURL = baseURL
+                .appendingPathComponent("storage/v1/object/public/avatars/\(objectPath)")
+            return .success(publicURL.absoluteString)
+        } catch {
+            return .failure(error)
+        }
+    }
+
+    /// Best-effort delete of an avatar object extracted from a public URL.
+    func deleteAvatar(publicURL: String) async {
+        guard let url = URL(string: publicURL) else { return }
+        // public URL: .../storage/v1/object/public/avatars/<path>
+        let path = url.path
+        guard let range = path.range(of: "/public/avatars/") else { return }
+        let objectPath = String(path[range.upperBound...])
+        var req = URLRequest(url: baseURL.appendingPathComponent("storage/v1/object/avatars/\(objectPath)"))
+        req.httpMethod = "DELETE"
+        req.setValue(anonKey, forHTTPHeaderField: "apikey")
+        if let token = currentSession?.accessToken {
+            req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        _ = try? await session.data(for: req)
+    }
+
+    // MARK: Low-level helpers
+
+    private func authHeaders(includeBearer: Bool) -> [String: String] {
+        var h = ["apikey": anonKey, "Content-Type": "application/json"]
+        if includeBearer, let token = currentSession?.accessToken {
+            h["Authorization"] = "Bearer \(token)"
+        }
+        return h
+    }
+
+    private func authPost<T: Decodable>(_ path: String, body: [String: Any],
+                                        parse: @escaping (Data) async throws -> T) async -> Result<T, Error> {
+        var req = URLRequest(url: baseURL.appendingPathComponent("auth/v1/\(path)"))
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.setValue(anonKey, forHTTPHeaderField: "apikey")
+        req.httpBody = try? JSONSerialization.data(withJSONObject: body)
+        do {
+            let (data, resp) = try await session.data(for: req)
+            guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+                let msg = errorMessage(from: data) ?? "Authentication failed."
+                return .failure(NSError(domain: "SupabaseAuth", code: 1, userInfo: [NSLocalizedDescriptionKey: msg]))
+            }
+            let parsed = try await parse(data)
+            return .success(parsed)
+        } catch {
+            return .failure(error)
+        }
+    }
+
+    private func restGet<T: Decodable>(url: URL, singleton: Bool = false) async -> Result<T, Error> {
+        var req = URLRequest(url: url)
+        req.httpMethod = "GET"
+        for (k, v) in authHeaders(includeBearer: true) { req.setValue(v, forHTTPHeaderField: k) }
+        req.setValue("application/json", forHTTPHeaderField: "Accept")
+        if singleton {
+            req.setValue("application/vnd.pgrst.object+json", forHTTPHeaderField: "Accept")
+        }
+        do {
+            let (data, resp) = try await session.data(for: req)
+            guard let http = resp as? HTTPURLResponse else { return .failure(URLError(.badServerResponse)) }
+            if singleton && http.statusCode == 406 {
+                // No row found — safe-cast nil for Optional<T> callers
+                if let nilResult = Optional<T>.none as? T {
+                    return .success(nilResult)
+                }
+                return .failure(NSError(domain: "SupabaseREST", code: 406,
+                                         userInfo: [NSLocalizedDescriptionKey: "No row found"]))
+            }
+            guard (200..<300).contains(http.statusCode) else {
+                let msg = errorMessage(from: data) ?? "Request failed (\(http.statusCode))."
+                return .failure(NSError(domain: "SupabaseREST", code: http.statusCode, userInfo: [NSLocalizedDescriptionKey: msg]))
+            }
+            let decoded = try decoder.decode(T.self, from: data)
+            return .success(decoded)
+        } catch {
+            return .failure(error)
+        }
+    }
+
+    private func restPost<T: Decodable>(url: URL, body: [String: Any?], singleton: Bool = false) async -> Result<T, Error> {
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"
+        for (k, v) in authHeaders(includeBearer: true) { req.setValue(v, forHTTPHeaderField: k) }
+        req.setValue("return=representation", forHTTPHeaderField: "Prefer")
+        if singleton { req.setValue("application/vnd.pgrst.object+json", forHTTPHeaderField: "Accept") }
+        req.httpBody = try? JSONSerialization.data(withJSONObject: body.compactMapValues { $0 ?? NSNull() })
+        return await runRequest(req, singleton: singleton)
+    }
+
+    private func restPatch<T: Decodable>(url: URL, body: [String: Any?], singleton: Bool = false) async -> Result<T, Error> {
+        var req = URLRequest(url: url)
+        req.httpMethod = "PATCH"
+        for (k, v) in authHeaders(includeBearer: true) { req.setValue(v, forHTTPHeaderField: k) }
+        req.setValue("return=representation", forHTTPHeaderField: "Prefer")
+        if singleton { req.setValue("application/vnd.pgrst.object+json", forHTTPHeaderField: "Accept") }
+        req.httpBody = try? JSONSerialization.data(withJSONObject: body.compactMapValues { $0 ?? NSNull() })
+        return await runRequest(req, singleton: singleton)
+    }
+
+    private func restPatchMinimal(url: URL, body: [String: Any?]) async -> Result<Void, Error> {
+        var req = URLRequest(url: url)
+        req.httpMethod = "PATCH"
+        for (k, v) in authHeaders(includeBearer: true) { req.setValue(v, forHTTPHeaderField: k) }
+        req.setValue("return=minimal", forHTTPHeaderField: "Prefer")
+        req.httpBody = try? JSONSerialization.data(withJSONObject: body.compactMapValues { $0 ?? NSNull() })
+        do {
+            let (_, resp) = try await session.data(for: req)
+            guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+                return .failure(URLError(.badServerResponse))
+            }
+            return .success(())
+        } catch {
+            return .failure(error)
+        }
+    }
+
+    private func rpc<T: Decodable>(_ name: String, body: [String: Any?]) async -> Result<T, Error> {
+        var req = URLRequest(url: baseURL.appendingPathComponent("rest/v1/rpc/\(name)"))
+        req.httpMethod = "POST"
+        for (k, v) in authHeaders(includeBearer: true) { req.setValue(v, forHTTPHeaderField: k) }
+        req.httpBody = try? JSONSerialization.data(withJSONObject: body.compactMapValues { $0 ?? NSNull() })
+        return await runRequest(req, singleton: false)
+    }
+
+    private func rpcVoid(_ name: String, body: [String: Any?]) async -> Result<Void, Error> {
+        var req = URLRequest(url: baseURL.appendingPathComponent("rest/v1/rpc/\(name)"))
+        req.httpMethod = "POST"
+        for (k, v) in authHeaders(includeBearer: true) { req.setValue(v, forHTTPHeaderField: k) }
+        req.httpBody = try? JSONSerialization.data(withJSONObject: body.compactMapValues { $0 ?? NSNull() })
+        do {
+            let (_, resp) = try await session.data(for: req)
+            guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+                return .failure(URLError(.badServerResponse))
+            }
+            return .success(())
+        } catch {
+            return .failure(error)
+        }
+    }
+
+    private func runRequest<T: Decodable>(_ req: URLRequest, singleton: Bool) async -> Result<T, Error> {
+        do {
+            let (data, resp) = try await session.data(for: req)
+            guard let http = resp as? HTTPURLResponse else { return .failure(URLError(.badServerResponse)) }
+            guard (200..<300).contains(http.statusCode) else {
+                let msg = errorMessage(from: data) ?? "Request failed (\(http.statusCode))."
+                return .failure(NSError(domain: "SupabaseREST", code: http.statusCode, userInfo: [NSLocalizedDescriptionKey: msg]))
+            }
+            let decoded = try decoder.decode(T.self, from: data)
+            return .success(decoded)
+        } catch {
+            return .failure(error)
+        }
+    }
+
+    private func errorMessage(from data: Data) -> String? {
+        guard let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return nil }
+        if let msg = obj["message"] as? String { return msg }
+        if let error = obj["error"] as? String { return error }
+        return nil
+    }
+}

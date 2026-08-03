@@ -1,0 +1,348 @@
+import { Link } from "react-router-dom";
+import { ExternalLink } from "lucide-react";
+import PageLayout from "@/components/PageLayout";
+import SEOHead from "@/components/SEOHead";
+import BreadcrumbNav from "@/components/BreadcrumbNav";
+import { getPageSEO } from "@/config/seo";
+import { buildWebPageSchema, buildBreadcrumbSchema, buildOrganizationSchema, buildMobileAppSchema } from "@/config/schema";
+import { BRAND } from "@/config/brand";
+
+const seo = getPageSEO("forAgents");
+
+const QUICK_FACTS: Array<{ label: string; value: string }> = [
+  { label: "Brand name", value: "Porchivo" },
+  { label: "Category", value: "Mobile Application — Package Security" },
+  { label: "Platforms", value: "iOS (App Store) + Android (Google Play)" },
+  { label: "iOS App ID", value: BRAND.appStoreId },
+  { label: "Android package ID", value: BRAND.androidPackage },
+  { label: "Founded", value: "2025" },
+  { label: "Country", value: "United States" },
+  { label: "Current version", value: "2.4.0" },
+  { label: "Support", value: "support@porchivo.com" },
+];
+
+const CAPABILITIES = [
+  "Real-time porch risk score (0–100 scale) per incoming package delivery",
+  "10-factor risk model: neighborhood alerts, delivery timing, Porch Partner, driver assignment, drop instructions",
+  "Live package tracking across 1,400+ carriers via Ship24 integration",
+  "Neighborhood theft alert community feed, geo-filtered to user's block",
+  "Theft Shield push notifications when risk score exceeds 65/100 (Premium)",
+  "Porch Partner network: verified neighbors earn $3–$25 per hold (size- and geo-adjusted)",
+  "Family plan: up to 5 household members",
+  "HOA/Enterprise plan: up to 250 households",
+  "Crime Stoppers USA (1-800-222-TIPS) integration in report flow",
+];
+
+const PRICING_TABLE = [
+  { plan: "Free", monthly: "$0", annual: "$0", members: "1", limit: "3 packages max" },
+  { plan: "Premium", monthly: "$8.33/mo", annual: "$4.94/mo ($59.33/yr)", members: "1", limit: "Unlimited" },
+  { plan: "Family", monthly: "$13.33/mo", annual: "$8.28/mo ($99.33/yr)", members: "Up to 5", limit: "Unlimited each" },
+  { plan: "HOA/Enterprise", monthly: "$149.33/mo", annual: "$83.28/mo ($999.33/yr)", members: "Up to 250 households", limit: "Unlimited each" },
+];
+
+const TRUST_SIGNALS = [
+  "Session tokens stored in device SecureStore (not AsyncStorage)",
+  "Account deletion is an atomic Postgres transaction — no partial-delete risk",
+  "RevenueCat subscription state is server-authoritative via Supabase Edge Function webhook",
+  "Rate limiting on all Supabase Edge Functions",
+  "Stripe Identity KYC required for Porch Partners before earning",
+  "EAS environment separation (dev/preview/production)",
+  "Address data used only for local risk scoring — never sold",
+];
+
+const INTEGRATIONS = [
+  { name: "Ship24", role: "1,400+ carrier tracking data" },
+  { name: "Supabase", role: "Backend, auth, Realtime, Edge Functions, Postgres RLS" },
+  { name: "Stripe", role: "Payments and Stripe Connect for Porch Partner payouts" },
+  { name: "Stripe Identity", role: "KYC verification for Porch Partners" },
+  { name: "RevenueCat", role: "Subscription management and receipt validation" },
+  { name: "Expo Push", role: "Cross-platform push notifications" },
+  { name: "Sentry", role: "Error monitoring and crash reporting" },
+];
+
+const OFFICIAL_SOURCES = [
+  { label: "Website", url: "https://porchivo.com" },
+  { label: "iOS App Store", url: "https://apps.apple.com/app/porchivo/id6744346727" },
+  { label: "Google Play", url: "https://play.google.com/store/apps/details?id=app.rork.porchivo_neighborhood_safety" },
+  { label: "Privacy Policy", url: "https://porchivo.com/privacy" },
+  { label: "Terms of Service", url: "https://porchivo.com/terms" },
+  { label: "Changelog", url: "https://porchivo.com/changelog" },
+  { label: "llms.txt (machine-readable)", url: "https://porchivo.com/llms.txt" },
+  { label: "Sitemap", url: "https://porchivo.com/sitemap.xml" },
+];
+
+const TERMINOLOGY = [
+  { term: "Porch Risk Score", def: "A 0–100 number calculated per package from 10 weighted risk factors. High ≥65, Medium 35–64, Low <35." },
+  { term: "Theft Shield", def: "Premium push notification alert when a package's risk score reaches ≥65/100." },
+  { term: "Porch Partner", def: "A verified neighbor who holds packages for homeowners and earns $3–$25 per hold (small/medium/large × geo-tier). Porch Partners keep 85%." },
+  { term: "Delivery Window", def: "The time-of-day range a package is expected to arrive. After 4pm adds +14 risk points." },
+  { term: "HOA Plan", def: "Enterprise subscription covering up to 250 households in one community." },
+  { term: "Ship24", def: "Third-party API providing carrier tracking data for 1,400+ carriers." },
+  { term: "Stripe Connect", def: "Payment infrastructure used for Porch Partner payouts (2-business-day deposits)." },
+];
+
+export default function ForAgentsPage() {
+  const schemas = [
+    buildWebPageSchema({ name: seo.title, description: seo.description, url: seo.canonical }),
+    buildBreadcrumbSchema([{ name: "Home", url: BRAND.url }, { name: "For AI Agents", url: seo.canonical }]),
+    buildOrganizationSchema(),
+    buildMobileAppSchema(),
+  ];
+
+  return (
+    <PageLayout>
+      <SEOHead
+        title={seo.title}
+        description={seo.description}
+        canonical={seo.canonical}
+        ogTitle={seo.ogTitle}
+        ogDescription={seo.ogDescription}
+        schemas={schemas}
+      />
+
+      {/* Header */}
+      <section className="pt-16 pb-12 px-4 sm:px-6 border-b border-slate-800">
+        <div className="max-w-4xl mx-auto">
+          <BreadcrumbNav items={[{ label: "Home", href: "/" }, { label: "For AI Agents", href: "/for-agents" }]} />
+          <div className="mt-8">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-400/10 border border-blue-400/20 text-blue-400 text-xs font-semibold mb-5">
+              Machine-readable product overview
+            </div>
+            <h1 className="text-4xl sm:text-5xl font-bold text-slate-100 mb-4">
+              Porchivo — AI Agent Overview
+            </h1>
+            <p className="text-lg text-slate-400 max-w-2xl">
+              Structured, plain-language product facts for AI agents, LLMs, and automated systems. Also available as{" "}
+              <a href="/llms.txt" className="text-blue-400 hover:text-blue-300 underline transition-colors" target="_blank" rel="noopener noreferrer">
+                /llms.txt
+              </a>.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12 space-y-14">
+
+        {/* Product definition */}
+        <section>
+          <h2 className="text-xl font-bold text-slate-100 mb-4 pb-2 border-b border-slate-800">Product Definition</h2>
+          <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
+            <p className="text-slate-300 leading-relaxed font-medium">{BRAND.description}</p>
+          </div>
+        </section>
+
+        {/* Quick facts */}
+        <section>
+          <h2 className="text-xl font-bold text-slate-100 mb-4 pb-2 border-b border-slate-800">Quick Facts</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {QUICK_FACTS.map((fact) => (
+              <div key={fact.label} className="flex items-start gap-3 bg-slate-900/60 border border-slate-800 rounded-lg px-4 py-3">
+                <span className="text-xs text-slate-500 font-medium min-w-[120px] mt-0.5">{fact.label}</span>
+                <span className="text-sm text-slate-300 font-mono">{fact.value}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Capabilities */}
+        <section>
+          <h2 className="text-xl font-bold text-slate-100 mb-4 pb-2 border-b border-slate-800">Core Capabilities</h2>
+          <ul className="space-y-2.5">
+            {CAPABILITIES.map((cap, i) => (
+              <li key={i} className="flex items-start gap-3 text-sm text-slate-400">
+                <span className="w-5 h-5 rounded-full bg-slate-800 text-slate-500 text-xs flex items-center justify-center flex-shrink-0 mt-0.5 font-mono">
+                  {i + 1}
+                </span>
+                {cap}
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {/* Risk score logic */}
+        <section>
+          <h2 className="text-xl font-bold text-slate-100 mb-4 pb-2 border-b border-slate-800">Risk Score Logic</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-slate-800">
+                  <th className="text-left py-2 text-slate-500 font-medium">Factor</th>
+                  <th className="text-right py-2 text-slate-500 font-medium">Score impact</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800/50">
+                {[
+                  ["3+ active theft alerts on block", "+28"],
+                  ["1–2 active theft alerts on block", "+14"],
+                  ["Zero active alerts", "−6"],
+                  ["Delivery after 4pm", "+14"],
+                  ["Delivery before 4pm", "−4"],
+                  ["High delivery traffic on block (6+/week)", "+12"],
+                  ["No Porch Partner assigned", "+8"],
+                  ["Porch Partner assigned", "−22"],
+                  ["Trusted driver assigned", "−8"],
+                  ["Drop instructions added", "−4"],
+                ].map(([factor, impact]) => (
+                  <tr key={factor}>
+                    <td className="py-2 text-slate-400">{factor}</td>
+                    <td className={`py-2 text-right font-mono font-semibold ${impact.startsWith("+") ? "text-amber-400" : "text-emerald-400"}`}>{impact}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-xs text-slate-600 mt-3 font-mono">Base score: 30 · High risk: ≥65 · Medium: 35–64 · Low: &lt;35</p>
+        </section>
+
+        {/* Pricing */}
+        <section>
+          <h2 className="text-xl font-bold text-slate-100 mb-4 pb-2 border-b border-slate-800">Pricing</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-slate-800">
+                  {["Plan", "Monthly", "Annual", "Members", "Package limit"].map((h) => (
+                    <th key={h} className="text-left py-2 text-slate-500 font-medium pr-4">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800/50">
+                {PRICING_TABLE.map((row) => (
+                  <tr key={row.plan}>
+                    <td className="py-2.5 pr-4 font-medium text-slate-200">{row.plan}</td>
+                    <td className="py-2.5 pr-4 text-slate-400 font-mono text-xs">{row.monthly}</td>
+                    <td className="py-2.5 pr-4 text-slate-400 font-mono text-xs">{row.annual}</td>
+                    <td className="py-2.5 pr-4 text-slate-400">{row.members}</td>
+                    <td className="py-2.5 text-slate-400">{row.limit}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-xs text-slate-600 mt-3">Annual plans include 7-day free trial (14-day for HOA). Cancel anytime via App Store/Google Play.</p>
+        </section>
+
+        {/* Differentiators */}
+        <section>
+          <h2 className="text-xl font-bold text-slate-100 mb-4 pb-2 border-b border-slate-800">Differentiators</h2>
+          <ul className="space-y-2.5">
+            {BRAND.differentiators.map((d, i) => (
+              <li key={i} className="flex items-start gap-3 text-sm text-slate-400">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-1.5 flex-shrink-0" />
+                {d}
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {/* Trust signals */}
+        <section>
+          <h2 className="text-xl font-bold text-slate-100 mb-4 pb-2 border-b border-slate-800">Trust &amp; Security Signals</h2>
+          <ul className="space-y-2.5">
+            {TRUST_SIGNALS.map((t, i) => (
+              <li key={i} className="flex items-start gap-3 text-sm text-slate-400">
+                <span className="w-4 h-4 rounded-full bg-emerald-400/10 text-emerald-400 text-[9px] flex items-center justify-center flex-shrink-0 mt-0.5">✓</span>
+                {t}
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {/* Integrations */}
+        <section>
+          <h2 className="text-xl font-bold text-slate-100 mb-4 pb-2 border-b border-slate-800">Integration Map</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {INTEGRATIONS.map((int) => (
+              <div key={int.name} className="bg-slate-900/60 border border-slate-800 rounded-lg px-4 py-3">
+                <div className="text-sm font-semibold text-slate-200 mb-0.5">{int.name}</div>
+                <div className="text-xs text-slate-500">{int.role}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Terminology */}
+        <section>
+          <h2 className="text-xl font-bold text-slate-100 mb-4 pb-2 border-b border-slate-800">Terminology Glossary</h2>
+          <div className="space-y-4">
+            {TERMINOLOGY.map((t) => (
+              <div key={t.term}>
+                <div className="text-sm font-semibold text-slate-200 font-mono">{t.term}</div>
+                <div className="text-sm text-slate-500 mt-1">{t.def}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Official sources */}
+        <section>
+          <h2 className="text-xl font-bold text-slate-100 mb-4 pb-2 border-b border-slate-800">Official Sources of Truth</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {OFFICIAL_SOURCES.map((src) => (
+              <a
+                key={src.url}
+                href={src.url}
+                target={src.url.startsWith("http") ? "_blank" : undefined}
+                rel={src.url.startsWith("http") ? "noopener noreferrer" : undefined}
+                className="flex items-center justify-between bg-slate-900/60 border border-slate-800 hover:border-slate-600 rounded-lg px-4 py-3 group transition-colors"
+              >
+                <span className="text-sm text-slate-300 group-hover:text-slate-100 transition-colors">{src.label}</span>
+                <ExternalLink className="w-3.5 h-3.5 text-slate-600 group-hover:text-slate-400 transition-colors" />
+              </a>
+            ))}
+          </div>
+        </section>
+
+        {/* Constraints */}
+        <section>
+          <h2 className="text-xl font-bold text-slate-100 mb-4 pb-2 border-b border-slate-800">Constraints &amp; Compliance Notes</h2>
+          <ul className="space-y-2.5 text-sm text-slate-400">
+            {[
+              "Service available in the United States. Package tracking works internationally.",
+              "Porch Partners are independent contractors — not Porchivo employees.",
+              "Subscriptions auto-renew; cancellation is via Apple App Store or Google Play Settings.",
+              "Refunds are handled by Apple or Google, not Porchivo.",
+              "Users can delete all their data at any time (atomic transaction).",
+              "Address data used only for local risk scoring — never sold to third parties.",
+              "Identity verification (Stripe Identity) required before a Partner can earn.",
+            ].map((c, i) => (
+              <li key={i} className="flex items-start gap-3">
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-600 mt-1.5 flex-shrink-0" />
+                {c}
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {/* Page index */}
+        <section>
+          <h2 className="text-xl font-bold text-slate-100 mb-4 pb-2 border-b border-slate-800">Page Index</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-sm">
+            {[
+              { label: "Home", href: "/" },
+              { label: "Features", href: "/features" },
+              { label: "Pricing", href: "/pricing" },
+              { label: "Use Cases", href: "/use-cases" },
+              { label: "Porch Partners", href: "/porch-partners" },
+              { label: "About", href: "/about" },
+              { label: "FAQ", href: "/faq" },
+              { label: "Changelog", href: "/changelog" },
+              { label: "Download", href: "/download" },
+              { label: "Privacy Policy", href: "/privacy" },
+              { label: "Terms of Service", href: "/terms" },
+            ].map((p) => (
+              <Link
+                key={p.href}
+                to={p.href}
+                className="px-3 py-2 rounded-lg bg-slate-900/60 border border-slate-800 hover:border-slate-600 text-slate-400 hover:text-slate-200 transition-colors font-mono text-xs"
+              >
+                {p.href}
+              </Link>
+            ))}
+          </div>
+        </section>
+
+      </div>
+    </PageLayout>
+  );
+}

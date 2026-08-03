@@ -1,0 +1,52 @@
+{
+  "theme": {
+    "style": "Deep midnight navy and charcoal environments anchored by warm amber-gold accents, evoking a high-security smart-neighborhood world. Surfaces feel like premium glass and brushed metal with soft volumetric glows and cinematic rim lighting, nodding to both security intelligence and community warmth. Backgrounds shift between cool dark expanses and amber heat pools to create visual variety while keeping every slide unmistakably part of the same trusted, modern HOA platform.",
+    "headlineFont": "font-family: 'Plus Jakarta Sans', sans-serif; @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&display=swap')",
+    "headlineFontSize": 108,
+    "mockupIds": {
+      "iphone": "deep-blue",
+      "ipad": "space-gray"
+    },
+    "palette": {
+      "primary": "#0D1B2A",
+      "secondary": "#1B4F72",
+      "accent": "#F5A623"
+    }
+  },
+  "slides": [
+    {
+      "label": "Porch Risk Score",
+      "backgroundPrompt": "Abstract digital art featuring a massive pulsing sphere of molten amber and warm gold light erupting from the lower center of the frame, casting long radiant corona rays outward into a deep navy (#0D1B2A) to near-black void, fine translucent smoke wisps curling around the light source and suspended dust particles catching the glow, the upper 30% fading to a dark unlit navy expanse for clean text placement, cinematic upward lighting, depth of field blur on outer edges, subtle grain texture throughout. 8K quality, ultra smooth gradients, premium feel, no text, no letters, no UI elements, no device mockups",
+      "backgroundUrl": "https://r2-pub.rork.com/app-store-screenshots/f5467048-c019-4790-aac2-23256ec985f0.png"
+    },
+    {
+      "label": "Package Tracking",
+      "backgroundPrompt": "3D rendered scene of sweeping curved silk ribbons in deep slate blue (#1B4F72) and cool silver arcing horizontally across a dark midnight navy canvas, layered with translucent frosted glass planes that catch thin amber (#F5A623) highlights along their sharp edges, soft volumetric light from the far right diffusing inward and creating luminous depth between the ribbon layers, the upper third calm and darkened for text contrast, subtle surface grain texture. 8K quality, ultra smooth gradients, premium feel, no text, no letters, no UI elements, no device mockups",
+      "backgroundUrl": "https://r2-pub.rork.com/app-store-screenshots/be6d2aec-9beb-4fe0-bafc-9217559e3600.png"
+    },
+    {
+      "label": "Community Hub",
+      "backgroundPrompt": "Abstract digital art of organic fluid liquid forms in warm amber (#F5A623) and deep slate teal blending and flowing diagonally upward from the bottom-right corner, softly dissolving into deep navy (#0D1B2A) as they rise toward the upper 30% which remains a calm dark expanse, diffused warm light emanating from the lower right casting gentle color washes, translucent glass morphism bubbles layered throughout adding soft depth and premium shimmer. 8K quality, ultra smooth gradients, premium feel, no text, no letters, no UI elements, no device mockups",
+      "backgroundUrl": "https://r2-pub.rork.com/app-store-screenshots/333df702-43e8-4cc0-84b5-a25672df4fff.png"
+    },
+    {
+      "label": "Maintenance Requests",
+      "backgroundPrompt": "3D rendered environment of stacked angular frosted dark-charcoal glass shards arranged in a steep diagonal composition from lower-left to upper-right, each shard's edge catching a razor-thin line of cool silver and faint amber (#F5A623) rim light against a near-black charcoal base, dramatic rim lighting from the upper left, deep shadow pools between layers creating strong geometric depth, the upper third fading to unlit dark grey for clean headline placement, fine grain texture across all surfaces. 8K quality, ultra smooth gradients, premium feel, no text, no letters, no UI elements, no device mockups",
+      "backgroundUrl": "https://r2-pub.rork.com/app-store-screenshots/04b4b5a6-b48c-4456-b25c-faeb28f4b64d.png"
+    },
+    {
+      "label": "Admin Dashboard",
+      "backgroundPrompt": "Abstract digital art of a vast constellation of tiny amber (#F5A623) and pale gold luminous dots scattered across a deep midnight blue (#0D1B2A) expanse, connected by ultra-thin glowing threads forming intricate symmetric geometric lattice patterns, a soft diffused sphere of deep blue (#1B4F72) and warm amber light pooling gently in the lower center while the upper 30% remains open, dark, and completely uncluttered, subtle bokeh depth-of-field effect causing outer nodes to bloom softly. 8K quality, ultra smooth gradients, premium feel, no text, no letters, no UI elements, no device mockups",
+      "backgroundUrl": "https://r2-pub.rork.com/app-store-screenshots/b35811b7-798b-4ce2-8a0c-eb66fe139448.png"
+    }
+  ],
+  "headlines": {
+    "en": {
+      "Porch Risk Score": "Know Your Risk<br>Before It Arrives",
+      "Package Tracking": "Every Package<br>Tracked",
+      "Community Hub": "Your HOA<br>Reimagined",
+      "Maintenance Requests": "Submit Track<br>Resolved",
+      "Admin Dashboard": "Built for<br>Property Managers"
+    }
+  }
+}

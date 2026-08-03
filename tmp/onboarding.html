@@ -1,0 +1,904 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Porchivo — Onboarding Flows</title>
+<style>
+:root{
+  --bg:#080d17;
+  --panel:#101828;
+  --panel2:#0b1220;
+  --border:#1e2a3f;
+  --border2:#263752;
+  --text:#e8eef7;
+  --muted:#8fa1b8;
+  --amber:#f5a623;
+  --amber2:#ffc95e;
+  --green:#2fbf71;
+  --blue:#0a84ff;
+  --red:#ef4444;
+  --teal:#2dd4bf;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  background:
+    radial-gradient(1000px 500px at 15% -10%, rgba(245,166,35,.08), transparent 60%),
+    radial-gradient(900px 500px at 90% 0%, rgba(45,212,191,.06), transparent 60%),
+    var(--bg);
+  color:var(--text);
+  min-height:100vh;
+}
+header{max-width:1240px;margin:0 auto;padding:44px 24px 6px}
+.brandrow{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.logo{
+  width:40px;height:40px;border-radius:11px;
+  background:linear-gradient(135deg,var(--amber),#e8890c);
+  position:relative;flex:none;box-shadow:0 6px 18px rgba(245,166,35,.35);
+}
+.logo::before{content:"";position:absolute;left:50%;top:6px;bottom:6px;width:3px;background:rgba(0,0,0,.28);transform:translateX(-50%)}
+.logo::after{content:"";position:absolute;left:8px;right:8px;top:11px;height:3px;background:rgba(0,0,0,.28)}
+.wordmark{font-size:22px;font-weight:800;letter-spacing:.2px}
+.wordmark span{color:var(--amber)}
+.tagline{font-size:12px;color:var(--muted);letter-spacing:2.2px;text-transform:uppercase;margin-left:auto}
+h1{font-size:34px;font-weight:800;letter-spacing:-.5px;line-height:1.15}
+.sub{color:var(--muted);margin-top:10px;font-size:15px;max-width:640px;line-height:1.55}
+.tabs{display:flex;gap:10px;margin-top:26px;flex-wrap:wrap}
+.tab{
+  padding:11px 22px;border-radius:12px;border:1px solid var(--border);
+  background:var(--panel);color:var(--muted);font-size:14px;font-weight:700;cursor:pointer;
+  transition:all .18s ease;font-family:inherit;
+}
+.tab:hover{border-color:var(--border2);color:var(--text)}
+.tab.active{background:linear-gradient(135deg,rgba(245,166,35,.16),rgba(245,166,35,.06));border-color:var(--amber);color:var(--amber2)}
+main{max-width:1240px;margin:0 auto;padding:26px 24px 60px}
+.stage{display:grid;grid-template-columns:auto 1fr;gap:40px;align-items:start}
+@media(max-width:980px){.stage{grid-template-columns:1fr;justify-items:center}}
+
+/* ---------- Phone ---------- */
+.phone-wrap{display:flex;flex-direction:column;align-items:center;gap:18px;position:sticky;top:24px}
+@media(max-width:980px){.phone-wrap{position:static}}
+.phone{
+  width:336px;height:692px;border-radius:52px;
+  border:9px solid #1c2637;background:#000;position:relative;
+  box-shadow:0 30px 80px rgba(0,0,0,.55),0 0 0 1px #0a0f1a,inset 0 0 0 2px #000;
+  overflow:hidden;flex:none;
+}
+.phone::before{
+  content:"";position:absolute;top:12px;left:50%;transform:translateX(-50%);
+  z-index:30;
+}
+.phone.ios::before{width:110px;height:28px;border-radius:16px;background:#000;box-shadow:0 0 0 1px rgba(255,255,255,.04)}
+.phone.android::before{width:14px;height:14px;border-radius:50%;background:#0a0f16;box-shadow:inset 0 0 3px #1c2b45,0 0 0 3px rgba(0,0,0,.6)}
+.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;background:var(--panel2);scrollbar-width:none}
+.screen::-webkit-scrollbar{display:none}
+
+/* ---------- Screen scaffolding ---------- */
+.scr{min-height:100%;display:flex;flex-direction:column;padding:26px 22px 26px;animation:fadein .3s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.statusbar{display:flex;justify-content:space-between;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:14px;flex:none}
+.grow{flex:1}
+.center-col{display:flex;flex-direction:column;align-items:center;text-align:center}
+.h-xl{font-size:30px;font-weight:800;letter-spacing:-.6px;line-height:1.15}
+.h-lg{font-size:23px;font-weight:800;letter-spacing:-.4px;line-height:1.2}
+.body-sm{font-size:13.5px;color:var(--muted);line-height:1.55}
+.btn{
+  display:block;width:100%;padding:15px;border:none;border-radius:14px;
+  background:linear-gradient(135deg,var(--amber),#e8890c);color:#1a1206;
+  font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;
+  box-shadow:0 8px 22px rgba(245,166,35,.28);
+}
+.btn.ghost{background:transparent;box-shadow:none;color:var(--muted);font-weight:700;border:1px solid var(--border)}
+.btn.blue{background:var(--blue);color:#fff;box-shadow:0 8px 22px rgba(10,132,255,.3)}
+.btn.dark{background:#1a2436;color:var(--text);box-shadow:none;border:1px solid var(--border2)}
+.linkish{background:none;border:none;color:var(--muted);font-size:13px;font-weight:600;margin-top:14px;cursor:pointer;font-family:inherit}
+.spacer-8{height:8px}.spacer-12{height:12px}.spacer-16{height:16px}.spacer-20{height:20px}.spacer-24{height:24px}.spacer-32{height:32px}
+
+/* package mark */
+.pkg{
+  width:76px;height:76px;border-radius:20px;position:relative;flex:none;
+  background:linear-gradient(135deg,var(--amber),#e8890c);
+  box-shadow:0 14px 34px rgba(245,166,35,.4);
+}
+.pkg::before{content:"";position:absolute;left:50%;top:12px;bottom:12px;width:5px;background:rgba(0,0,0,.25);transform:translateX(-50%)}
+.pkg::after{content:"";position:absolute;left:14px;right:14px;top:22px;height:5px;background:rgba(0,0,0,.25)}
+
+/* inputs & chips */
+.input{
+  width:100%;padding:15px 16px;border-radius:13px;border:1px solid var(--border2);
+  background:#0a101c;color:var(--text);font-size:14.5px;font-family:inherit;outline:none;
+}
+.input:focus{border-color:var(--amber)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{
+  padding:9px 16px;border-radius:99px;border:1px solid var(--border2);
+  background:#0a101c;color:var(--muted);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;
+}
+.chip.sel{background:rgba(245,166,35,.14);border-color:var(--amber);color:var(--amber2)}
+.field-label{font-size:12px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;text-align:left;width:100%}
+
+/* cards */
+.card{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:18px}
+.card.flat{background:#0e1626}
+.row{display:flex;align-items:center;gap:12px}
+.risk-pill{padding:5px 12px;border-radius:99px;font-size:11px;font-weight:800;letter-spacing:.8px}
+.risk-low{background:rgba(47,191,113,.15);color:var(--green)}
+.risk-high{background:rgba(239,68,68,.15);color:var(--red)}
+.score-big{font-size:72px;font-weight:800;letter-spacing:-3px;line-height:1;color:var(--green)}
+.score-big.high{color:var(--red)}
+.tick{display:flex;gap:10px;align-items:flex-start;text-align:left;font-size:13.5px;color:#c4d2e4;line-height:1.5}
+.tick b{color:var(--green);flex:none}
+.divider{height:1px;background:var(--border);margin:14px 0}
+
+/* notification mock */
+.notif{
+  background:rgba(28,38,58,.92);backdrop-filter:blur(8px);
+  border:1px solid var(--border2);border-radius:16px;padding:13px 14px;text-align:left;
+}
+.notif-head{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;letter-spacing:.6px;color:var(--muted);text-transform:uppercase;margin-bottom:6px}
+.notif-app{display:flex;align-items:center;gap:7px}
+.mini-app{width:18px;height:18px;border-radius:5px;background:linear-gradient(135deg,var(--amber),#e8890c);position:relative;flex:none}
+.mini-app::before{content:"";position:absolute;left:50%;top:3px;bottom:3px;width:2px;background:rgba(0,0,0,.3);transform:translateX(-50%)}
+.notif-title{font-size:13.5px;font-weight:700;color:var(--text)}
+.notif-body{font-size:13px;color:#c4d2e4;margin-top:2px;line-height:1.45}
+.notif-actions{display:flex;margin-top:11px;border-top:1px solid var(--border2);padding-top:0}
+.notif-actions span{flex:1;text-align:center;padding:9px 4px;font-size:13px;font-weight:600;color:var(--blue)}
+.notif-actions span+span{border-left:1px solid var(--border2)}
+
+/* system dialogs */
+.overlay{
+  position:absolute;inset:0;background:rgba(3,6,12,.62);backdrop-filter:blur(3px);
+  display:flex;align-items:center;justify-content:center;z-index:20;padding:30px;animation:fadein .25s ease;
+}
+.dialog{background:#1c2536;border-radius:18px;width:100%;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.dialog .d-body{padding:20px 18px 14px;text-align:center}
+.dialog .d-title{font-size:15.5px;font-weight:700;line-height:1.35}
+.dialog .d-sub{font-size:13px;color:var(--muted);margin-top:7px;line-height:1.45}
+.dialog .d-actions{display:flex;border-top:1px solid #2a3850}
+.dialog .d-actions span{flex:1;text-align:center;padding:13px;font-size:15px;color:var(--blue);font-weight:600}
+.dialog .d-actions span+span{border-left:1px solid #2a3850}
+.dialog .d-actions .bold{font-weight:800}
+.dialog.android-d .d-actions span{color:#7ab8ff;text-transform:uppercase;font-size:13px;letter-spacing:.5px}
+
+/* lock screen */
+.lock{
+  min-height:100%;display:flex;flex-direction:column;align-items:center;padding:60px 20px 26px;
+  background:linear-gradient(180deg,#16233c 0%,#0c1526 55%,#080d17 100%);
+}
+.lock-time{font-size:74px;font-weight:200;letter-spacing:-2px;line-height:1}
+.lock-date{font-size:15px;color:#b9c7da;margin-bottom:6px;font-weight:600}
+.live-act{
+  width:100%;background:rgba(18,26,42,.94);border:1px solid var(--border2);
+  border-radius:20px;padding:14px 16px;margin-top:auto;
+}
+.live-head{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+.live-title{font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--amber2)}
+.live-eta{margin-left:auto;font-size:12px;font-weight:700;color:var(--muted)}
+.live-main{display:flex;align-items:center;gap:12px}
+.live-main .t1{font-size:15px;font-weight:700}
+.live-main .t2{font-size:12px;color:var(--muted);margin-top:2px}
+.progress{height:5px;border-radius:99px;background:#1c2940;margin-top:12px;overflow:hidden}
+.progress i{display:block;height:100%;width:68%;border-radius:99px;background:linear-gradient(90deg,var(--amber),var(--amber2))}
+.island{
+  display:flex;align-items:center;gap:7px;background:#000;border:1px solid #22304a;
+  border-radius:99px;padding:6px 13px;font-size:11px;font-weight:700;margin:0 auto 8px;
+}
+.island .dotp{width:7px;height:7px;border-radius:50%;background:var(--green)}
+
+/* notification center */
+.ncenter{
+  min-height:100%;padding:60px 16px 26px;display:flex;flex-direction:column;gap:10px;
+  background:linear-gradient(180deg,#131f35,#080d17);
+}
+.nc-label{text-align:center;font-size:13px;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px}
+
+/* home */
+.home-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.home-head .hi{font-size:20px;font-weight:800}
+.avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#31435f,#22304a);border:1px solid var(--border2)}
+.deliv-card{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:16px}
+.deliv-top{display:flex;align-items:center;gap:10px}
+.deliv-name{font-size:14.5px;font-weight:800}
+.deliv-sub{font-size:12px;color:var(--muted);margin-top:1px}
+.deliv-status{display:flex;align-items:center;gap:8px;margin-top:13px;font-size:12.5px;color:var(--green);font-weight:700}
+.navbar{
+  display:flex;border-top:1px solid var(--border);background:rgba(13,20,34,.96);
+  padding:10px 6px calc(10px + env(safe-area-inset-bottom));flex:none;
+}
+.navbar div{flex:1;text-align:center;font-size:10.5px;color:var(--muted);font-weight:700}
+.navbar div.on{color:var(--amber2)}
+.navbar i{display:block;font-style:normal;font-size:17px;margin-bottom:3px}
+
+/* map-ish */
+.mapbox{
+  height:150px;border-radius:16px;border:1px solid var(--border2);position:relative;overflow:hidden;
+  background:
+    radial-gradient(4px 4px at 30% 40%, var(--amber) 40%, transparent 60%),
+    radial-gradient(4px 4px at 62% 25%, var(--teal) 40%, transparent 60%),
+    radial-gradient(4px 4px at 74% 62%, var(--teal) 40%, transparent 60%),
+    radial-gradient(4px 4px at 44% 70%, var(--teal) 40%, transparent 60%),
+    repeating-linear-gradient(0deg,transparent 0 28px,rgba(120,150,190,.07) 28px 29px),
+    repeating-linear-gradient(90deg,transparent 0 28px,rgba(120,150,190,.07) 28px 29px),
+    #0d1524;
+}
+.mapbox .you{
+  position:absolute;left:30%;top:40%;width:15px;height:15px;margin:-7px;border-radius:50%;
+  background:var(--amber);box-shadow:0 0 0 6px rgba(245,166,35,.22),0 0 0 14px rgba(245,166,35,.08);
+}
+
+/* toast */
+.toast{
+  background:#1c2940;border:1px solid var(--border2);border-radius:13px;
+  padding:12px 14px;font-size:12.5px;color:#c4d2e4;line-height:1.5;
+}
+
+/* banner (re-optin) */
+.warn-banner{
+  background:linear-gradient(135deg,rgba(239,68,68,.16),rgba(239,68,68,.06));
+  border:1px solid rgba(239,68,68,.4);border-radius:16px;padding:15px;
+}
+.warn-title{font-size:14px;font-weight:800;color:#fca5a5;line-height:1.4}
+.warn-sub{font-size:12.5px;color:#d5b0b0;margin-top:5px;line-height:1.5}
+
+/* ---------- Navigator ---------- */
+.navctrl{display:flex;align-items:center;gap:16px}
+.navbtn{
+  padding:11px 20px;border-radius:12px;border:1px solid var(--border);
+  background:var(--panel);color:var(--text);font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;
+  transition:all .15s ease;
+}
+.navbtn:hover:not(:disabled){border-color:var(--amber);color:var(--amber2)}
+.navbtn:disabled{opacity:.35;cursor:default}
+.dots{display:flex;gap:7px}
+.dot{width:8px;height:8px;border-radius:99px;background:#24334c;cursor:pointer;transition:all .2s ease;border:none;padding:0}
+.dot.on{width:22px;background:var(--amber)}
+
+/* ---------- Spec panel ---------- */
+.panel{display:flex;flex-direction:column;gap:18px;min-width:0}
+.step-kicker{font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--amber)}
+.panel h2{font-size:27px;font-weight:800;letter-spacing:-.4px;margin-top:6px}
+.block{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:18px 20px}
+.block h3{font-size:11.5px;font-weight:800;letter-spacing:1.8px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.block h3::before{content:"";width:7px;height:7px;border-radius:2px;background:var(--amber);flex:none}
+.block p{font-size:14.5px;line-height:1.65;color:#c9d6e6}
+.block p b{color:var(--text)}
+pre{
+  white-space:pre-wrap;word-break:break-word;
+  font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  background:#070c15;border:1px solid var(--border);border-radius:12px;
+  padding:14px 16px;font-size:12.5px;line-height:1.6;color:#a9c3e8;
+}
+.metric-chip{
+  display:inline-block;background:rgba(47,191,113,.12);border:1px solid rgba(47,191,113,.35);
+  color:var(--green);font-size:13px;font-weight:700;border-radius:10px;padding:8px 13px;line-height:1.5;
+}
+.branch-note{
+  display:inline-block;background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.35);
+  color:var(--amber2);font-size:12.5px;font-weight:700;border-radius:10px;padding:7px 12px;margin-top:10px;
+}
+footer{max-width:1240px;margin:0 auto;padding:0 24px 50px;color:var(--muted);font-size:13px;line-height:1.6;border-top:1px solid var(--border);padding-top:26px}
+footer b{color:var(--text)}
+</style>
+<script src="https://www.kimi.com/sdk-seed.js" defer=""></script></head>
+<body>
+<header>
+  <div class="brandrow">
+    <div class="logo"></div>
+    <div class="wordmark">Porch<span>ivo</span></div>
+    <div class="tagline">Onboarding Prototype · v1</div>
+  </div>
+  <h1>Two platforms. Two permission games.<br/>One first-run experience.</h1>
+  <p class="sub">Click through each flow exactly as a new user would. Every screen ships with its final copy, the strategic reason it exists, the implementation spec, and the metric that tells you it&#39;s working.</p>
+  <div class="tabs">
+    <button class="tab active" data-flow="android">Android Flow</button>
+    <button class="tab" data-flow="ios">iOS Flow</button>
+  </div>
+</header>
+
+<main>
+  <section class="stage">
+    <div class="phone-wrap">
+      <div class="phone android" id="phone">
+        <div class="screen" id="screen"></div>
+      </div>
+      <div class="navctrl">
+        <button class="navbtn" id="prev">← Back</button>
+        <div class="dots" id="dots"></div>
+        <button class="navbtn" id="next">Next →</button>
+      </div>
+    </div>
+    <aside class="panel">
+      <div>
+        <div class="step-kicker" id="kicker"></div>
+        <h2 id="stepName"></h2>
+      </div>
+      <div class="block"><h3>Why this step exists</h3><p id="why"></p></div>
+      <div class="block"><h3>Implementation spec</h3><pre id="impl"></pre></div>
+      <div class="block"><h3>Metric that proves it works</h3><div class="metric-chip" id="metric"></div><div id="branch"></div></div>
+    </aside>
+  </section>
+</main>
+
+<footer>
+  <b>Design principles applied across both flows:</b> value before asks · one-shot system prompts are never spent cold · every permission is earned by a moment the user just experienced · notifications are treated as the product, not a marketing channel.
+  Built as the executable spec for the Porchivo first-run experience.
+</footer>
+<script>
+const FLOWS = {
+android: {
+  phoneClass: "android",
+  steps: [
+  {
+    name: "Welcome — sell the outcome, not the app",
+    html: `
+      <div class="scr">
+        <div class="statusbar"><span>9:41</span><span>5G &nbsp; 82%</span></div>
+        <div class="grow center-col" style="justify-content:center;gap:0">
+          <div class="pkg"></div>
+          <div class="spacer-24"></div>
+          <div class="h-xl">Your porch,<br>protected.</div>
+          <div class="spacer-16"></div>
+          <p class="body-sm" style="max-width:250px">Track every delivery, see your theft risk in real time, and team up with neighbors to stop porch pirates.</p>
+        </div>
+        <button class="btn">Get started</button>
+        <button class="linkish">Already protecting your porch? Sign in</button>
+      </div>`,
+    why: `No permission prompts, no sign-up wall, no feature tour. The first screen sells one thing — <b>protection</b> — because that's the emotional job the user hired the app for. Every ask is deferred until after the user has felt value. Sign-up itself is postponed until the first delivery is tracked (deferred account creation).`,
+    impl: `// Deferred signup: let the user reach
+// the first value moment anonymously.
+// Create the account only when they
+// track their first package.
+//
+// Analytics events to fire:
+//   onboarding_started
+//   welcome_cta_tapped`,
+    metric: `Welcome → "Get started" tap rate. Target ≥ 85%. Anything lower means the value prop isn't landing — test the headline before touching anything else.`
+  },
+  {
+    name: "Add your first delivery",
+    html: `
+      <div class="scr">
+        <div class="statusbar"><span>9:41</span><span>5G &nbsp; 82%</span></div>
+        <div class="h-lg">Add your first<br>delivery</div>
+        <div class="spacer-8"></div>
+        <p class="body-sm">Porchivo starts watching the moment a package is in the system.</p>
+        <div class="spacer-24"></div>
+        <div class="field-label">Tracking number</div>
+        <input class="input" value="1Z 999 AA1 01 2345 6784" readonly>
+        <div class="spacer-16"></div>
+        <div class="field-label">Carrier</div>
+        <div class="chips">
+          <button class="chip sel">UPS</button>
+          <button class="chip">FedEx</button>
+          <button class="chip">USPS</button>
+          <button class="chip">Amazon</button>
+        </div>
+        <div class="grow"></div>
+        <button class="btn">Track my package</button>
+        <button class="linkish">Skip for now</button>
+      </div>`,
+    why: `This is the value engine — every downstream feature (alerts, Theft Shield, live tracking) keys off a tracked delivery, so the single job of onboarding is getting one into the system. <b>"Skip for now" stays visible</b>: a user who skips is recoverable, a user who bounces from a forced form is not.`,
+    impl: `// Auto-detect carrier from the
+// tracking number format (regex per
+// carrier) so the chips pre-select.
+//
+// Offer paste-from-clipboard:
+//   val clip = clipboardManager
+//     .primaryClip?.getItemAt(0)?.text
+//   if (looksLikeTracking(clip)) prefill(clip)
+//
+// Fire: delivery_added_first`,
+    metric: `% of new users who add a delivery in their first session. Target ≥ 60%. This is the single most predictive onboarding metric you have.`
+  },
+  {
+    name: "The Theft Shield reveal",
+    html: `
+      <div class="scr">
+        <div class="statusbar"><span>9:41</span><span>5G &nbsp; 82%</span></div>
+        <div class="h-lg">Your Theft Shield<br>is live</div>
+        <div class="spacer-20"></div>
+        <div class="card center-col">
+          <div class="field-label" style="text-align:center">Risk score · deliveries to 90028</div>
+          <div class="score-big">34</div>
+          <div class="spacer-8"></div>
+          <span class="risk-pill risk-low">LOW RISK</span>
+          <div class="divider" style="width:100%"></div>
+          <div class="tick"><b>✓</b><span>Refreshed every 90 seconds during active delivery windows</span></div>
+          <div class="spacer-8"></div>
+          <div class="tick"><b>✓</b><span>Built from reported thefts, delivery density, and timing patterns near you</span></div>
+        </div>
+        <div class="grow"></div>
+        <button class="btn">This is useful — continue</button>
+      </div>`,
+    why: `The aha moment. Theft Shield is the thing no carrier app gives them — a proprietary risk score — and it lands <b>before any permission ask</b>. That's deliberate: the next screen spends trust, so this screen has to earn it first. The CTA copy ("This is useful") makes the user articulate the value back to you.`,
+    impl: `// Score computed server-side per ZIP;
+// cache for the session.
+//
+// Animate the number counting up to
+// the score (600ms, ease-out) — the
+// count-up reads as "calculated for
+// ME", not a static stat.
+//
+// Fire: theftshield_viewed`,
+    metric: `Continue rate from this screen. Target ≥ 90%. If users drop here, the score isn't reading as personal — test showing their actual street name.`
+  },
+  {
+    name: "Alerts priming → the one system prompt",
+    html: `
+      <div class="scr" style="position:relative">
+        <div class="statusbar"><span>9:41</span><span>5G &nbsp; 82%</span></div>
+        <div class="h-lg">Know the moment<br>it arrives</div>
+        <div class="spacer-16"></div>
+        <div class="notif">
+          <div class="notif-head"><span class="notif-app"><span class="mini-app"></span>PORCHIVO</span><span style="margin-left:auto">now</span></div>
+          <div class="notif-title">Your UPS package was delivered</div>
+          <div class="notif-body">Theft Shield: LOW RISK · It's safe to grab it when you're home.</div>
+        </div>
+        <div class="spacer-16"></div>
+        <p class="body-sm">Delivery alerts tell you the second a package lands — so it never sits unattended.</p>
+        <div class="grow"></div>
+        <button class="btn">Enable delivery alerts</button>
+        <button class="linkish">Not now</button>
+        <div class="overlay">
+          <div class="dialog android-d">
+            <div class="d-body">
+              <div class="d-title">Allow Porchivo to send you notifications?</div>
+            </div>
+            <div class="d-actions"><span>Don't allow</span><span>Allow</span></div>
+          </div>
+        </div>
+      </div>`,
+    why: `Android 13+ requires a runtime <b>POST_NOTIFICATIONS</b> prompt — the old "push is on by default" advantage is gone on modern devices, so Android now plays the same one-shot game as iOS. The custom priming screen goes first because declining <b>your</b> screen is free (you can re-ask later), while declining the <b>system</b> dialog is nearly permanent. Only users who tap "Enable" ever see the real prompt.`,
+    impl: `// Only launch the system prompt AFTER
+// the priming screen is accepted:
+//
+// val launcher = registerForActivityResult(
+//   ActivityResultContracts.RequestPermission()
+// ) { granted -> logPermResult(granted) }
+//
+// primingAcceptBtn.setOnClickListener {
+//   launcher.launch(
+//     Manifest.permission.POST_NOTIFICATIONS)
+// }
+//
+// "Not now" → set reask flag: fire again
+// after the user's first package is
+// marked DELIVERED while away.`,
+    metric: `Two numbers: priming accept rate (target ≥ 70%) and system "Allow" rate among primed users (target ≥ 75%). If the second is low, your priming copy is over-promising.`
+  },
+  {
+    name: "Porch partners — recruit the network",
+    html: `
+      <div class="scr">
+        <div class="statusbar"><span>9:41</span><span>5G &nbsp; 82%</span></div>
+        <div class="h-lg">3 neighbors nearby<br>can hold packages</div>
+        <div class="spacer-16"></div>
+        <div class="mapbox"><span class="you"></span></div>
+        <div class="spacer-16"></div>
+        <div class="card flat">
+          <div class="tick"><b>✓</b><span>Porch partners within 0.2 mi of you hold deliveries when you're not home — and you can return the favor.</span></div>
+        </div>
+        <div class="grow"></div>
+        <button class="btn">Join my neighborhood</button>
+        <button class="linkish">Maybe later</button>
+      </div>`,
+    why: `Network density is the moat — every user who joins during onboarding makes the product better for the next user in that ZIP. It's placed <b>after</b> value and permission so a "no" costs nothing, and the live neighbor count makes the network feel real instead of hypothetical.`,
+    impl: `// Coarse location only at this step
+// (ACCESS_COARSE_LOCATION) — precise
+// location is earned later, when a
+// handoff is actually arranged.
+//
+// Neighbor count via geohash cell:
+//   count = partnersApi.count(
+//     geohash(cellPrecision = 6))
+//
+// Fire: partner_joined / partner_skipped`,
+    metric: `Join rate. Target ≥ 30%. Below that, test leading with the reciprocity framing ("neighbors hold yours, you hold theirs") vs. the protection framing.`
+  },
+  {
+    name: "Home — end with the app already working",
+    html: `
+      <div class="scr" style="padding-left:0;padding-right:0">
+        <div style="padding:0 22px">
+          <div class="statusbar"><span>9:41</span><span>5G &nbsp; 82%</span></div>
+          <div class="home-head"><span class="hi">Today's deliveries</span><span class="avatar"></span></div>
+          <div class="deliv-card">
+            <div class="deliv-top">
+              <span class="mini-app" style="width:26px;height:26px;border-radius:7px"></span>
+              <div><div class="deliv-name">UPS · 1Z999…6784</div><div class="deliv-sub">Arriving today, 2:00–4:00 PM</div></div>
+              <span class="risk-pill risk-low" style="margin-left:auto">LOW</span>
+            </div>
+            <div class="progress"><i></i></div>
+            <div class="deliv-status">● Out for delivery · 4 stops away</div>
+          </div>
+          <div class="spacer-12"></div>
+          <button class="btn dark">+ Add another delivery</button>
+        </div>
+        <div class="grow"></div>
+        <div class="navbar">
+          <div class="on"><i>▣</i>Home</div>
+          <div><i>♦</i>Alerts</div>
+          <div><i>⬡</i>Neighbors</div>
+          <div><i>⚙</i>Settings</div>
+        </div>
+      </div>`,
+    why: `The first session ends on a live dashboard with a package already in motion — the user leaves with the app visibly doing its job, which is what brings them back when the next delivery ships. Nothing here is a tutorial; it's the product, running.`,
+    impl: `// Deep-link: tapping a delivery push
+// opens this delivery's detail view,
+// not the generic home.
+//
+// First session ends here. First
+// provisional/standard alert should
+// fire the moment the carrier status
+// changes — that's the retention hook.`,
+    metric: `D1 and D7 retention of onboarded cohort vs. pre-revamp baseline. The whole flow exists to move this number.`
+  }
+  ]
+}
+};
+</script>
+<script>
+FLOWS.ios = {
+  phoneClass: "ios",
+  steps: [
+  {
+    name: "Welcome — same hook, zero prompts",
+    html: `
+      <div class="scr">
+        <div class="statusbar"><span>9:41</span><span>5G &nbsp; 82%</span></div>
+        <div class="grow center-col" style="justify-content:center">
+          <div class="pkg"></div>
+          <div class="spacer-24"></div>
+          <div class="h-xl">Your porch,<br>protected.</div>
+          <div class="spacer-16"></div>
+          <p class="body-sm" style="max-width:250px">Track every delivery, see your theft risk in real time, and team up with neighbors to stop porch pirates.</p>
+        </div>
+        <button class="btn blue">Get started</button>
+        <button class="linkish">Already protecting your porch? Sign in</button>
+      </div>`,
+    why: `Identical emotional hook to Android — the difference is discipline. On iOS the system permission prompt can be shown <b>exactly once</b>, ever. Firing it here (as most apps do) is how you end up with a 51% opt-in rate. This screen's only job is to not ask for anything.`,
+    impl: `// Do NOT call requestAuthorization()
+// on first launch. Nothing. The one-shot
+// prompt is spent only at Step 6, after
+// the user has felt the product work.
+//
+// Fire: onboarding_started`,
+    metric: `Welcome → "Get started" tap rate. Target ≥ 85%. Same bar as Android; the platforms only diverge after this screen.`
+  },
+  {
+    name: "Add your first delivery",
+    html: `
+      <div class="scr">
+        <div class="statusbar"><span>9:41</span><span>5G &nbsp; 82%</span></div>
+        <div class="h-lg">Add your first<br>delivery</div>
+        <div class="spacer-8"></div>
+        <p class="body-sm">Porchivo starts watching the moment a package is in the system.</p>
+        <div class="spacer-24"></div>
+        <div class="field-label">Tracking number</div>
+        <input class="input" value="1Z 999 AA1 01 2345 6784" readonly>
+        <div class="spacer-16"></div>
+        <div class="field-label">Carrier</div>
+        <div class="chips">
+          <button class="chip sel">UPS</button>
+          <button class="chip">FedEx</button>
+          <button class="chip">USPS</button>
+          <button class="chip">Amazon</button>
+        </div>
+        <div class="grow"></div>
+        <button class="btn blue">Track my package</button>
+        <button class="linkish">Skip for now</button>
+      </div>`,
+    why: `Same value engine as Android — but on iOS this step has a second job: a tracked delivery is what lets the next two iOS-only weapons fire (provisional alerts and the Live Activity). Everything on iOS is sequenced to demonstrate value <b>before</b> permission is discussed.`,
+    impl: `// Same carrier auto-detect and
+// clipboard prefill as Android.
+//
+// The deliveryAdded event is the
+// trigger for BOTH:
+//   1. provisional alert stream
+//   2. ActivityKit Live Activity
+//
+// Fire: delivery_added_first`,
+    metric: `% adding a delivery in the first session. Target ≥ 60%.`
+  },
+  {
+    name: "Silent alerts — provisional push, no permission needed",
+    html: `
+      <div class="scr" style="padding-left:0;padding-right:0">
+        <div style="padding:0 22px">
+          <div class="statusbar"><span>9:41</span><span>5G &nbsp; 82%</span></div>
+          <div class="home-head"><span class="hi">Today's deliveries</span><span class="avatar"></span></div>
+          <div class="deliv-card">
+            <div class="deliv-top">
+              <span class="mini-app" style="width:26px;height:26px;border-radius:7px"></span>
+              <div><div class="deliv-name">UPS · 1Z999…6784</div><div class="deliv-sub">Arriving today, 2:00–4:00 PM</div></div>
+              <span class="risk-pill risk-low" style="margin-left:auto">LOW</span>
+            </div>
+          </div>
+          <div class="spacer-12"></div>
+          <div class="toast">Delivery updates will appear quietly in your Notification Center — nothing to set up.</div>
+        </div>
+        <div class="grow"></div>
+        <div class="navbar">
+          <div class="on"><i>▣</i>Home</div>
+          <div><i>♦</i>Alerts</div>
+          <div><i>⬡</i>Neighbors</div>
+          <div><i>⚙</i>Settings</div>
+        </div>
+      </div>`,
+    why: `The iOS backdoor. <b>Provisional authorization</b> (iOS 12+) delivers notifications silently to Notification Center with <b>no permission prompt at all</b> — meaning 100% of iOS users are reachable from the moment of install. The user experiences real, useful alerts before ever being asked anything, which is the entire strategy in one move.`,
+    impl: `// Request provisional authorization at
+// first launch — the user sees NO dialog:
+//
+// try await UNUserNotificationCenter
+//   .current().requestAuthorization(
+//     options: [.alert, .sound, .provisional]
+//   )
+//
+// These arrive silently (Notification
+// Center only, no banner/sound) until
+// the user upgrades themselves.`,
+    metric: `Notification open rate from Notification Center among provisional users. This predicts your self-upgrade rate in the next step.`
+  },
+  {
+    name: "Live Activity — the Lock Screen becomes your tracker",
+    html: `
+      <div class="lock">
+        <div class="island"><span class="dotp"></span> UPS · 12 min · LOW</div>
+        <div class="lock-date">Tuesday, June 9</div>
+        <div class="lock-time">9:41</div>
+        <div class="live-act">
+          <div class="live-head">
+            <span class="mini-app"></span>
+            <span class="live-title">PORCHIVO · LIVE TRACKING</span>
+            <span class="live-eta">12 min away</span>
+          </div>
+          <div class="live-main">
+            <div>
+              <div class="t1">UPS package arriving soon</div>
+              <div class="t2">Theft Shield: <b style="color:var(--green)">LOW RISK</b> · 4 stops away</div>
+            </div>
+          </div>
+          <div class="progress"><i></i></div>
+        </div>
+      </div>`,
+    why: `The iOS-exclusive weapon. A Live Activity puts the delivery — ETA and Theft Shield score — on the <b>Lock Screen and Dynamic Island</b>, updating in real time, immune to Focus and Do Not Disturb. Since iOS 17, push opt-in automatically includes Live Activities. The product demos itself every time the user glances at their phone — you cannot buy that kind of exposure.`,
+    impl: `// ActivityKit — start on deliveryAdded:
+//
+// let attrs = DeliveryAttributes(
+//   trackingID: id)
+// let state = DeliveryAttributes
+//   .ContentState(
+//     etaMinutes: 12, risk: .low)
+// let activity = try Activity.request(
+//   attributes: attrs,
+//   content: ActivityContent(
+//     state: state, staleDate: nil))
+//
+// Update via push-to-start token as
+// carrier status changes.`,
+    metric: `Live Activity start rate per tracked delivery (target ~100%) and glance-to-open rate. Watch for iOS users opening the app from the Lock Screen.`
+  },
+  {
+    name: "The self-upgrade — Apple converts the user for you",
+    html: `
+      <div class="ncenter">
+        <div class="nc-label">Notification Center</div>
+        <div class="notif">
+          <div class="notif-head"><span class="notif-app"><span class="mini-app"></span>PORCHIVO</span><span style="margin-left:auto">2m ago</span></div>
+          <div class="notif-title">Your package is 4 stops away</div>
+          <div class="notif-body">Theft Shield: LOW RISK · On track for the 2:00–4:00 PM window.</div>
+          <div class="notif-actions"><span>Turn Off</span><span><b>Deliver Prominently</b></span></div>
+        </div>
+        <div class="notif" style="opacity:.55">
+          <div class="notif-head"><span class="notif-app"><span class="mini-app"></span>PORCHIVO</span><span style="margin-left:auto">1h ago</span></div>
+          <div class="notif-title">UPS package out for delivery</div>
+          <div class="notif-body">Arriving today, 2:00–4:00 PM.</div>
+        </div>
+      </div>`,
+    why: `Provisional notifications arrive with Apple-rendered buttons: <b>"Deliver Prominently"</b> and "Turn Off." A user who just watched a genuinely useful alert appear taps "Deliver Prominently" — and has now fully opted into banners and sounds at the exact moment of demonstrated value, without you ever spending the one-shot system prompt. Fewer opt-ins than Android's volume, but these users said yes <b>after</b> the product proved itself.`,
+    impl: `// Zero extra code — these buttons are
+// system-rendered on provisional
+// notifications. Your job is only to
+// make the first 1-2 alerts genuinely
+// valuable (ETA, risk score), never
+// marketing.
+//
+// Fire: provisional_upgraded when
+// authorizationStatus changes to
+// .authorized`,
+    metric: `Self-upgrade rate: % of provisional users who tap "Deliver Prominently." Benchmark target ≥ 25%. Low number = your alerts aren't useful enough, fix content before anything else.`
+  },
+  {
+    name: "Priming → the one-shot prompt, spent at peak intent",
+    html: `
+      <div class="scr" style="position:relative">
+        <div class="statusbar"><span>9:41</span><span>5G &nbsp; 82%</span></div>
+        <div class="card" style="border-color:rgba(239,68,68,.4)">
+          <span class="risk-pill risk-high">HIGH RISK WINDOW</span>
+          <div class="spacer-12"></div>
+          <div class="h-lg" style="font-size:19px">Theft Shield flagged tomorrow's 1:40 PM delivery as high-risk.</div>
+          <div class="spacer-8"></div>
+          <p class="body-sm">Alerts are the only way to know the moment it lands. Don't let it sit.</p>
+        </div>
+        <div class="grow"></div>
+        <button class="btn blue">Turn on alerts</button>
+        <button class="linkish">Not now</button>
+        <div class="overlay">
+          <div class="dialog">
+            <div class="d-body">
+              <div class="d-title">"Porchivo" Would Like to Send You Notifications</div>
+              <div class="d-sub">Notifications may include alerts, sounds, and icon badges. These can be configured in Settings.</div>
+            </div>
+            <div class="d-actions"><span>Don't Allow</span><span class="bold">Allow</span></div>
+          </div>
+        </div>
+      </div>`,
+    why: `For users who didn't self-upgrade, you now spend the one-shot system prompt — but only with a <b>concrete, loss-framed reason</b> ("a high-risk window tomorrow at 1:40 PM"), never a generic "enable notifications." The priming screen sits in front because declining <b>your</b> screen costs nothing: "Not now" leaves Apple's prompt unspent for a better moment later.`,
+    impl: `// Only after priming accept:
+//
+// let granted = try await
+//   UNUserNotificationCenter.current()
+//   .requestAuthorization(
+//     options: [.alert, .sound, .badge])
+//
+// "Not now" → do NOT call the above.
+// Re-trigger priming on the next
+// high-risk delivery event.
+//
+// Mark true theft alerts:
+//   content.interruptionLevel =
+//     .timeSensitive   // breaks Focus`,
+    metric: `System "Allow" rate among primed users. Target ≥ 60% (vs. ~51% industry-wide for cold prompts).`
+  },
+  {
+    name: "Re-opt-in — catch the deniers at maximum regret",
+    html: `
+      <div class="scr" style="padding-left:0;padding-right:0">
+        <div style="padding:0 22px">
+          <div class="statusbar"><span>9:41</span><span>5G &nbsp; 82%</span></div>
+          <div class="home-head"><span class="hi">Today's deliveries</span><span class="avatar"></span></div>
+          <div class="warn-banner">
+            <div class="warn-title">That delivery was HIGH RISK — and your alerts were off.</div>
+            <div class="warn-sub">It sat unattended for 47 minutes. Turn alerts on so the next one doesn't.</div>
+            <div class="spacer-12"></div>
+            <button class="btn blue" style="padding:12px">Turn alerts on</button>
+          </div>
+          <div class="spacer-12"></div>
+          <div class="deliv-card">
+            <div class="deliv-top">
+              <span class="mini-app" style="width:26px;height:26px;border-radius:7px"></span>
+              <div><div class="deliv-name">UPS · Delivered 1:42 PM</div><div class="deliv-sub">Sat unattended 47 min</div></div>
+              <span class="risk-pill risk-high" style="margin-left:auto">HIGH</span>
+            </div>
+          </div>
+        </div>
+        <div class="grow"></div>
+        <div class="navbar">
+          <div class="on"><i>▣</i>Home</div>
+          <div><i>♦</i>Alerts</div>
+          <div><i>⬡</i>Neighbors</div>
+          <div><i>⚙</i>Settings</div>
+        </div>
+      </div>`,
+    why: `For the users who denied: the moment of maximum regret is right after a high-risk delivery sat unattended with no alert. That's when this banner appears — once, never nagging — and the button deep-links <b>straight to Porchivo's Settings page</b>, removing every step of friction between regret and recovery.`,
+    impl: `// Trigger conditions (ALL must hold):
+//   authorizationStatus == .denied
+//   delivery.risk == .high
+//   delivery.status == .delivered
+//
+// Button deep-links to Settings:
+//   UIApplication.shared.open(
+//     URL(string:
+//       UIApplication
+//       .openSettingsURLString)!)
+//
+// Show max once per week. Never nag.`,
+    metric: `Opt-in recovery rate: % of deniers who enable push via this path. Target ≥ 15% — this is found revenue from users everyone else writes off.`
+  },
+  {
+    name: "Home — the loop is closed",
+    html: `
+      <div class="scr" style="padding-left:0;padding-right:0">
+        <div style="padding:0 22px">
+          <div class="statusbar"><span>9:41</span><span>5G &nbsp; 82%</span></div>
+          <div class="home-head"><span class="hi">Today's deliveries</span><span class="avatar"></span></div>
+          <div class="deliv-card">
+            <div class="deliv-top">
+              <span class="mini-app" style="width:26px;height:26px;border-radius:7px"></span>
+              <div><div class="deliv-name">UPS · 1Z999…6784</div><div class="deliv-sub">Arriving today, 2:00–4:00 PM</div></div>
+              <span class="risk-pill risk-low" style="margin-left:auto">LOW</span>
+            </div>
+            <div class="progress"><i></i></div>
+            <div class="deliv-status">● Out for delivery · Live Activity running</div>
+          </div>
+          <div class="spacer-12"></div>
+          <div class="toast">Alerts on · Live Activity on · Theft Shield watching</div>
+        </div>
+        <div class="grow"></div>
+        <div class="navbar">
+          <div class="on"><i>▣</i>Home</div>
+          <div><i>♦</i>Alerts</div>
+          <div><i>⬡</i>Neighbors</div>
+          <div><i>⚙</i>Settings</div>
+        </div>
+      </div>`,
+    why: `Every iOS user arrives at this dashboard through one of three doors — self-upgraded, primed-and-allowed, or silently provisional — and all three have already seen the product work. The iOS flow gets fewer opt-ins than Android's volume game, but the ones it gets <b>watched the product prove itself first</b>. That's the user who stays, and eventually pays.`,
+    impl: `// Final state per user is one of:
+//   .authorized     (self-upgrade or prompt)
+//   .provisional    (silent stream continues)
+//   .denied         (re-opt-in trigger armed)
+//
+// All three are workable states.
+// None are dead ends.`,
+    metric: `Blended iOS alert reach: authorized + provisional users as % of installs. Target ≥ 90% reachable — vs ~51% for the naive prompt-on-launch approach.`
+  }
+  ]
+};
+</script>
+<script>
+let currentFlow = "android";
+let idx = 0;
+
+const phone = document.getElementById("phone");
+const screen = document.getElementById("screen");
+const kicker = document.getElementById("kicker");
+const stepName = document.getElementById("stepName");
+const why = document.getElementById("why");
+const impl = document.getElementById("impl");
+const metric = document.getElementById("metric");
+const branch = document.getElementById("branch");
+const dotsEl = document.getElementById("dots");
+const prevBtn = document.getElementById("prev");
+const nextBtn = document.getElementById("next");
+
+function render() {
+  const flow = FLOWS[currentFlow];
+  const step = flow.steps[idx];
+  phone.className = "phone " + flow.phoneClass;
+  screen.innerHTML = step.html;
+  screen.scrollTop = 0;
+  const label = currentFlow === "android" ? "Android" : "iOS";
+  kicker.textContent = label + " flow · Step " + (idx + 1) + " of " + flow.steps.length;
+  stepName.textContent = step.name;
+  why.innerHTML = step.why;
+  impl.textContent = step.impl;
+  metric.textContent = step.metric;
+  branch.innerHTML = (step.name.indexOf("Re-opt-in") === 0)
+    ? '<span class="branch-note">Conditional branch — only shown to users who denied the prompt</span>' : "";
+  dotsEl.innerHTML = "";
+  flow.steps.forEach((s, i) => {
+    const d = document.createElement("button");
+    d.className = "dot" + (i === idx ? " on" : "");
+    d.setAttribute("aria-label", "Step " + (i + 1));
+    d.addEventListener("click", () => { idx = i; render(); });
+    dotsEl.appendChild(d);
+  });
+  prevBtn.disabled = idx === 0;
+  nextBtn.disabled = idx === flow.steps.length - 1;
+}
+
+prevBtn.addEventListener("click", () => { if (idx > 0) { idx--; render(); } });
+nextBtn.addEventListener("click", () => {
+  if (idx < FLOWS[currentFlow].steps.length - 1) { idx++; render(); }
+});
+
+document.querySelectorAll(".tab").forEach(t => {
+  t.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
+    t.classList.add("active");
+    currentFlow = t.dataset.flow;
+    idx = 0;
+    render();
+  });
+});
+
+document.addEventListener("keydown", e => {
+  if (e.key === "ArrowRight") nextBtn.click();
+  if (e.key === "ArrowLeft") prevBtn.click();
+});
+
+render();
+</script>
+
+
+</body></html>

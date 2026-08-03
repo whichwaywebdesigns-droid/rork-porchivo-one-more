@@ -1,0 +1,154 @@
+//
+//  ChatScreen.swift
+//  Porchivo
+//
+//  Org-scoped chat thread — avatars, message bubbles, send field. Loads
+//  `chat_messages` for the thread and appends via SupabaseService.
+//
+
+import SwiftUI
+
+struct ChatScreen: View {
+    @Environment(AppState.self) private var appState
+    @Environment(\.porchivo) private var c
+    let threadId: String
+    @State private var messages: [ChatMessage] = []
+    @State private var draft = ""
+    @State private var isSending = false
+    @State private var loaded = false
+
+    var body: some View {
+        VStack(spacing: 0) {
+            ScrollViewReader { proxy in
+                ScrollView {
+                    LazyVStack(spacing: 10) {
+                        ForEach(messages) { msg in
+                            MessageBubble(message: msg).id(msg.id)
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.top, 16)
+                    .padding(.bottom, 12)
+                }
+                .onChange(of: messages.count) { _, _ in
+                    if let last = messages.last {
+                        withAnimation { proxy.scrollTo(last.id, anchor: .bottom) }
+                    }
+                }
+            }
+            composer
+        }
+        .background(c.background.ignoresSafeArea())
+        .navigationTitle("Chat")
+        .navigationBarTitleDisplayMode(.inline)
+        .task {
+            if !loaded { await load(); loaded = true }
+        }
+    }
+
+    private var composer: some View {
+        HStack(spacing: 10) {
+            TextField("Message…", text: $draft, axis: .vertical)
+                .font(.system(size: 15))
+                .foregroundStyle(c.textPrimary)
+                .lineLimit(1...5)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
+                .background(c.surface, in: .rect(cornerRadius: Radius.lg))
+                .overlay(RoundedRectangle(cornerRadius: Radius.lg).stroke(c.border, lineWidth: 1))
+            Button {
+                send()
+            } label: {
+                Image(systemName: "arrow.up.circle.fill")
+                    .font(.system(size: 30))
+                    .foregroundStyle(draft.isEmpty ? c.textMuted : c.accent)
+            }
+            .disabled(draft.isEmpty || isSending)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .background(c.surface.shadow(.drop(color: c.textPrimary.opacity(0.06), radius: 6, y: -2)))
+    }
+
+    private func send() {
+        guard let user = appState.user, !draft.isEmpty else { return }
+        let body = draft
+        draft = ""
+        Haptics.light()
+        Task { @MainActor in
+            isSending = true
+            defer { isSending = false }
+            // Optimistic append
+            let optimistic = ChatMessage(
+                id: UUID().uuidString,
+                senderId: user.id,
+                senderName: user.name,
+                senderAvatarUrl: user.avatarUrl,
+                body: body,
+                createdAt: Date(),
+                isMine: true
+            )
+            messages.append(optimistic)
+            if appState.isSupabaseConfigured {
+                _ = await SupabaseService.shared.sendChatMessage(
+                    threadId: threadId, body: body, sender: user)
+            }
+        }
+    }
+
+    private func load() async {
+        guard appState.isSupabaseConfigured else {
+            messages = []
+            return
+        }
+        let result = await SupabaseService.shared.fetchChatMessages(threadId: threadId)
+        if case .success(let rows) = result {
+            let me = appState.currentUserId ?? ""
+            messages = rows.map { Mappers.toChatMessage($0, currentUserId: me) }
+        }
+    }
+}
+
+private struct MessageBubble: View {
+    @Environment(\.porchivo) private var c
+    let message: ChatMessage
+
+    var body: some View {
+        HStack {
+            if message.isMine { Spacer(minLength: 60) }
+            if !message.isMine {
+                AvatarBubble(name: message.senderName, avatarUrl: message.senderAvatarUrl, size: 32)
+            }
+            VStack(alignment: message.isMine ? .trailing : .leading, spacing: 3) {
+                if !message.isMine {
+                    Text(message.senderName)
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(c.textMuted)
+                }
+                Text(message.body)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(message.isMine ? c.onAccent : c.textPrimary)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 10)
+                    .background(message.isMine ? c.accent : c.surface,
+                                in: .rect(cornerRadius: Radius.lg))
+                    .overlay(
+                        !message.isMine
+                            ? AnyShapeStyle(c.border.opacity(0.5))
+                            : AnyShapeStyle(.clear)
+                    )
+                Text(timestamp)
+                    .font(.system(size: 10))
+                    .foregroundStyle(c.textMuted)
+            }
+            if !message.isMine { Spacer(minLength: 60) }
+        }
+    }
+
+    private var timestamp: String {
+        let f = DateFormatter()
+        f.dateStyle = .none
+        f.timeStyle = .short
+        return f.string(from: message.createdAt)
+    }
+}

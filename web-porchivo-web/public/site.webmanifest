@@ -1,0 +1,21 @@
+{
+  "name": "Porchivo",
+  "short_name": "Porchivo",
+  "description": "Neighborhood watch powered by the community — track packages, report porch pirates, and keep your block safe.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#102040",
+  "theme_color": "#1B3A78",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/porchivo-icon.png",
+      "sizes": "1024x1024",
+      "type": "image/png"
+    }
+  ]
+}

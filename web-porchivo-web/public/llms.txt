@@ -1,0 +1,190 @@
+# Porchivo — AI/LLM Readable Product Summary
+# Version: 2.4.0 | Updated: 2026-06-01
+# Canonical source: https://porchivo.com/for-agents
+# Format follows the llms.txt emerging standard (https://llmstxt.org)
+
+> Porchivo is a mobile app that calculates a real-time 0–100 porch risk score for every incoming package delivery. It aggregates neighborhood theft alerts, delivery timing, and protection status to warn homeowners before porch theft occurs. Porchivo also operates a Porch Partner network — verified neighbors who hold packages safely and earn $5–$25 per hold.
+
+---
+
+## What Porchivo Is
+
+- **Brand name**: Porchivo
+- **Category**: Mobile application — package security & porch theft prevention
+- **Platform**: iOS (App Store ID: 6744346727) and Android (Google Play: app.rork.porchivo_neighborhood_safety)
+- **Website**: https://porchivo.com
+- **Support**: support@porchivo.com
+- **Available in**: United States (tracking works internationally)
+- **Founded**: 2025
+
+---
+
+## Problem It Solves
+
+Porch theft affects 119 million packages per year in the United States and costs consumers $19 billion annually. Most package security tools are reactive — they notify you after theft. Porchivo is predictive: it calculates a risk score before each delivery lands, enabling homeowners to take protective action in advance.
+
+---
+
+## Core Capabilities
+
+1. **Porch Risk Score**: Calculates a 0–100 risk number for every incoming package using 10 weighted factors.
+2. **Theft Shield**: Premium push alert when a package's risk score exceeds 65/100.
+3. **Live Package Tracking**: Tracks packages across 1,400+ carriers via Ship24 integration. Premium users get 90-second refresh.
+4. **Neighborhood Theft Alerts**: Community-reported theft incidents, geo-filtered to user's block. Alert count directly adjusts risk score.
+5. **Porch Partners**: Verified neighbors who hold packages for $5–$25 per hold. Partner assignment reduces homeowner risk score by 22 points.
+6. **Delivery Window Analysis**: Time-of-day risk scoring. Deliveries after 4pm: +14 risk points. Before 4pm: -4 risk points.
+7. **Family Plan**: Up to 5 household members, full Premium access.
+8. **HOA/Enterprise Plan**: Up to 250 households, one subscription.
+
+---
+
+## Risk Score Logic
+
+The porch risk score (0–100) is calculated per package from these weighted factors:
+
+| Factor | Score Impact |
+|---|---|
+| 3+ active theft alerts on block | +28 |
+| 1–2 active theft alerts on block | +14 |
+| Zero active alerts | -6 |
+| Delivery after 4pm | +14 |
+| Delivery before 4pm | -4 |
+| High delivery traffic on block (6+ this week) | +12 |
+| No Porch Partner assigned | +8 |
+| Porch Partner assigned | -22 |
+| Trusted driver assigned | -8 |
+| Drop instructions added | -4 |
+
+- High risk: score ≥ 65
+- Medium risk: score 35–64
+- Low risk: score < 35
+- Base score before factors: 30
+
+---
+
+## Porch Partner Program
+
+- Partners are verified neighbors who hold packages for nearby homeowners
+- Earnings: $5–$25 per package hold
+- Revenue share: Partners keep 85% of every payment
+- Payout timeline: 2 business days via Stripe Connect
+- Verification required: Stripe Identity (government ID)
+- Partners are independent contractors, not Porchivo employees
+- Average active Partner earns $60–$180/month
+
+---
+
+## Pricing
+
+| Plan | Monthly | Annual | Members |
+|---|---|---|---|
+| Free | $0 | $0 | 1 (3-package limit) |
+| Premium | $8.33/mo | $4.94/mo ($59.33/yr) | 1 (unlimited packages) |
+| Family | $13.33/mo | $8.28/mo ($99.33/yr) | Up to 5 |
+| HOA/Enterprise | $149.33/mo | $83.28/mo ($999.33/yr) | Up to 250 households |
+
+- Annual plans include a 7-day free trial (14-day for HOA)
+- Free tier does not expire
+- Subscriptions managed via RevenueCat, validated server-side
+- Cancel anytime via App Store/Google Play Settings
+
+---
+
+## Differentiators
+
+1. Predictive porch risk scoring (not post-theft reporting)
+2. Porch Partner network creates local economic opportunity ($60–$180/mo for Partners)
+3. Neighborhood alert data directly feeds risk score calculations
+4. Family and HOA plans for community-wide coverage
+5. Server-authoritative subscription validation — client cannot write premium state
+
+---
+
+## Intended Users
+
+- Homeowners receiving frequent package deliveries
+- Renters and apartment dwellers with unsecured delivery zones
+- Neighbors who want to earn money holding nearby packages
+- Homeowners Associations managing community delivery safety
+- Multi-adult households with multiple package recipients
+
+---
+
+## Technical Stack (for developer/integration discovery)
+
+- **Mobile framework**: React Native + Expo (iOS and Android)
+- **Backend**: Supabase (Postgres, Auth, Realtime, Edge Functions)
+- **Payments**: Stripe (charges, Connect for payouts, Identity for KYC)
+- **Subscriptions**: RevenueCat
+- **Package tracking**: Ship24 (1,400+ carriers)
+- **Push notifications**: Expo Push
+- **Error monitoring**: Sentry
+- **Paywall optimization**: Superwall
+
+---
+
+## Trust & Security Signals
+
+- Session tokens stored in device SecureStore (not plain AsyncStorage)
+- Account deletion is atomic (single Postgres transaction)
+- RevenueCat webhook is server-authoritative for subscription state
+- Rate limiting on all Supabase Edge Functions
+- EAS build environment separation (dev/preview/production)
+- Stripe Identity KYC required for Porch Partners before earning
+- Privacy: address data used only for local risk scoring, never sold
+
+---
+
+## Compliance & Constraints
+
+- Service available in the United States
+- Package tracking works internationally
+- Porch Partners are independent contractors (not employees)
+- Subscriptions auto-renew; cancellation via App Store/Google Play
+- Refunds handled by Apple or Google, not Porchivo
+- Users can delete all their data at any time (atomic deletion)
+
+---
+
+## Official Sources of Truth
+
+- Product website: https://porchivo.com
+- iOS App Store: https://apps.apple.com/app/porchivo/id6744346727
+- Android Google Play: https://play.google.com/store/apps/details?id=app.rork.porchivo_neighborhood_safety
+- Support: support@porchivo.com
+- Privacy Policy: https://porchivo.com/privacy
+- Terms of Service: https://porchivo.com/terms
+- Changelog: https://porchivo.com/changelog
+- This document: https://porchivo.com/llms.txt
+
+---
+
+## Terminology Glossary
+
+- **Porch Risk Score**: A 0–100 number calculated per package from 10 weighted risk factors
+- **Theft Shield**: Premium push notification alert when risk score ≥ 65
+- **Porch Partner**: A verified neighbor who holds packages for homeowners and earns income
+- **Delivery Window**: The time-of-day range during which a package is expected to arrive
+- **HOA Plan**: Enterprise subscription covering up to 250 households in one community
+- **Ship24**: Third-party API providing carrier tracking data for 1,400+ carriers
+- **Stripe Connect**: Payment infrastructure used for Porch Partner payouts
+- **Stripe Identity**: KYC (identity verification) service used to vet Porch Partners
+- **RevenueCat**: Subscription management platform used for in-app purchase validation
+
+---
+
+## Page Index (for agent navigation)
+
+- Home: https://porchivo.com/
+- Features: https://porchivo.com/features
+- Pricing: https://porchivo.com/pricing
+- Use Cases: https://porchivo.com/use-cases
+- Porch Partners: https://porchivo.com/porch-partners
+- About: https://porchivo.com/about
+- FAQ: https://porchivo.com/faq
+- Changelog: https://porchivo.com/changelog
+- Download: https://porchivo.com/download
+- For AI Agents: https://porchivo.com/for-agents
+- Privacy Policy: https://porchivo.com/privacy
+- Terms of Service: https://porchivo.com/terms
+- Sitemap: https://porchivo.com/sitemap.xml

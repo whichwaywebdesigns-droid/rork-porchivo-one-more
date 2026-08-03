@@ -1,0 +1,29 @@
+{
+  "$schema": "https://rork.com/schema/rork.json",
+  "apps": [
+    {
+      "name": "Porchivo",
+      "path": "expo",
+      "framework": "react-native",
+      "settings": {
+        "iosBundleId": "app.rork.porchivo-neighborhood-safety",
+        "androidPackage": "com.whichwayweblabs.porchivo"
+      }
+    },
+    {
+      "name": "Porchivo Web",
+      "path": "web-porchivo-web",
+      "framework": "web"
+    },
+    {
+      "name": "Porchivo",
+      "path": "android",
+      "framework": "kotlin"
+    },
+    {
+      "name": "Porchivo",
+      "path": "ios",
+      "framework": "swift"
+    }
+  ]
+}
