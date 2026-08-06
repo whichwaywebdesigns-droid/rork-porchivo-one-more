@@ -90,7 +90,7 @@ struct HomeScreen: View {
                 .padding(.bottom, 24)
             }
             .background(c.background.ignoresSafeArea())
-            .navigationBarHidden(true)
+            .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: Route.self) { route in
                 RouteView(route: route, path: $path)
             }

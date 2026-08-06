@@ -2,9 +2,10 @@
 //  OnboardingFlowView.swift
 //  Porchivo
 //
-//  Value-first onboarding (8 steps, iOS):
-//  Welcome → Add delivery → Silent alerts (provisional) → Live Activity →
-//  Self-upgrade → Priming (one-shot prompt) → Re-opt-in (conditional) → Home.
+//  Value-first onboarding (9 steps, iOS):
+//  Welcome → Role selection → Profile setup → Add delivery →
+//  Silent alerts (provisional) → Live Activity → Self-upgrade →
+//  Priming (one-shot prompt) → Re-opt-in (conditional) → Home.
 //
 //  Design principle: value before asks. Every permission is earned by a
 //  moment the user just experienced. The one-shot system prompt is never
@@ -18,12 +19,7 @@ struct OnboardingFlowView: View {
     @Environment(AppState.self) private var appState
     @Environment(\.porchivo) private var c
 
-    @State private var step = 0
-    @State private var trackingNumber = ""
-    @State private var selectedCarrier: Carrier = .ups
-    @State private var notifStatus: UNAuthorizationStatus = .notDetermined
-    @State private var provisionalGranted = false
-    @State private var isCompleting = false
+    @State private var viewModel = OnboardingViewModel()
 
     var body: some View {
         ZStack {
@@ -31,13 +27,15 @@ struct OnboardingFlowView: View {
             VStack(spacing: 0) {
                 progressBar
                 Group {
-                    switch step {
+                    switch viewModel.step {
                     case 0: welcomeStep
-                    case 1: addDeliveryStep
-                    case 2: silentAlertsStep
-                    case 3: liveActivityStep
-                    case 4: selfUpgradeStep
-                    case 5: primingStep
+                    case 1: roleSelectionStep
+                    case 2: onboardingSetupStep
+                    case 3: addDeliveryStep
+                    case 4: silentAlertsStep
+                    case 5: liveActivityStep
+                    case 6: selfUpgradeStep
+                    case 7: primingStep
                     default: reOptInStep
                     }
                 }
@@ -50,19 +48,19 @@ struct OnboardingFlowView: View {
             .padding(.horizontal, 24)
             .padding(.bottom, 24)
         }
-        .animation(.spring(duration: 0.4), value: step)
-        .task { await checkNotifStatus() }
+        .animation(.spring(duration: 0.4), value: viewModel.step)
+        .task { await viewModel.checkNotifStatus() }
     }
 
     // MARK: - Progress
 
     private var progressBar: some View {
         HStack(spacing: 6) {
-            ForEach(0..<7, id: \.self) { i in
+            ForEach(0..<viewModel.totalSteps, id: \.self) { i in
                 Capsule()
-                    .fill(i <= step ? c.accent : c.elevated)
-                    .frame(width: i == step ? 24 : 8, height: 8)
-                    .animation(.spring, value: step)
+                    .fill(i <= viewModel.step ? c.accent : c.elevated)
+                    .frame(width: i == viewModel.step ? 24 : 8, height: 8)
+                    .animation(.spring, value: viewModel.step)
             }
         }
         .padding(.top, 16)
@@ -87,12 +85,33 @@ struct OnboardingFlowView: View {
             Spacer()
             PrimaryButton(title: "Get started", systemImage: "arrow.right") {
                 Haptics.light()
-                advance()
+                viewModel.advance()
             }
         }
     }
 
-    // MARK: - Step 1: Add your first delivery
+    // MARK: - Step 1: Role selection
+
+    private var roleSelectionStep: some View {
+        RoleSelectionScreen(onContinue: { role in
+            viewModel.selectedRole = role
+            viewModel.advance()
+        }, onSkip: {
+            viewModel.advance()
+        })
+    }
+
+    // MARK: - Step 2: Profile setup
+
+    private var onboardingSetupStep: some View {
+        OnboardingSetupScreen(role: viewModel.selectedRole, onContinue: {
+            viewModel.advance()
+        }, onSkip: {
+            viewModel.advance()
+        })
+    }
+
+    // MARK: - Step 3: Add your first delivery
 
     private var addDeliveryStep: some View {
         ScrollView {
@@ -116,12 +135,12 @@ struct OnboardingFlowView: View {
                     HStack(spacing: 10) {
                         Image(systemName: "barcode.viewfinder")
                             .foregroundStyle(c.textMuted)
-                        TextField("", text: $trackingNumber)
+                        TextField("", text: $viewModel.trackingNumber)
                             .font(.system(size: 15))
                             .foregroundStyle(c.textPrimary)
                             .textInputAutocapitalization(.characters)
-                            .onChange(of: trackingNumber) { _, newValue in
-                                selectedCarrier = detectCarrier(newValue)
+                            .onChange(of: viewModel.trackingNumber) { _, newValue in
+                                viewModel.selectedCarrier = viewModel.detectCarrier(newValue)
                             }
                     }
                     .padding(.horizontal, 14)
@@ -140,14 +159,14 @@ struct OnboardingFlowView: View {
                             ForEach(Carrier.allCases.filter { $0 != .other }) { carrier in
                                 Button {
                                     Haptics.selection()
-                                    selectedCarrier = carrier
+                                    viewModel.selectedCarrier = carrier
                                 } label: {
                                     Text(carrier.label)
                                         .font(.system(size: 13, weight: .bold))
-                                        .foregroundStyle(selectedCarrier == carrier ? c.onAccent : c.textSecondary)
+                                        .foregroundStyle(viewModel.selectedCarrier == carrier ? c.onAccent : c.textSecondary)
                                         .padding(.horizontal, 16)
                                         .padding(.vertical, 9)
-                                        .background(selectedCarrier == carrier ? c.accent : c.elevated, in: .capsule)
+                                        .background(viewModel.selectedCarrier == carrier ? c.accent : c.elevated, in: .capsule)
                                 }
                                 .buttonStyle(.plain)
                             }
@@ -159,9 +178,9 @@ struct OnboardingFlowView: View {
 
                 VStack(spacing: 12) {
                     PrimaryButton(title: "Track my package", systemImage: "arrow.right") {
-                        addDelivery()
+                        viewModel.addDelivery(into: appState)
                     }
-                    Button("Skip for now") { advance() }
+                    Button("Skip for now") { viewModel.advance() }
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(c.textSecondary)
                 }
@@ -171,7 +190,7 @@ struct OnboardingFlowView: View {
         .scrollBounceBehavior(.basedOnSize)
     }
 
-    // MARK: - Step 2: Silent alerts (provisional push)
+    // MARK: - Step 4: Silent alerts (provisional push)
 
     private var silentAlertsStep: some View {
         VStack(spacing: 20) {
@@ -201,12 +220,12 @@ struct OnboardingFlowView: View {
 
             Spacer()
             PrimaryButton(title: "Continue", systemImage: "arrow.right") {
-                Task { await requestProvisionalAuth() }
+                Task { await viewModel.requestProvisionalAuth() }
             }
         }
     }
 
-    // MARK: - Step 3: Live Activity
+    // MARK: - Step 5: Live Activity
 
     private var liveActivityStep: some View {
         VStack(spacing: 20) {
@@ -230,12 +249,12 @@ struct OnboardingFlowView: View {
 
             Spacer()
             PrimaryButton(title: "Continue", systemImage: "arrow.right") {
-                advance()
+                viewModel.advance()
             }
         }
     }
 
-    // MARK: - Step 4: Self-upgrade
+    // MARK: - Step 6: Self-upgrade
 
     private var selfUpgradeStep: some View {
         VStack(spacing: 20) {
@@ -245,7 +264,7 @@ struct OnboardingFlowView: View {
                     .font(.system(size: 24, weight: .heavy))
                     .foregroundStyle(c.textPrimary)
                     .multilineTextAlignment(.center)
-                Text("Provisional notifications arrive with Apple-rendered buttons. Tap \"Deliver Prominently\" to upgrade to full alerts — no extra setup needed.")
+                Text("Provisional notifications arrive with Apple-rendered buttons. Tap "Deliver Prominently" to upgrade to full alerts — no extra setup needed.")
                     .font(.system(size: 14))
                     .foregroundStyle(c.textSecondary)
                     .multilineTextAlignment(.center)
@@ -256,12 +275,12 @@ struct OnboardingFlowView: View {
 
             Spacer()
             PrimaryButton(title: "Continue", systemImage: "arrow.right") {
-                advance()
+                viewModel.advance()
             }
         }
     }
 
-    // MARK: - Step 5: Priming (one-shot prompt)
+    // MARK: - Step 7: Priming (one-shot prompt)
 
     private var primingStep: some View {
         VStack(spacing: 20) {
@@ -296,11 +315,11 @@ struct OnboardingFlowView: View {
             Spacer()
             VStack(spacing: 12) {
                 PrimaryButton(title: "Turn on alerts", systemImage: "bell.fill") {
-                    Task { await requestFullAuth() }
+                    Task { await viewModel.requestFullAuth(in: appState) }
                 }
                 Button("Not now") {
                     Haptics.selection()
-                    advance() // → re-opt-in step
+                    viewModel.advance() // → re-opt-in step
                 }
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundStyle(c.textSecondary)
@@ -308,7 +327,7 @@ struct OnboardingFlowView: View {
         }
     }
 
-    // MARK: - Step 6: Re-opt-in (conditional — deniers only)
+    // MARK: - Step 8: Re-opt-in (conditional — deniers only)
 
     private var reOptInStep: some View {
         VStack(spacing: 20) {
@@ -357,118 +376,13 @@ struct OnboardingFlowView: View {
                     if let url = URL(string: UIApplication.openSettingsURLString) {
                         UIApplication.shared.open(url)
                     }
-                    completeOnboarding()
+                    viewModel.completeOnboarding(in: appState)
                 }
                 Button("Continue without alerts") {
-                    completeOnboarding()
+                    viewModel.completeOnboarding(in: appState)
                 }
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundStyle(c.textSecondary)
-            }
-        }
-    }
-
-    // MARK: - Actions
-
-    private func advance() {
-        Haptics.light()
-        withAnimation { step += 1 }
-    }
-
-    private func addDelivery() {
-        Haptics.light()
-        let pkg = TrackedPackage(
-            id: UUID().uuidString,
-            name: "\(selectedCarrier.label) package",
-            carrier: selectedCarrier,
-            trackingNumber: trackingNumber.isEmpty ? "1Z999AA10123456784" : trackingNumber,
-            expectedDeliveryDate: Date().addingTimeInterval(4 * 3600),
-            currentStatus: .outForDelivery,
-            addressNickname: .home,
-            notesForPartner: "",
-            statusHistory: [
-                PackageStatusEvent(status: .ordered, timestamp: Date().addingTimeInterval(-72 * 3600), completed: true),
-                PackageStatusEvent(status: .shipped, timestamp: Date().addingTimeInterval(-30 * 3600), completed: true),
-                PackageStatusEvent(status: .outForDelivery, timestamp: Date().addingTimeInterval(-3 * 3600), completed: true),
-            ],
-            createdAt: Date().addingTimeInterval(-72 * 3600)
-        )
-        appState.addPackage(pkg)
-        advance()
-    }
-
-    private func detectCarrier(_ tracking: String) -> Carrier {
-        let upper = tracking.uppercased()
-        if upper.hasPrefix("1Z") { return .ups }
-        if upper.hasPrefix("TBA") { return .amazon }
-        if upper.hasPrefix("79") || upper.hasPrefix("1Z") { return .fedex }
-        if upper.hasPrefix("94") || upper.hasPrefix("92") || upper.hasPrefix("93") { return .usps }
-        return selectedCarrier
-    }
-
-    private func checkNotifStatus() async {
-        let settings = await UNUserNotificationCenter.current().notificationSettings()
-        await MainActor.run { notifStatus = settings.authorizationStatus }
-    }
-
-    private func requestProvisionalAuth() async {
-        let center = UNUserNotificationCenter.current()
-        let settings = await center.notificationSettings()
-        if settings.authorizationStatus == .notDetermined {
-            do {
-                _ = try await center.requestAuthorization(options: [.alert, .sound, .provisional])
-                provisionalGranted = true
-            } catch {
-                // Non-fatal — continue
-            }
-        } else if settings.authorizationStatus == .authorized || settings.authorizationStatus == .provisional {
-            provisionalGranted = true
-        }
-        await MainActor.run { advance() }
-    }
-
-    private func requestFullAuth() async {
-        let center = UNUserNotificationCenter.current()
-        let settings = await center.notificationSettings()
-
-        var granted = false
-        if settings.authorizationStatus == .authorized {
-            granted = true
-        } else if settings.authorizationStatus != .denied {
-            do {
-                granted = try await center.requestAuthorization(options: [.alert, .sound, .badge])
-            } catch {
-                granted = false
-            }
-        }
-
-        await MainActor.run {
-            if granted {
-                Haptics.success()
-                completeOnboarding()
-            } else {
-                Haptics.error()
-                advance() // → re-opt-in
-            }
-        }
-    }
-
-    private func completeOnboarding() {
-        guard !isCompleting else { return }
-        isCompleting = true
-        Haptics.success()
-        Task { @MainActor in
-            defer { isCompleting = false }
-            await appState.completeOnboarding(
-                name: appState.user?.name ?? "",
-                phone: appState.user?.phone ?? "",
-                address: appState.user?.address ?? "",
-                role: .homeowner,
-                hasLocationConsent: false
-            )
-            // Nudge authState so RootView re-evaluates and switches to MainTabView
-            if case .authenticated(let id) = appState.authState {
-                appState.authState = .authenticated(id)
             }
         }
     }

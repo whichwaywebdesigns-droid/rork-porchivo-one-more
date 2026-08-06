@@ -10,7 +10,7 @@
 import Foundation
 import Security
 
-enum KeychainError: Error {
+nonisolated enum KeychainError: Error, Sendable {
     case unhandled(OSStatus)
     case decode
 }

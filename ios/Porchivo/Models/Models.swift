@@ -113,7 +113,7 @@ nonisolated enum AddressNickname: String, CaseIterable, Identifiable, Codable {
 }
 
 /// Auth user profile — mirrors `profiles` table + `User` domain model.
-nonisolated struct User: Identifiable, Equatable {
+nonisolated struct User: Identifiable, Equatable, Sendable {
     let id: String
     var name: String
     var phone: String
@@ -128,7 +128,7 @@ nonisolated struct User: Identifiable, Equatable {
     var isOnboarded: Bool
 }
 
-nonisolated struct Shipment: Identifiable, Equatable {
+nonisolated struct Shipment: Identifiable, Equatable, Sendable {
     let id: String
     let homeownerId: String
     let homeownerName: String
@@ -149,7 +149,7 @@ nonisolated struct Shipment: Identifiable, Equatable {
     var updatedAt: Date
 }
 
-nonisolated struct PackageStatusEvent: Identifiable, Equatable {
+nonisolated struct PackageStatusEvent: Identifiable, Equatable, Sendable {
     let id = UUID()
     let status: PackageTrackingStatus
     let timestamp: Date?
@@ -244,7 +244,7 @@ private nonisolated struct StatusEventDTO: Codable, Sendable {
     }
 }
 
-nonisolated struct DeliveryNotification: Identifiable, Equatable {
+nonisolated struct DeliveryNotification: Identifiable, Equatable, Sendable {
     let id: String
     let shipmentId: String
     let type: NotificationType
@@ -255,7 +255,7 @@ nonisolated struct DeliveryNotification: Identifiable, Equatable {
 }
 
 /// Resident directory entry — mirrors `get_org_directory` RPC output.
-nonisolated struct DirectoryEntry: Identifiable, Equatable {
+nonisolated struct DirectoryEntry: Identifiable, Equatable, Sendable {
     let id: String
     let name: String
     let role: UserRole
@@ -265,7 +265,7 @@ nonisolated struct DirectoryEntry: Identifiable, Equatable {
 }
 
 /// Chat message — mirrors `chat_messages` table.
-nonisolated struct ChatMessage: Identifiable, Equatable {
+nonisolated struct ChatMessage: Identifiable, Equatable, Sendable {
     let id: String
     let senderId: String
     let senderName: String

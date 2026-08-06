@@ -264,6 +264,35 @@ final class AppState {
         }
     }
 
+    /// Updates profile fields during onboarding without marking the user fully
+    /// onboarded. Used by the setup screen so the rest of the onboarding flow
+    /// can still run before `completeOnboarding` flips `is_onboarded`.
+    @MainActor
+    func updateProfileInfo(name: String, phone: String, address: String,
+                           role: UserRole, hasLocationConsent: Bool) async {
+        guard isSupabaseConfigured else {
+            if user == nil { user = MockData.user }
+            user?.name = name
+            user?.phone = phone
+            user?.address = address
+            user?.role = role
+            user?.hasLocationConsent = hasLocationConsent
+            return
+        }
+        guard let userId = currentUserId else { return }
+        let updates: [String: Any?] = [
+            "name": name,
+            "phone": phone,
+            "address": address,
+            "role": role.rawValue,
+            "has_location_consent": hasLocationConsent,
+        ]
+        let result = await supabase.updateProfile(userId: userId, updates)
+        if case .success(let db) = result {
+            user = Mappers.toUser(db)
+        }
+    }
+
     @MainActor
     func completeOnboarding(name: String, phone: String, address: String,
                             role: UserRole, hasLocationConsent: Bool) async {

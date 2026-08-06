@@ -130,7 +130,8 @@ struct CreateScreen: View {
                 Haptics.success()
                 announcementPosted = true
                 announcementText = ""
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                Task { @MainActor in
+                    try? await Task.sleep(for: .seconds(1.5))
                     showAnnouncement = false
                     announcementPosted = false
                 }

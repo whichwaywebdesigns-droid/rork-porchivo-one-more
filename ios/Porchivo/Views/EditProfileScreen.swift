@@ -157,7 +157,8 @@ struct EditProfileScreen: View {
             appState.user?.address = a
             withAnimation { saved = true }
             Haptics.success()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+            Task { @MainActor in
+                try? await Task.sleep(for: .seconds(1.2))
                 dismiss()
             }
         }
