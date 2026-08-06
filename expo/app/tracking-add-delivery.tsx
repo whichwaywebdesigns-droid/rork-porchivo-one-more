@@ -34,10 +34,11 @@ import { detectCarrier, carrierLabel, isValidTrackingFormat } from '@/lib/carrie
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { recordConsent } from '@/lib/consent';
 import { log } from '@/lib/logger';
+import { useRouter } from 'expo-router';
 
 interface TrackingAddDeliveryProps {
-  onContinue: () => void;
-  onSkip: () => void;
+  onContinue?: () => void;
+  onSkip?: () => void;
 }
 
 const CARRIER_CHIPS: Carrier[] = ['Amazon', 'UPS', 'FedEx', 'USPS', 'Other'];
@@ -49,6 +50,17 @@ export default function TrackingAddDeliveryScreen({
   const { track } = useAnalytics();
   const { session, user, completeOnboarding } = useApp();
   const { addPackage } = usePackages();
+  const router = useRouter();
+
+  // Fallbacks for deep-link access — route into the step manager instead of crashing
+  const safeContinue = useCallback(() => {
+    if (onContinue) onContinue();
+    else router.replace('/tracking-onboarding' as never);
+  }, [onContinue, router]);
+  const safeSkip = useCallback(() => {
+    if (onSkip) onSkip();
+    else router.replace('/tracking-onboarding' as never);
+  }, [onSkip, router]);
 
   // ── Form state ──────────────────────────────────────────────────────
   const [trackingNumber, setTrackingNumber] = useState<string>('');
@@ -190,7 +202,7 @@ export default function TrackingAddDeliveryScreen({
         );
         track('delivery_added_first', { carrier, has_account: true });
         void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        onContinue();
+        safeContinue();
         return;
       } catch (err: any) {
         if (err?.message === 'FREE_LIMIT_REACHED') {
@@ -304,13 +316,13 @@ export default function TrackingAddDeliveryScreen({
 
         track('delivery_added_first', { carrier, has_account: true });
         void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        onContinue();
+        safeContinue();
       } catch (err: any) {
         if (err?.message === 'FREE_LIMIT_REACHED') {
           Alert.alert('Free Limit', 'You can track up to 5 active packages on the free plan.');
         } else {
           Alert.alert('Error', 'Account created but could not add package. Please try again from the home screen.');
-          onContinue();
+          safeContinue();
         }
       }
     } catch {
@@ -331,15 +343,15 @@ export default function TrackingAddDeliveryScreen({
     addPackage,
     track,
     completeOnboarding,
-    onContinue,
+    safeContinue,
     expandAuthForm,
   ]);
 
   const handleSkip = useCallback(() => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     track('onboarding_step_skipped', { step: 'add_delivery' });
-    onSkip();
-  }, [track, onSkip]);
+    safeSkip();
+  }, [track, safeSkip]);
 
   const authFormHeight = authFormAnim.interpolate({
     inputRange: [0, 1],

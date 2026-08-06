@@ -29,10 +29,11 @@ import { useAnalytics } from '@/store/AnalyticsContext';
 import { useApp } from '@/store/AppContext';
 import { supabase } from '@/lib/supabase';
 import { log } from '@/lib/logger';
+import { useRouter } from 'expo-router';
 
 interface TrackingTheftShieldProps {
-  onContinue: () => void;
-  onSkip: () => void;
+  onContinue?: () => void;
+  onSkip?: () => void;
 }
 
 interface RiskFactor {
@@ -91,6 +92,17 @@ export default function TrackingTheftShieldScreen({
 }: TrackingTheftShieldProps): React.ReactElement {
   const { track } = useAnalytics();
   const { session, user } = useApp();
+  const router = useRouter();
+
+  // Fallbacks for deep-link access — route into the step manager instead of crashing
+  const safeContinue = useCallback(() => {
+    if (onContinue) onContinue();
+    else router.replace('/tracking-onboarding' as never);
+  }, [onContinue, router]);
+  const safeSkip = useCallback(() => {
+    if (onSkip) onSkip();
+    else router.replace('/tracking-onboarding' as never);
+  }, [onSkip, router]);
 
   const [zipCode, setZipCode] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -235,14 +247,14 @@ export default function TrackingTheftShieldScreen({
   const handleContinue = useCallback(() => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     track('onboarding_step_complete', { step: 'theft_shield', risk_score: riskScore ?? -1 });
-    onContinue();
-  }, [track, onContinue, riskScore]);
+    safeContinue();
+  }, [track, safeContinue, riskScore]);
 
   const handleSkip = useCallback(() => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     track('onboarding_step_skipped', { step: 'theft_shield' });
-    onSkip();
-  }, [track, onSkip]);
+    safeSkip();
+  }, [track, safeSkip]);
 
   // ── Derived display values ──────────────────────────────────────────
   const ringScale = shieldPulse.interpolate({

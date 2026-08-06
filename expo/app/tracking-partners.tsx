@@ -32,12 +32,13 @@ import { useApp } from '@/store/AppContext';
 import { PorchPartner } from '@/types';
 import { mockPorchPartners } from '@/mocks/porchPartners';
 import { log } from '@/lib/logger';
+import { useRouter } from 'expo-router';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 interface TrackingPartnersProps {
-  onContinue: () => void;
-  onSkip: () => void;
+  onContinue?: () => void;
+  onSkip?: () => void;
 }
 
 type LocStatus = 'undetermined' | 'granted' | 'denied';
@@ -67,6 +68,17 @@ export default function TrackingPartnersScreen({
 }: TrackingPartnersProps): React.ReactElement {
   const { track } = useAnalytics();
   const { completeOnboarding, session, user } = useApp();
+  const router = useRouter();
+
+  // Fallbacks for deep-link access — route into the step manager instead of crashing
+  const safeContinue = useCallback(() => {
+    if (onContinue) onContinue();
+    else router.replace('/tracking-onboarding' as never);
+  }, [onContinue, router]);
+  const safeSkip = useCallback(() => {
+    if (onSkip) onSkip();
+    else router.replace('/tracking-onboarding' as never);
+  }, [onSkip, router]);
 
   const [locStatus, setLocStatus] = useState<LocStatus>('undetermined');
   const [requesting, setRequesting] = useState<boolean>(false);
@@ -206,8 +218,8 @@ export default function TrackingPartnersScreen({
       }
     }
 
-    setTimeout(onContinue, 800);
-  }, [hasJoined, track, nearbyPartners.length, onContinue, session, user, locStatus, completeOnboarding]);
+    setTimeout(safeContinue, 800);
+  }, [hasJoined, track, nearbyPartners.length, safeContinue, session, user, locStatus, completeOnboarding]);
 
   const handleSkip = useCallback(() => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -223,8 +235,8 @@ export default function TrackingPartnersScreen({
       }).catch((e) => log('[TrackingPartners] onboarding update error:', e));
     }
 
-    onSkip();
-  }, [track, onSkip, session, user, locStatus, completeOnboarding]);
+    safeSkip();
+  }, [track, safeSkip, session, user, locStatus, completeOnboarding]);
 
   // ── Radar sweep interpolation ───────────────────────────────────────
   const sweepRotate = radarSweep.interpolate({

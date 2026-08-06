@@ -23,11 +23,12 @@ import { palette, space, radius, type as ttype, elevation } from '@/constants/th
 import { useAnalytics } from '@/store/AnalyticsContext';
 import { useApp } from '@/store/AppContext';
 import { log } from '@/lib/logger';
+import { useRouter } from 'expo-router';
 
 interface TrackingCompleteProps {
-  onContinue: () => void;
+  onContinue?: () => void;
   /** Which steps the user actually completed (vs skipped) */
-  completedSteps: Set<number>;
+  completedSteps?: Set<number>;
 }
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -38,6 +39,15 @@ export default function TrackingCompleteScreen({
 }: TrackingCompleteProps): React.ReactElement {
   const { track } = useAnalytics();
   const { completeOnboarding, session, user } = useApp();
+  const router = useRouter();
+
+  // Fallback for deep-link access — route into the step manager instead of crashing
+  const safeContinue = useCallback(() => {
+    if (onContinue) onContinue();
+    else router.replace('/tracking-onboarding' as never);
+  }, [onContinue, router]);
+
+  const safeCompletedSteps = completedSteps ?? new Set<number>();
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(40)).current;
@@ -51,8 +61,8 @@ export default function TrackingCompleteScreen({
   useEffect(() => {
     track('onboarding_step_view', { step: 'complete' });
     track('onboarding_completed', {
-      steps_completed: Array.from(completedSteps).join(','),
-      step_count: completedSteps.size,
+      steps_completed: Array.from(safeCompletedSteps).join(','),
+      step_count: safeCompletedSteps.size,
     });
 
     // Hero entrance
@@ -126,39 +136,39 @@ export default function TrackingCompleteScreen({
     const userId = session?.user?.id ?? user?.id;
     if (userId) {
       void completeOnboarding({
-        hasLocationConsent: completedSteps.has(5),
+        hasLocationConsent: safeCompletedSteps.has(5),
         hasPreciseLocationConsent: false,
       }).catch((e) => log('[TrackingComplete] completeOnboarding error (non-fatal):', e));
     }
 
     track('onboarding_step_complete', { step: 'complete' });
-    onContinue();
-  }, [track, onContinue, completeOnboarding, session, user, completedSteps]);
+    safeContinue();
+  }, [track, safeContinue, completeOnboarding, session, user, safeCompletedSteps]);
 
   // ── Summary items ───────────────────────────────────────────────────
   const summaryItems = [
     {
       icon: <Package size={18} color={palette.navy} strokeWidth={2.2} />,
       label: 'Package tracking',
-      done: completedSteps.has(2),
+      done: safeCompletedSteps.has(2),
       tint: palette.sky,
     },
     {
       icon: <ShieldCheck size={18} color={palette.sage} strokeWidth={2.2} />,
       label: 'Theft Shield risk score',
-      done: completedSteps.has(3),
+      done: safeCompletedSteps.has(3),
       tint: palette.sageSoft,
     },
     {
       icon: <Bell size={18} color={palette.ember} strokeWidth={2.2} />,
       label: 'Delivery alerts',
-      done: completedSteps.has(4),
+      done: safeCompletedSteps.has(4),
       tint: palette.emberSoft,
     },
     {
       icon: <Users size={18} color={palette.navy} strokeWidth={2.2} />,
       label: 'Porch Partners network',
-      done: completedSteps.has(5),
+      done: safeCompletedSteps.has(5),
       tint: palette.sky,
     },
   ];

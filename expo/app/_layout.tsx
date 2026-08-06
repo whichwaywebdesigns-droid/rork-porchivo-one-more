@@ -89,6 +89,13 @@ function RootLayoutNav() {
   const inWelcome =
     currentSegment === "splash" ||
     currentSegment === "onboarding" ||
+    currentSegment === "tracking-onboarding" ||
+    currentSegment === "tracking-welcome" ||
+    currentSegment === "tracking-add-delivery" ||
+    currentSegment === "tracking-theft-shield" ||
+    currentSegment === "tracking-notifications" ||
+    currentSegment === "tracking-partners" ||
+    currentSegment === "tracking-complete" ||
     currentSegment === "welcome" ||
     currentSegment === "welcome-features" ||
     currentSegment === "guest-browse" ||
@@ -121,6 +128,13 @@ function RootLayoutNav() {
     const inWelcome =
       currentSegment === "splash" ||
       currentSegment === "onboarding" ||
+      currentSegment === "tracking-onboarding" ||
+      currentSegment === "tracking-welcome" ||
+      currentSegment === "tracking-add-delivery" ||
+      currentSegment === "tracking-theft-shield" ||
+      currentSegment === "tracking-notifications" ||
+      currentSegment === "tracking-partners" ||
+      currentSegment === "tracking-complete" ||
       currentSegment === "welcome" ||
       currentSegment === "welcome-features" ||
       currentSegment === "guest-browse" ||

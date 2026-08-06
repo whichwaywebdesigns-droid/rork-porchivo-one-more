@@ -2,6 +2,8 @@ import React, { useCallback, useRef, useState } from 'react';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { useAnalytics } from '@/store/AnalyticsContext';
+import { useApp } from '@/store/AppContext';
+import { log } from '@/lib/logger';
 
 import TrackingWelcomeScreen from './tracking-welcome';
 import TrackingAddDeliveryScreen from './tracking-add-delivery';
@@ -28,6 +30,7 @@ type Step = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 export default function TrackingOnboardingScreen(): React.ReactElement {
   const router = useRouter();
   const { track } = useAnalytics();
+  const { session } = useApp();
 
   const [step, setStep] = useState<Step>(1);
   const completedSteps = useRef<Set<number>>(new Set());
@@ -67,8 +70,18 @@ export default function TrackingOnboardingScreen(): React.ReactElement {
       steps_completed: Array.from(completedSteps.current).join(','),
       step_count: completedSteps.current.size,
     });
+
+    // If the user never signed up (skipped Step 2), sending them to home would
+    // cause the layout redirect to bounce them to /welcome. Route there directly
+    // instead — the welcome screen offers login and guest browse options.
+    if (!session) {
+      log('[TrackingOnboarding] No session — routing to /welcome (skip-signup path)');
+      router.replace('/welcome' as never);
+      return;
+    }
+
     router.replace('/(tabs)/(home)' as never);
-  }, [router, track]);
+  }, [router, track, session]);
 
   // ── Render current step ─────────────────────────────────────────────
   switch (step) {

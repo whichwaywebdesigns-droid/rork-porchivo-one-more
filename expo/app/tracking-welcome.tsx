@@ -14,15 +14,26 @@ import { ShieldCheck, ArrowRight, Package } from 'lucide-react-native';
 import { palette, space, radius, type as ttype, elevation } from '@/constants/theme';
 import { useAnalytics } from '@/store/AnalyticsContext';
 import * as Haptics from 'expo-haptics';
+import { useRouter } from 'expo-router';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 interface TrackingWelcomeProps {
-  onContinue: () => void;
+  onContinue?: () => void;
 }
 
 export default function TrackingWelcomeScreen({ onContinue }: TrackingWelcomeProps): React.ReactElement {
   const { track } = useAnalytics();
+  const router = useRouter();
+
+  // Fallback for deep-link access — route into the step manager instead of crashing
+  const safeContinue = useCallback(() => {
+    if (onContinue) {
+      onContinue();
+    } else {
+      router.replace('/tracking-onboarding' as never);
+    }
+  }, [onContinue, router]);
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(40)).current;
   const shieldScale = useRef(new Animated.Value(0.8)).current;
@@ -70,8 +81,8 @@ export default function TrackingWelcomeScreen({ onContinue }: TrackingWelcomePro
   const handleContinue = useCallback(() => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     track('welcome_cta_tapped', { surface: 'tracking_welcome' });
-    onContinue();
-  }, [track, onContinue]);
+    safeContinue();
+  }, [track, safeContinue]);
 
   const ringScale = pulseAnim.interpolate({
     inputRange: [0, 1],

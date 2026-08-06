@@ -29,10 +29,11 @@ import {
 import { palette, space, radius, type as ttype, elevation } from '@/constants/theme';
 import { useAnalytics } from '@/store/AnalyticsContext';
 import { log } from '@/lib/logger';
+import { useRouter } from 'expo-router';
 
 interface TrackingNotificationsProps {
-  onContinue: () => void;
-  onSkip: () => void;
+  onContinue?: () => void;
+  onSkip?: () => void;
 }
 
 type PermStatus = 'undetermined' | 'granted' | 'denied';
@@ -70,6 +71,17 @@ export default function TrackingNotificationsScreen({
   onSkip,
 }: TrackingNotificationsProps): React.ReactElement {
   const { track } = useAnalytics();
+  const router = useRouter();
+
+  // Fallbacks for deep-link access — route into the step manager instead of crashing
+  const safeContinue = useCallback(() => {
+    if (onContinue) onContinue();
+    else router.replace('/tracking-onboarding' as never);
+  }, [onContinue, router]);
+  const safeSkip = useCallback(() => {
+    if (onSkip) onSkip();
+    else router.replace('/tracking-onboarding' as never);
+  }, [onSkip, router]);
 
   const [status, setStatus] = useState<PermStatus>('undetermined');
   const [requesting, setRequesting] = useState<boolean>(false);
@@ -150,7 +162,7 @@ export default function TrackingNotificationsScreen({
   const handleEnable = useCallback(async () => {
     if (Platform.OS === 'web') {
       Alert.alert('Not available', 'Push notifications are unsupported on web.');
-      onContinue();
+      safeContinue();
       return;
     }
 
@@ -169,7 +181,7 @@ export default function TrackingNotificationsScreen({
 
     if (status === 'granted') {
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      onContinue();
+      safeContinue();
       return;
     }
 
@@ -228,7 +240,7 @@ export default function TrackingNotificationsScreen({
 
       if (granted) {
         // Brief celebration then continue
-        setTimeout(onContinue, 700);
+        setTimeout(safeContinue, 700);
       }
     } catch (e) {
       log('[TrackingNotifications] Request error:', e);
@@ -236,14 +248,14 @@ export default function TrackingNotificationsScreen({
     } finally {
       setRequesting(false);
     }
-  }, [status, track, onContinue]);
+  }, [status, track, safeContinue]);
 
   const handleSkip = useCallback(() => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     track('notification_priming_declined', { platform: Platform.OS });
     track('onboarding_step_skipped', { step: 'notifications' });
-    onSkip();
-  }, [track, onSkip]);
+    safeSkip();
+  }, [track, safeSkip]);
 
   // ── Derived display values ──────────────────────────────────────────
   const bellScale = bellPulse.interpolate({
