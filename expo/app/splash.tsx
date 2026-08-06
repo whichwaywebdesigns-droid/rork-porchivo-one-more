@@ -14,60 +14,14 @@ import Animated, {
   withDelay,
   Easing,
   runOnJS,
-  type SharedValue,
 } from 'react-native-reanimated';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useApp } from '@/store/AppContext';
 
-// New cardboard hero shot: full image shown first, then camera zooms into box
+// New cardboard hero shot: full image shown first, then camera zooms into the open box
 const SPLASH_CARD = require('@/assets/images/splash-cardboard-full.png');
 const HAS_SEEN_SLIDES_KEY = 'porchivo_pre_auth_slides_seen';
-const FLAP_COLOR = '#C4A265';
 const BOX_FOCAL_Y = 0.35; // Focal point of the open box on the full image (relative)
-
-type FlapSide = 'left' | 'right';
-
-interface CardboardFlapProps {
-  side: FlapSide;
-  progress: SharedValue<number>;
-  containerWidth: number;
-  containerHeight: number;
-}
-
-function CardboardFlap({
-  side,
-  progress,
-  containerWidth,
-  containerHeight,
-}: CardboardFlapProps) {
-  const animatedStyle = useAnimatedStyle(() => {
-    const target = side === 'left' ? -110 : 110;
-    const rotateY = progress.value * target;
-    return {
-      transform: [{ perspective: 800 }, { rotateY: `${rotateY}deg` }],
-    };
-  });
-
-  const flapWidth = containerWidth * 0.5;
-  const flapHeight = containerHeight * 0.45;
-
-  return (
-    <Animated.View
-      style={[
-        styles.flap,
-        {
-          width: flapWidth,
-          height: flapHeight,
-          left: side === 'left' ? 0 : containerWidth * 0.5,
-          top: containerHeight * 0.05,
-          transformOrigin: side === 'left' ? 'right center' : 'left center',
-        },
-        animatedStyle,
-      ]}
-      pointerEvents="none"
-    />
-  );
-}
 
 export default function SplashScreen(): React.ReactElement {
   const router = useRouter();
@@ -86,7 +40,6 @@ export default function SplashScreen(): React.ReactElement {
   const imageScale = useSharedValue<number>(1);
   const translateX = useSharedValue<number>(0);
   const translateY = useSharedValue<number>(0);
-  const flapProgress = useSharedValue<number>(0);
   const overlayOpacity = useSharedValue<number>(1);
 
   const navigateNext = () => {
@@ -129,12 +82,6 @@ export default function SplashScreen(): React.ReactElement {
       withTiming(targetY, { duration: 1200, easing: Easing.inOut(Easing.cubic) })
     );
 
-    // Flaps hinge open as the camera moves in, 1.2s → 2.0s
-    flapProgress.value = withDelay(
-      1200,
-      withTiming(1, { duration: 800, easing: Easing.inOut(Easing.ease) })
-    );
-
     // Fade out the splash during the final part of the zoom, then route
     overlayOpacity.value = withDelay(
       2000,
@@ -175,18 +122,6 @@ export default function SplashScreen(): React.ReactElement {
             resizeMode="contain"
             accessible={false}
           />
-          <CardboardFlap
-            side="left"
-            progress={flapProgress}
-            containerWidth={width}
-            containerHeight={height}
-          />
-          <CardboardFlap
-            side="right"
-            progress={flapProgress}
-            containerWidth={width}
-            containerHeight={height}
-          />
         </Animated.View>
       </Animated.View>
     </View>
@@ -197,16 +132,5 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: '#FFFFFF',
-  },
-  flap: {
-    position: 'absolute',
-    backgroundColor: FLAP_COLOR,
-    backfaceVisibility: 'hidden',
-    borderRadius: 4,
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 8,
-    elevation: 4,
   },
 });
