@@ -10,7 +10,7 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ShieldCheck, ArrowRight, Package } from 'lucide-react-native';
+import { ShieldCheck, ArrowRight, Package, ChevronRight } from 'lucide-react-native';
 import { palette, space, radius, type as ttype, elevation } from '@/constants/theme';
 import { useAnalytics } from '@/store/AnalyticsContext';
 import * as Haptics from 'expo-haptics';
@@ -20,13 +20,14 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 interface TrackingWelcomeProps {
   onContinue?: () => void;
+  onSkip?: () => void;
 }
 
-export default function TrackingWelcomeScreen({ onContinue }: TrackingWelcomeProps): React.ReactElement {
+export default function TrackingWelcomeScreen({ onContinue, onSkip }: TrackingWelcomeProps): React.ReactElement {
   const { track } = useAnalytics();
   const router = useRouter();
 
-  // Fallback for deep-link access — route into the step manager instead of crashing
+  // Fallbacks for deep-link access — route into the step manager instead of crashing
   const safeContinue = useCallback(() => {
     if (onContinue) {
       onContinue();
@@ -34,6 +35,16 @@ export default function TrackingWelcomeScreen({ onContinue }: TrackingWelcomePro
       router.replace('/tracking-onboarding' as never);
     }
   }, [onContinue, router]);
+  const safeSkip = useCallback(() => {
+    if (onSkip) onSkip();
+    else router.replace('/tracking-onboarding' as never);
+  }, [onSkip, router]);
+
+  const handleSkip = useCallback(() => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    track('onboarding_step_skipped', { step: 'welcome' });
+    safeSkip();
+  }, [track, safeSkip]);
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(40)).current;
   const shieldScale = useRef(new Animated.Value(0.8)).current;
@@ -170,6 +181,17 @@ export default function TrackingWelcomeScreen({ onContinue }: TrackingWelcomePro
           <Text style={styles.footerHint}>
             No account needed yet — {Platform.OS === 'ios' ? 'iOS' : 'Android'} optimized
           </Text>
+          <TouchableOpacity
+            onPress={handleSkip}
+            activeOpacity={0.7}
+            hitSlop={{ top: 12, bottom: 12, left: 20, right: 20 }}
+            accessibilityLabel="Skip for now"
+            accessibilityRole="button"
+            testID="btn-skip"
+          >
+            <Text style={styles.skipText}>Skip for now</Text>
+            <ChevronRight size={14} color={palette.slate300} strokeWidth={2} />
+          </TouchableOpacity>
         </View>
       </View>
     </SafeAreaView>
@@ -275,5 +297,11 @@ const styles = StyleSheet.create({
     ...ttype.caption,
     color: palette.slate300,
     fontSize: 13,
+  },
+  skipText: {
+    ...ttype.caption,
+    color: palette.slate500,
+    fontSize: 14,
+    fontWeight: '600' as const,
   },
 });

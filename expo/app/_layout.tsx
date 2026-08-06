@@ -125,16 +125,24 @@ function RootLayoutNav() {
     if (isLoading || isOnboarded === null || hasSeenSlides === null) return;
 
     const currentSegment = segments[0] as string;
-    const inWelcome =
-      currentSegment === "splash" ||
-      currentSegment === "onboarding" ||
+
+    // Tracking onboarding screens manage their own navigation via the step
+    // manager (tracking-onboarding.tsx → goHome()). They must NOT be yanked
+    // by the layout redirect when the user signs up mid-flow at Step 2 —
+    // doing so skips Steps 3–6 entirely.
+    const inTrackingOnboarding =
       currentSegment === "tracking-onboarding" ||
       currentSegment === "tracking-welcome" ||
       currentSegment === "tracking-add-delivery" ||
       currentSegment === "tracking-theft-shield" ||
       currentSegment === "tracking-notifications" ||
       currentSegment === "tracking-partners" ||
-      currentSegment === "tracking-complete" ||
+      currentSegment === "tracking-complete";
+
+    const inWelcome =
+      inTrackingOnboarding ||
+      currentSegment === "splash" ||
+      currentSegment === "onboarding" ||
       currentSegment === "welcome" ||
       currentSegment === "welcome-features" ||
       currentSegment === "guest-browse" ||
@@ -155,8 +163,9 @@ function RootLayoutNav() {
     if (!isOnboarded && !inWelcome) {
       // Pre-auth flow: show onboarding slides once, then the welcome/login screen.
       target = session ? "/onboarding-setup" : hasSeenSlides ? "/welcome" : "/splash";
-    } else if (isOnboarded && session && inWelcome) {
-      // Onboarded user inside the pre-auth/welcome chain -> send home.
+    } else if (isOnboarded && session && inWelcome && !inTrackingOnboarding) {
+      // Onboarded user inside the OLD pre-auth/welcome chain -> send home.
+      // Tracking onboarding screens are excluded — the step manager exits itself.
       target = "/(tabs)/(home)";
     } else if (isOnboarded && !session && !inWelcome) {
       target = "/welcome";

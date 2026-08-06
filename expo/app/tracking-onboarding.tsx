@@ -86,7 +86,12 @@ export default function TrackingOnboardingScreen(): React.ReactElement {
   // ── Render current step ─────────────────────────────────────────────
   switch (step) {
     case 1:
-      return <TrackingWelcomeScreen onContinue={() => { markComplete(1); goNext(); }} />;
+      return (
+        <TrackingWelcomeScreen
+          onContinue={() => { markComplete(1); goNext(); }}
+          onSkip={() => goSkip(1)}
+        />
+      );
 
     case 2:
       return (
