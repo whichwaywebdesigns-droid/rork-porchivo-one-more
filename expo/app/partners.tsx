@@ -20,6 +20,7 @@ import {
   CheckCircle,
   Clock,
   RotateCcw,
+  Gift,
 } from 'lucide-react-native';
 import { useColors, AppColors } from '@/constants/colors';
 import { palette, radius, space, elevation, tabularNums } from '@/constants/theme';
@@ -75,7 +76,15 @@ function PartnerCard({
       >
         <PartnerAvatar name={partner.name} size={50} />
         <View style={styles.partnerInfo}>
-          <Text style={styles.partnerName}>{partner.name}</Text>
+          <View style={styles.partnerNameRow}>
+            <Text style={styles.partnerName}>{partner.name}</Text>
+            {partner.isVolunteer && (
+              <View style={styles.volunteerBadge}>
+                <Gift size={10} color={palette.sage} />
+                <Text style={styles.volunteerBadgeText}>Free</Text>
+              </View>
+            )}
+          </View>
           <View style={styles.partnerMeta}>
             <View style={styles.distanceBadge}>
               <MapPin size={11} color={colors.primary} />
@@ -429,10 +438,29 @@ function createStyles(colors: AppColors) {
     flex: 1,
     gap: 4,
   },
+  partnerNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   partnerName: {
     fontSize: 16,
     fontWeight: '700' as const,
     color: colors.slate,
+  },
+  volunteerBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: palette.sageSoft,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  volunteerBadgeText: {
+    fontSize: 10,
+    fontWeight: '800' as const,
+    color: palette.sage,
   },
   partnerMeta: {
     flexDirection: 'row',

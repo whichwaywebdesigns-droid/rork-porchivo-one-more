@@ -42,6 +42,7 @@ interface DbPartnerPublicStats {
   completed_assignments: number;
   average_rating: number | null;
   tier: string;
+  is_volunteer: boolean | null;
 }
 
 // ─── Mappers ──────────────────────────────────────────────────────────────
@@ -61,6 +62,7 @@ function dbProfileToPartner(
     joinedAt: row.created_at,
     status: 'active',
     geoTier: 'tier3',
+    isVolunteer: v?.is_volunteer ?? false,
   };
 }
 
@@ -125,7 +127,7 @@ export const [PorchPartnersProvider, usePorchPartners] = createContextHook(() =>
       if (rows.length > 0) {
         const { data: stats } = await supabase
           .from('partner_public_stats')
-          .select('user_id, completed_assignments, average_rating, tier')
+          .select('user_id, completed_assignments, average_rating, tier, is_volunteer')
           .in('user_id', rows.map((r) => r.id));
         for (const s of (stats ?? []) as DbPartnerPublicStats[]) {
           statsById.set(s.user_id, s);

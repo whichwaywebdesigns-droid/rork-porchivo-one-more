@@ -13,6 +13,7 @@ export const mockPorchPartners: PorchPartner[] = [
     status: 'active',
     acceptedSizes: ['small', 'medium', 'large'],
     geoTier: 'tier3',
+    isVolunteer: false,
   },
   {
     id: 'pp_2',
@@ -26,6 +27,7 @@ export const mockPorchPartners: PorchPartner[] = [
     status: 'active',
     acceptedSizes: ['small', 'medium'],
     geoTier: 'tier3',
+    isVolunteer: true,
   },
   {
     id: 'pp_3',
@@ -39,6 +41,7 @@ export const mockPorchPartners: PorchPartner[] = [
     status: 'active',
     acceptedSizes: ['small', 'medium', 'large'],
     geoTier: 'tier2',
+    isVolunteer: false,
   },
   {
     id: 'pp_4',
@@ -52,6 +55,7 @@ export const mockPorchPartners: PorchPartner[] = [
     status: 'active',
     acceptedSizes: ['small', 'medium'],
     geoTier: 'tier3',
+    isVolunteer: true,
   },
   {
     id: 'pp_5',
@@ -65,5 +69,6 @@ export const mockPorchPartners: PorchPartner[] = [
     status: 'inactive',
     acceptedSizes: ['small', 'medium', 'large'],
     geoTier: 'tier1',
+    isVolunteer: false,
   },
 ];

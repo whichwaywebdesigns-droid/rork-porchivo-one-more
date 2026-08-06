@@ -23,6 +23,7 @@ import {
   Navigation,
   HandHeart,
   ShieldCheck,
+  Gift,
 } from 'lucide-react-native';
 
 import { palette, space, radius, type as ttype, elevation } from '@/constants/theme';
@@ -398,6 +399,12 @@ export default function TrackingPartnersScreen({
               <View style={styles.partnerInfo}>
                 <View style={styles.partnerNameRow}>
                   <Text style={styles.partnerName}>{partner.name}</Text>
+                  {partner.isVolunteer ? (
+                    <View style={styles.volunteerBadge}>
+                      <Gift size={9} color={palette.sage} strokeWidth={2.5} />
+                      <Text style={styles.volunteerBadgeText}>Free</Text>
+                    </View>
+                  ) : null}
                   <View style={styles.ratingBadge}>
                     <Star size={11} color={palette.gold ?? '#C8941E'} strokeWidth={2} fill="#C8941E" />
                     <Text style={styles.ratingText}>{partner.rating.toFixed(1)}</Text>
@@ -694,13 +701,27 @@ const styles = StyleSheet.create({
   partnerNameRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: 6,
     marginBottom: 4,
   },
   partnerName: {
     ...ttype.headline,
     color: palette.ink,
     fontSize: 15,
+  },
+  volunteerBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: palette.sageSoft,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  volunteerBadgeText: {
+    fontSize: 10,
+    fontWeight: '800' as const,
+    color: palette.sage,
   },
   ratingBadge: {
     flexDirection: 'row',

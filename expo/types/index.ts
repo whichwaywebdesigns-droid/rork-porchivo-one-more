@@ -76,6 +76,8 @@ export interface ProfileExtension {
   taxIdLast4: string;
   /** Free-form service hours / availability note */
   serviceHoursNotes: string;
+  /** True if this partner holds packages for free — no charge to homeowners */
+  isVolunteer: boolean;
 }
 
 export interface PackageStatusEvent {
@@ -174,6 +176,8 @@ export interface PorchPartner {
   /** Package sizes this partner accepts (defaults to all if omitted) */
   acceptedSizes?: PackageSize[];
   geoTier?: GeoTier;
+  /** True if this partner holds packages for free — no charge to homeowners */
+  isVolunteer?: boolean;
 }
 
 export interface PackageHold {

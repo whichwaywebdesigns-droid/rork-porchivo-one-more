@@ -56,6 +56,7 @@ const DEFAULT_EXTENSION: ProfileExtension = {
   maxDailyHolds: 5,
   taxIdLast4: '',
   serviceHoursNotes: '',
+  isVolunteer: false,
 };
 
 export const [ProfileExtensionProvider, useProfileExtension] = createContextHook(() => {

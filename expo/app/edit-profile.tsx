@@ -39,6 +39,7 @@ import {
   Lock,
   Trash2,
   ImagePlus,
+  Gift,
 } from 'lucide-react-native';
 import { useColors, AppColors } from '@/constants/colors';
 import { useApp } from '@/store/AppContext';
@@ -48,12 +49,14 @@ import {
   uploadAvatar,
   removeAvatarAtPublicUrl,
 } from '@/lib/avatar';
+import { log } from '@/lib/logger';
 import type {
   StructuredAddress,
   SafeDropPreference,
   PreferredDeliveryWindow,
   PackageSize,
 } from '@/types';
+import { syncVolunteerStatus } from '@/lib/partnerVerification';
 
 // ─── Address field helper ────────────────────────────────────────────────────
 
@@ -471,13 +474,21 @@ export default function EditProfileScreen() {
         avatarUrl: finalAvatarUrl,
       });
       setPendingAvatarAsset(null);
+
+      // Sync volunteer status to Supabase (non-fatal if it fails — local still works)
+      if (isPartner) {
+        void syncVolunteerStatus(extension.isVolunteer).catch((e) =>
+          log('[EditProfile] Volunteer sync error (non-fatal):', e),
+        );
+      }
+
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setTimeout(() => router.back(), 300);
     } catch {
       Alert.alert('Error', 'Could not save your profile. Please try again.');
       setIsSaving(false);
     }
-  }, [user, name, email, phone, homeAddress, avatarUri, pendingAvatarAsset, updateUser, router, saveScale, AVATAR_HOSTS]);
+  }, [user, name, email, phone, homeAddress, avatarUri, pendingAvatarAsset, updateUser, router, saveScale, AVATAR_HOSTS, isPartner, extension.isVolunteer]);
 
   const handleDiscard = useCallback(() => {
     if (hasChanges()) {
@@ -920,6 +931,26 @@ export default function EditProfileScreen() {
                 </View>
               </View>
 
+              {/* Volunteer toggle */}
+              <View style={[styles.sectionCard, { marginTop: 12 }]}>
+                <View style={styles.fieldRow}>
+                  <View style={[styles.fieldIcon, { backgroundColor: colors.successLight }]}>
+                    <Gift size={16} color={colors.success} />
+                  </View>
+                  <View style={styles.fieldContent}>
+                    <Text style={styles.fieldLabel}>Hold Packages for Free</Text>
+                    <Text style={styles.fieldHint}>Volunteer partners don't charge homeowners — community favor only</Text>
+                  </View>
+                  <Switch
+                    value={extension.isVolunteer}
+                    onValueChange={(v) => saveExtension({ isVolunteer: v })}
+                    trackColor={{ false: colors.border, true: colors.success }}
+                    ios_backgroundColor={colors.border}
+                    testID="volunteer-toggle"
+                  />
+                </View>
+              </View>
+
               {/* Accepted Package Sizes */}
               <Text style={styles.fieldSublabel}>Accepted Package Sizes</Text>
               <MultiChip
@@ -1108,6 +1139,7 @@ function createStyles(colors: AppColors) {
     },
     charCount: { fontSize: 11, color: colors.slateLighter, marginTop: 2, textAlign: 'right' as const },
     taxNote: { fontSize: 12, color: colors.slateLighter, lineHeight: 17, marginTop: 8 },
+    fieldHint: { fontSize: 12, color: colors.slateLight, lineHeight: 16, marginTop: 2 },
 
     // Cards
     sectionCard: {

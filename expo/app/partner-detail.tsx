@@ -18,6 +18,7 @@ import {
   Package,
   Clock,
   RotateCcw,
+  Gift,
 } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import { usePorchPartners } from '@/store/PorchPartnersContext';
@@ -129,6 +130,15 @@ export default function PartnerDetailScreen() {
               <Text style={styles.statLabel}>Away</Text>
             </View>
           </View>
+
+          {partner.isVolunteer ? (
+            <View style={styles.volunteerBanner}>
+              <Gift size={16} color={Colors.success} />
+              <Text style={styles.volunteerBannerText}>
+                Volunteer Partner — holds packages for free
+              </Text>
+            </View>
+          ) : null}
 
           <View style={styles.joinedRow}>
             <Calendar size={14} color={Colors.slateLighter} />
@@ -328,6 +338,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
     marginTop: 16,
+  },
+  volunteerBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: '#E8F9F0',
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    marginTop: 16,
+    width: '100%',
+  },
+  volunteerBannerText: {
+    fontSize: 13,
+    fontWeight: '700' as const,
+    color: '#059669',
   },
   joinedText: {
     fontSize: 13,

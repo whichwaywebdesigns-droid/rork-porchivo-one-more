@@ -522,6 +522,34 @@ export async function acceptConnection(connectionId: string): Promise<boolean> {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
+/**
+ * Sync the `is_volunteer` flag to the partner_verifications table.
+ * Creates a row if one doesn't exist yet (partner hasn't started IDV).
+ * RLS allows users to insert/update their own row.
+ * Non-fatal — volunteer preference still works locally via ProfileExtension.
+ */
+export async function syncVolunteerStatus(isVolunteer: boolean): Promise<void> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { error } = await supabase
+    .from('partner_verifications')
+    .upsert(
+      {
+        user_id: user.id,
+        is_volunteer: isVolunteer,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'user_id' },
+    );
+
+  if (error) {
+    logError('[partnerVerification] syncVolunteerStatus error');
+    return;
+  }
+  log('[partnerVerification] Volunteer status synced:', isVolunteer);
+}
+
 /** Format cents as a dollar amount string, e.g. 1250 → "$12.50" */
 export function formatCents(cents: number): string {
   return `$${(cents / 100).toFixed(2)}`;

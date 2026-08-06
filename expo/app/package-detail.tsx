@@ -34,6 +34,7 @@ import {
   CheckCircle,
   ShieldAlert,
   ChevronRight,
+  Gift,
 } from 'lucide-react-native';
 import { useColors, AppColors } from '@/constants/colors';
 import { usePackages } from '@/store/PackagesContext';
@@ -171,7 +172,15 @@ function PartnerPickerRow({
       >
         <AvatarCircle name={partner.name} size={44} />
         <View style={styles.pickerInfo}>
-          <Text style={styles.pickerName}>{partner.name}</Text>
+          <View style={styles.pickerNameRow}>
+            <Text style={styles.pickerName}>{partner.name}</Text>
+            {partner.isVolunteer && (
+              <View style={styles.volunteerBadge}>
+                <Gift size={10} color={colors.success} />
+                <Text style={styles.volunteerBadgeText}>Free</Text>
+              </View>
+            )}
+          </View>
           <View style={styles.pickerMeta}>
             <View style={styles.distanceBadge}>
               <MapPin size={11} color={colors.primary} />
@@ -1159,10 +1168,29 @@ function createStyles(colors: AppColors) {
     flex: 1,
     gap: 4,
   },
+  pickerNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   pickerName: {
     fontSize: 16,
     fontWeight: '700' as const,
     color: '#1F2937',
+  },
+  volunteerBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: colors.successLight,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  volunteerBadgeText: {
+    fontSize: 10,
+    fontWeight: '800' as const,
+    color: colors.success,
   },
   pickerMeta: {
     flexDirection: 'row',
