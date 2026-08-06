@@ -14,9 +14,14 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
+  withRepeat,
+  withDelay,
+  withSequence,
+  cancelAnimation,
   Easing,
   runOnJS,
 } from 'react-native-reanimated';
+import { ChevronLeft } from 'lucide-react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -49,6 +54,8 @@ export default function OnboardingScreen(): React.ReactElement {
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
 
   const progress = useSharedValue<number>(0);
+  const pulse = useSharedValue<number>(0);
+  const hasInteracted = useRef<boolean>(false);
   const currentIndexRef = useRef<number>(currentIndex);
   const isAnimatingRef = useRef<boolean>(isAnimating);
 
@@ -61,6 +68,9 @@ export default function OnboardingScreen(): React.ReactElement {
   }, [isAnimating]);
 
   const finish = useCallback(async () => {
+    hasInteracted.current = true;
+    cancelAnimation(pulse);
+    pulse.value = 0;
     track('onboarding_completed', { slides_shown: SLIDES.length });
     await AsyncStorage.setItem(HAS_SEEN_SLIDES_KEY, 'true');
     router.replace('/welcome' as any);
@@ -75,6 +85,9 @@ export default function OnboardingScreen(): React.ReactElement {
     if (isAnimatingRef.current || currentIndexRef.current >= SLIDES.length - 1) {
       return;
     }
+    hasInteracted.current = true;
+    cancelAnimation(pulse);
+    pulse.value = 0;
     setIsAnimating(true);
     const next = currentIndexRef.current + 1;
     setNextIndex(next);
@@ -104,7 +117,17 @@ export default function OnboardingScreen(): React.ReactElement {
 
   useEffect(() => {
     track('onboarding_started', { slide_index: 0 });
-  }, [track]);
+    pulse.value = withDelay(
+      1200,
+      withRepeat(
+        withSequence(
+          withTiming(1, { duration: 700, easing: Easing.inOut(Easing.cubic) }),
+          withTiming(0, { duration: 700, easing: Easing.inOut(Easing.cubic) }),
+        ),
+        -1,
+      ),
+    );
+  }, [track, pulse]);
 
   const swipeGesture = useMemo(
     () =>
@@ -156,6 +179,16 @@ export default function OnboardingScreen(): React.ReactElement {
     const shadowOpacity = p < 0.5 ? p * 0.6 : (1 - p) * 0.6;
     return {
       shadowOpacity,
+    };
+  });
+
+  const swipeHintStyle = useAnimatedStyle(() => {
+    const p = pulse.value;
+    const opacity = 0.25 + p * 0.45;
+    const translateX = -p * 10;
+    return {
+      opacity,
+      transform: [{ translateX }],
     };
   });
 
@@ -214,6 +247,16 @@ export default function OnboardingScreen(): React.ReactElement {
             )}
           </View>
         </GestureDetector>
+
+        {!isLastSlide && (
+          <Animated.View
+            style={[styles.swipeHint, swipeHintStyle]}
+            pointerEvents="none"
+          >
+            <ChevronLeft size={28} color={COLORS.primary} strokeWidth={2.5} />
+            <Text style={styles.swipeHintText}>Swipe</Text>
+          </Animated.View>
+        )}
 
         <View style={styles.footer}>
           <View style={styles.dots}>
@@ -333,5 +376,19 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '700',
+  },
+  swipeHint: {
+    position: 'absolute',
+    right: 28,
+    bottom: 200,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+  },
+  swipeHintText: {
+    color: COLORS.primary,
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 0.5,
   },
 });
