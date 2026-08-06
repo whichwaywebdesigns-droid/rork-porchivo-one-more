@@ -97,7 +97,7 @@ export default function SplashScreen(): React.ReactElement {
     }
 
     if (hasSeenSlides) {
-      router.replace('/welcome' as any);
+      router.replace('/tracking-onboarding' as any);
     } else {
       router.replace('/onboarding' as any);
     }

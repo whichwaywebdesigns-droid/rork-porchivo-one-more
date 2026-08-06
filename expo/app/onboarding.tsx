@@ -73,7 +73,7 @@ export default function OnboardingScreen(): React.ReactElement {
     pulse.value = 0;
     track('onboarding_completed', { slides_shown: SLIDES.length });
     await AsyncStorage.setItem(HAS_SEEN_SLIDES_KEY, 'true');
-    router.replace('/welcome' as any);
+    router.replace('/tracking-onboarding' as any);
   }, [router, track]);
 
   const finishRef = useRef(finish);

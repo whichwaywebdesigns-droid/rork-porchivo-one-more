@@ -182,6 +182,14 @@ function RootLayoutNav() {
     >
       <Stack.Screen name="splash" options={{ headerShown: false }} />
       <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+      {/* 6-step tracking onboarding flow (post-carousel) */}
+      <Stack.Screen name="tracking-onboarding" options={{ headerShown: false }} />
+      <Stack.Screen name="tracking-welcome" options={{ headerShown: false }} />
+      <Stack.Screen name="tracking-add-delivery" options={{ headerShown: false }} />
+      <Stack.Screen name="tracking-theft-shield" options={{ headerShown: false }} />
+      <Stack.Screen name="tracking-notifications" options={{ headerShown: false }} />
+      <Stack.Screen name="tracking-partners" options={{ headerShown: false }} />
+      <Stack.Screen name="tracking-complete" options={{ headerShown: false }} />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="welcome" options={{ headerShown: false }} />
       <Stack.Screen name="welcome-features" options={{ headerShown: false }} />
