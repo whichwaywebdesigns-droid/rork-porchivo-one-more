@@ -7,6 +7,7 @@ import { DbShipment } from '@/types/database';
 import { dbShipmentToShipment, shipmentToDbInsert } from '@/lib/mappers';
 import { supabase } from '@/lib/supabase';
 import { useApp } from '@/store/AppContext';
+import { useBackgroundError } from '@/store/BackgroundErrorContext';
 import { useNotifications } from '@/store/NotificationsContext';
 import { playDeliveryChime, playPickupChime } from '@/lib/sounds';
 import { maybeRequestReview } from '@/lib/storeReview';
@@ -33,6 +34,7 @@ export interface ShipmentTrackingInfo {
 
 export const [ShipmentsProvider, useShipments] = createContextHook(() => {
   const { session, user, capabilities } = useApp();
+  const { reportError, resolveError } = useBackgroundError();
   const { createNotification } = useNotifications();
   const shipmentPollIntervalMs = capabilities.fastPolling ? PREMIUM_POLL_INTERVAL_MS : FREE_POLL_INTERVAL_MS;
   const queryClient = useQueryClient();
@@ -61,6 +63,17 @@ export const [ShipmentsProvider, useShipments] = createContextHook(() => {
   const shipments = useMemo(() => shipmentsQuery.data ?? [], [shipmentsQuery.data]);
   const shipmentsRef = useRef(shipments);
   shipmentsRef.current = shipments;
+
+  // Surface Supabase fetch failures via the background error banner.
+  useEffect(() => {
+    if (shipmentsQuery.isError) {
+      reportError('shipments_fetch', 'Could not load your shipments', {
+        onRetry: () => void queryClient.invalidateQueries({ queryKey: ['shipments'] }),
+      });
+    } else if (shipmentsQuery.isSuccess) {
+      resolveError('shipments_fetch');
+    }
+  }, [shipmentsQuery.isError, shipmentsQuery.isSuccess, reportError, resolveError, queryClient]);
 
   const [trackingByShipment, setTrackingByShipment] = useState<Record<string, ShipmentTrackingInfo>>({});
   const pollingSet = useRef<Set<string>>(new Set());
@@ -317,12 +330,16 @@ export const [ShipmentsProvider, useShipments] = createContextHook(() => {
       if (tracking) {
         applyShipmentTracking(shipmentId, tracking);
       }
+      resolveError('shipments_poll');
     } catch (e) {
       log('[ShipmentsContext] Live poll error:', e instanceof Error ? e.message : e);
+      reportError('shipments_poll', 'Live tracking update unavailable', {
+        onRetry: () => void pollShipmentTracking(shipmentId),
+      });
     } finally {
       pollingSet.current.delete(shipmentId);
     }
-  }, [applyShipmentTracking]);
+  }, [applyShipmentTracking, reportError, resolveError]);
 
   const refreshAllShipmentTracking = useCallback(async () => {
     const list = shipmentsRef.current.filter(

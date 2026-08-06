@@ -33,6 +33,8 @@ import { FieldGuideProvider } from "@/store/FieldGuideContext";
 import { TrustEngineProvider } from "@/store/TrustEngineContext";
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import { ToastProvider } from "@/providers/ToastProvider";
+import { BackgroundErrorProvider } from "@/store/BackgroundErrorContext";
+import { BackgroundErrorBanner } from "@/components/BackgroundErrorBanner";
 import { useTheme } from "@/hooks/useTheme";
 import { useColors } from "@/constants/colors";
 
@@ -283,6 +285,8 @@ function RootLayoutNav() {
     />
     {/* Forced re-accept gate when the legal version changes */}
     <ConsentGate />
+    {/* Non-intrusive banner for background process failures (Ship24 polling, etc.) */}
+    <BackgroundErrorBanner />
     </View>
   );
 }
@@ -297,6 +301,7 @@ export default function RootLayout() {
           <AppProvider>
             <PaywallProvider>
             <NotificationsProvider>
+            <BackgroundErrorProvider>
               <ShipmentsProvider>
                 <PackagesProvider>
                   <DriversProvider>
@@ -328,6 +333,7 @@ export default function RootLayout() {
                   </DriversProvider>
                 </PackagesProvider>
               </ShipmentsProvider>
+            </BackgroundErrorProvider>
             </NotificationsProvider>
             </PaywallProvider>
           </AppProvider>

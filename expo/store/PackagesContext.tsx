@@ -13,6 +13,7 @@ import {
   Ship24TrackingResult,
 } from '@/lib/ship24';
 import { useApp } from '@/store/AppContext';
+import { useBackgroundError } from '@/store/BackgroundErrorContext';
 import { FREE_PACKAGE_LIMIT, FREE_POLL_INTERVAL_MS, PREMIUM_POLL_INTERVAL_MS } from '@/lib/tiers';
 import { log } from "../lib/logger";
 
@@ -101,6 +102,7 @@ function ship24EventsToLive(tracking: Ship24TrackingResult): LiveTrackingEvent[]
 export const [PackagesProvider, usePackages] = createContextHook(() => {
   const queryClient = useQueryClient();
   const { capabilities } = useApp();
+  const { reportError, resolveError } = useBackgroundError();
   const [packages, setPackages] = useState<TrackedPackage[]>([]);
   const packagesRef = useRef<TrackedPackage[]>([]);
   packagesRef.current = packages;
@@ -299,8 +301,12 @@ export const [PackagesProvider, usePackages] = createContextHook(() => {
         if (tracking) {
           applyTrackingResult(packageId, tracking);
         }
+        resolveError('packages_poll');
       } catch (e) {
         log('[Packages] Poll error for', pkg.trackingNumber, e instanceof Error ? e.message : e);
+        reportError('packages_poll', 'Tracking update unavailable', {
+          onRetry: () => void pollPackage(packageId),
+        });
       } finally {
         pollingPromises.current.delete(packageId);
       }
@@ -308,7 +314,7 @@ export const [PackagesProvider, usePackages] = createContextHook(() => {
 
     pollingPromises.current.set(packageId, promise);
     return promise;
-  }, [applyTrackingResult]);
+  }, [applyTrackingResult, reportError, resolveError]);
 
   const refreshAllPackages = useCallback(async () => {
     const list = packagesRef.current;
