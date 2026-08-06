@@ -73,18 +73,25 @@ export default function TrackingNotificationsScreen({
   const { track } = useAnalytics();
   const router = useRouter();
 
-  // Fallbacks for deep-link access — route into the step manager instead of crashing
+  // Fallbacks for deep-link access — guarded against double-advance.
+  // The auto-continue after permission grant (700ms timeout) can race with a
+  // manual Skip tap; hasAdvanced prevents both from firing.
   const safeContinue = useCallback(() => {
+    if (hasAdvanced.current) return;
+    hasAdvanced.current = true;
     if (onContinue) onContinue();
     else router.replace('/tracking-onboarding' as never);
   }, [onContinue, router]);
   const safeSkip = useCallback(() => {
+    if (hasAdvanced.current) return;
+    hasAdvanced.current = true;
     if (onSkip) onSkip();
     else router.replace('/tracking-onboarding' as never);
   }, [onSkip, router]);
 
   const [status, setStatus] = useState<PermStatus>('undetermined');
   const [requesting, setRequesting] = useState<boolean>(false);
+  const hasAdvanced = useRef<boolean>(false);
 
   // ── Animations ──────────────────────────────────────────────────────
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -112,7 +119,7 @@ export default function TrackingNotificationsScreen({
     ]).start();
 
     // Continuous bell ring pulse
-    Animated.loop(
+    const bellLoop = Animated.loop(
       Animated.sequence([
         Animated.timing(bellPulse, {
           toValue: 1,
@@ -125,21 +132,27 @@ export default function TrackingNotificationsScreen({
           useNativeDriver: true,
         }),
       ]),
-    ).start();
+    );
+    bellLoop.start();
 
     // Staggered tile entrance
+    const tileTimers: ReturnType<typeof setTimeout>[] = [];
     REASONS.forEach((_, i) => {
-      setTimeout(() => {
+      tileTimers.push(setTimeout(() => {
         Animated.spring(tileAnims[i], {
           toValue: 1,
           useNativeDriver: true,
           speed: 14,
           bounciness: 8,
         }).start();
-      }, 200 + i * 120);
+      }, 200 + i * 120));
     });
 
     void checkStatus();
+    return () => {
+      bellLoop.stop();
+      tileTimers.forEach(clearTimeout);
+    };
   }, []);
 
   const checkStatus = useCallback(async () => {

@@ -138,7 +138,7 @@ export default function TrackingTheftShieldScreen({
     ]).start();
 
     // Continuous shield pulse while waiting for score
-    Animated.loop(
+    const pulseLoop = Animated.loop(
       Animated.sequence([
         Animated.timing(shieldPulse, {
           toValue: 1,
@@ -151,7 +151,9 @@ export default function TrackingTheftShieldScreen({
           useNativeDriver: true,
         }),
       ]),
-    ).start();
+    );
+    pulseLoop.start();
+    return () => { pulseLoop.stop(); };
   }, []);
 
   // ── Fetch risk score from edge function ─────────────────────────────

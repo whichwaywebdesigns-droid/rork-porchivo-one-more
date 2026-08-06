@@ -9,7 +9,6 @@ import {
   Platform,
   Linking,
   Alert,
-  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
@@ -33,8 +32,6 @@ import { PorchPartner } from '@/types';
 import { mockPorchPartners } from '@/mocks/porchPartners';
 import { log } from '@/lib/logger';
 import { useRouter } from 'expo-router';
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 interface TrackingPartnersProps {
   onContinue?: () => void;
@@ -70,12 +67,17 @@ export default function TrackingPartnersScreen({
   const { completeOnboarding, session, user } = useApp();
   const router = useRouter();
 
-  // Fallbacks for deep-link access — route into the step manager instead of crashing
+  // Guarded against double-advance — handleJoin's 800ms auto-continue can
+  // race with a manual Skip tap.
   const safeContinue = useCallback(() => {
+    if (hasAdvanced.current) return;
+    hasAdvanced.current = true;
     if (onContinue) onContinue();
     else router.replace('/tracking-onboarding' as never);
   }, [onContinue, router]);
   const safeSkip = useCallback(() => {
+    if (hasAdvanced.current) return;
+    hasAdvanced.current = true;
     if (onSkip) onSkip();
     else router.replace('/tracking-onboarding' as never);
   }, [onSkip, router]);
@@ -83,6 +85,7 @@ export default function TrackingPartnersScreen({
   const [locStatus, setLocStatus] = useState<LocStatus>('undetermined');
   const [requesting, setRequesting] = useState<boolean>(false);
   const [hasJoined, setHasJoined] = useState<boolean>(false);
+  const hasAdvanced = useRef<boolean>(false);
 
   const nearbyPartners = useRef<NearbyPartner[]>(placeOnRadar(mockPorchPartners)).current;
 
@@ -113,25 +116,31 @@ export default function TrackingPartnersScreen({
     ]).start();
 
     // Continuous radar sweep
-    Animated.loop(
+    const sweepLoop = Animated.loop(
       Animated.timing(radarSweep, {
         toValue: 1,
         duration: 3000,
         useNativeDriver: true,
       }),
-    ).start();
+    );
+    sweepLoop.start();
 
     // Staggered partner pin entrance
+    const pinTimers: ReturnType<typeof setTimeout>[] = [];
     nearbyPartners.forEach((_, i) => {
-      setTimeout(() => {
+      pinTimers.push(setTimeout(() => {
         Animated.spring(pinAnims[i], {
           toValue: 1,
           useNativeDriver: true,
           speed: 12,
           bounciness: 10,
         }).start();
-      }, 400 + i * 150);
+      }, 400 + i * 150));
     });
+    return () => {
+      sweepLoop.stop();
+      pinTimers.forEach(clearTimeout);
+    };
   }, []);
 
   const handleEnableLocation = useCallback(async () => {

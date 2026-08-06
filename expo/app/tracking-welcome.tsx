@@ -5,7 +5,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   Animated,
-  Dimensions,
   StatusBar,
   Platform,
 } from 'react-native';
@@ -15,8 +14,6 @@ import { palette, space, radius, type as ttype, elevation } from '@/constants/th
 import { useAnalytics } from '@/store/AnalyticsContext';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 interface TrackingWelcomeProps {
   onContinue?: () => void;
@@ -73,7 +70,7 @@ export default function TrackingWelcomeScreen({ onContinue, onSkip }: TrackingWe
       }),
     ]).start();
 
-    Animated.loop(
+    const pulseLoop = Animated.loop(
       Animated.sequence([
         Animated.timing(pulseAnim, {
           toValue: 1,
@@ -86,7 +83,9 @@ export default function TrackingWelcomeScreen({ onContinue, onSkip }: TrackingWe
           useNativeDriver: true,
         }),
       ]),
-    ).start();
+    );
+    pulseLoop.start();
+    return () => { pulseLoop.stop(); };
   }, [track, fadeAnim, slideAnim, shieldScale, pulseAnim]);
 
   const handleContinue = useCallback(() => {

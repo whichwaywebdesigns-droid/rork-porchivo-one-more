@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   Animated,
   Easing,
-  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
@@ -30,8 +29,6 @@ interface TrackingCompleteProps {
   /** Which steps the user actually completed (vs skipped) */
   completedSteps?: Set<number>;
 }
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function TrackingCompleteScreen({
   onContinue,
@@ -60,10 +57,9 @@ export default function TrackingCompleteScreen({
 
   useEffect(() => {
     track('onboarding_step_view', { step: 'complete' });
-    track('onboarding_completed', {
-      steps_completed: Array.from(safeCompletedSteps).join(','),
-      step_count: safeCompletedSteps.size,
-    });
+    // NOTE: onboarding_completed / onboarding_complete are fired by handleEnter
+    // (user action) and goHome (step manager) respectively — not here on mount,
+    // to avoid counting users who view the summary but don't tap "Enter".
 
     // Hero entrance
     Animated.parallel([
@@ -87,7 +83,7 @@ export default function TrackingCompleteScreen({
     ]).start();
 
     // Shield celebratory bounce
-    Animated.loop(
+    const bounceLoop = Animated.loop(
       Animated.sequence([
         Animated.timing(shieldBounce, {
           toValue: 1,
@@ -102,22 +98,24 @@ export default function TrackingCompleteScreen({
           useNativeDriver: true,
         }),
       ]),
-    ).start();
+    );
+    bounceLoop.start();
 
     // Staggered summary items
+    const summaryTimers: ReturnType<typeof setTimeout>[] = [];
     summaryAnims.forEach((anim, i) => {
-      setTimeout(() => {
+      summaryTimers.push(setTimeout(() => {
         Animated.spring(anim, {
           toValue: 1,
           useNativeDriver: true,
           speed: 14,
           bounciness: 8,
         }).start();
-      }, 400 + i * 150);
+      }, 400 + i * 150));
     });
 
     // CTA entrance
-    setTimeout(() => {
+    const ctaTimer = setTimeout(() => {
       Animated.spring(ctaAnim, {
         toValue: 1,
         useNativeDriver: true,
@@ -127,6 +125,11 @@ export default function TrackingCompleteScreen({
     }, 1100);
 
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    return () => {
+      bounceLoop.stop();
+      summaryTimers.forEach(clearTimeout);
+      clearTimeout(ctaTimer);
+    };
   }, []);
 
   const handleEnter = useCallback(() => {

@@ -1,6 +1,5 @@
 import React, { useCallback, useRef, useState } from 'react';
 import { useRouter } from 'expo-router';
-import * as Haptics from 'expo-haptics';
 import { useAnalytics } from '@/store/AnalyticsContext';
 import { useApp } from '@/store/AppContext';
 import { log } from '@/lib/logger';
@@ -39,8 +38,9 @@ export default function TrackingOnboardingScreen(): React.ReactElement {
     completedSteps.current.add(stepNum);
   }, []);
 
+  // NOTE: Haptics are fired by the individual step screens (handleContinue /
+  // handleSkip) — not here, to avoid double-vibration on every tap.
   const goNext = useCallback(() => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setStep((prev) => {
       const next = (prev + 1) as Step;
       if (next > 6) {
@@ -51,19 +51,16 @@ export default function TrackingOnboardingScreen(): React.ReactElement {
     });
   }, []);
 
-  const goSkip = useCallback(
-    (skipFrom: number) => {
-      track('onboarding_step_skipped', { step: skipFrom });
-      // Skipping does NOT mark the step as completed
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      setStep((prev) => {
-        const next = (prev + 1) as Step;
-        if (next > 6) return prev;
-        return next;
-      });
-    },
-    [track],
-  );
+  // NOTE: The individual screen fires its own specific analytics event
+  // (e.g. notification_priming_declined, partner_skipped) AND the generic
+  // onboarding_step_skipped with a string step name. We only advance here.
+  const goSkip = useCallback(() => {
+    setStep((prev) => {
+      const next = (prev + 1) as Step;
+      if (next > 6) return prev;
+      return next;
+    });
+  }, []);
 
   const goHome = useCallback(() => {
     track('onboarding_complete', {
@@ -89,7 +86,7 @@ export default function TrackingOnboardingScreen(): React.ReactElement {
       return (
         <TrackingWelcomeScreen
           onContinue={() => { markComplete(1); goNext(); }}
-          onSkip={() => goSkip(1)}
+          onSkip={() => goSkip()}
         />
       );
 
@@ -97,7 +94,7 @@ export default function TrackingOnboardingScreen(): React.ReactElement {
       return (
         <TrackingAddDeliveryScreen
           onContinue={() => { markComplete(2); goNext(); }}
-          onSkip={() => goSkip(2)}
+          onSkip={() => goSkip()}
         />
       );
 
@@ -105,7 +102,7 @@ export default function TrackingOnboardingScreen(): React.ReactElement {
       return (
         <TrackingTheftShieldScreen
           onContinue={() => { markComplete(3); goNext(); }}
-          onSkip={() => goSkip(3)}
+          onSkip={() => goSkip()}
         />
       );
 
@@ -113,7 +110,7 @@ export default function TrackingOnboardingScreen(): React.ReactElement {
       return (
         <TrackingNotificationsScreen
           onContinue={() => { markComplete(4); goNext(); }}
-          onSkip={() => goSkip(4)}
+          onSkip={() => goSkip()}
         />
       );
 
@@ -121,7 +118,7 @@ export default function TrackingOnboardingScreen(): React.ReactElement {
       return (
         <TrackingPartnersScreen
           onContinue={() => { markComplete(5); goNext(); }}
-          onSkip={() => goSkip(5)}
+          onSkip={() => goSkip()}
         />
       );
 
