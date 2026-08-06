@@ -301,16 +301,18 @@ export default function TrackingAddDeliveryScreen({
           newUserId,
         );
 
-        // Complete onboarding for the new user
+        // Complete onboarding for the new user — pass the session from signUp
+        // directly, because the auth state listener may not have propagated it
+        // into AppContext yet (race condition that caused silent no-ops).
         try {
           await completeOnboarding({
             name: authName.trim(),
             email: authEmail.trim(),
             role: 'homeowner',
             hasLocationConsent: false,
-          });
+          }, data.session);
         } catch {
-          // Non-fatal — onboarding completion can retry later
+          // Non-fatal — onboarding completion can retry later (Step 6)
           log('[TrackingOnboarding] Onboarding completion deferred');
         }
 

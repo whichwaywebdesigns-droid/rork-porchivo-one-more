@@ -267,9 +267,16 @@ export const [AppProvider, useApp] = createContextHook(() => {
     },
   });
 
-  const completeOnboarding = useCallback(async (userData: Partial<User>) => {
+  const completeOnboarding = useCallback(async (
+    userData: Partial<User>,
+    explicitSession?: Session | null,
+  ) => {
     log('[AppContext] Completing onboarding with role:', userData.role);
-    const supabaseUser = session?.user;
+    // Use explicitSession if provided — after supabase.auth.signUp() the auth
+    // state listener may not have propagated the new session into context yet,
+    // causing a silent no-op. Callers that have the raw session should pass it.
+    const activeSession = explicitSession ?? session;
+    const supabaseUser = activeSession?.user;
     if (!supabaseUser?.id) {
       log('[AppContext] No authenticated user, cannot complete onboarding');
       return;

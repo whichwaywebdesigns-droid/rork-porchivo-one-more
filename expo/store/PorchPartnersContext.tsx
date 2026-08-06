@@ -125,10 +125,19 @@ export const [PorchPartnersProvider, usePorchPartners] = createContextHook(() =>
       // itself is owner-only). One batched lookup keyed by user_id.
       const statsById = new Map<string, DbPartnerPublicStats>();
       if (rows.length > 0) {
-        const { data: stats } = await supabase
+        const { data: stats, error: statsError } = await supabase
           .from('partner_public_stats')
           .select('user_id, completed_assignments, average_rating, tier, is_volunteer')
           .in('user_id', rows.map((r) => r.id));
+        if (statsError) {
+          // Most likely cause: the add_is_volunteer migration hasn't been run
+          // yet, so the view doesn't expose is_volunteer (or the view itself is
+          // stale). Log prominently so it's not silently swallowed — partners
+          // will still render but with default trust signals (0 holds, 5.0
+          // rating, non-volunteer), which is misleading but not a crash.
+          log('[PorchPartners] partner_public_stats query error:',
+            statsError.code, statsError.message);
+        }
         for (const s of (stats ?? []) as DbPartnerPublicStats[]) {
           statsById.set(s.user_id, s);
         }
