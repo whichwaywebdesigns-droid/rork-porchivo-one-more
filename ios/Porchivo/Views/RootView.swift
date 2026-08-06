@@ -2,7 +2,8 @@
 //  RootView.swift
 //  Porchivo
 //
-//  Root auth switch — Loading → Login → Onboarding (if needed) → Main TabView.
+//  Root auth switch — Loading → Login → Biometric Enrollment →
+//  Unlock (cold start) → Onboarding (if needed) → Main TabView.
 //
 
 import SwiftUI
@@ -21,7 +22,9 @@ struct RootView: View {
             case .locked:
                 UnlockScreen()
             case .authenticated(let userId):
-                if appState.isOnboarded || !appState.isSupabaseConfigured {
+                if appState.needsBiometricEnrollment {
+                    BiometricEnrollmentScreen()
+                } else if appState.isOnboarded || !appState.isSupabaseConfigured {
                     MainTabView()
                 } else {
                     OnboardingFlowView()

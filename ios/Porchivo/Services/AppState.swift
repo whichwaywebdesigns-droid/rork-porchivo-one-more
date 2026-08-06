@@ -55,9 +55,16 @@ final class AppState {
     var biometricUnlockEnabled: Bool = false
     var availableBiometry: BiometryType = .none
 
+    // Biometric enrollment — set to true after a fresh magic-link login so
+    // RootView can present the enrollment prompt before the dashboard.
+    // Cleared once the user enrolls or explicitly skips.
+    var needsBiometricEnrollment: Bool = false
+    var biometricEnrollmentDeclined: Bool = false
+
     private let supabase = SupabaseService.shared
     private let packagesKey = "porchivo_tracked_packages"
     private let biometricPrefKey = "porchivo_biometric_unlock_enabled"
+    private let biometricDeclinedKey = "porchivo_biometric_enrollment_declined"
     private let encoder = JSONEncoder()
     private let decoder = JSONDecoder()
 
@@ -67,6 +74,7 @@ final class AppState {
         decoder.dateDecodingStrategy = .iso8601
         availableBiometry = BiometricAuthService.availableType()
         biometricUnlockEnabled = UserDefaults.standard.bool(forKey: biometricPrefKey)
+        biometricEnrollmentDeclined = UserDefaults.standard.bool(forKey: biometricDeclinedKey)
     }
 
     // MARK: - Session restore
@@ -142,7 +150,73 @@ final class AppState {
         return biometricUnlockEnabled
     }
 
-    // MARK: - Auth
+    // MARK: - Magic link auth
+
+    /// Sends a magic link email with a 6-digit OTP code. Returns `true` if
+    /// Supabase accepted the request — the user then enters the code in-app.
+    @MainActor
+    func sendMagicLink(email: String) async -> Bool {
+        if !isSupabaseConfigured {
+            // Demo mode — pretend the link was sent.
+            return true
+        }
+        return await supabase.sendMagicLink(email.trimmingCharacters(in: .whitespaces))
+    }
+
+    /// Verifies the 6-digit OTP code from the magic link email. On success,
+    /// establishes a session and flags for biometric enrollment.
+    @MainActor
+    func verifyOtp(email: String, token: String) async -> Bool {
+        authError = nil
+        if !isSupabaseConfigured {
+            // Demo mode — any 6-digit code signs in.
+            seedDemoUser()
+            flagBiometricEnrollment()
+            return true
+        }
+        let result = await supabase.verifyOtp(
+            email: email.trimmingCharacters(in: .whitespaces),
+            token: token.trimmingCharacters(in: .whitespaces)
+        )
+        switch result {
+        case .success(let session):
+            authState = .authenticated(session.user?.id ?? "")
+            await loadInitialData(userId: session.user?.id ?? "")
+            flagBiometricEnrollment()
+            return true
+        case .failure(let err):
+            authError = err.localizedDescription
+            Haptics.error()
+            return false
+        }
+    }
+
+    /// After a fresh login, prompt for biometric enrollment if the device
+    /// supports it and the user hasn't already enabled or declined it.
+    private func flagBiometricEnrollment() {
+        let shouldEnroll = availableBiometry != .none
+            && !biometricUnlockEnabled
+            && !biometricEnrollmentDeclined
+        needsBiometricEnrollment = shouldEnroll
+    }
+
+    /// Called by the enrollment screen when the user successfully enrolls.
+    @MainActor
+    func completeBiometricEnrollment() async {
+        needsBiometricEnrollment = false
+        Haptics.success()
+    }
+
+    /// Called by the enrollment screen when the user taps "Skip".
+    @MainActor
+    func skipBiometricEnrollment() {
+        needsBiometricEnrollment = false
+        biometricEnrollmentDeclined = true
+        UserDefaults.standard.set(true, forKey: biometricDeclinedKey)
+        Haptics.selection()
+    }
+
+    // MARK: - Auth (legacy email/password — kept for fallback)
 
     @MainActor
     func signIn(email: String, password: String) async -> Bool {
@@ -194,6 +268,9 @@ final class AppState {
         // different user's restored session on the next cold start.
         biometricUnlockEnabled = false
         UserDefaults.standard.set(false, forKey: biometricPrefKey)
+        biometricEnrollmentDeclined = false
+        UserDefaults.standard.set(false, forKey: biometricDeclinedKey)
+        needsBiometricEnrollment = false
         authState = .unauthenticated
         user = nil
         tier = .free

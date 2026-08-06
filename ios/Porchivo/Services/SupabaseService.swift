@@ -300,6 +300,51 @@ actor SupabaseService {
         }
     }
 
+    // MARK: Magic link / OTP auth
+
+    /// Sends a magic link email to the given address. The email contains a
+    /// 6-digit OTP code the user enters in-app — no deep link required.
+    /// Returns `true` if Supabase accepted the request.
+    func sendMagicLink(_ email: String) async -> Bool {
+        var req = URLRequest(url: baseURL.appendingPathComponent("auth/v1/otp"))
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.setValue(anonKey, forHTTPHeaderField: "apikey")
+        req.httpBody = try? JSONSerialization.data(withJSONObject: [
+            "email": email,
+            "options": ["should_create_user": true],
+        ])
+        do {
+            let (_, resp) = try await session.data(for: req)
+            guard let http = resp as? HTTPURLResponse else { return false }
+            return (200..<300).contains(http.statusCode)
+        } catch {
+            return false
+        }
+    }
+
+    /// Verifies the 6-digit OTP code Supabase emailed and establishes a session.
+    /// On success the session is persisted to Keychain and returned.
+    func verifyOtp(email: String, token: String) async -> Result<AuthSession, Error> {
+        let body: [String: Any] = [
+            "email": email,
+            "token": token,
+            "type": "magiclink",
+        ]
+        return await authPost("token?grant_type=otp", body: body) { [weak self] data in
+            guard let self else { throw URLError(.cannotConnectToHost) }
+            var session = try self.decoder.decode(AuthSession.self, from: data)
+            if session.expiresAt == 0, session.expiresIn > 0 {
+                session.expiresAt = Date().timeIntervalSince1970 + session.expiresIn
+            }
+            if let user = try? await self.fetchUser(token: session.accessToken) {
+                session.user = user
+            }
+            await self.persist(session)
+            return session
+        }
+    }
+
     private func refreshSession(_ refreshToken: String) async -> AuthSession? {
         let body: [String: Any] = ["refresh_token": refreshToken]
         let result: Result<AuthSession, Error> = await authPost("token?grant_type=refresh_token", body: body) { [weak self] data in
