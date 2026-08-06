@@ -225,11 +225,11 @@ follow the existing pattern for adding a new carrier regex.
 | Terms of Service | `app/terms-of-service.tsx` |
 
 <!-- AUTO-GENERATED:SCREEN-INDEX:START -->
-> _Auto-generated from `expo/app/` on **2026-08-03 17:16 UTC** by `scripts/refresh-docs.mjs`. The
+> _Auto-generated from `expo/app/` on **2026-08-06 11:35 UTC** by `scripts/refresh-docs.mjs`. The
 > curated table above stays hand-written; this list is the complete, always-current
 > set of route files so nothing silently goes missing as the app grows._
 
-**85 route screens detected:**
+**87 route screens detected:**
 
 | Route | File |
 |-------|------|
@@ -279,6 +279,7 @@ follow the existing pattern for adding a new carrier regex.
 | `notifications.tsx` | `app/notifications.tsx` |
 | `onboarding-paywall.tsx` | `app/onboarding-paywall.tsx` |
 | `onboarding-setup.tsx` | `app/onboarding-setup.tsx` |
+| `onboarding.tsx` | `app/onboarding.tsx` |
 | `package-detail.tsx` | `app/package-detail.tsx` |
 | `package-ops-board.tsx` | `app/package-ops-board.tsx` |
 | `pain-point.tsx` | `app/pain-point.tsx` |
@@ -302,6 +303,7 @@ follow the existing pattern for adding a new carrier regex.
 | `safety-score.tsx` | `app/safety-score.tsx` |
 | `settings.tsx` | `app/settings.tsx` |
 | `shipment-detail.tsx` | `app/shipment-detail.tsx` |
+| `splash.tsx` | `app/splash.tsx` |
 | `staff-support-queue.tsx` | `app/staff-support-queue.tsx` |
 | `submit-maintenance.tsx` | `app/submit-maintenance.tsx` |
 | `support-ticket-detail.tsx` | `app/support-ticket-detail.tsx` |
