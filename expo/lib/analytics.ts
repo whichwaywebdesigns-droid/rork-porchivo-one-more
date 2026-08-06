@@ -79,7 +79,16 @@ export type FunnelEvent =
   | 'support_ticket_closed'
   | 'support_ticket_reopened'
   | 'guest_mode_started'
-  | 'guest_convert';
+  | 'guest_convert'
+  | 'welcome_cta_tapped'
+  | 'delivery_added_first'
+  | 'theftshield_viewed'
+  | 'notification_priming_accepted'
+  | 'notification_priming_declined'
+  | 'system_permission_granted'
+  | 'system_permission_denied'
+  | 'partner_joined'
+  | 'partner_skipped';
 
 export interface AnalyticsEvent {
   event: FunnelEvent;
