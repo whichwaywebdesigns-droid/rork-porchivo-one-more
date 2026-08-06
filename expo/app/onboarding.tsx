@@ -30,7 +30,6 @@ import { useAnalytics } from '@/store/AnalyticsContext';
 const HAS_SEEN_SLIDES_KEY = 'porchivo_pre_auth_slides_seen';
 
 const SLIDES = [
-  { image: require('@/assets/images/onboarding-1.png') },
   { image: require('@/assets/images/onboarding-2.png') },
   { image: require('@/assets/images/onboarding-3.png') },
   { image: require('@/assets/images/onboarding-4.png') },
