@@ -5,8 +5,8 @@ import * as Updates from "expo-updates";
 import React, { useEffect, useRef, useState } from "react";
 import { StatusBar, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Sentry from "@sentry/react-native";
-import BrandSplash from "@/components/BrandSplash";
 import ConsentGate from "@/components/ConsentGate";
 import { AppProvider, useApp } from "@/store/AppContext";
 import { PaywallProvider } from "@/store/PaywallContext";
@@ -74,28 +74,39 @@ function RootLayoutNav() {
   const segments = useSegments();
   const lastTarget = useRef<string | null>(null);
   const mountedAtRef = useRef<number>(Date.now());
-  const [splashVisible, setSplashVisible] = useState<boolean>(true);
-  const [splashMounted, setSplashMounted] = useState<boolean>(true);
+  const [hasSeenSlides, setHasSeenSlides] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    AsyncStorage.getItem("porchivo_pre_auth_slides_seen").then((value) => {
+      setHasSeenSlides(value === "true");
+    });
+  }, []);
 
   // In-app review prompt — only fires when onboarded and not on a welcome screen.
   // The hook internally checks session milestones (3rd, 10th, 25th open),
   // 7-day active use, cooldowns, and the storeReviewPrompt feature flag.
   const currentSegment = segments[0] as string;
-  const inWelcome = currentSegment === "welcome" || currentSegment === "welcome-features" || currentSegment === "guest-browse" || currentSegment === "login" || currentSegment === "role-selection" || currentSegment === "pain-point" || currentSegment === "value-preview" || currentSegment === "location-consent" || currentSegment === "onboarding-setup" || currentSegment === "onboarding-paywall" || currentSegment === "notifications-permission" || currentSegment === "delivery-alerts" || currentSegment === "safe-dropoff" || currentSegment === "reset-password";
+  const inWelcome =
+    currentSegment === "splash" ||
+    currentSegment === "onboarding" ||
+    currentSegment === "welcome" ||
+    currentSegment === "welcome-features" ||
+    currentSegment === "guest-browse" ||
+    currentSegment === "login" ||
+    currentSegment === "role-selection" ||
+    currentSegment === "pain-point" ||
+    currentSegment === "value-preview" ||
+    currentSegment === "location-consent" ||
+    currentSegment === "onboarding-setup" ||
+    currentSegment === "onboarding-paywall" ||
+    currentSegment === "notifications-permission" ||
+    currentSegment === "delivery-alerts" ||
+    currentSegment === "safe-dropoff" ||
+    currentSegment === "reset-password";
   const reviewPrompt = useReviewPrompt(isOnboarded, inWelcome);
 
-  useEffect(() => {
-    if (isLoading || isOnboarded === null) return;
-    SplashScreen.hideAsync().catch(() => {});
-    const elapsed = Date.now() - mountedAtRef.current;
-    const minDisplay = 1800;
-    const remaining = Math.max(0, minDisplay - elapsed);
-    const t = setTimeout(() => setSplashVisible(false), remaining);
-    return () => clearTimeout(t);
-  }, [isLoading, isOnboarded]);
-
-  // P-17: Fallback so the native splash never lingers behind BrandSplash on a
-  // slow network — hide it regardless of auth resolution after 3s.
+  // P-17: Fallback so the native splash never lingers on a slow network —
+  // hide it regardless of auth resolution after 3s.
   useEffect(() => {
     const fallback = setTimeout(() => {
       SplashScreen.hideAsync().catch(() => {});
@@ -104,19 +115,34 @@ function RootLayoutNav() {
   }, []);
 
   useEffect(() => {
-    if (isLoading || isOnboarded === null) return;
+    if (isLoading || isOnboarded === null || hasSeenSlides === null) return;
 
     const currentSegment = segments[0] as string;
-    // P-4/P-5/P-11: inWelcome protects onboarding-chain screens from the
-    // redirect effect. Added notifications-permission + onboarding-paywall;
-    // removed dead screens intro + post-signup (no inbound navigation).
-    const inWelcome = currentSegment === "welcome" || currentSegment === "welcome-features" || currentSegment === "guest-browse" || currentSegment === "login" || currentSegment === "role-selection" || currentSegment === "pain-point" || currentSegment === "value-preview" || currentSegment === "location-consent" || currentSegment === "onboarding-setup" || currentSegment === "onboarding-paywall" || currentSegment === "notifications-permission" || currentSegment === "delivery-alerts" || currentSegment === "safe-dropoff" || currentSegment === "reset-password";
+    const inWelcome =
+      currentSegment === "splash" ||
+      currentSegment === "onboarding" ||
+      currentSegment === "welcome" ||
+      currentSegment === "welcome-features" ||
+      currentSegment === "guest-browse" ||
+      currentSegment === "login" ||
+      currentSegment === "role-selection" ||
+      currentSegment === "pain-point" ||
+      currentSegment === "value-preview" ||
+      currentSegment === "location-consent" ||
+      currentSegment === "onboarding-setup" ||
+      currentSegment === "onboarding-paywall" ||
+      currentSegment === "notifications-permission" ||
+      currentSegment === "delivery-alerts" ||
+      currentSegment === "safe-dropoff" ||
+      currentSegment === "reset-password";
 
     let target: string | null = null;
 
     if (!isOnboarded && !inWelcome) {
-      target = "/welcome";
+      // Pre-auth flow: show onboarding slides once, then the welcome/login screen.
+      target = session ? "/onboarding-setup" : hasSeenSlides ? "/welcome" : "/splash";
     } else if (isOnboarded && session && inWelcome) {
+      // Onboarded user inside the pre-auth/welcome chain -> send home.
       target = "/(tabs)/(home)";
     } else if (isOnboarded && !session && !inWelcome) {
       target = "/welcome";
@@ -129,7 +155,7 @@ function RootLayoutNav() {
     } else if (!target) {
       lastTarget.current = null;
     }
-  }, [isOnboarded, isLoading, session, segments, router]);
+  }, [isOnboarded, isLoading, session, segments, router, hasSeenSlides]);
 
   return (
     <View style={{ flex: 1 }}>
@@ -140,6 +166,7 @@ function RootLayoutNav() {
         backgroundColor="transparent"
       />
     <Stack
+      initialRouteName="splash"
       screenOptions={{
         headerBackTitle: "Back",
         // Use surface (not white) so headers theme correctly in dark mode.
@@ -153,6 +180,8 @@ function RootLayoutNav() {
         animationDuration: 350,
       }}
     >
+      <Stack.Screen name="splash" options={{ headerShown: false }} />
+      <Stack.Screen name="onboarding" options={{ headerShown: false }} />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="welcome" options={{ headerShown: false }} />
       <Stack.Screen name="welcome-features" options={{ headerShown: false }} />
@@ -223,12 +252,6 @@ function RootLayoutNav() {
     />
     {/* Forced re-accept gate when the legal version changes */}
     <ConsentGate />
-    {splashMounted ? (
-      <BrandSplash
-        visible={splashVisible}
-        onAnimationComplete={() => setSplashMounted(false)}
-      />
-    ) : null}
     </View>
   );
 }

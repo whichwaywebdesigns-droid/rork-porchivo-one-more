@@ -11,9 +11,9 @@ export default (): { expo: ExpoConfig } => ({
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
     splash: {
-      image: "./assets/images/splash-icon.png",
-      resizeMode: "contain",
-      backgroundColor: "#102040",
+      image: "./assets/images/splash-box.png",
+      resizeMode: "cover",
+      backgroundColor: "#FFFFFF",
     },
     ios: {
       supportsTablet: false,
