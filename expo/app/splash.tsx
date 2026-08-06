@@ -11,6 +11,8 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
+  withSequence,
+  withRepeat,
   withDelay,
   Easing,
   runOnJS,
@@ -18,14 +20,14 @@ import Animated, {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useApp } from '@/store/AppContext';
 
-// New cardboard hero shot: full image shown first, then camera zooms into the open box
 const SPLASH_CARD = require('@/assets/images/splash-cardboard-full.png');
 const HAS_SEEN_SLIDES_KEY = 'porchivo_pre_auth_slides_seen';
-const BOX_FOCAL_Y = 0.35; // Focal point of the open box on the full image (relative)
+
+const SHAKE_DURATION = 100;
 
 export default function SplashScreen(): React.ReactElement {
   const router = useRouter();
-  const { width, height } = useWindowDimensions();
+  const { width } = useWindowDimensions();
   const { session, isOnboarded } = useApp();
   const [hasSeenSlides, setHasSeenSlides] = useState<boolean | null>(null);
 
@@ -35,12 +37,11 @@ export default function SplashScreen(): React.ReactElement {
     });
   }, []);
 
-  // Phase 1: full image settles in at scale 1.0 (no initial scale-down)
   const settleOpacity = useSharedValue<number>(0);
-  const imageScale = useSharedValue<number>(1);
-  const translateX = useSharedValue<number>(0);
-  const translateY = useSharedValue<number>(0);
-  const overlayOpacity = useSharedValue<number>(1);
+  const shakeX = useSharedValue<number>(0);
+  const shakeY = useSharedValue<number>(0);
+  const shakeRotate = useSharedValue<number>(0);
+  const whiteFade = useSharedValue<number>(0);
 
   const navigateNext = () => {
     if (session) {
@@ -60,51 +61,59 @@ export default function SplashScreen(): React.ReactElement {
   };
 
   useEffect(() => {
-    // 0.0s → 0.4s: full image fades in and rests, completely visible
-    settleOpacity.value = withTiming(1, { duration: 400, easing: Easing.out(Easing.cubic) });
+    // 0.0s: full image fades in, kept in frame entirely
+    settleOpacity.value = withTiming(1, { duration: 300, easing: Easing.out(Easing.cubic) });
 
-    // 1.0s → 2.2s: camera zooms into the center of the open box.
-    // The image scales up while translating so the box focal point stays centered.
-    const ZOOM = 3.2;
-    const targetX = (width / 2) - (width * ZOOM * 0.5); // keep horizontal center
-    const targetY = (height * BOX_FOCAL_Y) - (height * ZOOM * BOX_FOCAL_Y);
+    // 0.0s → 2.0s: subtle shaky handheld camera movement
+    const shakeStep = (offset: number) =>
+      withSequence(
+        withTiming(offset, { duration: SHAKE_DURATION, easing: Easing.inOut(Easing.sin) }),
+        withTiming(-offset, { duration: SHAKE_DURATION, easing: Easing.inOut(Easing.sin) })
+      );
 
-    imageScale.value = withDelay(
-      1000,
-      withTiming(ZOOM, { duration: 1200, easing: Easing.inOut(Easing.cubic) })
+    shakeX.value = withRepeat(
+      withSequence(shakeStep(2.5), withTiming(0, { duration: SHAKE_DURATION })),
+      10,
+      true
     );
-    translateX.value = withDelay(
-      1000,
-      withTiming(targetX, { duration: 1200, easing: Easing.inOut(Easing.cubic) })
+    shakeY.value = withRepeat(
+      withSequence(shakeStep(1.5), withTiming(0, { duration: SHAKE_DURATION })),
+      10,
+      true
     );
-    translateY.value = withDelay(
-      1000,
-      withTiming(targetY, { duration: 1200, easing: Easing.inOut(Easing.cubic) })
+    shakeRotate.value = withRepeat(
+      withSequence(
+        withTiming(0.4, { duration: SHAKE_DURATION, easing: Easing.inOut(Easing.sin) }),
+        withTiming(-0.4, { duration: SHAKE_DURATION, easing: Easing.inOut(Easing.sin) }),
+        withTiming(0, { duration: SHAKE_DURATION })
+      ),
+      10,
+      true
     );
 
-    // Fade out the splash during the final part of the zoom, then route
-    overlayOpacity.value = withDelay(
+    // 2.0s: white fade overlay begins, then navigate once fully covered
+    whiteFade.value = withDelay(
       2000,
-      withTiming(0, { duration: 400, easing: Easing.out(Easing.cubic) }, (finished) => {
+      withTiming(1, { duration: 400, easing: Easing.out(Easing.cubic) }, (finished) => {
         if (finished) {
           runOnJS(navigateNext)();
         }
       })
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [height, width, hasSeenSlides, session, isOnboarded]);
+  }, [width, hasSeenSlides, session, isOnboarded]);
 
   const imageContainerStyle = useAnimatedStyle(() => ({
     transform: [
-      { translateX: translateX.value },
-      { translateY: translateY.value },
-      { scale: imageScale.value },
+      { translateX: shakeX.value },
+      { translateY: shakeY.value },
+      { rotate: `${shakeRotate.value}deg` },
     ],
     opacity: settleOpacity.value,
   }));
 
-  const overlayStyle = useAnimatedStyle(() => ({
-    opacity: overlayOpacity.value,
+  const whiteOverlayStyle = useAnimatedStyle(() => ({
+    opacity: whiteFade.value,
   }));
 
   return (
@@ -114,16 +123,15 @@ export default function SplashScreen(): React.ReactElement {
         translucent
         backgroundColor="transparent"
       />
-      <Animated.View style={[StyleSheet.absoluteFill, overlayStyle]}>
-        <Animated.View style={[StyleSheet.absoluteFill, imageContainerStyle]}>
-          <Image
-            source={SPLASH_CARD}
-            style={StyleSheet.absoluteFill}
-            resizeMode="contain"
-            accessible={false}
-          />
-        </Animated.View>
+      <Animated.View style={[StyleSheet.absoluteFill, imageContainerStyle]}>
+        <Image
+          source={SPLASH_CARD}
+          style={StyleSheet.absoluteFill}
+          resizeMode="contain"
+          accessible={false}
+        />
       </Animated.View>
+      <Animated.View style={[StyleSheet.absoluteFill, styles.whiteOverlay, whiteOverlayStyle]} />
     </View>
   );
 }
@@ -131,6 +139,9 @@ export default function SplashScreen(): React.ReactElement {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  whiteOverlay: {
     backgroundColor: '#FFFFFF',
   },
 });
