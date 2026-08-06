@@ -24,10 +24,13 @@ const SPLASH_CARD = require('@/assets/images/splash-cardboard-full.png');
 const HAS_SEEN_SLIDES_KEY = 'porchivo_pre_auth_slides_seen';
 
 const SHAKE_DURATION = 100;
+const START_SCALE = 1.15; // Slight zoom so shake never reveals white edges
+const END_SCALE = 1.02; // Pull back to show the whole sticker on the final frame
+const FOCUS_Y = 0.35; // Center of the Porchivo sticker
 
 export default function SplashScreen(): React.ReactElement {
   const router = useRouter();
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const { session, isOnboarded } = useApp();
   const [hasSeenSlides, setHasSeenSlides] = useState<boolean | null>(null);
 
@@ -38,8 +41,9 @@ export default function SplashScreen(): React.ReactElement {
   }, []);
 
   const settleOpacity = useSharedValue<number>(0);
-  const shakeX = useSharedValue<number>(0);
-  const shakeY = useSharedValue<number>(0);
+  const imageScale = useSharedValue<number>(START_SCALE);
+  const translateX = useSharedValue<number>(0);
+  const translateY = useSharedValue<number>(0);
   const shakeRotate = useSharedValue<number>(0);
   const whiteFade = useSharedValue<number>(0);
 
@@ -61,37 +65,43 @@ export default function SplashScreen(): React.ReactElement {
   };
 
   useEffect(() => {
-    // 0.0s: full image fades in, kept in frame entirely
+    // 0.0s: image fades in, already zoomed slightly so edges have bleed
     settleOpacity.value = withTiming(1, { duration: 300, easing: Easing.out(Easing.cubic) });
 
-    // 0.0s → 2.0s: subtle shaky handheld camera movement
+    // 0.0s → 1.7s: subtle shaky handheld movement
     const shakeStep = (offset: number) =>
       withSequence(
         withTiming(offset, { duration: SHAKE_DURATION, easing: Easing.inOut(Easing.sin) }),
         withTiming(-offset, { duration: SHAKE_DURATION, easing: Easing.inOut(Easing.sin) })
       );
 
-    shakeX.value = withRepeat(
+    translateX.value = withRepeat(
       withSequence(shakeStep(2.5), withTiming(0, { duration: SHAKE_DURATION })),
       10,
       true
     );
-    shakeY.value = withRepeat(
+    translateY.value = withRepeat(
       withSequence(shakeStep(1.5), withTiming(0, { duration: SHAKE_DURATION })),
       10,
       true
     );
     shakeRotate.value = withRepeat(
       withSequence(
-        withTiming(0.4, { duration: SHAKE_DURATION, easing: Easing.inOut(Easing.sin) }),
-        withTiming(-0.4, { duration: SHAKE_DURATION, easing: Easing.inOut(Easing.sin) }),
+        withTiming(0.35, { duration: SHAKE_DURATION, easing: Easing.inOut(Easing.sin) }),
+        withTiming(-0.35, { duration: SHAKE_DURATION, easing: Easing.inOut(Easing.sin) }),
         withTiming(0, { duration: SHAKE_DURATION })
       ),
       10,
       true
     );
 
-    // 2.0s: white fade overlay begins, then navigate once fully covered
+    // 1.7s → 2.0s: settle back so the entire sticker is fully visible
+    imageScale.value = withDelay(
+      1700,
+      withTiming(END_SCALE, { duration: 300, easing: Easing.out(Easing.cubic) })
+    );
+
+    // 2.0s: white fade overlay covers the fully-framed sticker, then navigate
     whiteFade.value = withDelay(
       2000,
       withTiming(1, { duration: 400, easing: Easing.out(Easing.cubic) }, (finished) => {
@@ -101,16 +111,26 @@ export default function SplashScreen(): React.ReactElement {
       })
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [width, hasSeenSlides, session, isOnboarded]);
+  }, [width, height, hasSeenSlides, session, isOnboarded]);
 
-  const imageContainerStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateX: shakeX.value },
-      { translateY: shakeY.value },
-      { rotate: `${shakeRotate.value}deg` },
-    ],
-    opacity: settleOpacity.value,
-  }));
+  const imageContainerStyle = useAnimatedStyle(() => {
+    // Keep the sticker centered throughout the zoom and shake
+    const scaledWidth = width * imageScale.value;
+    const scaledHeight = height * imageScale.value;
+    const centerX = (width - scaledWidth) / 2;
+    const centerY = (height - scaledHeight) / 2;
+    const focusOffsetY = (height * FOCUS_Y) - (scaledHeight * FOCUS_Y);
+
+    return {
+      transform: [
+        { translateX: translateX.value + centerX },
+        { translateY: translateY.value + centerY + focusOffsetY },
+        { scale: imageScale.value },
+        { rotate: `${shakeRotate.value}deg` },
+      ],
+      opacity: settleOpacity.value,
+    };
+  });
 
   const whiteOverlayStyle = useAnimatedStyle(() => ({
     opacity: whiteFade.value,
@@ -127,7 +147,7 @@ export default function SplashScreen(): React.ReactElement {
         <Image
           source={SPLASH_CARD}
           style={StyleSheet.absoluteFill}
-          resizeMode="contain"
+          resizeMode="cover"
           accessible={false}
         />
       </Animated.View>
