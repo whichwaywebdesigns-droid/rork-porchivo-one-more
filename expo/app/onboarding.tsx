@@ -21,7 +21,7 @@ import Animated, {
   Easing,
   runOnJS,
 } from 'react-native-reanimated';
-import { ChevronLeft } from 'lucide-react-native';
+import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -115,6 +115,40 @@ export default function OnboardingScreen(): React.ReactElement {
     goNextRef.current = goNext;
   }, [goNext]);
 
+  const goPrevious = useCallback(() => {
+    if (isAnimatingRef.current || currentIndexRef.current <= 0) {
+      return;
+    }
+    hasInteracted.current = true;
+    cancelAnimation(pulse);
+    pulse.value = 0;
+    setIsAnimating(true);
+    const previous = currentIndexRef.current - 1;
+    setNextIndex(previous);
+    progress.value = 0;
+    progress.value = withTiming(
+      1,
+      { duration: 450, easing: Easing.inOut(Easing.cubic) },
+      (finished) => {
+        if (finished) {
+          runOnJS(setCurrentIndex)(previous);
+          runOnJS(setNextIndex)(null);
+          runOnJS(setIsAnimating)(false);
+          runOnJS(track)('onboarding_carousel_slide', {
+            slide_index: previous,
+            total_slides: SLIDES.length,
+          });
+          progress.value = 0;
+        }
+      }
+    );
+  }, [progress, track]);
+
+  const goPreviousRef = useRef(goPrevious);
+  useEffect(() => {
+    goPreviousRef.current = goPrevious;
+  }, [goPrevious]);
+
   useEffect(() => {
     track('onboarding_started', { slide_index: 0 });
     pulse.value = withDelay(
@@ -134,12 +168,15 @@ export default function OnboardingScreen(): React.ReactElement {
       Gesture.Pan()
         .activeOffsetX([-20, 20])
         .onEnd((event) => {
-          if (event.translationX < -50 && !isAnimatingRef.current) {
+          if (isAnimatingRef.current) return;
+          if (event.translationX < -50) {
             if (currentIndexRef.current < SLIDES.length - 1) {
               runOnJS(goNextRef.current)();
             } else {
               runOnJS(finishRef.current)();
             }
+          } else if (event.translationX > 50 && currentIndexRef.current > 0) {
+            runOnJS(goPreviousRef.current)();
           }
         }),
     []
@@ -193,6 +230,7 @@ export default function OnboardingScreen(): React.ReactElement {
   });
 
   const isLastSlide = currentIndex === SLIDES.length - 1;
+  const isFirstSlide = currentIndex === 0;
 
   return (
     <SafeAreaView style={styles.root} testID="onboarding-screen">
@@ -247,6 +285,32 @@ export default function OnboardingScreen(): React.ReactElement {
             )}
           </View>
         </GestureDetector>
+
+        {/* Slide arrows */}
+        {!isFirstSlide && (
+          <TouchableOpacity
+            onPress={goPreviousRef.current}
+            style={[styles.arrow, styles.arrowLeft]}
+            activeOpacity={0.7}
+            accessibilityLabel="Previous slide"
+          >
+            <View style={styles.arrowCircle}>
+              <ChevronLeft size={24} color={COLORS.primary} strokeWidth={2.5} />
+            </View>
+          </TouchableOpacity>
+        )}
+        {!isLastSlide && (
+          <TouchableOpacity
+            onPress={goNextRef.current}
+            style={[styles.arrow, styles.arrowRight]}
+            activeOpacity={0.7}
+            accessibilityLabel="Next slide"
+          >
+            <View style={styles.arrowCircle}>
+              <ChevronRight size={24} color={COLORS.primary} strokeWidth={2.5} />
+            </View>
+          </TouchableOpacity>
+        )}
 
         {!isLastSlide && (
           <Animated.View
@@ -330,6 +394,31 @@ const styles = StyleSheet.create({
   image: {
     width: '100%',
     height: '100%',
+  },
+  arrow: {
+    position: 'absolute',
+    top: '50%',
+    marginTop: -22,
+    zIndex: 10,
+  },
+  arrowLeft: {
+    left: 12,
+  },
+  arrowRight: {
+    right: 12,
+  },
+  arrowCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255,255,255,0.85)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    elevation: 3,
   },
   footer: {
     paddingHorizontal: 24,
