@@ -11,7 +11,6 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
-  withSequence,
   withDelay,
   Easing,
   runOnJS,
@@ -20,9 +19,11 @@ import Animated, {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useApp } from '@/store/AppContext';
 
-const SPLASH_BOX = require('@/assets/images/splash-box.png');
+// New cardboard hero shot: full image shown first, then camera zooms into box
+const SPLASH_CARD = require('@/assets/images/splash-cardboard-full.png');
 const HAS_SEEN_SLIDES_KEY = 'porchivo_pre_auth_slides_seen';
 const FLAP_COLOR = '#C4A265';
+const BOX_FOCAL_Y = 0.35; // Focal point of the open box on the full image (relative)
 
 type FlapSide = 'left' | 'right';
 
@@ -80,11 +81,13 @@ export default function SplashScreen(): React.ReactElement {
     });
   }, []);
 
-  const settleScale = useSharedValue<number>(0.95);
-  const flapProgress = useSharedValue<number>(0);
-  const zoomScale = useSharedValue<number>(1);
+  // Phase 1: full image settles in at scale 1.0 (no initial scale-down)
+  const settleOpacity = useSharedValue<number>(0);
+  const imageScale = useSharedValue<number>(1);
+  const translateX = useSharedValue<number>(0);
   const translateY = useSharedValue<number>(0);
-  const opacity = useSharedValue<number>(1);
+  const flapProgress = useSharedValue<number>(0);
+  const overlayOpacity = useSharedValue<number>(1);
 
   const navigateNext = () => {
     if (session) {
@@ -104,34 +107,37 @@ export default function SplashScreen(): React.ReactElement {
   };
 
   useEffect(() => {
-    // Phase 1: settle from 0.95 to 1.0 over 0.4s
-    settleScale.value = withSequence(
-      withTiming(1, { duration: 400, easing: Easing.out(Easing.cubic) }),
-      withDelay(1500, withTiming(1, { duration: 0 }))
-    );
+    // 0.0s → 0.4s: full image fades in and rests, completely visible
+    settleOpacity.value = withTiming(1, { duration: 400, easing: Easing.out(Easing.cubic) });
 
-    // Phase 2: flaps hinge open from 1.9s to 2.5s
-    flapProgress.value = withDelay(
-      1900,
-      withTiming(1, { duration: 600, easing: Easing.inOut(Easing.ease) })
-    );
+    // 1.0s → 2.2s: camera zooms into the center of the open box.
+    // The image scales up while translating so the box focal point stays centered.
+    const ZOOM = 3.2;
+    const targetX = (width / 2) - (width * ZOOM * 0.5); // keep horizontal center
+    const targetY = (height * BOX_FOCAL_Y) - (height * ZOOM * BOX_FOCAL_Y);
 
-    // Phase 3: camera zooms into the open box from 1.9s to 2.7s
-    zoomScale.value = withDelay(
-      1900,
-      withTiming(3, { duration: 800, easing: Easing.inOut(Easing.cubic) })
+    imageScale.value = withDelay(
+      1000,
+      withTiming(ZOOM, { duration: 1200, easing: Easing.inOut(Easing.cubic) })
+    );
+    translateX.value = withDelay(
+      1000,
+      withTiming(targetX, { duration: 1200, easing: Easing.inOut(Easing.cubic) })
     );
     translateY.value = withDelay(
-      1900,
-      withTiming(-height * 0.25, {
-        duration: 800,
-        easing: Easing.inOut(Easing.cubic),
-      })
+      1000,
+      withTiming(targetY, { duration: 1200, easing: Easing.inOut(Easing.cubic) })
     );
 
-    // Fade out during the final 0.4s of the zoom, then route to the next screen
-    opacity.value = withDelay(
-      2300,
+    // Flaps hinge open as the camera moves in, 1.2s → 2.0s
+    flapProgress.value = withDelay(
+      1200,
+      withTiming(1, { duration: 800, easing: Easing.inOut(Easing.ease) })
+    );
+
+    // Fade out the splash during the final part of the zoom, then route
+    overlayOpacity.value = withDelay(
+      2000,
       withTiming(0, { duration: 400, easing: Easing.out(Easing.cubic) }, (finished) => {
         if (finished) {
           runOnJS(navigateNext)();
@@ -139,15 +145,20 @@ export default function SplashScreen(): React.ReactElement {
       })
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [height, hasSeenSlides, session, isOnboarded]);
+  }, [height, width, hasSeenSlides, session, isOnboarded]);
 
-  const containerStyle = useAnimatedStyle(() => {
-    const scale = settleScale.value * zoomScale.value;
-    return {
-      transform: [{ scale }, { translateY: translateY.value }],
-      opacity: opacity.value,
-    };
-  });
+  const imageContainerStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: translateX.value },
+      { translateY: translateY.value },
+      { scale: imageScale.value },
+    ],
+    opacity: settleOpacity.value,
+  }));
+
+  const overlayStyle = useAnimatedStyle(() => ({
+    opacity: overlayOpacity.value,
+  }));
 
   return (
     <View style={styles.root} testID="splash-screen">
@@ -156,25 +167,27 @@ export default function SplashScreen(): React.ReactElement {
         translucent
         backgroundColor="transparent"
       />
-      <Animated.View style={[StyleSheet.absoluteFill, containerStyle]}>
-        <Image
-          source={SPLASH_BOX}
-          style={StyleSheet.absoluteFill}
-          resizeMode="cover"
-          accessible={false}
-        />
-        <CardboardFlap
-          side="left"
-          progress={flapProgress}
-          containerWidth={width}
-          containerHeight={height}
-        />
-        <CardboardFlap
-          side="right"
-          progress={flapProgress}
-          containerWidth={width}
-          containerHeight={height}
-        />
+      <Animated.View style={[StyleSheet.absoluteFill, overlayStyle]}>
+        <Animated.View style={[StyleSheet.absoluteFill, imageContainerStyle]}>
+          <Image
+            source={SPLASH_CARD}
+            style={StyleSheet.absoluteFill}
+            resizeMode="contain"
+            accessible={false}
+          />
+          <CardboardFlap
+            side="left"
+            progress={flapProgress}
+            containerWidth={width}
+            containerHeight={height}
+          />
+          <CardboardFlap
+            side="right"
+            progress={flapProgress}
+            containerWidth={width}
+            containerHeight={height}
+          />
+        </Animated.View>
       </Animated.View>
     </View>
   );
