@@ -37,26 +37,28 @@ const OG_IMAGE = BRAND.ogImageUrl;
 
 export const PAGE_SEO: Record<string, PageSEO> = {
   home: {
-    title: "Porchivo — Porch Risk Intelligence & Package Theft Prevention",
+    title: "Porchivo — Porch Pirate Protection & Package Theft Prevention App",
     description:
-      "Porchivo calculates a real-time porch risk score for every delivery. Track packages, get theft alerts, and assign trusted neighbors to protect what arrives.",
+      "Porchivo is a package delivery security app that calculates a real-time porch risk score, sends delivery theft alerts, and connects homeowners with trusted neighbor delivery holds. Built for HOA package management and neighborhood package safety.",
     canonical: `${BASE_URL}/`,
-    ogTitle: "Porchivo — Know Your Porch Risk Before Every Delivery",
+    ogTitle: "Porchivo — Porch Pirate Protection & Package Theft Prevention App",
     ogDescription:
-      "Real-time porch risk scores, neighborhood theft alerts, and a network of trusted neighbors who hold your packages safely.",
+      "Porchivo is a package delivery security app that calculates a real-time porch risk score, sends delivery theft alerts, and connects homeowners with trusted neighbor delivery holds. Built for HOA package management and neighborhood package safety.",
     ogImage: OG_IMAGE,
     twitterCard: "summary_large_image",
     robots: "index, follow",
     aiSummary:
-      "Porchivo is a mobile app that calculates a real-time 0–100 porch risk score for every incoming package delivery. It aggregates neighborhood theft alerts, delivery timing, and protection status to warn homeowners before theft happens. Users can activate Theft Shield, assign Porch Partners (trusted neighbors), and track unlimited packages across 1,400+ carriers.",
+      "Porchivo is a package theft prevention app and package delivery security app that calculates a real-time 0–100 porch risk score for every incoming package. It sends delivery theft alerts, enables trusted neighbor delivery holds, and supports HOA package management and neighborhood package safety.",
     keyFacts: [
       "119 million packages are stolen in the US every year",
       "1 in 5 delivered packages is stolen from a porch",
-      "Porchivo's risk score weighs neighborhood alerts, delivery timing, and porch protection status",
-      "Porch Partners earn $3–$25 per hold (size + geo-adjusted)",
+      "Porchivo's porch risk score weighs neighborhood alerts, delivery timing, and porch protection status",
+      "Theft Shield sends a delivery theft alert when risk exceeds 65/100",
+      "Porch Partners provide trusted neighbor delivery holds and earn $3–$25 per hold",
+      "HOA package management plan covers up to 250 households",
     ],
     primaryEntity: "Porchivo mobile app",
-    primaryIntent: "Product overview — understand what Porchivo does and who it's for",
+    primaryIntent: "Product overview — porch pirate protection, package theft prevention, and porch package security",
   },
 
   features: {

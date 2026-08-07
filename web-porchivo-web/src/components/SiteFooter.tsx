@@ -54,6 +54,9 @@ export default function SiteFooter() {
             <p className="text-sm text-brand-text-muted leading-relaxed max-w-xs">
               {BRAND.tagline}
             </p>
+            <p className="text-sm text-brand-text-muted mt-4">
+              Porchivo — Package delivery security app for homeowners and HOAs.
+            </p>
 
             {/* Trust badges */}
             <div className="flex flex-wrap gap-2 mt-5 mb-4">

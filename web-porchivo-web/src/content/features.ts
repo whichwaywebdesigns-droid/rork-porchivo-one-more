@@ -27,7 +27,7 @@ export const FEATURES: Feature[] = [
   {
     id: "porch-risk-score",
     name: "Porch Risk Score",
-    tagline: "A 0–100 risk rating for every incoming delivery.",
+    tagline: "A real-time porch risk score for every incoming delivery.",
     description:
       "Porchivo calculates a risk score for each package the moment it enters your delivery window. The score is computed from 10 weighted factors: neighborhood theft alert count, delivery timing (before or after 4pm), whether a Porch Partner is assigned, whether a trusted driver is assigned, whether drop instructions exist, and recent block activity. A score above 65 is flagged as High Risk and triggers a Theft Shield alert.",
     aiSummary:
@@ -50,7 +50,7 @@ export const FEATURES: Feature[] = [
   {
     id: "theft-shield",
     name: "Theft Shield",
-    tagline: "Instant alerts the moment your porch risk spikes.",
+    tagline: "Instant delivery theft alert the moment your porch risk spikes.",
     description:
       "Theft Shield is Porchivo's premium alert system. When a package's risk score crosses the High threshold (65/100), Theft Shield sends an immediate push notification. Users can then take action: assign a Porch Partner, add drop instructions, or notify a neighbor. Theft Shield turns the risk score from passive information into an active intervention signal.",
     aiSummary:
@@ -69,7 +69,7 @@ export const FEATURES: Feature[] = [
   {
     id: "live-tracking",
     name: "Live Package Tracking",
-    tagline: "Real-time tracking across 1,400+ carriers.",
+    tagline: "Real-time porch package security across 1,400+ carriers.",
     description:
       "Porchivo integrates with Ship24 to provide real-time tracking data for over 1,400 shipping carriers worldwide, including USPS, FedEx, UPS, DHL, Amazon Logistics, and hundreds of regional carriers. Premium users get tracking refreshed every 90 seconds. Free users get 10-minute refresh intervals. Tracking status feeds directly into the risk score — Out for Delivery packages have elevated risk calculations.",
     aiSummary:

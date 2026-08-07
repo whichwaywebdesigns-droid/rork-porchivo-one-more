@@ -12,7 +12,7 @@ export const BRAND = {
   tagline: "Package risk intelligence for your porch.",
   shortTagline: "Know before it's too late.",
   description:
-    "Porchivo is a mobile app that calculates a real-time porch risk score for every incoming package, sends theft alerts when risk rises, and connects homeowners with trusted neighbors who can hold deliveries safely.",
+    "Porchivo is a package theft prevention app that calculates a real-time porch risk score for every incoming package, sends delivery theft alerts when risk rises, and connects homeowners with trusted neighbors who can hold deliveries safely.",
   category: "Mobile Application",
   subcategory: "Package Security & Porch Theft Prevention",
   operatingSystem: ["iOS", "Android"],
