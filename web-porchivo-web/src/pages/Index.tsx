@@ -19,27 +19,6 @@ import { useCountUp } from "@/hooks/useCountUp";
 const seo = getPageSEO("home");
 const homeFAQs = getFAQsByCategory("general").slice(0, 4);
 
-const HOW_IT_WORKS = [
-  {
-    step: "01",
-    icon: Package,
-    title: "Add your packages",
-    body: "Forward tracking numbers or connect carriers. Porchivo monitors every delivery across 1,400+ shipping services.",
-  },
-  {
-    step: "02",
-    icon: ShieldAlert,
-    title: "Get your porch risk score",
-    body: "Each package gets a real-time 0–100 risk score based on neighborhood alerts, delivery timing, and protection status.",
-  },
-  {
-    step: "03",
-    icon: Bell,
-    title: "Act before delivery",
-    body: "When risk spikes, Theft Shield alerts you so you can assign a Porch Partner, add drop instructions, or be home.",
-  },
-];
-
 const FEATURE_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   ShieldAlert,
   Bell,
@@ -147,26 +126,66 @@ export default function IndexPage() {
           <div className="text-center mb-14">
             <h2 className="text-3xl sm:text-4xl font-bold text-slate-100 mb-4">How Porchivo works</h2>
             <p className="text-lg text-slate-400 max-w-2xl mx-auto">
-              Predictive porch protection — not just post-theft reporting.
+              From porch-piracy problem to protected delivery — in four simple steps.
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {HOW_IT_WORKS.map((item) => {
-              const Icon = item.icon;
-              return (
-                <div
-                  key={item.step}
-                  className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6"
-                >
-                  <div className="text-xs font-bold text-amber-400/70 mb-4">{item.step}</div>
-                  <div className="w-10 h-10 rounded-xl bg-amber-400/10 flex items-center justify-center mb-4">
-                    <Icon className="w-5 h-5 text-amber-400" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-slate-100 mb-2">{item.title}</h3>
-                  <p className="text-slate-400 text-sm leading-relaxed">{item.body}</p>
-                </div>
-              );
-            })}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden">
+              <img
+                src="/images/why-porchivo-porch-piracy.png"
+                alt="Porch piracy is an everyday problem — 1 in 5 households are hit"
+                loading="lazy"
+                className="w-full h-auto"
+              />
+              <div className="p-5">
+                <p className="text-sm font-semibold text-amber-400 mb-1">1. The problem</p>
+                <p className="text-slate-400 text-sm leading-relaxed">
+                  Porch piracy is an everyday problem — 1 in 5 households are hit.
+                </p>
+              </div>
+            </div>
+            <div className="bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden">
+              <img
+                src="/images/how-it-works-three-taps.png"
+                alt="Track, assign a Porch Partner, and receive in three taps"
+                loading="lazy"
+                className="w-full h-auto"
+              />
+              <div className="p-5">
+                <p className="text-sm font-semibold text-amber-400 mb-1">2. The solution</p>
+                <p className="text-slate-400 text-sm leading-relaxed">
+                  Track your package, assign a trusted neighbor, and receive — three taps.
+                </p>
+              </div>
+            </div>
+            <div className="bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden">
+              <img
+                src="/images/how-it-works-package-secured.png"
+                alt="Package secured confirmation when your Porch Partner takes custody"
+                loading="lazy"
+                className="w-full h-auto"
+              />
+              <div className="p-5">
+                <p className="text-sm font-semibold text-amber-400 mb-1">3. The outcome</p>
+                <p className="text-slate-400 text-sm leading-relaxed">
+                  Get an instant "Package secured" confirmation when your partner takes custody.
+                </p>
+              </div>
+            </div>
+            <div className="bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden">
+              <img
+                src="/images/built-on-trust-real-neighbors.png"
+                alt="Verified, private, local neighbors keep each other accountable"
+                loading="lazy"
+                className="w-full h-auto"
+              />
+              <div className="p-5">
+                <p className="text-sm font-semibold text-amber-400 mb-1">4. The trust layer</p>
+                <p className="text-slate-400 text-sm leading-relaxed">
+                  Verified, private, local. Real neighbors keep each other accountable.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
