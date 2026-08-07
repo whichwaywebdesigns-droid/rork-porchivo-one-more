@@ -88,7 +88,10 @@ export type FunnelEvent =
   | 'system_permission_granted'
   | 'system_permission_denied'
   | 'partner_joined'
-  | 'partner_skipped';
+  | 'partner_skipped'
+  | 'neighbor_invite_tapped'
+  | 'neighbor_invite_link_generated'
+  | 'neighbor_invite_shared';
 
 export interface AnalyticsEvent {
   event: FunnelEvent;

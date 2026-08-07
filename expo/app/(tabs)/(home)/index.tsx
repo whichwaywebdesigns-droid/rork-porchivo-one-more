@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { View, Text, StyleSheet, FlatList, RefreshControl, TouchableOpacity, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Stack } from 'expo-router';
-import { Shield, MapPin, ShieldAlert, Bell, BarChart3, Plus, Crown, Zap, BadgeDollarSign, ArrowRight } from 'lucide-react-native';
+import { Shield, MapPin, ShieldAlert, Bell, BarChart3, Plus, Crown, Zap, BadgeDollarSign, ArrowRight, Users } from 'lucide-react-native';
 import { useQueryClient } from '@tanstack/react-query';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -20,6 +20,7 @@ import OFDLiveHero from '@/components/OFDLiveHero';
 import TodayRiskCard from '@/components/TodayRiskCard';
 import DailyStreakCard from '@/components/DailyStreakCard';
 import ReferralCard from '@/components/ReferralCard';
+import InviteNeighborsCard from '@/components/InviteNeighborsCard';
 import { usePaywall } from '@/store/PaywallContext';
 import { PAYWALL_TRIGGERS } from '@/lib/tiers';
 import { log } from '@/lib/logger';
@@ -124,6 +125,7 @@ export default function HomeScreen() {
     { label: 'Alerts', icon: Bell, color: colors.danger, bg: colors.dangerLight, route: '/notifications', badge: unreadNotificationCount },
     { label: 'Safety', icon: BarChart3, color: colors.primary, bg: colors.primaryLight, route: '/safety-score', badge: 0 },
     { label: 'Add Package', icon: Plus, color: colors.success, bg: colors.successLight, route: '/add-package', badge: 0 },
+    { label: 'Invite', icon: Users, color: palette.warmOrange, bg: palette.warmOrangeGlow, route: '/invite-partner', badge: 0 },
     { label: 'Porch Risk', icon: ShieldAlert, color: palette.warmOrange, bg: palette.warmOrangeGlow, route: '/porch-risk', badge: 0 },
   ], [unreadNotificationCount, colors]);
 
@@ -253,6 +255,14 @@ export default function HomeScreen() {
           onShared={() => {
             log('[Home] Referral shared');
           }}
+        />
+      )}
+
+      {/* Invite Neighbors — always visible to authenticated users with an id */}
+      {user?.id && (
+        <InviteNeighborsCard
+          userId={user.id}
+          userName={user?.name ?? ''}
         />
       )}
     </View>

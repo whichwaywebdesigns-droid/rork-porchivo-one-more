@@ -17,9 +17,25 @@ export async function grantReferralCredit(
   await onApply(days);
 }
 
+/**
+ * Generates a unique invite link with a short, shareable referral code.
+ * The code encodes the inviter's user id + a timestamp so each invite is
+ * unique and trackable, but stays short enough to look clean in a text.
+ */
 export function generateInviteLink(userId: string): string {
   const code = `${userId}-${Date.now().toString(36)}`;
   return `${APP_DOWNLOAD_URL}?ref=${code}`;
+}
+
+/** Returns just the referral code portion (without the URL prefix). */
+export function generateInviteCode(userId: string): string {
+  return `${userId}-${Date.now().toString(36)}`;
+}
+
+/** Neighbor-focused invite message (distinct from the partner referral message). */
+export function getNeighborInviteMessage(senderName: string, inviteLink: string): string {
+  const firstName = senderName.split(' ')[0] || senderName;
+  return `Hey! ${firstName} invited you to join Porchivo — a neighborhood network that protects packages from porch pirates. When neighbors team up, thieves lose. Join the block and watch each other's deliveries.\n\nGet Porchivo free: ${inviteLink}`;
 }
 
 export function getInviteMessage(senderName: string, inviteLink: string): string {
