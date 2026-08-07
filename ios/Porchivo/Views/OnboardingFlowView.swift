@@ -66,9 +66,14 @@ struct OnboardingFlowView: View {
     // MARK: - Step 0: Welcome
 
     private var welcomeStep: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: 20) {
             Spacer()
-            BrandLogoWithBox(logoSize: 72)
+            Image("BuiltOnTrust")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(maxHeight: 280)
+                .clipShape(.rect(cornerRadius: Radius.lg))
+                .accessibilityLabel("Built on trust: verified, private, local neighbors keep each other accountable.")
             VStack(spacing: 10) {
                 Text("Your porch, protected.")
                     .font(.system(size: 30, weight: .heavy))
