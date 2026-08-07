@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Stack } from 'expo-router';
-import { Plus, Package, ChevronRight, PackageCheck, Clock3, LayoutGrid, Search, X, Filter, AlertTriangle } from 'lucide-react-native';
+import { Plus, Package, ChevronRight, PackageCheck, Clock3, LayoutGrid, Search, X, Filter, AlertTriangle, ArrowDownWideNarrow, CalendarClock, Zap } from 'lucide-react-native';
 import { useColors, AppColors } from '@/constants/colors';
 import { palette, radius, space, elevation, tabularNums } from '@/constants/theme';
 import { usePackages } from '@/store/PackagesContext';
@@ -25,6 +25,7 @@ import SegmentedControl from '@/components/ui/SegmentedControl';
 import { log } from "@/lib/logger";
 
 export type PackageFilter = 'all' | 'pending' | 'delivered';
+export type PackageSortMode = 'urgent' | 'arriving' | 'recent';
 
 const DELIVERED_STATUSES: PackageTrackingStatus[] = ['delivered', 'picked_up', 'returned'];
 
@@ -34,6 +35,35 @@ function isDelivered(pkg: TrackedPackage): boolean {
 
 function isPending(pkg: TrackedPackage): boolean {
   return !DELIVERED_STATUSES.includes(pkg.currentStatus);
+}
+
+/**
+ * Urgent sort: time-sensitive deliveries (overdue, out-for-delivery, arriving today)
+ * rise to the top, then by soonest expected date. Delivered packages sink.
+ */
+function sortByUrgentMode(a: TrackedPackage, b: TrackedPackage): number {
+  const aPending = isPending(a);
+  const bPending = isPending(b);
+  if (aPending !== bPending) return aPending ? -1 : 1;
+  if (aPending && bPending) {
+    const aScore = a.currentStatus === 'out_for_delivery' ? -100 : getDaysRemaining(a.expectedDeliveryDate);
+    const bScore = b.currentStatus === 'out_for_delivery' ? -100 : getDaysRemaining(b.expectedDeliveryDate);
+    return aScore - bScore;
+  }
+  return new Date(b.expectedDeliveryDate).getTime() - new Date(a.expectedDeliveryDate).getTime();
+}
+
+/** Arriving sort: pending packages first, then by soonest expected delivery date. */
+function sortByArrivingMode(a: TrackedPackage, b: TrackedPackage): number {
+  const aPending = isPending(a);
+  const bPending = isPending(b);
+  if (aPending !== bPending) return aPending ? -1 : 1;
+  return new Date(a.expectedDeliveryDate).getTime() - new Date(b.expectedDeliveryDate).getTime();
+}
+
+/** Recent sort: newest created package first. */
+function sortByRecentMode(a: TrackedPackage, b: TrackedPackage): number {
+  return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
 }
 
 function formatDeliveryDate(dateStr: string): string {
@@ -180,6 +210,7 @@ export default function PackagesScreen() {
   const queryClient = useQueryClient();
   const fabScale = useRef(new Animated.Value(1)).current;
   const [filter, setFilter] = useState<PackageFilter>('all');
+  const [sortMode, setSortMode] = useState<PackageSortMode>('urgent');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   const counts = useMemo(() => {
@@ -205,24 +236,29 @@ export default function PackagesScreen() {
     })();
 
     const q = searchQuery.trim().toLowerCase();
-    if (!q) return byStatus;
+    const searched = q
+      ? byStatus.filter((p) => {
+          const recipient = p.name.toLowerCase();
+          const carrier = p.carrier.toLowerCase();
+          const tracking = p.trackingNumber.toLowerCase();
+          const address = (p.addressNickname === 'Other' && p.customAddressLabel
+            ? p.customAddressLabel
+            : p.addressNickname).toLowerCase();
+          return (
+            recipient.includes(q) ||
+            carrier.includes(q) ||
+            tracking.includes(q) ||
+            address.includes(q)
+          );
+        })
+      : byStatus;
 
-    // Search by recipient (package name), carrier, tracking number, or address.
-    return byStatus.filter((p) => {
-      const recipient = p.name.toLowerCase();
-      const carrier = p.carrier.toLowerCase();
-      const tracking = p.trackingNumber.toLowerCase();
-      const address = (p.addressNickname === 'Other' && p.customAddressLabel
-        ? p.customAddressLabel
-        : p.addressNickname).toLowerCase();
-      return (
-        recipient.includes(q) ||
-        carrier.includes(q) ||
-        tracking.includes(q) ||
-        address.includes(q)
-      );
-    });
-  }, [packages, filter, searchQuery]);
+    const sorted = [...searched];
+    if (sortMode === 'arriving') sorted.sort(sortByArrivingMode);
+    else if (sortMode === 'recent') sorted.sort(sortByRecentMode);
+    else sorted.sort(sortByUrgentMode);
+    return sorted;
+  }, [packages, filter, searchQuery, sortMode]);
 
   const filterOptions = useMemo(
     () => [
@@ -231,6 +267,15 @@ export default function PackagesScreen() {
       { value: 'delivered' as const, label: 'Delivered' },
     ],
     [],
+  );
+
+  const sortOptions = useMemo<{ value: PackageSortMode; label: string; icon: React.ReactNode }[]>(
+    () => [
+      { value: 'urgent', label: 'Urgent', icon: <Zap size={12} color={sortMode === 'urgent' ? colors.primary : colors.slateLighter} strokeWidth={2.4} /> },
+      { value: 'arriving', label: 'Arriving', icon: <CalendarClock size={12} color={sortMode === 'arriving' ? colors.primary : colors.slateLighter} strokeWidth={2.2} /> },
+      { value: 'recent', label: 'Recent', icon: <ArrowDownWideNarrow size={12} color={sortMode === 'recent' ? colors.primary : colors.slateLighter} strokeWidth={2.2} /> },
+    ],
+    [colors, sortMode],
   );
 
   const handleFabPressIn = () => {
@@ -342,6 +387,32 @@ export default function PackagesScreen() {
         </View>
       ) : (
         <>
+          <View style={styles.sortRowWrap}>
+            <View style={styles.sortLabelRow}>
+              <ArrowDownWideNarrow size={11} color={colors.slateLighter} strokeWidth={2.2} />
+              <Text style={styles.sortLabelText}>Sort by</Text>
+            </View>
+            <View style={styles.sortChips}>
+              {sortOptions.map((opt) => {
+                const active = sortMode === opt.value;
+                return (
+                  <TouchableOpacity
+                    key={opt.value}
+                    style={[styles.sortChip, active && styles.sortChipActive]}
+                    onPress={() => setSortMode(opt.value)}
+                    activeOpacity={0.7}
+                    testID={`sort-toggle-${opt.value}`}
+                  >
+                    {opt.icon}
+                    <Text style={[styles.sortChipText, active && styles.sortChipTextActive]}>
+                      {opt.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
+
           <View style={styles.searchBarWrap}>
             <View style={[styles.searchBar, searchQuery.length > 0 && styles.searchBarActive]}>
               <Search size={16} color={searchQuery.length > 0 ? colors.primary : colors.slateLighter} />
@@ -421,6 +492,54 @@ function createStyles(colors: AppColors) {
       paddingHorizontal: space.lg,
       paddingTop: 6,
       paddingBottom: 10,
+    },
+    sortRowWrap: {
+      paddingHorizontal: space.lg,
+      paddingBottom: 8,
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      justifyContent: 'space-between' as const,
+      gap: 8,
+    },
+    sortLabelRow: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      gap: 4,
+    },
+    sortLabelText: {
+      fontSize: 11,
+      fontWeight: '600' as const,
+      color: colors.slateLighter,
+      letterSpacing: 0.3,
+      textTransform: 'uppercase' as const,
+    },
+    sortChips: {
+      flexDirection: 'row' as const,
+      gap: 6,
+    },
+    sortChip: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      gap: 4,
+      paddingHorizontal: 10,
+      paddingVertical: 6,
+      borderRadius: radius.pill,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+    },
+    sortChipActive: {
+      borderColor: colors.primary,
+      backgroundColor: colors.primaryLight,
+    },
+    sortChipText: {
+      fontSize: 12,
+      fontWeight: '600' as const,
+      color: colors.slateLight,
+    },
+    sortChipTextActive: {
+      color: colors.primary,
+      fontWeight: '700' as const,
     },
     searchBarWrap: {
       paddingHorizontal: space.lg,
