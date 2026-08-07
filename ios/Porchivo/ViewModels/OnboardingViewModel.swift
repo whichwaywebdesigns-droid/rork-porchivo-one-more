@@ -27,7 +27,7 @@ final class OnboardingViewModel {
 
     func advance() {
         Haptics.light()
-        withAnimation { step += 1 }
+        withAnimation(.easeInOut(duration: 0.35)) { step += 1 }
     }
 
     func addDelivery(into appState: AppState) {

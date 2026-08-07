@@ -40,15 +40,12 @@ struct OnboardingFlowView: View {
                     }
                 }
                 .frame(maxHeight: .infinity)
-                .transition(.asymmetric(
-                    insertion: .move(edge: .trailing).combined(with: .opacity),
-                    removal: .move(edge: .leading).combined(with: .opacity)
-                ))
+                .transition(.opacity)
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 24)
         }
-        .animation(.spring(duration: 0.4), value: viewModel.step)
+        .animation(.easeInOut(duration: 0.35), value: viewModel.step)
         .task { await viewModel.checkNotifStatus() }
     }
 
