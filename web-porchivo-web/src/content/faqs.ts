@@ -49,7 +49,7 @@ export const FAQS: FAQ[] = [
     id: "how-many-packages-can-i-track",
     question: "How many packages can I track at the same time?",
     answer:
-      "Free accounts can track up to 3 packages simultaneously. Premium accounts track unlimited packages. When you exceed the free limit, the app prompts you to upgrade. Your existing packages remain visible; you just can't add new ones until you upgrade or a current package is delivered.",
+      "Free accounts can track 1 package at a time. Premium accounts track unlimited packages. When you exceed the free limit, the app prompts you to upgrade. Your existing packages remain visible; you just can't add new ones until you upgrade or a current package is delivered.",
     category: "tracking",
   },
   {
@@ -65,7 +65,7 @@ export const FAQS: FAQ[] = [
     id: "is-porchivo-free",
     question: "Is Porchivo free to use?",
     answer:
-      "Yes — Porchivo has a free tier with no time limit. Free accounts can track up to 3 packages simultaneously with 10-minute refresh intervals and access to neighborhood alerts. Premium plans add unlimited package tracking, 90-second refresh, Theft Shield alerts, and priority risk scoring. The free tier does not expire.",
+      "Yes — Porchivo has a free tier with no time limit. Free accounts can track 1 package at a time with 10-minute refresh intervals and access to neighborhood alerts. Premium plans add unlimited package tracking, 90-second refresh, Theft Shield alerts, and priority risk scoring. The free tier does not expire.",
     category: "pricing",
   },
   {

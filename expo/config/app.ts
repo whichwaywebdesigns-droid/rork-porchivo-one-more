@@ -68,9 +68,9 @@ export const PRICING = {
     displayPrice: '$500',
     productId: 'porchivo_lifetime',
     // When true, lifetime is hidden from the main paywall.
-    // Users can only see it via a small "one-time purchase" link.
     // Set to false to show it prominently on the paywall.
-    hideFromMainPaywall: true,
+    // Optimal: surface as a visible third card for high-intent buyers.
+    hideFromMainPaywall: false,
   },
 
   // Shown to users who previously had premium and let it lapse (win-back offer)

@@ -25,6 +25,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,7 +44,7 @@ import com.rork.porchivo.model.SubscriptionTier
 import com.rork.porchivo.ui.theme.PorchivoTheme
 import com.rork.porchivo.ui.viewmodel.AppViewModel
 
-private enum class Plan { MONTHLY, ANNUAL, FAMILY }
+private enum class Plan { MONTHLY, ANNUAL, FAMILY, LIFETIME }
 
 /** Paywall — mirrors the Expo app's upgrade screen and PRICING config. */
 @Composable
@@ -103,6 +104,15 @@ fun UpgradeScreen(
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center,
                 lineHeight = 20.sp,
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "${AppConfig.Pricing.ANNUAL_DISPLAY} billed yearly · just ${AppConfig.Pricing.ANNUAL_PER_MONTH} to protect every delivery",
+                color = c.accent,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold,
+                textAlign = TextAlign.Center,
+                lineHeight = 18.sp,
             )
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -164,14 +174,26 @@ fun UpgradeScreen(
                 selected = selectedPlan == Plan.FAMILY,
                 onClick = { selectedPlan = Plan.FAMILY },
             )
+            Spacer(modifier = Modifier.height(10.dp))
+            PlanCard(
+                title = "Lifetime",
+                price = AppConfig.Pricing.LIFETIME_DISPLAY,
+                subtitle = "Pay once, premium forever · no subscription",
+                badge = null,
+                selected = selectedPlan == Plan.LIFETIME,
+                onClick = { selectedPlan = Plan.LIFETIME },
+            )
 
             Spacer(modifier = Modifier.height(20.dp))
 
             Button(
                 onClick = {
-                    appViewModel.upgradeTier(
-                        if (selectedPlan == Plan.FAMILY) SubscriptionTier.FAMILY else SubscriptionTier.PREMIUM,
-                    )
+                    val tier = when (selectedPlan) {
+                        Plan.FAMILY -> SubscriptionTier.FAMILY
+                        Plan.LIFETIME -> SubscriptionTier.LIFETIME
+                        else -> SubscriptionTier.PREMIUM
+                    }
+                    appViewModel.upgradeTier(tier)
                     navController.popBackStack()
                 },
                 modifier = Modifier
@@ -185,6 +207,7 @@ fun UpgradeScreen(
                         Plan.ANNUAL -> "Start ${AppConfig.Pricing.ANNUAL_TRIAL_DAYS}-Day Free Trial"
                         Plan.MONTHLY -> "Subscribe for ${AppConfig.Pricing.MONTHLY_DISPLAY}/mo"
                         Plan.FAMILY -> "Start Family Plan"
+                        Plan.LIFETIME -> "Get Lifetime Access"
                     },
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
@@ -194,6 +217,25 @@ fun UpgradeScreen(
             Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = "Billed through Google Play. Auto-renews unless canceled at least 24 hours before the period ends.",
+                color = c.textMuted,
+                fontSize = 11.sp,
+                textAlign = TextAlign.Center,
+                lineHeight = 15.sp,
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            TextButton(
+                onClick = { navController.popBackStack() },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(
+                    text = "Continue with limited free",
+                    color = c.textSecondary,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
+            Text(
+                text = "Track 1 package · 10-minute refresh",
                 color = c.textMuted,
                 fontSize = 11.sp,
                 textAlign = TextAlign.Center,

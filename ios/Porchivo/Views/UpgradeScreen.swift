@@ -17,7 +17,7 @@ struct UpgradeScreen: View {
     @State private var isProcessing = false
 
     enum Plan: String, CaseIterable, Identifiable {
-        case monthly, annual, family
+        case monthly, annual, family, lifetime
         var id: String { rawValue }
     }
 
@@ -28,7 +28,7 @@ struct UpgradeScreen: View {
                 winbackCard
                 ForEach(Plan.allCases) { planCard($0) }
                 comparisonCard
-                PrimaryButton(title: "Start \(selectedPlan == .family ? "Family" : "Premium")",
+                PrimaryButton(title: "Start \(selectedPlan == .family ? "Family" : selectedPlan == .lifetime ? "Lifetime" : "Premium")",
                               systemImage: "crown.fill", isLoading: isProcessing,
                               action: purchase)
                 Button("Restore purchases") { restore() }
@@ -60,22 +60,37 @@ struct UpgradeScreen: View {
                 .font(.system(size: 13))
                 .foregroundStyle(c.textSecondary)
                 .multilineTextAlignment(.center)
+            Text("\(AppConfig.Pricing.annualDisplay) billed yearly · just \(AppConfig.Pricing.annualPerMonth) to protect every delivery")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(c.accent)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 20)
         }
     }
 
     private var winbackCard: some View {
-        HStack(spacing: 10) {
-            Image(systemName: "sparkles.fill").foregroundStyle(c.onAccent)
-            VStack(alignment: .leading, spacing: 1) {
-                Text("Winback offer — \(AppConfig.Pricing.winbackLabel)")
-                    .font(.system(size: 13, weight: .bold)).foregroundStyle(c.onAccent)
-                Text("Only \(AppConfig.Pricing.winbackDisplay) for 3 months")
-                    .font(.system(size: 11)).foregroundStyle(c.onAccent.opacity(0.85))
+        VStack(spacing: 10) {
+            HStack(spacing: 10) {
+                Image(systemName: "sparkles.fill").foregroundStyle(c.onAccent)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("Winback offer — \(AppConfig.Pricing.winbackLabel)")
+                        .font(.system(size: 13, weight: .bold)).foregroundStyle(c.onAccent)
+                    Text("Only \(AppConfig.Pricing.winbackDisplay) for 3 months")
+                        .font(.system(size: 11)).foregroundStyle(c.onAccent.opacity(0.85))
+                }
+                Spacer()
             }
-            Spacer()
+            .padding(12)
+            .background(c.accent, in: .rect(cornerRadius: Radius.md))
+
+            Button("Continue with limited free") {
+                Haptics.light()
+                dismiss()
+            }
+            .font(.system(size: 13, weight: .semibold))
+            .foregroundStyle(c.textSecondary)
+            .padding(.vertical, 8)
         }
-        .padding(12)
-        .background(c.accent, in: .rect(cornerRadius: Radius.md))
     }
 
     private func planCard(_ plan: Plan) -> some View {
@@ -90,6 +105,9 @@ struct UpgradeScreen: View {
         case .family:
             title = "Family"; price = AppConfig.FamilyPlan.annualDisplay; per = AppConfig.FamilyPlan.annualPerMonth
             blurb = "Up to \(AppConfig.FamilyPlan.maxMembers) members."; savings = AppConfig.FamilyPlan.annualSavingsLabel
+        case .lifetime:
+            title = "Lifetime"; price = AppConfig.Pricing.lifetimeDisplay; per = "one-time"
+            blurb = "Pay once, premium forever."; savings = nil
         }
         return Button {
             Haptics.selection()
@@ -160,7 +178,8 @@ struct UpgradeScreen: View {
         Task { @MainActor in
             defer { isProcessing = false }
             try? await Task.sleep(for: .seconds(1))
-            appState.upgradeTier(selectedPlan == .family ? .family : .premium)
+            let tier: SubscriptionTier = if selectedPlan == .family { .family } else if selectedPlan == .lifetime { .lifetime } else { .premium }
+            appState.upgradeTier(tier)
             Haptics.success()
             dismiss()
         }

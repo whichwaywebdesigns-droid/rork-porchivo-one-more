@@ -29,6 +29,7 @@ import {
   MapPin,
   BarChart3,
   Headphones,
+  Loader2,
 } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import Colors from '@/constants/colors';
@@ -47,7 +48,7 @@ import {
   DISCOUNT_WINBACK_PRICE,
   PaywallTrigger,
 } from '@/lib/tiers';
-import { ENTERPRISE_PLAN } from '@/config/app';
+import { ENTERPRISE_PLAN, PRICING } from '@/config/app';
 import { useLivePrices } from '@/hooks/useLivePrices';
 
 type TierTab = 'premium' | 'family' | 'enterprise';
@@ -160,7 +161,7 @@ export default function UpgradeScreen() {
   });
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [showAllFeatures, setShowAllFeatures] = useState<boolean>(false);
-  const [showLifetime, setShowLifetime] = useState<boolean>(false);
+
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(20)).current;
@@ -195,7 +196,7 @@ export default function UpgradeScreen() {
   const lifetime = useMemo(() => PLANS.find((p) => p.tier === 'lifetime')!, []);
 
   // Live, localized store prices. Falls back to config labels in preview/Expo Go.
-  const { priceFor, perMonthFor } = useLivePrices();
+  const { priceFor, perMonthFor, isLoading: pricesLoading } = useLivePrices();
 
   const handleSelectTab = useCallback((t: TierTab) => {
     Haptics.selectionAsync();
@@ -204,7 +205,6 @@ export default function UpgradeScreen() {
     else if (t === 'family') setSelectedPlanId('family_annual');
     else setSelectedPlanId('enterprise_annual');
     setShowAllFeatures(false);
-    setShowLifetime(false);
     track('paywall_tab_change', { tab: t });
   }, [track]);
 
@@ -393,6 +393,23 @@ export default function UpgradeScreen() {
             </View>
           )}
 
+          {/* Day-7 escape hatch: keeps free users from uninstalling when no trial is available */}
+          {trigger === 'day7_hard' && !isEnterprise && (
+            <TouchableOpacity
+              style={styles.limitedFreeBtn}
+              onPress={() => {
+                track('paywall_dismiss', { trigger, method: 'limited_free' });
+                onPaywallDismiss();
+                router.back();
+              }}
+              activeOpacity={0.7}
+              testID="btn-limited-free"
+            >
+              <Text style={styles.limitedFreeText}>Continue with limited free</Text>
+              <Text style={styles.limitedFreeSub}>Track 1 package · 10-min refresh</Text>
+            </TouchableOpacity>
+          )}
+
           {isEnterprise && (
             <View style={styles.revenueRow}>
               <View style={styles.revenueStat}>
@@ -409,6 +426,17 @@ export default function UpgradeScreen() {
                 <Text style={styles.revenueNum}>14</Text>
                 <Text style={styles.revenueLabel}>day free trial</Text>
               </View>
+            </View>
+          )}
+
+          {!isEnterprise && tab === 'premium' && (
+            <View style={styles.priceAnchorRow}>
+              <Text style={styles.priceAnchorText}>
+                <Text style={styles.priceAnchorHighlight}>{priceFor('premium_annual') ?? PRICING.annual.displayPrice}</Text>{' '}
+                billed yearly · just{' '}
+                <Text style={styles.priceAnchorHighlight}>{perMonthFor('premium_annual') ?? PRICING.annual.perMonthLabel}</Text>{' '}
+                to protect every delivery
+              </Text>
             </View>
           )}
 
@@ -533,19 +561,21 @@ export default function UpgradeScreen() {
 
         {/* ── CTA ── */}
         <TouchableOpacity
-          style={[styles.ctaBtn, isEnterprise && styles.ctaBtnEnterprise, isProcessing && styles.ctaBtnDisabled]}
+          style={[styles.ctaBtn, isEnterprise && styles.ctaBtnEnterprise, (isProcessing || pricesLoading) && styles.ctaBtnDisabled]}
           onPress={() => handlePurchase(selectedPlanId)}
-          disabled={isProcessing}
+          disabled={isProcessing || pricesLoading}
           activeOpacity={0.9}
           testID="cta-purchase"
         >
-          {isEnterprise ? (
+          {pricesLoading ? (
+            <Loader2 size={18} color={palette.railAccent} />
+          ) : isEnterprise ? (
             <Building2 size={18} color="#fff" />
           ) : (
             <Crown size={18} color={palette.railAccent} />
           )}
           <Text style={[styles.ctaText, isEnterprise && styles.ctaTextEnterprise]}>
-            {ctaLabel}
+            {pricesLoading ? 'Loading prices...' : ctaLabel}
           </Text>
         </TouchableOpacity>
 
@@ -621,21 +651,8 @@ export default function UpgradeScreen() {
         </Text>
 
         {/* ── Lifetime (premium only) ── */}
+        {/* ── Lifetime card (always visible on Premium tab) ── */}
         {tab === 'premium' && (
-          <TouchableOpacity
-            style={styles.lifetimeToggle}
-            onPress={() => { Haptics.selectionAsync(); setShowLifetime((v) => !v); }}
-            activeOpacity={0.7}
-            testID="toggle-lifetime"
-          >
-            <InfinityIcon size={13} color={Colors.slateLight} />
-            <Text style={styles.lifetimeToggleText}>
-              {showLifetime ? 'Hide one-time option' : 'Looking for a one-time purchase?'}
-            </Text>
-          </TouchableOpacity>
-        )}
-
-        {tab === 'premium' && showLifetime && (
           <View style={styles.lifetimeCard}>
             <View style={styles.lifetimeHeader}>
               <View style={styles.lifetimeIconWrap}>
@@ -650,7 +667,7 @@ export default function UpgradeScreen() {
             <TouchableOpacity
               style={styles.lifetimeBtn}
               onPress={() => handlePurchase(lifetime.id)}
-              disabled={isProcessing}
+              disabled={isProcessing || pricesLoading}
               activeOpacity={0.85}
               testID="cta-lifetime"
             >
@@ -765,6 +782,20 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     maxWidth: 320,
   },
+  priceAnchorRow: {
+    marginTop: 10,
+    paddingHorizontal: 20,
+  },
+  priceAnchorText: {
+    fontSize: 13,
+    color: Colors.slateLight,
+    textAlign: 'center',
+    lineHeight: 18,
+  },
+  priceAnchorHighlight: {
+    fontWeight: '700' as const,
+    color: Colors.primary,
+  },
   discountBanner: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -782,6 +813,26 @@ const styles = StyleSheet.create({
     fontWeight: '800' as const,
     color: palette.railAccent,
     letterSpacing: 0.4,
+  },
+  limitedFreeBtn: {
+    alignItems: 'center',
+    marginTop: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    backgroundColor: Colors.white,
+  },
+  limitedFreeText: {
+    fontSize: 13,
+    fontWeight: '700' as const,
+    color: Colors.slate,
+  },
+  limitedFreeSub: {
+    fontSize: 11,
+    color: Colors.slateLight,
+    marginTop: 1,
   },
 
   // Revenue stats (enterprise)
@@ -1063,6 +1114,9 @@ const styles = StyleSheet.create({
     shadowColor: '#16A34A',
   },
   ctaBtnDisabled: { opacity: 0.7 },
+  ctaSpinner: {
+    marginRight: 6,
+  },
   ctaText: {
     fontSize: 14,
     fontWeight: '900' as const,
