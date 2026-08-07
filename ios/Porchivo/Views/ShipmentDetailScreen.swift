@@ -12,6 +12,8 @@ struct ShipmentDetailScreen: View {
     @Environment(AppState.self) private var appState
     @Environment(\.porchivo) private var c
     let shipmentId: String
+    @State private var showAcceptConfirmation = false
+    @State private var showCompleteConfirmation = false
 
     var body: some View {
         Group {
@@ -26,6 +28,22 @@ struct ShipmentDetailScreen: View {
         .background(c.background.ignoresSafeArea())
         .navigationTitle("Shipment")
         .navigationBarTitleDisplayMode(.inline)
+        .confirmationDialog("Secure this package?", isPresented: $showAcceptConfirmation, titleVisibility: .visible) {
+            Button("Accept & secure", role: .none) {
+                Task { await confirmAccept() }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("The homeowner will be notified that you have taken custody of their delivery.")
+        }
+        .confirmationDialog("Mark returned to homeowner?", isPresented: $showCompleteConfirmation, titleVisibility: .visible) {
+            Button("Mark returned", role: .none) {
+                Task { await confirmComplete() }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This confirms the package is back with the homeowner and completes the shipment.")
+        }
     }
 
     private var shipment: Shipment? {
@@ -163,20 +181,28 @@ struct ShipmentDetailScreen: View {
 
     private func acceptButton(_ s: Shipment) -> some View {
         PrimaryButton(title: "Accept as Porch Partner", systemImage: "hand.raised.fill") {
-            Task {
-                let ok = await appState.acceptShipment(id: s.id)
-                if ok { Haptics.success() }
-            }
+            Haptics.light()
+            showAcceptConfirmation = true
         }
     }
 
     private func completeButton(_ s: Shipment) -> some View {
         PrimaryButton(title: "Mark returned to homeowner", systemImage: "checkmark.seal.fill",
                       tint: c.success) {
-            Task {
-                let ok = await appState.completeShipment(id: s.id)
-                if ok { Haptics.success() }
-            }
+            Haptics.light()
+            showCompleteConfirmation = true
         }
+    }
+
+    private func confirmAccept() async {
+        guard let id = shipment?.id else { return }
+        let ok = await appState.acceptShipment(id: id)
+        if ok { Haptics.success() }
+    }
+
+    private func confirmComplete() async {
+        guard let id = shipment?.id else { return }
+        let ok = await appState.completeShipment(id: id)
+        if ok { Haptics.success() }
     }
 }
