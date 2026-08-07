@@ -40,6 +40,8 @@ import { useColors, AppColors } from '@/constants/colors';
 import { usePackages } from '@/store/PackagesContext';
 import { useDrivers } from '@/store/DriversContext';
 import { usePorchPartners } from '@/store/PorchPartnersContext';
+import { useShipments } from '@/store/ShipmentsContext';
+import { Image as RNImage } from 'react-native';
 import { PackageTrackingStatus, Driver, PorchPartner } from '@/types';
 import CarrierIcon from '@/components/CarrierIcon';
 import { canAssignDriver, calculateMockDistance } from '@/lib/driverAssignment';
@@ -207,6 +209,8 @@ export default function PackageDetailScreen() {
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const { getRankedDrivers, getDriverForPackage, assignDriverToPackage: driverCtxAssign, unassignDriverFromPackage: driverCtxUnassign } = useDrivers();
   const { activePartners, getPartnerById, getHoldForPackage, assignPartnerToPackage, unassignPartnerFromPackage, markPickedUp, markReturned } = usePorchPartners();
+  const { shipments } = useShipments();
+  const [photoViewerVisible, setPhotoViewerVisible] = useState<boolean>(false);
   const [showDriverPicker, setShowDriverPicker] = useState<boolean>(false);
   const [showPartnerPicker, setShowPartnerPicker] = useState<boolean>(false);
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -215,6 +219,14 @@ export default function PackageDetailScreen() {
   const assignedDriver = useMemo(() => (pkg ? getDriverForPackage(pkg.id) : undefined), [pkg, getDriverForPackage]);
   const assignedPartner = useMemo(() => (pkg?.porchPartnerId ? getPartnerById(pkg.porchPartnerId) : undefined), [pkg?.porchPartnerId, getPartnerById]);
   const hold = useMemo(() => (pkg ? getHoldForPackage(pkg.id) : undefined), [pkg, getHoldForPackage]);
+
+  const deliveryPhotoUrl = useMemo(() => {
+    if (!pkg?.trackingNumber) return null;
+    const match = shipments.find(
+      (s) => s.trackingNumber === pkg.trackingNumber && s.completionPhotoUrl,
+    );
+    return match?.completionPhotoUrl ?? null;
+  }, [shipments, pkg?.trackingNumber]);
 
   const rankedDrivers = useMemo(() => {
     if (!pkg) return [];
@@ -591,6 +603,32 @@ export default function PackageDetailScreen() {
           <ChevronRight size={18} color={colors.slateLighter} />
         </TouchableOpacity>
 
+        {deliveryPhotoUrl && pkg.currentStatus === 'delivered' ? (
+          <View style={styles.proofCard}>
+            <View style={styles.proofHeader}>
+              <View style={styles.proofIconWrap}>
+                <PackageCheck size={16} color={colors.success} />
+              </View>
+              <View style={styles.proofHeaderText}>
+                <Text style={styles.proofTitle}>Delivery Confirmation Photo</Text>
+                <Text style={styles.proofSubText}>Your Porch Partner captured this photo when marking the delivery complete.</Text>
+              </View>
+            </View>
+            <TouchableOpacity
+              activeOpacity={0.9}
+              onPress={() => setPhotoViewerVisible(true)}
+            >
+              <View style={styles.proofPhotoWrap}>
+                <RNImage
+                  source={{ uri: deliveryPhotoUrl }}
+                  style={styles.proofPhoto}
+                  resizeMode="cover"
+                />
+              </View>
+            </TouchableOpacity>
+          </View>
+        ) : null}
+
         {pkg.trackingNumber ? (
           <View style={{ marginTop: 20 }}>
             <LiveTrackingTimeline
@@ -685,6 +723,30 @@ export default function PackageDetailScreen() {
           <Text style={styles.deleteText}>Remove Package</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      <Modal
+        visible={photoViewerVisible}
+        animationType="fade"
+        presentationStyle="fullScreen"
+        onRequestClose={() => setPhotoViewerVisible(false)}
+      >
+        <View style={styles.photoViewer}>
+          <TouchableOpacity
+            style={styles.photoViewerClose}
+            onPress={() => setPhotoViewerVisible(false)}
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          >
+            <X size={24} color={colors.white} />
+          </TouchableOpacity>
+          {deliveryPhotoUrl && (
+            <RNImage
+              source={{ uri: deliveryPhotoUrl }}
+              style={styles.photoViewerImage}
+              resizeMode="contain"
+            />
+          )}
+        </View>
+      </Modal>
 
       <Modal
         visible={showPartnerPicker}
@@ -1270,6 +1332,78 @@ function createStyles(colors: AppColors) {
   riskCtaSub: {
     fontSize: 12,
     color: colors.slateLight,
+  },
+  proofCard: {
+    backgroundColor: colors.white,
+    borderRadius: 18,
+    marginTop: 16,
+    padding: 18,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 3,
+    borderLeftWidth: 3,
+    borderLeftColor: colors.success,
+  },
+  proofHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+    marginBottom: 14,
+  },
+  proofIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: colors.successLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  proofHeaderText: {
+    flex: 1,
+    gap: 3,
+  },
+  proofTitle: {
+    fontSize: 15,
+    fontWeight: '700' as const,
+    color: '#1F2937',
+  },
+  proofSubText: {
+    fontSize: 12,
+    color: colors.slateLight,
+    lineHeight: 17,
+  },
+  proofPhotoWrap: {
+    borderRadius: 14,
+    overflow: 'hidden' as const,
+    backgroundColor: colors.borderLight,
+  },
+  proofPhoto: {
+    width: '100%',
+    height: 220,
+  },
+  photoViewer: {
+    flex: 1,
+    backgroundColor: '#000000',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  photoViewerClose: {
+    position: 'absolute' as const,
+    top: 56,
+    right: 20,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 10,
+  },
+  photoViewerImage: {
+    width: '100%',
+    height: '80%',
   },
   });
 }

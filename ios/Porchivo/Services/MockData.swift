@@ -69,6 +69,7 @@ enum MockData {
                      preferredReturnTime: "Evening",
                      trackingNumber: "794644790132",
                      deliveryStatus: .deliveredToHomeowner,
+                     completionPhotoUrl: "https://images.unsplash.com/photo-1586768359841-59e5c6c0a5b0?w=600",
                      createdAt: n.addingTimeInterval(-72 * HOUR),
                      updatedAt: n.addingTimeInterval(-44 * HOUR)),
         ]

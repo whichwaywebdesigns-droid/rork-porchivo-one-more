@@ -125,6 +125,7 @@ nonisolated struct DbShipment: Codable, Sendable {
     var preferredReturnTime: String?
     var trackingNumber: String?
     var deliveryStatus: String
+    var completionPhotoUrl: String?
     var createdAt: String?
     var updatedAt: String?
 
@@ -144,6 +145,7 @@ nonisolated struct DbShipment: Codable, Sendable {
         case preferredReturnTime = "preferred_return_time"
         case trackingNumber = "tracking_number"
         case deliveryStatus = "delivery_status"
+        case completionPhotoUrl = "completion_photo_url"
         case createdAt = "created_at"
         case updatedAt = "updated_at"
     }

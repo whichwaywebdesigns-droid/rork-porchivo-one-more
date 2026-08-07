@@ -32,6 +32,7 @@ data class DbShipment(
     @SerialName("tracking_number") val trackingNumber: String? = null,
     @SerialName("carrier_tracking_url") val carrierTrackingUrl: String? = null,
     @SerialName("delivery_status") val deliveryStatus: String = "pending",
+    @SerialName("completion_photo_url") val completionPhotoUrl: String? = null,
     @SerialName("created_at") val createdAt: String = "",
     @SerialName("updated_at") val updatedAt: String = "",
 )

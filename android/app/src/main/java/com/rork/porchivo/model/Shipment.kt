@@ -18,6 +18,7 @@ data class Shipment(
     val preferredReturnTime: String = "Anytime",
     val trackingNumber: String? = null,
     val deliveryStatus: DeliveryStatus,
+    val completionPhotoUrl: String? = null,
     val createdAt: Long,
     val updatedAt: Long,
 )

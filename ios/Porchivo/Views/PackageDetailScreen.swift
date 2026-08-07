@@ -13,6 +13,17 @@ struct PackageDetailScreen: View {
     @Environment(\.porchivo) private var c
     let packageId: String
     @State private var showDelete = false
+    @State private var showFullPhoto = false
+
+    private var deliveryPhotoUrl: String? {
+        guard let pkg,
+              let trackingNumber = pkg.trackingNumber as String?,
+              !trackingNumber.isEmpty,
+              pkg.currentStatus == .delivered else { return nil }
+        return appState.shipments.first {
+            $0.trackingNumber == trackingNumber && $0.completionPhotoUrl != nil
+        }?.completionPhotoUrl
+    }
 
     var body: some View {
         Group {
@@ -33,6 +44,11 @@ struct PackageDetailScreen: View {
                 Haptics.medium()
             }
             Button("Cancel", role: .cancel) {}
+        }
+        .fullScreenCover(isPresented: $showFullPhoto) {
+            if let url = deliveryPhotoUrl {
+                PhotoFullScreen(url: url)
+            }
         }
     }
 
@@ -64,6 +80,47 @@ struct PackageDetailScreen: View {
                         row("Expected by", expectedLabel(p), "calendar")
                         if !p.notesForPartner.isEmpty {
                             row("Notes for partner", p.notesForPartner, "text.bubble.fill")
+                        }
+                    }
+                }
+
+                if let photoUrl = deliveryPhotoUrl {
+                    SectionHeader(title: "Delivery confirmation")
+                    Card {
+                        VStack(alignment: .leading, spacing: 10) {
+                            HStack(spacing: 10) {
+                                Image(systemName: "camera.fill")
+                                    .font(.system(size: 13, weight: .bold))
+                                    .foregroundStyle(c.success)
+                                    .frame(width: 22)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Proof of delivery")
+                                        .font(.system(size: 14, weight: .semibold))
+                                        .foregroundStyle(c.textPrimary)
+                                    Text("Your Porch Partner captured this photo when marking the delivery complete.")
+                                        .font(.system(size: 12))
+                                        .foregroundStyle(c.textMuted)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                }
+                                Spacer()
+                            }
+                            Color(.secondarySystemBackground)
+                                .frame(height: 200)
+                                .overlay {
+                                    AsyncImage(url: URL(string: photoUrl)) { phase in
+                                        if let image = phase.image {
+                                            image.resizable().aspectRatio(contentMode: .fill).allowsHitTesting(false)
+                                        } else if phase.error != nil {
+                                            Image(systemName: "photo")
+                                                .font(.system(size: 30))
+                                                .foregroundStyle(c.textMuted)
+                                        } else {
+                                            ProgressView()
+                                        }
+                                    }
+                                }
+                                .clipShape(.rect(cornerRadius: Radius.md))
+                                .onTapGesture { showFullPhoto = true }
                         }
                     }
                 }
@@ -141,5 +198,38 @@ struct PackageDetailScreen: View {
         f.dateStyle = .medium
         f.timeStyle = .short
         return f.string(from: d)
+    }
+}
+
+private struct PhotoFullScreen: View {
+    let url: String
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        ZStack {
+            Color.black.ignoresSafeArea()
+            AsyncImage(url: URL(string: url)) { phase in
+                if let image = phase.image {
+                    image.resizable().aspectRatio(contentMode: .fit)
+                } else {
+                    ProgressView().tint(.white)
+                }
+            }
+            .padding(.horizontal, 8)
+            VStack {
+                HStack {
+                    Spacer()
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 28))
+                            .foregroundStyle(.white.opacity(0.8))
+                            .padding(8)
+                    }
+                }
+                Spacer()
+            }
+        }
     }
 }

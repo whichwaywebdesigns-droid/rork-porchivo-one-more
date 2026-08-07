@@ -145,6 +145,7 @@ nonisolated struct Shipment: Identifiable, Equatable, Sendable {
     var preferredReturnTime: String
     var trackingNumber: String?
     var deliveryStatus: DeliveryStatus
+    var completionPhotoUrl: String?
     var createdAt: Date
     var updatedAt: Date
 }

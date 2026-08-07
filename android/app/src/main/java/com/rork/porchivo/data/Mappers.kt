@@ -71,6 +71,7 @@ object Mappers {
         preferredReturnTime = s.preferredReturnTime,
         trackingNumber = s.trackingNumber,
         deliveryStatus = parseDeliveryStatus(s.deliveryStatus),
+        completionPhotoUrl = s.completionPhotoUrl,
         createdAt = parseIsoToMillis(s.createdAt),
         updatedAt = parseIsoToMillis(s.updatedAt),
     )

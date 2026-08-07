@@ -121,6 +121,7 @@ enum Mappers {
             preferredReturnTime: s.preferredReturnTime ?? "Anytime",
             trackingNumber: s.trackingNumber,
             deliveryStatus: parseDeliveryStatus(s.deliveryStatus),
+            completionPhotoUrl: s.completionPhotoUrl,
             createdAt: parseISO(s.createdAt),
             updatedAt: parseISO(s.updatedAt)
         )
