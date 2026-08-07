@@ -285,32 +285,6 @@ export default function OnboardingScreen(): React.ReactElement {
           </View>
         </GestureDetector>
 
-        {/* Slide arrows */}
-        {!isFirstSlide && (
-          <TouchableOpacity
-            onPress={goPreviousRef.current}
-            style={[styles.arrow, styles.arrowLeft]}
-            activeOpacity={0.7}
-            accessibilityLabel="Previous slide"
-          >
-            <View style={styles.arrowCircle}>
-              <ChevronLeft size={24} color={COLORS.primary} strokeWidth={2.5} />
-            </View>
-          </TouchableOpacity>
-        )}
-        {!isLastSlide && (
-          <TouchableOpacity
-            onPress={goNextRef.current}
-            style={[styles.arrow, styles.arrowRight]}
-            activeOpacity={0.7}
-            accessibilityLabel="Next slide"
-          >
-            <View style={styles.arrowCircle}>
-              <ChevronRight size={24} color={COLORS.primary} strokeWidth={2.5} />
-            </View>
-          </TouchableOpacity>
-        )}
-
         {!isLastSlide && (
           <Animated.View
             style={[styles.swipeHint, swipeHintStyle]}
