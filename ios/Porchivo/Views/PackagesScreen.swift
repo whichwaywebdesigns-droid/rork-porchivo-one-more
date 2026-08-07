@@ -13,6 +13,13 @@ struct PackagesScreen: View {
     @Environment(\.porchivo) private var c
     @State private var path = NavigationPath()
 
+    private func isFinished(_ pkg: TrackedPackage) -> Bool {
+        switch pkg.currentStatus {
+        case .delivered, .pickedUp, .returned: return true
+        default: return false
+        }
+    }
+
     var body: some View {
         NavigationStack(path: $path) {
             ScrollView {
@@ -114,13 +121,6 @@ struct PackagesScreen: View {
         .shadow(color: c.textPrimary.opacity(0.05), radius: 6, y: 2)
     }
 
-    private func isFinished(_ pkg: TrackedPackage) -> Bool {
-        switch pkg.currentStatus {
-        case .delivered, .pickedUp, .returned: return true
-        default: return false
-        }
-    }
-
     private func isDueToday(_ pkg: TrackedPackage) -> Bool {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
@@ -184,6 +184,13 @@ struct PackagesScreen: View {
             }
             .font(.system(size: 11, weight: .medium))
             .foregroundStyle(c.textSecondary)
+
+            if !isFinished(pkg) {
+                DeliveryCountdownView(
+                    expectedDeliveryDate: pkg.expectedDeliveryDate,
+                    isDelivered: false
+                )
+            }
         }
         .padding(Space.md)
         .background(c.surface, in: .rect(cornerRadius: Radius.lg))

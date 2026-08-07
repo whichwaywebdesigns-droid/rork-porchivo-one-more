@@ -22,6 +22,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import StatusPill from '@/components/ui/StatusPill';
 import EmptyState from '@/components/ui/EmptyState';
 import SegmentedControl from '@/components/ui/SegmentedControl';
+import { DeliveryCountdown } from '@/components/DeliveryCountdown';
 import { log } from "@/lib/logger";
 
 export type PackageFilter = 'all' | 'pending' | 'delivered';
@@ -179,6 +180,11 @@ function PackageCard({ pkg, onPress }: { pkg: TrackedPackage; onPress: () => voi
                 </View>
               );
             })()}
+            <DeliveryCountdown
+              expectedDeliveryDate={pkg.expectedDeliveryDate}
+              currentStatus={pkg.currentStatus}
+              deliveredTimestamp={pkg.deliveredTimestamp}
+            />
           </View>
           <View style={styles.addressBadge}>
             <Text style={styles.addressText}>

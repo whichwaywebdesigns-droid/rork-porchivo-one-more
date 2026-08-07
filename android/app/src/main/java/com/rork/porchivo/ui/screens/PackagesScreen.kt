@@ -38,6 +38,7 @@ import com.rork.porchivo.model.TrackedPackage
 import com.rork.porchivo.ui.components.CarrierIcon
 import com.rork.porchivo.ui.components.EmptyState
 import com.rork.porchivo.ui.components.PackageStatusPill
+import com.rork.porchivo.ui.components.DeliveryCountdown
 import com.rork.porchivo.ui.navigation.Routes
 import com.rork.porchivo.ui.theme.PorchivoTheme
 import com.rork.porchivo.ui.viewmodel.PackagesViewModel
@@ -165,6 +166,14 @@ private fun PackageCard(
                         color = c.textPrimary,
                         fontSize = 15.sp,
                         fontWeight = FontWeight.SemiBold,
+                    )
+                    DeliveryCountdown(
+                        expectedDeliveryDate = pkg.expectedDeliveryDate,
+                        isDelivered = pkg.currentStatus in setOf(
+                            com.rork.porchivo.model.PackageTrackingStatus.DELIVERED,
+                            com.rork.porchivo.model.PackageTrackingStatus.PICKED_UP,
+                            com.rork.porchivo.model.PackageTrackingStatus.RETURNED,
+                        ),
                     )
                 }
                 Text(
