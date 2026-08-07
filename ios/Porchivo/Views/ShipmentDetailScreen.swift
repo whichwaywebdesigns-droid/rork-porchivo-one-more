@@ -22,6 +22,7 @@ struct ShipmentDetailScreen: View {
                            message: "This shipment may have been cancelled or removed.")
             }
         }
+        .biometricGuard(reason: "Authenticate to view shipment details.")
         .background(c.background.ignoresSafeArea())
         .navigationTitle("Shipment")
         .navigationBarTitleDisplayMode(.inline)

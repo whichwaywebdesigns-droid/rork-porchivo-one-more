@@ -11,6 +11,7 @@ import SwiftUI
 struct RootView: View {
     @Environment(AppState.self) private var appState
     @Environment(\.colorScheme) private var systemScheme
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         Group {
@@ -33,6 +34,18 @@ struct RootView: View {
             }
         }
         .porchivoTheme(systemScheme)
+        .onChange(of: scenePhase) { _, newPhase in
+            switch newPhase {
+            case .background:
+                appState.handleEnterBackground()
+            case .active:
+                Task { @MainActor in appState.handleEnterForeground() }
+            case .inactive:
+                appState.handleSceneInactive()
+            @unknown default:
+                break
+            }
+        }
     }
 }
 

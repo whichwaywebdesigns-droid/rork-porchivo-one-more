@@ -64,6 +64,20 @@ final class AppState {
     // Push notifications — deep-link shipment id set when the user taps a push.
     var pendingDeepLinkShipmentId: String? = nil
 
+    // Foreground re-lock — when biometric unlock is enabled, the app re-locks
+    // after being backgrounded for longer than `relockInterval`. This prevents
+    // someone from picking up a device that was briefly set down and seeing
+    // package data without re-authenticating.
+    var isForegroundLocked: Bool = false
+    private var backgroundedAt: Date? = nil
+    private let relockInterval: TimeInterval = 30  // 30 seconds in background → re-lock
+
+    // Per-screen biometric guard — sensitive screens (package detail, shipment
+    // detail) require re-auth if the user hasn't authenticated within this
+    // window. Reset on each successful unlock.
+    private var lastBiometricSuccessAt: Date? = nil
+    let biometricReauthInterval: TimeInterval = 300  // 5 minutes
+
     private let supabase = SupabaseService.shared
     private let packagesKey = "porchivo_tracked_packages"
     private let biometricPrefKey = "porchivo_biometric_unlock_enabled"
@@ -124,6 +138,7 @@ final class AppState {
         )
         if ok {
             Haptics.success()
+            lastBiometricSuccessAt = Date()
             await unlockSession()
         } else {
             Haptics.error()
@@ -143,6 +158,7 @@ final class AppState {
             )
             guard ok else { return biometricUnlockEnabled }
             biometricUnlockEnabled = true
+            lastBiometricSuccessAt = Date()
             UserDefaults.standard.set(true, forKey: biometricPrefKey)
             Haptics.success()
         } else {
@@ -619,6 +635,70 @@ final class AppState {
 
     func setDarkTheme(_ dark: Bool) { darkThemeOverride = dark }
     func upgradeTier(_ newTier: SubscriptionTier) { tier = newTier }
+
+    // MARK: - Foreground re-lock (scene phase)
+
+    /// Called when the app enters the background. Records the timestamp so we
+    /// can decide whether to re-lock on return.
+    func handleEnterBackground() {
+        backgroundedAt = Date()
+    }
+
+    /// Called when the app returns to the foreground. If biometric unlock is
+    /// enabled and the app was backgrounded longer than `relockInterval`, the
+    /// session is re-locked so the user must authenticate again.
+    @MainActor
+    func handleEnterForeground() {
+        guard biometricUnlockEnabled,
+              case .authenticated(let userId) = authState,
+              availableBiometry != .none else { return }
+        if let bgAt = backgroundedAt {
+            let elapsed = Date().timeIntervalSince(bgAt)
+            if elapsed >= relockInterval {
+                isForegroundLocked = true
+                authState = .locked(userId)
+            }
+        }
+        backgroundedAt = nil
+    }
+
+    /// Called when the app is about to be captured for the app switcher
+    /// screenshot. The privacy shield handles the visual blur; this just
+    /// marks the state so we know a re-lock may be needed on return.
+    func handleSceneInactive() {
+        // Nothing to do here — the privacy shield modifier handles the visual
+        // blur. The re-lock decision happens in handleEnterForeground.
+    }
+
+    // MARK: - Per-screen biometric guard
+
+    /// Returns `true` if enough time has passed since the last biometric
+    /// success that a sensitive screen should require re-authentication.
+    var needsReauthForSensitiveContent: Bool {
+        guard biometricUnlockEnabled, availableBiometry != .none else {
+            return false
+        }
+        guard let last = lastBiometricSuccessAt else {
+            // No prior auth in this session — require it.
+            return true
+        }
+        return Date().timeIntervalSince(last) >= biometricReauthInterval
+    }
+
+    /// Re-authenticates for a sensitive screen (package/shipment detail).
+    /// On success, refreshes the timestamp and returns `true`.
+    @MainActor
+    func performBiometricReauth(reason: String) async -> Bool {
+        guard availableBiometry != .none else { return true }
+        let ok = await BiometricAuthService.authenticate(reason: reason)
+        if ok {
+            lastBiometricSuccessAt = Date()
+            Haptics.success()
+        } else {
+            Haptics.error()
+        }
+        return ok
+    }
 }
 
 /// Unit type for LoadState when there's no payload.

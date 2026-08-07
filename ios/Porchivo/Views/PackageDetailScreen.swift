@@ -23,6 +23,7 @@ struct PackageDetailScreen: View {
                            message: "This tracked package may have been removed.")
             }
         }
+        .biometricGuard(reason: "Authenticate to view package details.")
         .background(c.background.ignoresSafeArea())
         .navigationTitle("Package")
         .navigationBarTitleDisplayMode(.inline)

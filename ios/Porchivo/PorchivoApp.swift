@@ -22,6 +22,7 @@ struct PorchivoApp: App {
                                       : appState.darkThemeOverride == false ? .light
                                       : nil)
                 .tint(.porchivoAccent)
+                .privacyShield()
                 .task { await appState.restoreSession() }
                 .onAppear {
                     appDelegate.appState = appState
