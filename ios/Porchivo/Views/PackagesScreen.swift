@@ -94,7 +94,8 @@ struct PackagesScreen: View {
     }
 
     private func packageCard(_ pkg: TrackedPackage) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
+        let priority = priorityBadge(for: pkg)
+        return VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 10) {
                 Image(systemName: pkg.carrier.sfSymbol)
                     .font(.system(size: 16, weight: .bold))
@@ -110,11 +111,14 @@ struct PackagesScreen: View {
                         .foregroundStyle(c.textMuted)
                 }
                 Spacer()
-                Pill(text: pkg.currentStatus.label, tint: c.accent, softTint: c.accentSoft)
+                if let priority {
+                    PriorityPill(text: priority.text, tint: priority.tint, softTint: priority.softTint)
+                }
             }
             HStack(spacing: 12) {
                 Label(pkg.addressNickname.label, systemImage: "mappin.fill")
                 Label(expectedLabel(pkg), systemImage: "calendar")
+                Spacer()
             }
             .font(.system(size: 11, weight: .medium))
             .foregroundStyle(c.textSecondary)
@@ -124,11 +128,66 @@ struct PackagesScreen: View {
         .shadow(color: c.textPrimary.opacity(0.05), radius: 6, y: 2)
     }
 
+    private func priorityBadge(for pkg: TrackedPackage) -> PriorityBadge? {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let expected = calendar.startOfDay(for: pkg.expectedDeliveryDate)
+        let days = calendar.dateComponents([.day], from: today, to: expected).day ?? 0
+
+        // Don't badge packages that are already delivered/picked up/returned.
+        switch pkg.currentStatus {
+        case .delivered, .pickedUp, .returned:
+            return nil
+        default:
+            break
+        }
+
+        if days == 0 {
+            return PriorityBadge(text: "Due today", tint: c.danger, softTint: c.dangerSoft, icon: "flame.fill")
+        } else if days < 0 {
+            return PriorityBadge(text: "Overdue", tint: c.danger, softTint: c.dangerSoft, icon: "exclamationmark.triangle.fill")
+        } else if days == 1 {
+            return PriorityBadge(text: "Due tomorrow", tint: c.warmOrange, softTint: c.warmOrangeSoft, icon: "clock.arrow.2.circlepath")
+        } else if days <= 3 {
+            return PriorityBadge(text: "Due soon", tint: c.gold, softTint: c.goldSoft, icon: "calendar.badge.clock")
+        }
+        return nil
+    }
+
+    private struct PriorityBadge: Equatable {
+        let text: String
+        let tint: Color
+        let softTint: Color
+        let icon: String
+    }
+
     private func expectedLabel(_ pkg: TrackedPackage) -> String {
         let f = DateFormatter()
         f.dateStyle = .medium
         f.timeStyle = .none
         return "By \(f.string(from: pkg.expectedDeliveryDate))"
+    }
+}
+
+struct PriorityPill: View {
+    let text: String
+    let tint: Color
+    let softTint: Color
+    var icon: String? = nil
+
+    var body: some View {
+        HStack(spacing: 4) {
+            if let icon {
+                Image(systemName: icon)
+                    .font(.system(size: 10, weight: .bold))
+            }
+            Text(text)
+                .font(.system(size: 11, weight: .bold))
+        }
+        .foregroundStyle(tint)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
+        .background(softTint, in: .rect(cornerRadius: Radius.pill))
     }
 }
 
