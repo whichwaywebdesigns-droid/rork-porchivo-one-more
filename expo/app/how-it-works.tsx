@@ -59,6 +59,7 @@ export default function HowItWorksScreen() {
               <View style={styles.stepContent}>
                 <Text style={[styles.stepTitle, { color: Colors.slate }]}>Porch Partners</Text>
                 <Text style={[styles.stepDesc, { color: Colors.slateLight }]}>Trusted neighbors can hold packages for you when you&apos;re away. No more deliveries sitting unattended for hours.</Text>
+                <Text style={[styles.stepHighlight, { color: Colors.primary }]}>Great for when you are going to be home late or about to take a vacation!</Text>
               </View>
             </View>
           )}
@@ -169,6 +170,12 @@ const styles = StyleSheet.create({
   stepDesc: {
     fontSize: 13,
     lineHeight: 19,
+  },
+  stepHighlight: {
+    fontSize: 13,
+    fontWeight: '600' as const,
+    lineHeight: 19,
+    marginTop: 4,
   },
   earnLink: {
     marginTop: 6,

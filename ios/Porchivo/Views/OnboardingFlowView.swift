@@ -83,6 +83,11 @@ struct OnboardingFlowView: View {
                     .font(.system(size: 15, weight: .medium))
                     .foregroundStyle(c.textSecondary)
                     .multilineTextAlignment(.center)
+                Text("Great for when you are going to be home late or about to take a vacation!")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(c.accent)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 12)
             }
             Spacer()
             PrimaryButton(title: "Get started", systemImage: "arrow.right") {

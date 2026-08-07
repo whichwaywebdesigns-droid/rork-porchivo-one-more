@@ -162,6 +162,9 @@ export default function IndexPage() {
                 <p className="text-slate-400 text-sm leading-relaxed">
                   Track your package, assign a trusted neighbor, and receive — three taps.
                 </p>
+                <p className="text-slate-500 text-sm leading-relaxed mt-2">
+                  Great for when you are going to be home late or about to take a vacation!
+                </p>
               </div>
             </div>
             <div className="bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden">

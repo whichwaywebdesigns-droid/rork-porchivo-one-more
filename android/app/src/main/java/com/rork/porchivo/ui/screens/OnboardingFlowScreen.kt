@@ -718,6 +718,18 @@ private fun PorchPartnersStep(c: com.rork.porchivo.ui.theme.PorchivoColors, onCo
             )
         }
 
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Text(
+            text = "Great for when you are going to be home late or about to take a vacation!",
+            color = c.accent,
+            fontSize = 13.5.sp,
+            fontWeight = FontWeight.SemiBold,
+            textAlign = TextAlign.Center,
+            lineHeight = 19.sp,
+            modifier = Modifier.padding(horizontal = 16.dp),
+        )
+
         Spacer(modifier = Modifier.weight(1f))
 
         PrimaryAmberButton(
