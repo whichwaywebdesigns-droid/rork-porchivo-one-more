@@ -34,6 +34,10 @@ struct PackagesScreen: View {
                         }
                     }
 
+                    if !appState.packages.isEmpty {
+                        packageSummaryHeader
+                    }
+
                     if appState.tier == .free {
                         freeTierBanner
                     }
@@ -64,6 +68,64 @@ struct PackagesScreen: View {
                 RouteView(route: route, path: $path)
             }
         }
+    }
+
+    private var packageSummaryHeader: some View {
+        let active = appState.packages.filter { !isFinished($0) }
+        let dueToday = active.filter { isDueToday($0) }
+
+        return HStack(spacing: 12) {
+            summaryTile(
+                value: active.count,
+                label: active.count == 1 ? "Active package" : "Active packages",
+                icon: "shippingbox.fill",
+                tint: c.accent,
+                softTint: c.accentSoft
+            )
+            summaryTile(
+                value: dueToday.count,
+                label: "Due today",
+                icon: "flame.fill",
+                tint: c.danger,
+                softTint: c.dangerSoft
+            )
+        }
+    }
+
+    private func summaryTile(value: Int, label: String, icon: String, tint: Color, softTint: Color) -> some View {
+        HStack(spacing: 10) {
+            Image(systemName: icon)
+                .font(.system(size: 16, weight: .bold))
+                .foregroundStyle(tint)
+                .frame(width: 38, height: 38)
+                .background(softTint, in: .rect(cornerRadius: Radius.md))
+            VStack(alignment: .leading, spacing: 1) {
+                Text("\(value)")
+                    .font(.system(size: 20, weight: .black))
+                    .foregroundStyle(c.textPrimary)
+                Text(label)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(c.textSecondary)
+            }
+            Spacer()
+        }
+        .padding(12)
+        .background(c.surface, in: .rect(cornerRadius: Radius.lg))
+        .shadow(color: c.textPrimary.opacity(0.05), radius: 6, y: 2)
+    }
+
+    private func isFinished(_ pkg: TrackedPackage) -> Bool {
+        switch pkg.currentStatus {
+        case .delivered, .pickedUp, .returned: return true
+        default: return false
+        }
+    }
+
+    private func isDueToday(_ pkg: TrackedPackage) -> Bool {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let expected = calendar.startOfDay(for: pkg.expectedDeliveryDate)
+        return calendar.isDate(today, inSameDayAs: expected)
     }
 
     private var freeTierBanner: some View {
