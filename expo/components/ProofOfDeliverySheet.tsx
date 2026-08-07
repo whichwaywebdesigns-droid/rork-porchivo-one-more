@@ -93,7 +93,7 @@ export default function ProofOfDeliverySheet({
     if (!photoUri || !photoAsset) {
       setSkipping(true);
       try {
-        completeShipment(shipmentId, null);
+        await completeShipment(shipmentId, null);
         onComplete();
       } finally {
         setSkipping(false);
@@ -110,7 +110,7 @@ export default function ProofOfDeliverySheet({
         photoUri,
         photoAsset,
       );
-      completeShipment(shipmentId, publicUrl);
+      await completeShipment(shipmentId, publicUrl);
       onComplete();
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
@@ -119,8 +119,8 @@ export default function ProofOfDeliverySheet({
         'Upload Failed',
         'Could not upload the proof photo. You can complete without a photo or try again.',
         [
-          { text: 'Complete without photo', onPress: () => {
-            completeShipment(shipmentId, null);
+          { text: 'Complete without photo', onPress: async () => {
+            await completeShipment(shipmentId, null);
             onComplete();
           }},
           { text: 'Try Again', style: 'cancel' },

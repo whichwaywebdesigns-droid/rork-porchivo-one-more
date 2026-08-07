@@ -388,6 +388,18 @@ actor SupabaseService {
         return await restGet(url: c.url ?? url, singleton: true)
     }
 
+    /// Persist a native iOS APNS device token to the user's profile so the
+    /// backend can send Apple Push Notification service alerts.
+    func saveAPNSToken(userId: String, token: String) async {
+        let result = await updateProfile(userId: ["apns_token": token])
+        switch result {
+        case .success:
+            log("[SupabaseService] APNS token saved for user \(userId)")
+        case .failure(let err):
+            log("[SupabaseService] APNS token save error: \(err.localizedDescription)")
+        }
+    }
+
     func updateProfile(userId: String, _ updates: [String: Any?]) async -> Result<DbProfile, Error> {
         guard let comps = URLComponents(url: baseURL.appendingPathComponent("rest/v1/profiles"), resolvingAgainstBaseURL: false),
               let url = comps.url else { return .failure(URLError(.badURL)) }

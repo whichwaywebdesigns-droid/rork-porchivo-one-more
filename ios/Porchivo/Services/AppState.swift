@@ -61,6 +61,9 @@ final class AppState {
     var needsBiometricEnrollment: Bool = false
     var biometricEnrollmentDeclined: Bool = false
 
+    // Push notifications — deep-link shipment id set when the user taps a push.
+    var pendingDeepLinkShipmentId: String? = nil
+
     private let supabase = SupabaseService.shared
     private let packagesKey = "porchivo_tracked_packages"
     private let biometricPrefKey = "porchivo_biometric_unlock_enabled"
@@ -431,7 +434,22 @@ final class AppState {
         return user?.id
     }
 
+    var isAuthenticated: Bool {
+        if case .authenticated = authState { return true }
+        return false
+    }
+
     var isOnboarded: Bool { user?.isOnboarded == true }
+
+    // MARK: - Push notifications
+
+    /// Persist an Apple Push Notification service (APNS) device token to the
+    /// user's profile. Supabase can use this token to send native iOS pushes.
+    @MainActor
+    func registerAPNSToken(_ token: String) async {
+        guard isSupabaseConfigured, let userId = currentUserId else { return }
+        await supabase.saveAPNSToken(userId: userId, token: token)
+    }
 
     // MARK: - Shipments
 

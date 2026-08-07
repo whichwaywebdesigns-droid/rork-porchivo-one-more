@@ -142,7 +142,7 @@ export const [ShipmentsProvider, useShipments] = createContextHook(() => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, queryClient]);
 
-  const completeShipment = useCallback((shipmentId: string, completionPhotoUrl?: string | null) => {
+  const completeShipment = useCallback(async (shipmentId: string, completionPhotoUrl?: string | null) => {
     log('[ShipmentsContext] Completing shipment:', shipmentId, completionPhotoUrl ? 'with photo' : 'no photo');
     const updates: Partial<DbShipment> = {
       status: 'completed',
@@ -151,14 +151,40 @@ export const [ShipmentsProvider, useShipments] = createContextHook(() => {
     if (completionPhotoUrl) {
       updates.completion_photo_url = completionPhotoUrl;
     }
-    updateShipmentMutation.mutate({
-      id: shipmentId,
-      updates,
-    });
+
+    try {
+      const completed = await updateShipmentMutation.mutateAsync({
+        id: shipmentId,
+        updates,
+      });
+
+      // Notify the homeowner that their package is safely stored with the neighbor.
+      const homeownerId = completed.homeownerId;
+      if (homeownerId) {
+        const ok = await shouldSendNotification('partner_completed');
+        if (!ok) {
+          log('[ShipmentsContext] Partner-completed alert muted by user pref');
+        } else {
+          const partnerName = completed.partnerName || 'Your Porch Partner';
+          const carrier = completed.carrier || 'package';
+          void createNotification(
+            shipmentId,
+            'partner_completed',
+            'Package safely stored',
+            `${partnerName} has your ${carrier} package safely stored. Tap to view details.`,
+            homeownerId,
+            'homeowner',
+          );
+        }
+      }
+    } catch (err) {
+      log('[ShipmentsContext] Complete shipment error:', err instanceof Error ? err.message : err);
+      throw err;
+    }
 
     void playPickupChime().catch(e => log('[ShipmentsContext] Pickup chime error:', e));
     void maybeRequestReview();
-  }, [updateShipmentMutation]);
+  }, [updateShipmentMutation, createNotification]);
 
   const cancelShipment = useCallback((shipmentId: string) => {
     log('[ShipmentsContext] Cancelling shipment:', shipmentId);

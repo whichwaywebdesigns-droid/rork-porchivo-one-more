@@ -7,9 +7,11 @@
 //
 
 import SwiftUI
+import UserNotifications
 
 @main
 struct PorchivoApp: App {
+    @UIApplicationDelegateAdaptor(PorchivoAppDelegate.self) private var appDelegate
     @State private var appState = AppState()
 
     var body: some Scene {
@@ -21,6 +23,14 @@ struct PorchivoApp: App {
                                       : nil)
                 .tint(.porchivoAccent)
                 .task { await appState.restoreSession() }
+                .onAppear {
+                    appDelegate.appState = appState
+                }
+                .onChange(of: appState.isAuthenticated) { _, isAuthenticated in
+                    if isAuthenticated {
+                        appDelegate.appState = appState
+                    }
+                }
         }
     }
 }

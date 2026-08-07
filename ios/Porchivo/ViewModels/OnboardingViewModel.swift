@@ -79,6 +79,9 @@ final class OnboardingViewModel {
         } else if settings.authorizationStatus == .authorized || settings.authorizationStatus == .provisional {
             provisionalGranted = true
         }
+        // Register for remote notifications once authorization is known. The
+        // system will call AppDelegate with the APNS device token on success.
+        UIApplication.shared.registerForRemoteNotifications()
         await MainActor.run { advance() }
     }
 
@@ -96,6 +99,10 @@ final class OnboardingViewModel {
                 granted = false
             }
         }
+
+        // Register for remote notifications after full authorization. The APNS
+        // token will be delivered to AppDelegate and persisted to Supabase.
+        UIApplication.shared.registerForRemoteNotifications()
 
         await MainActor.run {
             if granted {
