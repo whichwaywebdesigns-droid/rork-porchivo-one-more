@@ -19,6 +19,7 @@ import {
 } from '@/utils/invite';
 import { track } from '@/lib/analytics';
 import { log } from '@/lib/logger';
+import { useToast } from '@/hooks/useToast';
 
 interface InviteNeighborsCardProps {
   userId: string;
@@ -31,6 +32,7 @@ interface InviteNeighborsCardProps {
  * via the native share sheet, copy it to clipboard, or preview the code.
  */
 export default function InviteNeighborsCard({ userId, userName }: InviteNeighborsCardProps) {
+  const toast = useToast();
   const [sharing, setSharing] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
   const [link, setLink] = useState<string>('');
@@ -97,13 +99,17 @@ export default function InviteNeighborsCard({ userId, userName }: InviteNeighbor
       if (result.action === Share.sharedAction) {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         track('neighbor_invite_shared', { method: 'system_share' });
+        toast.success('Invite sent! Your neighbor will see the link once they open it.', {
+          duration: 4000,
+        });
       }
     } catch (e) {
       log('[InviteNeighbors] Share error:', e);
+      toast.error('Could not open the share sheet. Please try again.');
     } finally {
       setSharing(false);
     }
-  }, [sharing, bounceBtn, ensureLink, userName]);
+  }, [sharing, bounceBtn, ensureLink, userName, toast]);
 
   const handleCopy = useCallback(async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -112,11 +118,14 @@ export default function InviteNeighborsCard({ userId, userName }: InviteNeighbor
       await Clipboard.setStringAsync(activeLink);
       setCopied(true);
       track('neighbor_invite_shared', { method: 'clipboard' });
+      toast.success('Invite link copied to clipboard!', {
+        duration: 3000,
+      });
       setTimeout(() => setCopied(false), 2200);
     } catch (e) {
-      Alert.alert('Copy failed', 'Could not copy the link to your clipboard.');
+      toast.error('Could not copy the link. Please try again.');
     }
-  }, [ensureLink]);
+  }, [ensureLink, toast]);
 
   const glowOpacity = glowAnim.interpolate({
     inputRange: [0, 1],
