@@ -25,7 +25,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
-import { CheckCircle2, Info, AlertTriangle, XCircle } from 'lucide-react-native';
+import { PackageCheck, PackageX, MailWarning, PackageOpen } from 'lucide-react-native';
 import createContextHook from '@nkzw/create-context-hook';
 
 import { useColors } from '@/constants/colors';
@@ -193,12 +193,12 @@ function ToastViewport() {
 
   const Icon =
     rendered.variant === 'success'
-      ? CheckCircle2
+      ? PackageCheck
       : rendered.variant === 'error'
-        ? XCircle
+        ? PackageX
         : rendered.variant === 'warning'
-          ? AlertTriangle
-          : Info;
+          ? MailWarning
+          : PackageOpen;
 
   return (
     <View style={[styles.viewport, { top: insets.top + space.sm, pointerEvents: 'box-none' as const }]}>
