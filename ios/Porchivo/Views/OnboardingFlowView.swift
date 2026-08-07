@@ -264,7 +264,7 @@ struct OnboardingFlowView: View {
                     .font(.system(size: 24, weight: .heavy))
                     .foregroundStyle(c.textPrimary)
                     .multilineTextAlignment(.center)
-                Text("Provisional notifications arrive with Apple-rendered buttons. Tap "Deliver Prominently" to upgrade to full alerts — no extra setup needed.")
+                Text("Provisional notifications arrive with Apple-rendered buttons. Tap \"Deliver Prominently\" to upgrade to full alerts — no extra setup needed.")
                     .font(.system(size: 14))
                     .foregroundStyle(c.textSecondary)
                     .multilineTextAlignment(.center)

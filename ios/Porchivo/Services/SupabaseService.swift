@@ -10,6 +10,7 @@
 //
 
 import Foundation
+import os.log
 
 // MARK: - DTOs (nonisolated for background decode/encode)
 
@@ -391,12 +392,12 @@ actor SupabaseService {
     /// Persist a native iOS APNS device token to the user's profile so the
     /// backend can send Apple Push Notification service alerts.
     func saveAPNSToken(userId: String, token: String) async {
-        let result = await updateProfile(userId: ["apns_token": token])
+        let result = await updateProfile(userId: userId, ["apns_token": token])
         switch result {
         case .success:
-            log("[SupabaseService] APNS token saved for user \(userId)")
+            os_log("APNS token saved for user %{private}@", log: .default, type: .info, String(userId.suffix(8)))
         case .failure(let err):
-            log("[SupabaseService] APNS token save error: \(err.localizedDescription)")
+            os_log("APNS token save error: %@", log: .default, type: .error, err.localizedDescription)
         }
     }
 
