@@ -70,6 +70,19 @@ export default function IndexPage() {
       <section className="pt-20 pb-24 px-4 sm:px-6 border-b border-slate-800 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-amber-500/8 via-transparent to-transparent pointer-events-none" />
         <div className="max-w-5xl mx-auto relative text-center">
+          {/* Hero image: premium gradient glow + soft edges */}
+          <div className="relative mx-auto mb-8 max-w-md">
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-400/30 via-orange-500/20 to-blue-500/20 blur-3xl rounded-[2.5rem] scale-110" />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent rounded-[2.5rem]" />
+            <img
+              src="/images/hero-porchivo-cardboard.png"
+              alt="Porchivo cardboard box: When porch pirates lurk, neighbors go to work."
+              className="relative rounded-[2.5rem] shadow-2xl shadow-amber-900/20 border border-white/10"
+              loading="eager"
+            />
+            <div className="absolute inset-x-0 -bottom-1 h-24 bg-gradient-to-t from-slate-950 to-transparent rounded-b-[2.5rem]" />
+          </div>
+
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-400/10 border border-amber-400/20 text-amber-400 text-sm font-medium mb-6">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
             {BRAND.shortTagline}
