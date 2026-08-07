@@ -16,6 +16,7 @@ import React, { useCallback, useRef, useState } from 'react';
 import {
   AccessibilityInfo,
   Animated,
+  Easing,
   PanResponder,
   Platform,
   Pressable,
@@ -128,6 +129,7 @@ function ToastViewport() {
 
   const translateY = useRef(new Animated.Value(-140)).current;
   const opacity = useRef(new Animated.Value(0)).current;
+  const progress = useRef(new Animated.Value(0)).current;
   const [rendered, setRendered] = useState<ToastState | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -172,10 +174,20 @@ function ToastViewport() {
 
     if (timerRef.current) clearTimeout(timerRef.current);
     if (toast.duration > 0) {
+      progress.setValue(1);
+      Animated.timing(progress, {
+        toValue: 0,
+        duration: toast.duration,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      }).start();
       timerRef.current = setTimeout(() => dismiss(), toast.duration);
+    } else {
+      progress.setValue(1);
     }
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
+      progress.stopAnimation();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [toast?.id]);
@@ -233,6 +245,18 @@ function ToastViewport() {
           >
             <Text style={[styles.actionLabel, { color: accent }]}>{rendered.actionLabel}</Text>
           </Pressable>
+        ) : null}
+        {rendered.duration > 0 ? (
+          <Animated.View
+            style={[
+              styles.progressBar,
+              {
+                backgroundColor: accent,
+                opacity: 0.3,
+                transform: [{ scaleX: progress }],
+              },
+            ]}
+          />
         ) : null}
       </Animated.View>
     </View>
@@ -297,5 +321,12 @@ const styles = StyleSheet.create({
   actionLabel: {
     ...type.caption,
     fontWeight: '800',
+  },
+  progressBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 2.5,
   },
 });
