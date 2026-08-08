@@ -4,7 +4,7 @@ export default (): { expo: ExpoConfig } => ({
   expo: {
     name: "Porchivo",
     slug: "porchivo-neighborhood-safety",
-    version: "1.0.4",
+    version: "1.0.5",
     orientation: "portrait",
     icon: "./assets/images/icon.png",
     scheme: "porchivo",
@@ -18,7 +18,7 @@ export default (): { expo: ExpoConfig } => ({
     ios: {
       supportsTablet: false,
       bundleIdentifier: "com.whichwayweblabs.porchivo",
-      buildNumber: "4",
+      buildNumber: "5",
       infoPlist: {
         ITSAppUsesNonExemptEncryption: false,
       },
@@ -30,7 +30,7 @@ export default (): { expo: ExpoConfig } => ({
         monochromeImage: "./assets/images/adaptive-icon.png",
       },
       package: "com.whichwayweblabs.porchivo",
-      versionCode: 4,
+      versionCode: 5,
       permissions: [
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION",
