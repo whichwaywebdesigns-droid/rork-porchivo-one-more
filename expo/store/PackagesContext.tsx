@@ -5,7 +5,7 @@ import createContextHook from '@nkzw/create-context-hook';
 import { AppState, AppStateStatus } from 'react-native';
 import { TrackedPackage, PackageTrackingStatus, PackageStatusEvent, Carrier, AddressNickname, LiveTrackingEvent } from '@/types';
 import { scheduleLocalNotification, scheduleDeliveryReminder, cancelDeliveryReminders } from '@/lib/notifications';
-import { shouldSendNotification } from '@/lib/notificationPreferences';
+import { shouldSendNotification, getDeliverySound } from '@/lib/notificationPreferences';
 import {
   trackShipment,
   isShip24Configured,
@@ -184,7 +184,9 @@ export const [PackagesProvider, usePackages] = createContextHook(() => {
     }
 
     try {
-      await scheduleLocalNotification(title, body, { packageId: pkg.id, status: newStatus }, 1);
+      const deliverySound = await getDeliverySound();
+      const soundArg = deliverySound === 'silent' ? null : deliverySound === 'chime' ? 'porch-light-verified-chime.mp3' : 'default';
+      await scheduleLocalNotification(title, body, { packageId: pkg.id, status: newStatus }, 1, soundArg);
     } catch (e) {
       log('[Packages] Notification error:', e);
     }

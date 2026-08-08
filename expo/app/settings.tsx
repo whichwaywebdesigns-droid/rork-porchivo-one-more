@@ -41,6 +41,7 @@ import {
   Truck,
   HandHeart,
   MapPin,
+  Volume2,
 } from 'lucide-react-native';
 
 import { useTheme } from '@/hooks/useTheme';
@@ -48,7 +49,7 @@ import { manualRequestReview } from '@/lib/storeReview';
 import { useApp } from '@/store/AppContext';
 import { useNotifications } from '@/store/NotificationsContext';
 import { useNotificationPreferences } from '@/hooks/useNotificationPreferences';
-import { NotificationPreferences } from '@/lib/notificationPreferences';
+import { NotificationPreferences, DeliverySound } from '@/lib/notificationPreferences';
 import { ThemePreference, ThemeTokens } from '@/constants/theme';
 import { DoorFlipSwitch } from '@/components/settings/DoorFlipSwitch';
 import { PorchLightHero } from '@/components/settings/PorchLightHero';
@@ -255,7 +256,7 @@ export default function SettingsScreen() {
     useTheme();
   const { signOut } = useApp();
   const { expoPushToken } = useNotifications();
-  const { prefs, loaded: prefsLoaded, togglePref } = useNotificationPreferences();
+  const { prefs, loaded: prefsLoaded, togglePref, setDeliverySound } = useNotificationPreferences();
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
@@ -478,6 +479,61 @@ export default function SettingsScreen() {
                 onToggle={() => togglePref('communityAlerts')}
                 tokens={tokens}
               />
+
+              {/* Delivery sound picker */}
+              <View style={styles.notifPrefRow}>
+                <View style={[styles.rowIcon, { backgroundColor: tokens.accentSoft }]}>
+                  <Volume2 size={16} color={tokens.accent} strokeWidth={2} />
+                </View>
+                <View style={styles.notifPrefText}>
+                  <Text style={[styles.notifPrefLabel, { color: tokens.text }]}>
+                    Delivery sound
+                  </Text>
+                  <Text style={[styles.notifPrefDesc, { color: tokens.textMuted }]}>
+                    Choose the sound played for delivery status updates.
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.soundPickerRow}>
+                {(['default', 'chime', 'silent'] as DeliverySound[]).map((sound) => {
+                  const active = prefs.deliverySound === sound;
+                  const labels: Record<DeliverySound, string> = {
+                    default: 'Default',
+                    chime: 'Chime',
+                    silent: 'Silent',
+                  };
+                  return (
+                    <TouchableOpacity
+                      key={sound}
+                      style={[
+                        styles.soundPill,
+                        {
+                          backgroundColor: active ? tokens.accent : tokens.surfaceAlt,
+                          borderColor: active ? tokens.accent : tokens.border,
+                        },
+                      ]}
+                      onPress={() => void setDeliverySound(sound)}
+                      activeOpacity={0.7}
+                      accessibilityRole="radio"
+                      accessibilityLabel={`${labels[sound]} delivery sound`}
+                      accessibilityState={{ selected: active }}
+                    >
+                      <Text
+                        style={[
+                          styles.soundPillLabel,
+                          {
+                            color: active ? '#FFFFFF' : tokens.textMuted,
+                            fontWeight: active ? ('700' as const) : ('500' as const),
+                          },
+                        ]}
+                      >
+                        {labels[sound]}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
             </>
           )}
 
@@ -739,6 +795,26 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 2,
     elevation: 2,
+  },
+
+  // ── Sound picker ───────────────────────────────────────────────────────────
+  soundPickerRow: {
+    flexDirection: 'row' as const,
+    gap: 8,
+    paddingLeft: 44,
+    paddingRight: 4,
+    marginBottom: 12,
+  },
+  soundPill: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 10,
+    borderRadius: 10,
+    borderWidth: 1.5,
+  },
+  soundPillLabel: {
+    fontSize: 13,
+    letterSpacing: 0.1,
   },
   divider: {
     height: 1,

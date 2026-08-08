@@ -163,15 +163,16 @@ export async function scheduleLocalNotification(
   body: string,
   data?: Record<string, unknown>,
   seconds: number = 1,
+  sound: string | null = 'default',
 ): Promise<string> {
   if (isWeb) return '';
-  log('[Notifications] Scheduling local notification:', title);
+  log('[Notifications] Scheduling local notification:', title, 'sound:', sound);
   const id = await Notifications.scheduleNotificationAsync({
     content: {
       title,
       body,
       data: data ?? {},
-      sound: 'default',
+      sound: sound ?? undefined,
     },
     trigger: {
       type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,

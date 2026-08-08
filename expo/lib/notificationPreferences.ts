@@ -17,6 +17,9 @@ import { log } from './logger';
 
 const PREFS_KEY = 'porchivo_notification_prefs_v1';
 
+/** Sound options for delivery status notifications. */
+export type DeliverySound = 'default' | 'chime' | 'silent';
+
 export interface NotificationPreferences {
   /** Out-for-delivery alerts — "your package is on the truck" */
   outForDeliveryAlerts: boolean;
@@ -28,6 +31,8 @@ export interface NotificationPreferences {
   trackingAddedAlerts: boolean;
   /** Neighborhood theft / community alerts */
   communityAlerts: boolean;
+  /** Sound played when a delivery status notification fires */
+  deliverySound: DeliverySound;
 }
 
 export const DEFAULT_PREFERENCES: NotificationPreferences = {
@@ -36,6 +41,7 @@ export const DEFAULT_PREFERENCES: NotificationPreferences = {
   partnerPickupAlerts: true,
   trackingAddedAlerts: true,
   communityAlerts: true,
+  deliverySound: 'default',
 };
 
 /**
@@ -45,7 +51,7 @@ export const DEFAULT_PREFERENCES: NotificationPreferences = {
  */
 export function typeToPreference(
   type: string,
-): keyof NotificationPreferences | null {
+): keyof Omit<NotificationPreferences, 'deliverySound'> | null {
   switch (type) {
     case 'package_out_for_delivery':
       return 'outForDeliveryAlerts';
@@ -94,11 +100,11 @@ export async function saveNotificationPreferences(
 }
 
 /**
- * Updates a single preference key.
+ * Updates a single preference key (boolean toggle or delivery sound).
  */
 export async function updatePreference(
   key: keyof NotificationPreferences,
-  value: boolean,
+  value: boolean | DeliverySound,
 ): Promise<NotificationPreferences> {
   const current = await getNotificationPreferences();
   const updated = { ...current, [key]: value };
@@ -117,5 +123,14 @@ export async function shouldSendNotification(
   if (!prefKey) return true; // Not user-configurable → always send
 
   const prefs = await getNotificationPreferences();
-  return prefs[prefKey];
+  return prefs[prefKey] as boolean;
+}
+
+/**
+ * Returns the user's preferred delivery notification sound,
+ * or 'default' if not set.
+ */
+export async function getDeliverySound(): Promise<DeliverySound> {
+  const prefs = await getNotificationPreferences();
+  return prefs.deliverySound ?? 'default';
 }

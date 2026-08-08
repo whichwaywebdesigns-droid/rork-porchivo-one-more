@@ -9,6 +9,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import {
   NotificationPreferences,
+  DeliverySound,
   DEFAULT_PREFERENCES,
   getNotificationPreferences,
   saveNotificationPreferences,
@@ -28,7 +29,7 @@ export function useNotificationPreferences() {
   }, []);
 
   const togglePref = useCallback(
-    async (key: keyof NotificationPreferences) => {
+    async (key: keyof Omit<NotificationPreferences, 'deliverySound'>) => {
       const newValue = !prefs[key];
       // Optimistic update
       setPrefs((prev) => ({ ...prev, [key]: newValue }));
@@ -45,10 +46,24 @@ export function useNotificationPreferences() {
     [prefs],
   );
 
+  const setDeliverySound = useCallback(
+    async (sound: DeliverySound) => {
+      setPrefs((prev) => ({ ...prev, deliverySound: sound }));
+      try {
+        const updated = await updatePref('deliverySound', sound);
+        setPrefs(updated);
+        log('[NotifPrefsHook] Set deliverySound →', sound);
+      } catch (e) {
+        log('[NotifPrefsHook] setDeliverySound error:', e);
+      }
+    },
+    [],
+  );
+
   const setAll = useCallback(async (newPrefs: NotificationPreferences) => {
     setPrefs(newPrefs);
     await saveNotificationPreferences(newPrefs);
   }, []);
 
-  return { prefs, loaded, togglePref, setAll };
+  return { prefs, loaded, togglePref, setDeliverySound, setAll };
 }
