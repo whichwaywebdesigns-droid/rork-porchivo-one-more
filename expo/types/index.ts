@@ -108,6 +108,7 @@ export interface TrackedPackage {
   addressNickname: AddressNickname;
   customAddressLabel: string | null;
   notesForPartner: string;
+  personalNotes: string;
   statusHistory: PackageStatusEvent[];
   driverId: string | null;
   porchPartnerId: string | null;

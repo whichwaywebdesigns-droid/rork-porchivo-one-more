@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState, useCallback } from 'react';
+import React, { useMemo, useRef, useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import {
   Platform,
   RefreshControl,
   Share,
+  TextInput,
 } from 'react-native';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { useApp } from '@/store/AppContext';
@@ -38,6 +39,7 @@ import {
   ChevronRight,
   Gift,
   Share2,
+  StickyNote,
 } from 'lucide-react-native';
 import { useColors, AppColors } from '@/constants/colors';
 import { usePackages } from '@/store/PackagesContext';
@@ -208,7 +210,7 @@ export default function PackageDetailScreen() {
   const router = useRouter();
   const colors = useColors();
   const { user } = useApp();
-  const { packages, deletePackage, assignDriverToPackage, unassignDriverFromPackage, assignPartnerToPackage: pkgAssignPartner, refreshPackage, refreshAllPackages, ship24Enabled } = usePackages();
+  const { packages, deletePackage, assignDriverToPackage, unassignDriverFromPackage, assignPartnerToPackage: pkgAssignPartner, refreshPackage, refreshAllPackages, ship24Enabled, updatePersonalNotes } = usePackages();
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const { getRankedDrivers, getDriverForPackage, assignDriverToPackage: driverCtxAssign, unassignDriverFromPackage: driverCtxUnassign } = useDrivers();
   const { activePartners, getPartnerById, getHoldForPackage, assignPartnerToPackage, unassignPartnerFromPackage, markPickedUp, markReturned } = usePorchPartners();
@@ -219,6 +221,31 @@ export default function PackageDetailScreen() {
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const pkg = useMemo(() => packages.find((p) => p.id === id), [packages, id]);
+
+  const [notesDraft, setNotesDraft] = useState<string>('');
+  const [notesSaved, setNotesSaved] = useState<boolean>(false);
+  const saveNotesTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    setNotesDraft(pkg?.personalNotes ?? '');
+  }, [pkg?.id, pkg?.personalNotes]);
+
+  const handleNotesChange = useCallback((text: string) => {
+    setNotesDraft(text);
+    setNotesSaved(false);
+    if (saveNotesTimer.current) clearTimeout(saveNotesTimer.current);
+    if (!pkg) return;
+    saveNotesTimer.current = setTimeout(() => {
+      updatePersonalNotes(pkg.id, text);
+      setNotesSaved(true);
+    }, 800);
+  }, [pkg, updatePersonalNotes]);
+
+  useEffect(() => {
+    return () => {
+      if (saveNotesTimer.current) clearTimeout(saveNotesTimer.current);
+    };
+  }, []);
 
   const onRefresh = useCallback(async () => {
     if (!pkg) return;
@@ -481,6 +508,31 @@ export default function PackageDetailScreen() {
               </View>
             </>
           ) : null}
+        </View>
+
+        <View style={styles.personalNotesCard}>
+          <View style={styles.personalNotesHeader}>
+            <View style={styles.personalNotesIconWrap}>
+              <StickyNote size={16} color={colors.primary} />
+            </View>
+            <Text style={styles.personalNotesTitle}>Personal Notes</Text>
+            {notesSaved && (
+              <View style={styles.savedBadge}>
+                <Text style={styles.savedBadgeText}>Saved</Text>
+              </View>
+            )}
+          </View>
+          <TextInput
+            style={styles.personalNotesInput}
+            value={notesDraft}
+            onChangeText={handleNotesChange}
+            placeholder="Add your own notes about this package — what's inside, who it's for, where to store it..."
+            placeholderTextColor={colors.slateLighter}
+            multiline
+            textAlignVertical="top"
+            autoCapitalize="sentences"
+            autoCorrect
+          />
         </View>
 
         {assignedPartner ? (
@@ -971,6 +1023,59 @@ function createStyles(colors: AppColors) {
     fontSize: 14,
     color: '#374151',
     lineHeight: 20,
+  },
+  personalNotesCard: {
+    backgroundColor: colors.white,
+    borderRadius: 18,
+    marginTop: 16,
+    padding: 18,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 3,
+  },
+  personalNotesHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
+  personalNotesIconWrap: {
+    width: 30,
+    height: 30,
+    borderRadius: 9,
+    backgroundColor: colors.skyBlue,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  personalNotesTitle: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: '700' as const,
+    color: '#1F2937',
+  },
+  savedBadge: {
+    backgroundColor: colors.successLight,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  savedBadgeText: {
+    fontSize: 11,
+    fontWeight: '700' as const,
+    color: colors.success,
+  },
+  personalNotesInput: {
+    fontSize: 14,
+    color: '#374151',
+    lineHeight: 20,
+    minHeight: 80,
+    padding: 12,
+    borderRadius: 12,
+    backgroundColor: colors.background,
+    borderWidth: 1,
+    borderColor: colors.borderLight,
   },
   assignButton: {
     flexDirection: 'row',

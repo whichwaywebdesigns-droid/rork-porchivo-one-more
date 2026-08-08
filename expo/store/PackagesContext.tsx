@@ -118,6 +118,7 @@ export const [PackagesProvider, usePackages] = createContextHook(() => {
         log('[Packages] Loaded', parsed.length, 'packages');
         return parsed.map((p) => ({
           ...p,
+          personalNotes: p.personalNotes ?? '',
           trackerId: p.trackerId ?? null,
           liveMilestone: p.liveMilestone ?? null,
           liveEvents: p.liveEvents ?? [],
@@ -392,6 +393,7 @@ export const [PackagesProvider, usePackages] = createContextHook(() => {
       addressNickname: input.addressNickname,
       customAddressLabel: input.customAddressLabel,
       notesForPartner: input.notesForPartner,
+      personalNotes: '',
       statusHistory: createInitialStatusHistory('ordered'),
       driverId: null,
       porchPartnerId: input.porchPartnerId ?? null,
@@ -418,6 +420,17 @@ export const [PackagesProvider, usePackages] = createContextHook(() => {
 
     return newPkg;
   }, [syncMutation, pollPackage, capabilities.unlimitedPackages]);
+
+  const updatePersonalNotes = useCallback((packageId: string, notes: string) => {
+    setPackages((prev) => {
+      const updated = prev.map((p) => {
+        if (p.id !== packageId) return p;
+        return { ...p, personalNotes: notes, updatedAt: new Date().toISOString() };
+      });
+      syncMutation.mutate(updated);
+      return updated;
+    });
+  }, [syncMutation]);
 
   const deletePackage = useCallback((packageId: string) => {
     log('[Packages] Deleting package:', packageId);
@@ -452,6 +465,7 @@ export const [PackagesProvider, usePackages] = createContextHook(() => {
     canAddMorePackages,
     freeRemaining,
     freeLimit: FREE_PACKAGE_LIMIT,
+    updatePersonalNotes,
     assignPartnerToPackage: (packageId: string, partnerId: string | null) => {
       log('[Packages] Assigning porch partner', partnerId, 'to package', packageId);
       setPackages((prev) => {
