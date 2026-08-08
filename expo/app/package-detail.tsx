@@ -12,6 +12,7 @@ import {
   Linking,
   Platform,
   RefreshControl,
+  Share,
 } from 'react-native';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { useApp } from '@/store/AppContext';
@@ -36,6 +37,7 @@ import {
   ShieldAlert,
   ChevronRight,
   Gift,
+  Share2,
 } from 'lucide-react-native';
 import { useColors, AppColors } from '@/constants/colors';
 import { usePackages } from '@/store/PackagesContext';
@@ -384,6 +386,26 @@ export default function PackageDetailScreen() {
     ]);
   };
 
+  const handleShare = useCallback(async () => {
+    const statusLabel = STATUS_STEPS.find((s) => s.status === pkg.currentStatus)?.label ?? pkg.currentStatus;
+    const deliveryDate = formatDate(pkg.expectedDeliveryDate);
+    const message =
+      `Porchivo — ${pkg.name}\n` +
+      `Carrier: ${pkg.carrier}\n` +
+      `Status: ${statusLabel}\n` +
+      `Expected delivery: ${deliveryDate}\n` +
+      `Tracking #: ${pkg.trackingNumber}`;
+
+    try {
+      await Share.share({
+        message,
+        title: `Porchivo — ${pkg.name}`,
+      });
+    } catch (e) {
+      log('[package-detail] share error', e);
+    }
+  }, [pkg]);
+
   const renderPickerDriver = ({ item, index }: { item: Driver; index: number }) => (
     <DriverPickerRow driver={item} index={index} onSelect={() => handleAssignDriver(item)} />
   );
@@ -408,6 +430,15 @@ export default function PackageDetailScreen() {
               <Text style={styles.heroName}>{pkg.name}</Text>
               <Text style={styles.heroCarrier}>{pkg.carrier}</Text>
             </View>
+            <TouchableOpacity
+              onPress={handleShare}
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+              activeOpacity={0.6}
+              accessibilityLabel="Share tracking status"
+              accessibilityRole="button"
+            >
+              <Share2 size={20} color={colors.slateLight} strokeWidth={2} />
+            </TouchableOpacity>
           </View>
 
           <View style={styles.heroDivider} />
