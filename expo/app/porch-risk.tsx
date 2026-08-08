@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   Animated,
   Easing,
   Platform,
+  RefreshControl,
 } from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -73,11 +74,21 @@ export default function PorchRiskScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { packages } = usePackages();
+  const { packages, refreshAllPackages } = usePackages();
   const { alerts } = useAlerts();
   const { weekCount } = useNeighborhood();
   const { getHoldForPackage } = usePorchPartners();
   const { getDriverForPackage } = useDrivers();
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await refreshAllPackages();
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refreshAllPackages]);
   const { isEntitled, capabilities } = useApp();
   const { track } = useAnalytics();
   const { guardPremiumAccess } = usePaywall();
@@ -194,6 +205,7 @@ export default function PorchRiskScreen() {
       <ScrollView
         contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + space.xxxl }]}
         showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={palette.navy} />}
       >
         <View style={[styles.heroCard, { backgroundColor: meta.bg }]}>
           <View style={styles.heroTop}>

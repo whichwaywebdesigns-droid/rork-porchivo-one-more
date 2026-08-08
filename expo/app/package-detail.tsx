@@ -11,6 +11,7 @@ import {
   FlatList,
   Linking,
   Platform,
+  RefreshControl,
 } from 'react-native';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { useApp } from '@/store/AppContext';
@@ -205,7 +206,7 @@ export default function PackageDetailScreen() {
   const router = useRouter();
   const colors = useColors();
   const { user } = useApp();
-  const { packages, deletePackage, assignDriverToPackage, unassignDriverFromPackage, assignPartnerToPackage: pkgAssignPartner, refreshPackage, ship24Enabled } = usePackages();
+  const { packages, deletePackage, assignDriverToPackage, unassignDriverFromPackage, assignPartnerToPackage: pkgAssignPartner, refreshPackage, refreshAllPackages, ship24Enabled } = usePackages();
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const { getRankedDrivers, getDriverForPackage, assignDriverToPackage: driverCtxAssign, unassignDriverFromPackage: driverCtxUnassign } = useDrivers();
   const { activePartners, getPartnerById, getHoldForPackage, assignPartnerToPackage, unassignPartnerFromPackage, markPickedUp, markReturned } = usePorchPartners();
@@ -216,6 +217,16 @@ export default function PackageDetailScreen() {
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const pkg = useMemo(() => packages.find((p) => p.id === id), [packages, id]);
+
+  const onRefresh = useCallback(async () => {
+    if (!pkg) return;
+    setIsRefreshing(true);
+    try {
+      await refreshPackage(pkg.id);
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [pkg, refreshPackage]);
   const assignedDriver = useMemo(() => (pkg ? getDriverForPackage(pkg.id) : undefined), [pkg, getDriverForPackage]);
   const assignedPartner = useMemo(() => (pkg?.porchPartnerId ? getPartnerById(pkg.porchPartnerId) : undefined), [pkg?.porchPartnerId, getPartnerById]);
   const hold = useMemo(() => (pkg ? getHoldForPackage(pkg.id) : undefined), [pkg, getHoldForPackage]);
@@ -388,6 +399,7 @@ export default function PackageDetailScreen() {
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
       >
         <View style={styles.heroCard}>
           <View style={styles.heroTop}>

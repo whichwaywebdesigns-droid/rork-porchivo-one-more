@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Animated,
   Dimensions,
+  RefreshControl,
 } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import {
@@ -274,15 +275,25 @@ const insightStyles = StyleSheet.create({
 export default function SafetyScoreScreen() {
   const router = useRouter();
   const { user } = useApp();
-  const { activeShipments, completedShipments } = useShipments();
+  const { activeShipments, completedShipments, refreshAllShipmentTracking } = useShipments();
   const { activePartners, holds } = usePorchPartners();
   const { alerts, activeCount } = useAlerts();
-  const { packages } = usePackages();
+  const { packages, refreshAllPackages } = usePackages();
   const { weekCount } = useNeighborhood();
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   // P-12: score breakdown collapsed by default — reference material behind a tap.
   const [breakdownExpanded, setBreakdownExpanded] = useState<boolean>(false);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([refreshAllPackages(), refreshAllShipmentTracking()]);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refreshAllPackages, refreshAllShipmentTracking]);
 
   useEffect(() => {
     Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }).start();
@@ -424,6 +435,7 @@ export default function SafetyScoreScreen() {
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.primary} />}
       >
         <View style={styles.scoreSection}>
           <View style={[styles.gradeBanner, { backgroundColor: grade.bg }]}>

@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert, Image,
+  View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert, Image, RefreshControl,
 } from 'react-native';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import {
@@ -43,13 +43,23 @@ export default function ShipmentDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { user } = useApp();
-  const { shipments, acceptShipment, completeShipment, cancelShipment, updateShipmentTracking, trackingByShipment, refreshShipmentTracking, ship24Enabled } = useShipments();
+  const { shipments, acceptShipment, completeShipment, cancelShipment, updateShipmentTracking, trackingByShipment, refreshShipmentTracking, refreshAllShipmentTracking, ship24Enabled } = useShipments();
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const { notifications } = useNotifications();
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const shipment = useMemo(() => shipments.find(s => s.id === id), [shipments, id]);
+
+  const onRefresh = useCallback(async () => {
+    if (!shipment) return;
+    setIsRefreshing(true);
+    try {
+      await refreshShipmentTracking(shipment.id);
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [shipment, refreshShipmentTracking]);
 
   const [trackingInput, setTrackingInput] = useState('');
   const [shareLocation, setShareLocation] = useState(false);
@@ -155,7 +165,11 @@ export default function ShipmentDetailScreen() {
           ),
         }}
       />
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
+      >
         {deliveryBanner && (
           <View style={styles.deliveredBanner}>
             <Check size={18} color={colors.success} />
