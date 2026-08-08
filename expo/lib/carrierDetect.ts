@@ -63,3 +63,29 @@ export function isValidTrackingFormat(trackingNumber: string): boolean {
   const cleaned = trackingNumber.trim().replace(/\s+/g, '');
   return cleaned.length >= 10;
 }
+
+/**
+ * Build a deep link to the carrier's official tracking page for a specific shipment.
+ * Returns null when the carrier doesn't support public tracking URLs (e.g. Amazon TBA,
+ * unknown carriers).
+ */
+export function getCarrierTrackingUrl(carrier: Carrier, trackingNumber: string): string | null {
+  const tn = encodeURIComponent(trackingNumber.trim());
+  if (!tn) return null;
+
+  switch (carrier) {
+    case 'UPS':
+      return `https://www.ups.com/track?tracknum=${tn}&requestAction=track&loc=en_US`;
+    case 'FedEx':
+      return `https://www.fedex.com/fedextrack/?trknbr=${tn}`;
+    case 'USPS':
+      return `https://tools.usps.com/go/TrackConfirmAction?tLabels=${tn}`;
+    case 'Amazon':
+      // Amazon Logistics TBA numbers require an Amazon account to track;
+      // link to the order tracking page as the closest public equivalent.
+      return `https://www.amazon.com/track?trackingId=${tn}`;
+    case 'Other':
+    default:
+      return null;
+  }
+}

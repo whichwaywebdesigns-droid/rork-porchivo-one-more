@@ -50,6 +50,8 @@ import { Image as RNImage } from 'react-native';
 import { PackageTrackingStatus, Driver, PorchPartner } from '@/types';
 import CarrierIcon from '@/components/CarrierIcon';
 import { canAssignDriver, calculateMockDistance } from '@/lib/driverAssignment';
+import { getCarrierTrackingUrl } from '@/lib/carrierDetect';
+import { ExternalLink } from 'lucide-react-native';
 import LiveTrackingTimeline from '@/components/LiveTrackingTimeline';
 import { Ship24Milestone } from '@/lib/ship24';
 import { log } from "@/lib/logger";
@@ -413,15 +415,25 @@ export default function PackageDetailScreen() {
     ]);
   };
 
+  const carrierTrackingUrl = useMemo(
+    () => getCarrierTrackingUrl(pkg.carrier, pkg.trackingNumber),
+    [pkg.carrier, pkg.trackingNumber],
+  );
+
   const handleShare = useCallback(async () => {
     const statusLabel = STATUS_STEPS.find((s) => s.status === pkg.currentStatus)?.label ?? pkg.currentStatus;
     const deliveryDate = formatDate(pkg.expectedDeliveryDate);
-    const message =
-      `Porchivo — ${pkg.name}\n` +
-      `Carrier: ${pkg.carrier}\n` +
-      `Status: ${statusLabel}\n` +
-      `Expected delivery: ${deliveryDate}\n` +
-      `Tracking #: ${pkg.trackingNumber}`;
+    const lines = [
+      `Porchivo — ${pkg.name}`,
+      `Carrier: ${pkg.carrier}`,
+      `Status: ${statusLabel}`,
+      `Expected delivery: ${deliveryDate}`,
+      `Tracking #: ${pkg.trackingNumber}`,
+    ];
+    if (carrierTrackingUrl) {
+      lines.push(`Track on ${pkg.carrier}: ${carrierTrackingUrl}`);
+    }
+    const message = lines.join('\n');
 
     try {
       await Share.share({
@@ -431,7 +443,22 @@ export default function PackageDetailScreen() {
     } catch (e) {
       log('[package-detail] share error', e);
     }
-  }, [pkg]);
+  }, [pkg, carrierTrackingUrl]);
+
+  const handleOpenCarrierTracking = useCallback(async () => {
+    if (!carrierTrackingUrl) return;
+    try {
+      const supported = await Linking.canOpenURL(carrierTrackingUrl);
+      if (!supported) {
+        Alert.alert('Unable to open', 'This tracking link cannot be opened on your device.');
+        return;
+      }
+      await Linking.openURL(carrierTrackingUrl);
+    } catch (e) {
+      log('[package-detail] carrier tracking open error', e);
+      Alert.alert('Error', 'Could not open the carrier tracking page.');
+    }
+  }, [carrierTrackingUrl]);
 
   const renderPickerDriver = ({ item, index }: { item: Driver; index: number }) => (
     <DriverPickerRow driver={item} index={index} onSelect={() => handleAssignDriver(item)} />
@@ -679,6 +706,26 @@ export default function PackageDetailScreen() {
           >
             <UserPlus size={20} color={colors.white} />
             <Text style={styles.assignButtonText}>Assign Driver</Text>
+          </TouchableOpacity>
+        ) : null}
+
+        {carrierTrackingUrl ? (
+          <TouchableOpacity
+            style={styles.carrierLinkCta}
+            onPress={handleOpenCarrierTracking}
+            activeOpacity={0.85}
+            testID="open-carrier-tracking"
+            accessibilityLabel={`Track this package on ${pkg.carrier} website`}
+            accessibilityRole="button"
+          >
+            <View style={styles.carrierLinkIcon}>
+              <ExternalLink size={18} color={colors.primary} strokeWidth={2.2} />
+            </View>
+            <View style={styles.carrierLinkText}>
+              <Text style={styles.carrierLinkTitle}>Track on {pkg.carrier}</Text>
+              <Text style={styles.carrierLinkSub}>Open the official tracking page for this shipment</Text>
+            </View>
+            <ChevronRight size={18} color={colors.slateLighter} />
           </TouchableOpacity>
         ) : null}
 
@@ -1443,6 +1490,42 @@ function createStyles(colors: AppColors) {
   },
   pickerEmptyText: {
     fontSize: 15,
+    color: colors.slateLight,
+  },
+  carrierLinkCta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: colors.white,
+    marginTop: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.borderLight,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 1,
+  },
+  carrierLinkIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    backgroundColor: colors.skyBlue,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  carrierLinkText: { flex: 1 },
+  carrierLinkTitle: {
+    fontSize: 15,
+    fontWeight: '700' as const,
+    color: '#1F2937',
+    marginBottom: 2,
+  },
+  carrierLinkSub: {
+    fontSize: 12,
     color: colors.slateLight,
   },
   riskCta: {
