@@ -42,9 +42,9 @@ struct OnboardingSetupScreen: View {
                 Spacer().frame(height: 32)
 
                 VStack(spacing: 14) {
-                    field("Full name", text: \$name, symbol: "person.fill", keyboard: .default)
-                    field("Phone number", text: \$phone, symbol: "phone.fill", keyboard: .phonePad)
-                    field("Street address", text: \$address, symbol: "mappin.and.ellipse", keyboard: .default)
+                    field("Full name", text: $name, symbol: "person.fill", keyboard: .default)
+                    field("Phone number", text: $phone, symbol: "phone.fill", keyboard: .phonePad)
+                    field("Street address", text: $address, symbol: "mappin.and.ellipse", keyboard: .default)
                 }
                 .padding(.horizontal, 24)
 

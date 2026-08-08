@@ -9,6 +9,12 @@
 import Foundation
 import RevenueCat
 
+/// Simple string-wrapped error for RevenueCat purchase/restore failures.
+struct PurchaseError: LocalizedError {
+    let message: String
+    var errorDescription: String? { message }
+}
+
 @MainActor
 @Observable
 final class RevenueCatService {
@@ -38,10 +44,15 @@ final class RevenueCatService {
         guard isConfigured else { return }
         isLoading = true
         defer { isLoading = false }
-        do {
-            offerings = try await Purchases.shared.getOfferings()
-        } catch {
-            lastError = error.localizedDescription
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            Purchases.shared.getOfferings { offerings, error in
+                if let error {
+                    self.lastError = error.localizedDescription
+                } else {
+                    self.offerings = offerings
+                }
+                continuation.resume()
+            }
         }
     }
 
@@ -63,56 +74,74 @@ final class RevenueCatService {
 
     /// Purchases the given package. Returns the resulting SubscriptionTier on
     /// success, or an error message on failure.
-    func purchase(_ plan: UpgradePlan) async -> Result<SubscriptionTier, String> {
+    func purchase(_ plan: UpgradePlan) async -> Result<SubscriptionTier, PurchaseError> {
         guard isConfigured else {
-            return .failure("In-app purchases are not available in this build.")
+            return .failure(PurchaseError(message: "In-app purchases are not available in this build."))
         }
         guard let package = package(for: plan) else {
-            return .failure("This plan is currently unavailable. Please try again later.")
+            return .failure(PurchaseError(message: "This plan is currently unavailable. Please try again later."))
         }
-        do {
-            let result = try await Purchases.shared.purchase(package: package)
-            return .success(tierFromCustomerInfo(result.customerInfo))
-        } catch let error as ErrorCode {
-            if error == .purchaseCancelledError {
-                return .failure("cancelled")
+        return await withCheckedContinuation { (continuation: CheckedContinuation<Result<SubscriptionTier, PurchaseError>, Never>) in
+            Purchases.shared.purchase(package: package) { transaction, customerInfo, error, userCancelled in
+                if userCancelled {
+                    continuation.resume(returning: .failure(PurchaseError(message: "cancelled")))
+                    return
+                }
+                if let error {
+                    continuation.resume(returning: .failure(PurchaseError(message: error.localizedDescription)))
+                    return
+                }
+                guard let customerInfo else {
+                    continuation.resume(returning: .failure(PurchaseError(message: "Purchase completed but customer info was unavailable.")))
+                    return
+                }
+                let tier = self.tierFromCustomerInfo(customerInfo)
+                continuation.resume(returning: .success(tier))
             }
-            return .failure(error.localizedDescription)
-        } catch {
-            return .failure(error.localizedDescription)
         }
     }
 
     /// Restores previous purchases. Returns the resolved tier or an error.
-    func restorePurchases() async -> Result<SubscriptionTier, String> {
+    func restorePurchases() async -> Result<SubscriptionTier, PurchaseError> {
         guard isConfigured else {
-            return .failure("In-app purchases are not available in this build.")
+            return .failure(PurchaseError(message: "In-app purchases are not available in this build."))
         }
-        do {
-            let info = try await Purchases.shared.restorePurchases()
-            let tier = tierFromCustomerInfo(info)
-            if tier == .free {
-                return .failure("No active subscriptions were found to restore.")
+        return await withCheckedContinuation { (continuation: CheckedContinuation<Result<SubscriptionTier, PurchaseError>, Never>) in
+            Purchases.shared.restorePurchases { customerInfo, error in
+                if let error {
+                    continuation.resume(returning: .failure(PurchaseError(message: error.localizedDescription)))
+                    return
+                }
+                guard let customerInfo else {
+                    continuation.resume(returning: .failure(PurchaseError(message: "Could not retrieve customer info.")))
+                    return
+                }
+                let tier = self.tierFromCustomerInfo(customerInfo)
+                if tier == .free {
+                    continuation.resume(returning: .failure(PurchaseError(message: "No active subscriptions were found to restore.")))
+                    return
+                }
+                continuation.resume(returning: .success(tier))
             }
-            return .success(tier)
-        } catch {
-            return .failure(error.localizedDescription)
         }
     }
 
     /// Checks the current entitlements and returns the active tier.
     func currentTier() async -> SubscriptionTier {
         guard isConfigured else { return .free }
-        do {
-            let info = try await Purchases.shared.getCustomerInfo()
-            return tierFromCustomerInfo(info)
-        } catch {
-            return .free
+        return await withCheckedContinuation { (continuation: CheckedContinuation<SubscriptionTier, Never>) in
+            Purchases.shared.getCustomerInfo { customerInfo, error in
+                guard let customerInfo, error == nil else {
+                    continuation.resume(returning: .free)
+                    return
+                }
+                continuation.resume(returning: self.tierFromCustomerInfo(customerInfo))
+            }
         }
     }
 
     /// Maps RevenueCat entitlements to our SubscriptionTier enum.
-    private func tierFromCustomerInfo(_ info: CustomerInfo) -> SubscriptionTier {
+    nonisolated private func tierFromCustomerInfo(_ info: CustomerInfo) -> SubscriptionTier {
         if info.entitlements["lifetime"]?.isActive == true {
             return .lifetime
         }

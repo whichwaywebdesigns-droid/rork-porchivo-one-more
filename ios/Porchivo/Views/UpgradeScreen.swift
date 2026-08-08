@@ -184,15 +184,15 @@ struct UpgradeScreen: View {
         isProcessing = true
         Task { @MainActor in
             defer { isProcessing = false }
-            let result = await RevenueCatService.shared.purchase(selectedPlan)
+            let result = await RevenueCatService.shared.purchase(UpgradePlan(rawValue: selectedPlan.rawValue) ?? .annual)
             switch result {
             case .success(let tier):
                 appState.upgradeTier(tier)
                 Haptics.success()
                 dismiss()
-            case .failure(let msg):
-                if msg != "cancelled" {
-                    lastError = msg
+            case .failure(let err):
+                if err.message != "cancelled" {
+                    lastError = err.message
                     Haptics.error()
                 }
             }
@@ -209,8 +209,8 @@ struct UpgradeScreen: View {
                 appState.upgradeTier(tier)
                 Haptics.success()
                 dismiss()
-            case .failure(let msg):
-                lastError = msg
+            case .failure(let err):
+                lastError = err.message
                 Haptics.error()
             }
         }
