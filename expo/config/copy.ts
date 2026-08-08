@@ -190,9 +190,9 @@ export const COPY = {
     trackingNumberPlaceholder: 'Tracking number',
     packageNamePlaceholder: 'Package name (optional)',
     submitButton: 'Track this package',
-    // Shown when free user hits the 5-package limit
+    // Shown when free user hits the 1-package limit
     limitReachedHeadline: 'Package limit reached',
-    limitReachedBody: 'Free accounts can track up to 5 packages. Upgrade to track unlimited deliveries.',
+    limitReachedBody: 'Free accounts can track 1 package. Upgrade to track unlimited deliveries.',
     limitReachedCta: 'Upgrade to Premium',
     // Shown when tracking number is invalid
     invalidTrackingError: 'That tracking number doesn\'t look right. Double-check it and try again.',

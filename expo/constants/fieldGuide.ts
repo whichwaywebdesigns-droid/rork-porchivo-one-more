@@ -93,7 +93,7 @@ export const FIELD_GUIDE: ManualSection[] = [
     audience: 'homeowner',
     blocks: [
       { type: 'paragraph', text: 'Tap the **+** button, paste a tracking number, and Porchivo auto-detects the carrier. Give it an optional nickname like "Mom\'s gift" so it is easy to spot.' },
-      { type: 'paragraph', text: 'You can add up to **20** active packages on the free plan, and unlimited on Premium. Delivered items archive automatically after **7** days.' },
+      { type: 'paragraph', text: 'You can add up to **1** active package on the free plan, and unlimited on Premium. Delivered items archive automatically after **7** days.' },
       { type: 'tip', text: 'No tracking number yet? Add the package by expected date and update the number later — tracking backfills automatically.' },
     ],
   },

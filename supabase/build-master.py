@@ -50,6 +50,8 @@ ORDER = [
     "support-reply-templates-migration.sql",  # staff reply-templates library (references profiles + update_updated_at)
     "avatar-storage-migration.sql",           # public avatars bucket + owner-scoped Storage RLS
     "delete-account-procedure.sql",           # references most tables — run last
+    "add_apns_token.sql",                    # native iOS APNS token column on profiles
+    "add_is_volunteer.sql",                  # volunteer partner flag + stats view rebuild
 ]
 
 POLICY_RE = re.compile(

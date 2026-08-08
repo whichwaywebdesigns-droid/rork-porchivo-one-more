@@ -130,7 +130,7 @@ export default function AddPackageScreen() {
       if (err?.message === 'FREE_LIMIT_REACHED') {
         Alert.alert(
           'Free limit reached',
-          'Free accounts can track up to 5 active packages. Upgrade to Premium for unlimited tracking.',
+          'Free accounts can track 1 active package. Upgrade to Premium for unlimited tracking.',
           [
             { text: 'Not now', style: 'cancel' },
             { text: 'Upgrade', onPress: () => router.push('/upgrade?trigger=package_limit' as any) },

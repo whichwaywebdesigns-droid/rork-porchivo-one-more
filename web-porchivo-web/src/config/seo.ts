@@ -91,16 +91,16 @@ export const PAGE_SEO: Record<string, PageSEO> = {
     canonical: `${BASE_URL}/pricing`,
     ogTitle: "Porchivo Pricing — Plans for Every Household",
     ogDescription:
-      "Free tier available. Premium from $4.94/mo. Family plan for up to 5 members. HOA plan covering 250 households. Start with a 7-day free trial.",
+      "Free tier available. Premium from $8.33/mo. Family plan for up to 5 members. HOA plan covering 250 households. Start with a 7-day free trial.",
     ogImage: OG_IMAGE,
     twitterCard: "summary_large_image",
     robots: "index, follow",
     aiSummary:
-      "Porchivo offers four plan tiers: Free (tracks 3 packages), Premium at $8.33/month or $4.94/month billed annually ($59.33/year), Family at $13.33/month or $8.28/month annually (up to 5 members), and Enterprise/HOA at $149.33/month or $999.33/year (up to 250 households). Annual plans include a 7-day free trial.",
+      "Porchivo offers four plan tiers: Free (tracks 1 package), Premium at $13.99/month or $8.33/month billed annually ($99.99/year), Family at $23.99/month or $15.00/month annually (up to 5 members), and Enterprise/HOA at $149.33/month or $999.33/year (up to 250 households). Annual plans include a 7-day free trial.",
     keyFacts: [
-      "Free tier: track up to 3 packages",
-      "Premium monthly: $8.33/mo",
-      "Premium annual: $4.94/mo ($59.33/yr) — save 41%",
+      "Free tier: track 1 package",
+      "Premium monthly: $13.99/mo",
+      "Premium annual: $8.33/mo ($99.99/yr) — save 40%",
       "Family plan: up to 5 household members",
       "HOA/Enterprise plan: up to 250 households at $149.33/mo",
       "7-day free trial on all annual plans",
@@ -194,7 +194,7 @@ export const PAGE_SEO: Record<string, PageSEO> = {
     keyFacts: [
       "Risk score is calculated from 10 weighted factors",
       "Supports 1,400+ carriers via Ship24 integration",
-      "Free accounts can track up to 3 packages",
+      "Free accounts can track 1 package",
       "Porchivo does not share your address with third parties",
     ],
     primaryEntity: "Porchivo FAQ",

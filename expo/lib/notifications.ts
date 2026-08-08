@@ -45,15 +45,8 @@ export async function registerForPushNotifications(): Promise<string | null> {
   const { status: existingStatus } = await Notifications.getPermissionsAsync();
   log('[Notifications] Existing permission status:', existingStatus);
 
-  let finalStatus = existingStatus;
   if (existingStatus !== 'granted') {
-    const { status } = await Notifications.requestPermissionsAsync();
-    finalStatus = status;
-    log('[Notifications] Requested permission, new status:', finalStatus);
-  }
-
-  if (finalStatus !== 'granted') {
-    log('[Notifications] Permission not granted');
+    log('[Notifications] Permission not granted — not re-asking (onboarding owns the prompt)');
     return null;
   }
 

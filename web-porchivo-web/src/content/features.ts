@@ -80,7 +80,7 @@ export const FEATURES: Feature[] = [
       "Premium: updates every 90 seconds",
       "Free: updates every 10 minutes",
       "Out-for-delivery status triggers elevated risk calculation",
-      "Free accounts track up to 3 packages simultaneously",
+      "Free accounts track 1 package simultaneously",
       "Premium accounts track unlimited packages",
     ],
     benefitsWho: "Anyone who orders packages online",

@@ -23,7 +23,10 @@ struct PorchivoApp: App {
                                       : nil)
                 .tint(.porchivoAccent)
                 .privacyShield()
-                .task { await appState.restoreSession() }
+        .task {
+                    RevenueCatService.shared.configure()
+                    await appState.restoreSession()
+                }
                 .onAppear {
                     appDelegate.appState = appState
                 }

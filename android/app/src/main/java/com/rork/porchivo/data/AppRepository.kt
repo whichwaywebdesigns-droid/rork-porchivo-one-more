@@ -367,6 +367,7 @@ class AppRepository(context: Context) {
     }
 
     fun addPackage(pkg: TrackedPackage) {
+        if (!canAddPackage()) return
         val updated = listOf(pkg) + _packages.value
         _packages.value = updated
         saveLocalPackages(updated)

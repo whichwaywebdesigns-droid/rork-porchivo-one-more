@@ -104,16 +104,29 @@ final class AppState {
             authState = .unauthenticated
             return
         }
-        let session = await supabase.restoreSession()
+        // Race the session restore against a timeout so users on poor connectivity
+        // don't see a frozen splash indefinitely.
+        let restoreTask = Task { await supabase.restoreSession() }
+        let timeoutTask = Task {
+            try? await Task.sleep(for: .seconds(8))
+            restoreTask.cancel()
+        }
+        let session = await restoreTask.value
+        timeoutTask.cancel()
         guard let session else {
             authState = .unauthenticated
             return
         }
         let userId = session.user?.id ?? ""
+        // Re-evaluate biometric availability in case the user changed Face ID
+        // settings since the last cold start.
+        availableBiometry = BiometricAuthService.availableType()
         if biometricUnlockEnabled && availableBiometry != .none {
             // Gate the restored session behind biometrics. Data loads only after unlock.
             authState = .locked(userId)
         } else {
+            // Biometrics disabled or no longer enrolled — skip the gate rather
+            // than locking the user out. Biometrics is a convenience, not a hard wall.
             authState = .authenticated(userId)
             await loadInitialData(userId: userId)
         }
@@ -649,6 +662,9 @@ final class AppState {
     /// session is re-locked so the user must authenticate again.
     @MainActor
     func handleEnterForeground() {
+        // Re-evaluate biometric availability — the user may have enrolled or
+        // unenrolled Face ID while the app was backgrounded.
+        availableBiometry = BiometricAuthService.availableType()
         guard biometricUnlockEnabled,
               case .authenticated(let userId) = authState,
               availableBiometry != .none else { return }

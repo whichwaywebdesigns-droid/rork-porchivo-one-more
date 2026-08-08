@@ -203,13 +203,13 @@ export const CHANGELOG: ChangeEntry[] = [
     summary:
       "Porchivo's first public release. Core features: porch risk scoring, live package tracking, community theft alerts, and push notifications.",
     aiSummary:
-      "Version 1.0.0 was the initial launch of Porchivo. Core features: 0–100 porch risk score per package, live tracking via Ship24 (1,400+ carriers), neighborhood theft alert community, push notifications for high-risk events, and a 3-package free tier.",
+      "Version 1.0.0 was the initial launch of Porchivo. Core features: 0–100 porch risk score per package, live tracking via Ship24 (1,400+ carriers), neighborhood theft alert community, push notifications for high-risk events, and a 1-package free tier.",
     changes: [
       { type: "feature", description: "Porch risk score (0–100) for every incoming package." },
       { type: "feature", description: "Live package tracking via Ship24 (1,400+ carriers)." },
       { type: "feature", description: "Neighborhood theft alert community feed." },
       { type: "feature", description: "Push notifications for high-risk porch events." },
-      { type: "feature", description: "Free tier: track up to 3 packages." },
+      { type: "feature", description: "Free tier: track 1 package." },
       { type: "feature", description: "Premium plans: monthly and annual." },
     ],
   },

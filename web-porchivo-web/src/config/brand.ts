@@ -43,7 +43,7 @@ export const BRAND = {
     "Porch Partners are trusted neighbors who hold packages on behalf of homeowners",
     "Porchivo integrates with 1,400+ carriers via Ship24",
     "Premium users get 90-second live tracking refresh",
-    "Free tier tracks up to 3 packages simultaneously",
+    "Free tier tracks 1 package simultaneously",
     "Available on iOS (App Store) and Android (Google Play)",
   ],
 

@@ -34,9 +34,9 @@ const CAPABILITIES = [
 ];
 
 const PRICING_TABLE = [
-  { plan: "Free", monthly: "$0", annual: "$0", members: "1", limit: "3 packages max" },
-  { plan: "Premium", monthly: "$8.33/mo", annual: "$4.94/mo ($59.33/yr)", members: "1", limit: "Unlimited" },
-  { plan: "Family", monthly: "$13.33/mo", annual: "$8.28/mo ($99.33/yr)", members: "Up to 5", limit: "Unlimited each" },
+  { plan: "Free", monthly: "$0", annual: "$0", members: "1", limit: "1 package max" },
+  { plan: "Premium", monthly: "$13.99/mo", annual: "$8.33/mo ($99.99/yr)", members: "1", limit: "Unlimited" },
+  { plan: "Family", monthly: "$23.99/mo", annual: "$15.00/mo ($179.99/yr)", members: "Up to 5", limit: "Unlimited each" },
   { plan: "HOA/Enterprise", monthly: "$149.33/mo", annual: "$83.28/mo ($999.33/yr)", members: "Up to 250 households", limit: "Unlimited each" },
 ];
 

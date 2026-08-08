@@ -93,7 +93,7 @@ export function buildMobileAppSchema(): SchemaObject {
         price: "0",
         priceCurrency: "USD",
         name: "Free tier",
-        description: "Track up to 3 packages at no cost",
+        description: "Track 1 package at no cost",
       },
       {
         "@type": "Offer",

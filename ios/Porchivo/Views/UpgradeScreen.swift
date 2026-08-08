@@ -3,8 +3,7 @@
 //  Porchivo
 //
 //  Paywall — monthly/annual plan cards, family plan, restore, tier comparison,
-//  winback offer. IAP deferred to a follow-up; selecting a plan upgrades the
-//  local tier for demo purposes.
+//  winback offer. Real IAP via RevenueCat SDK.
 //
 
 import SwiftUI
@@ -15,6 +14,7 @@ struct UpgradeScreen: View {
     @Environment(\.dismiss) private var dismiss
     @State private var selectedPlan: Plan = .annual
     @State private var isProcessing = false
+    @State private var lastError: String?
 
     enum Plan: String, CaseIterable, Identifiable {
         case monthly, annual, family, lifetime
@@ -34,6 +34,13 @@ struct UpgradeScreen: View {
                 Button("Restore purchases") { restore() }
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(c.accent)
+                if let lastError {
+                    Text(lastError)
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(c.danger)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 20)
+                }
                 Text("Cancel anytime. Payment charged to your Apple ID.")
                     .font(.system(size: 11))
                     .foregroundStyle(c.textMuted)
@@ -177,16 +184,35 @@ struct UpgradeScreen: View {
         isProcessing = true
         Task { @MainActor in
             defer { isProcessing = false }
-            try? await Task.sleep(for: .seconds(1))
-            let tier: SubscriptionTier = if selectedPlan == .family { .family } else if selectedPlan == .lifetime { .lifetime } else { .premium }
-            appState.upgradeTier(tier)
-            Haptics.success()
-            dismiss()
+            let result = await RevenueCatService.shared.purchase(selectedPlan)
+            switch result {
+            case .success(let tier):
+                appState.upgradeTier(tier)
+                Haptics.success()
+                dismiss()
+            case .failure(let msg):
+                if msg != "cancelled" {
+                    lastError = msg
+                    Haptics.error()
+                }
+            }
         }
     }
 
     private func restore() {
-        Haptics.light()
-        // IAP restore deferred — in demo we trust the existing tier.
+        isProcessing = true
+        Task { @MainActor in
+            defer { isProcessing = false }
+            let result = await RevenueCatService.shared.restorePurchases()
+            switch result {
+            case .success(let tier):
+                appState.upgradeTier(tier)
+                Haptics.success()
+                dismiss()
+            case .failure(let msg):
+                lastError = msg
+                Haptics.error()
+            }
+        }
     }
 }

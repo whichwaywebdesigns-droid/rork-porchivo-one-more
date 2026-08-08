@@ -46,6 +46,7 @@ android {
 
         buildConfigField("String", "SUPABASE_URL", "\"${envOrProp("SUPABASE_URL", "EXPO_PUBLIC_SUPABASE_URL")}\"")
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"${envOrProp("SUPABASE_ANON_KEY", "EXPO_PUBLIC_SUPABASE_ANON_KEY", "EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY")}\"")
+        buildConfigField("String", "REVENUECAT_ANDROID_API_KEY", "\"${envOrProp("EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY")}\"")
     }
 
     buildTypes {
@@ -98,5 +99,6 @@ dependencies {
     implementation(libs.coil.network.okhttp)
     implementation(libs.koin.androidx.compose)
     implementation(libs.androidx.security.crypto)
+    implementation(libs.revenuecat.purchases)
     debugImplementation(libs.androidx.ui.tooling)
 }

@@ -32,7 +32,8 @@ NO_JWT_FUNCTIONS=(
   "verification-webhook"
   "revenuecat-webhook"
   "stripe-webhook"      # Stripe subscription events: verified via stripe-signature
-  "send-email"          # server-to-server: protected by x-email-secret header
+  "send-email",          # server-to-server: protected by x-email-secret header
+  "support-ticket-ai-draft"   # DB trigger fires pg_net POSTs; bearer-token auth
 )
 
 # --- Everything else is deployed with default JWT verification. ---
@@ -44,7 +45,8 @@ JWT_FUNCTIONS=(
   "initiate-verification"
   "partner-payout"
   "send-notification"
-  "track-shipment"
+  "track-shipment",
+  "dev-confirm-user"          # dev-only QA tool (anon-key check)
 )
 
 is_no_jwt() {

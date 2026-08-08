@@ -206,7 +206,7 @@ export default function TrackingAddDeliveryScreen({
         return;
       } catch (err: any) {
         if (err?.message === 'FREE_LIMIT_REACHED') {
-          Alert.alert('Free Limit', 'You can track up to 5 active packages on the free plan.');
+          Alert.alert('Free Limit', 'You can track 1 active package on the free plan.');
         } else {
           Alert.alert('Error', 'Could not add package. Please try again.');
         }
@@ -321,7 +321,7 @@ export default function TrackingAddDeliveryScreen({
         safeContinue();
       } catch (err: any) {
         if (err?.message === 'FREE_LIMIT_REACHED') {
-          Alert.alert('Free Limit', 'You can track up to 5 active packages on the free plan.');
+          Alert.alert('Free Limit', 'You can track 1 active package on the free plan.');
         } else {
           Alert.alert('Error', 'Account created but could not add package. Please try again from the home screen.');
           safeContinue();

@@ -41,6 +41,10 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.clickable
@@ -56,7 +60,9 @@ import com.rork.porchivo.config.AppConfig
 import com.rork.porchivo.model.SubscriptionTier
 import com.rork.porchivo.model.UserRole
 import com.rork.porchivo.ui.navigation.Routes
+import com.rork.porchivo.data.RevenueCatService
 import com.rork.porchivo.ui.theme.PorchivoTheme
+import kotlinx.coroutines.launch
 import com.rork.porchivo.ui.viewmodel.AppViewModel
 
 @Composable
@@ -67,6 +73,7 @@ fun ProfileScreen(
 ) {
     val c = PorchivoTheme.colors
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val user by appViewModel.user.collectAsStateWithLifecycle()
     val tier by appViewModel.tier.collectAsStateWithLifecycle()
     val darkOverride by appViewModel.darkThemeOverride.collectAsStateWithLifecycle()
@@ -213,7 +220,14 @@ fun ProfileScreen(
                     icon = Icons.Outlined.Refresh,
                     iconTint = c.accent,
                     label = "Restore Purchases",
-                    onClick = { },
+                    onClick = {
+                        scope.launch {
+                            val result = RevenueCatService.restorePurchases()
+                            if (result.tier != null) {
+                                appViewModel.upgradeTier(result.tier)
+                            }
+                        }
+                    },
                 )
             }
         }

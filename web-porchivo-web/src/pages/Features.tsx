@@ -57,7 +57,7 @@ const FEATURES_DETAILED = [
       "1,400+ carriers including USPS, FedEx, UPS, DHL, Amazon",
       "Premium: 90-second refresh interval",
       "Free: 10-minute refresh interval",
-      "Free tier: track up to 3 packages",
+      "Free tier: track 1 package",
       "Premium: unlimited package tracking",
       "OFD status triggers elevated risk calculation",
     ],
@@ -305,7 +305,7 @@ export default function FeaturesPage() {
       <section className="py-20 px-4 sm:px-6 bg-slate-900/40 border-t border-slate-800">
         <div className="max-w-2xl mx-auto text-center">
           <h2 className="text-3xl font-bold text-slate-100 mb-4">Ready to score your first delivery?</h2>
-          <p className="text-slate-400 mb-8">Free download. Track 3 packages at no cost. Upgrade whenever you're ready.</p>
+          <p className="text-slate-400 mb-8">Free download. Track 1 package at no cost. Upgrade whenever you're ready.</p>
           <Link to="/download" className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold transition-all hover:scale-[1.02]">
             Download Porchivo
             <ArrowRight className="w-4 h-4" />

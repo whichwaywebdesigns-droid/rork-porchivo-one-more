@@ -11,7 +11,7 @@ import { BRAND } from "@/config/brand";
 const seo = getPageSEO("download");
 
 const FREE_INCLUDES = [
-  "Track up to 3 packages simultaneously",
+  "Track 1 package simultaneously",
   "Porch risk score for every delivery",
   "Neighborhood theft alerts",
   "10-minute live tracking refresh",

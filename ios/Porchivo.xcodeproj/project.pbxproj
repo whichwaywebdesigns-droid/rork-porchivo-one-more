@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		XXD63457E41125E77BACFDXX /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = XX8F6E1A701EA04CDCEA3DXX /* RevenueCat */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		105FC58A2E9EAD3200EA8BCF /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				XXD63457E41125E77BACFDXX /* RevenueCat in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +117,7 @@
 			);
 			name = Porchivo;
 			packageProductDependencies = (
+				XX8F6E1A701EA04CDCEA3DXX /* RevenueCat */,
 			);
 			productName = Porchivo;
 			productReference = 105FC57A2E9EAD3100EA8BCF /* Porchivo.app */;
@@ -203,6 +209,9 @@
 				105FC5792E9EAD3100EA8BCF /* Porchivo */,
 				105FC5882E9EAD3200EA8BCF /* PorchivoTests */,
 				105FC5922E9EAD3200EA8BCF /* PorchivoUITests */,
+			);
+			packageReferences = (
+				XX56D7F10BAEE1D3529BF9XX /* XCRemoteSwiftPackageReference "purchases-ios-spm" */,
 			);
 		};
 /* End PBXProject section */
@@ -401,12 +410,12 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				CODE_SIGN_ENTITLEMENTS = Porchivo/Porchivo.entitlements;
-			INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
-			INFOPLIST_KEY_NSCameraUsageDescription = "Porchivo uses the camera to capture your profile photo and package delivery evidence.";
-			INFOPLIST_KEY_NSFaceIDUsageDescription = "Porchivo uses Face ID to unlock your session without re-entering your password.";
-			INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Porchivo uses approximate location to surface nearby shipments and porch risk for your block.";
-			INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Porchivo needs photo library access to select a profile picture.";
-			INFOPLIST_KEY_NSUserNotificationsUsageDescription = "Porchivo sends you delivery alerts when your Porch Partner picks up or safely stores a package.";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Porchivo uses the camera to capture your profile photo and package delivery evidence.";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "Porchivo uses Face ID to unlock your session without re-entering your password.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Porchivo uses approximate location to surface nearby shipments and porch risk for your block.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Porchivo needs photo library access to select a profile picture.";
+				INFOPLIST_KEY_NSUserNotificationsUsageDescription = "Porchivo sends you delivery alerts when your Porch Partner picks up or safely stores a package.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -440,12 +449,12 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				CODE_SIGN_ENTITLEMENTS = Porchivo/Porchivo.entitlements;
-			INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
-			INFOPLIST_KEY_NSCameraUsageDescription = "Porchivo uses the camera to capture your profile photo and package delivery evidence.";
-			INFOPLIST_KEY_NSFaceIDUsageDescription = "Porchivo uses Face ID to unlock your session without re-entering your password.";
-			INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Porchivo uses approximate location to surface nearby shipments and porch risk for your block.";
-			INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Porchivo needs photo library access to select a profile picture.";
-			INFOPLIST_KEY_NSUserNotificationsUsageDescription = "Porchivo sends you delivery alerts when your Porch Partner picks up or safely stores a package.";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Porchivo uses the camera to capture your profile photo and package delivery evidence.";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "Porchivo uses Face ID to unlock your session without re-entering your password.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Porchivo uses approximate location to surface nearby shipments and porch risk for your block.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Porchivo needs photo library access to select a profile picture.";
+				INFOPLIST_KEY_NSUserNotificationsUsageDescription = "Porchivo sends you delivery alerts when your Porch Partner picks up or safely stores a package.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -478,7 +487,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				MARKETING_VERSION = 1.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.whichwayweblabs.porchivo.tests";
+				PRODUCT_BUNDLE_IDENTIFIER = com.whichwayweblabs.porchivo.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -500,7 +509,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				MARKETING_VERSION = 1.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.whichwayweblabs.porchivo.tests";
+				PRODUCT_BUNDLE_IDENTIFIER = com.whichwayweblabs.porchivo.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -520,7 +529,7 @@
 				DEVELOPMENT_TEAM = UL64N5W93Y;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.whichwayweblabs.porchivo.uitests";
+				PRODUCT_BUNDLE_IDENTIFIER = com.whichwayweblabs.porchivo.uitests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -540,7 +549,7 @@
 				DEVELOPMENT_TEAM = UL64N5W93Y;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.whichwayweblabs.porchivo.uitests";
+				PRODUCT_BUNDLE_IDENTIFIER = com.whichwayweblabs.porchivo.uitests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -592,6 +601,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		XX56D7F10BAEE1D3529BF9XX /* XCRemoteSwiftPackageReference "purchases-ios-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/RevenueCat/purchases-ios-spm.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		XX8F6E1A701EA04CDCEA3DXX /* RevenueCat */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = XX56D7F10BAEE1D3529BF9XX /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
+			productName = RevenueCat;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 105FC5722E9EAD3100EA8BCF /* Project object */;
 }

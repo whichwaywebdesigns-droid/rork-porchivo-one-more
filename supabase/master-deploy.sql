@@ -14,7 +14,7 @@
 -- tables/indexes use IF NOT EXISTS. Running this on a partially-migrated
 -- database brings it fully up to date without erroring on existing objects.
 --
--- Bundles 38 migrations in dependency order.
+-- Bundles 40 migrations in dependency order.
 -- =============================================================
 
 
@@ -8711,3 +8711,77 @@ $$;
 -- who the function body explicitly validates via auth.uid().
 REVOKE ALL ON FUNCTION public.delete_account_cascade() FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.delete_account_cascade() TO authenticated;
+
+
+
+-- #############################################################
+-- ##  add_apns_token.sql
+-- #############################################################
+-- Add native iOS APNS token support to the existing push infrastructure.
+-- Expo apps continue to use the existing `profiles.expo_push_token` column and
+-- the `send_push_notification` trigger (which calls the Expo Push API).
+-- This migration adds an `apns_token` column so the native iOS app can persist
+-- its Apple Push Notification service device token for future native iOS pushes.
+--
+-- PREREQUISITE: native iOS APNS *delivery* still requires an APNS certificate
+-- or key configured in your backend. This migration only adds the storage column.
+
+-- 1. Add the APNS token column to profiles.
+alter table public.profiles
+    add column if not exists apns_token text;
+
+-- 2. Ensure the column is writable by the authenticated user themselves.
+--    (profiles already has RLS policies; this grants update on the new column.)
+grant update (apns_token) on public.profiles to authenticated;
+
+-- 3. Keep the existing Expo push trigger unchanged. When you later wire native
+--    APNS delivery, you can extend `send_push_notification()` to fall back to
+--    `apns_token` when `expo_push_token` is null.
+--
+--    Example future trigger logic (not enabled here because APNS credentials are
+--    project-specific and not yet configured):
+--      if new.recipient's expo_push_token is not null then send via Expo Push API
+--      elsif new.recipient's apns_token is not null then send via APNS
+--      end if;
+
+
+
+-- #############################################################
+-- ##  add_is_volunteer.sql
+-- #############################################################
+-- ──────────────────────────────────────────────────────────────────────────────
+-- Migration: Add is_volunteer to partner_verifications + partner_public_stats view
+--
+-- Allows Porch Partners to mark themselves as "volunteer" — they hold packages
+-- for free, no charge to homeowners. The flag is exposed via the public stats
+-- view so homeowners can see which neighbors don't charge.
+--
+-- Run order: after master-deploy.sql (or can be run standalone on an existing DB)
+-- ──────────────────────────────────────────────────────────────────────────────
+
+-- 1. Add is_volunteer column to partner_verifications
+alter table public.partner_verifications
+  add column if not exists is_volunteer boolean not null default false;
+
+comment on column public.partner_verifications.is_volunteer is
+  'True if this partner holds packages for free (no charge to homeowners). '
+  'Volunteer partners skip the Stripe payment flow entirely.';
+
+-- 2. Rebuild the partner_public_stats view to include is_volunteer
+create or replace view public.partner_public_stats as
+  select
+    user_id,
+    tier,
+    idv_status,
+    payout_status,
+    completed_assignments,
+    total_assignments,
+    average_rating,
+    is_volunteer
+  from public.partner_verifications;
+
+grant select on public.partner_public_stats to authenticated;
+
+comment on view public.partner_public_stats is
+  'Public, non-PII trust signals for partners (tier, rating, completion counts, volunteer status). '
+  'Use this for cross-user reads; the partner_verifications table is owner-only.';

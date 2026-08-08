@@ -30,7 +30,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -40,11 +42,21 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.rork.porchivo.config.AppConfig
+import com.rork.porchivo.data.RevenueCatService
 import com.rork.porchivo.model.SubscriptionTier
 import com.rork.porchivo.ui.theme.PorchivoTheme
 import com.rork.porchivo.ui.viewmodel.AppViewModel
+import kotlinx.coroutines.launch
 
-private enum class Plan { MONTHLY, ANNUAL, FAMILY, LIFETIME }
+private enum class Plan {
+    MONTHLY, ANNUAL, FAMILY, LIFETIME;
+    fun toRcPlan() = when (this) {
+        MONTHLY -> RevenueCatService.Plan.MONTHLY
+        ANNUAL -> RevenueCatService.Plan.ANNUAL
+        FAMILY -> RevenueCatService.Plan.FAMILY
+        LIFETIME -> RevenueCatService.Plan.LIFETIME
+    }
+}
 
 /** Paywall — mirrors the Expo app's upgrade screen and PRICING config. */
 @Composable
@@ -55,6 +67,10 @@ fun UpgradeScreen(
 ) {
     val c = PorchivoTheme.colors
     var selectedPlan by remember { mutableStateOf(Plan.ANNUAL) }
+    var isProcessing by remember { mutableStateOf(false) }
+    var errorMsg by remember { mutableStateOf<String?>(null) }
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     Column(
         modifier = modifier
@@ -188,22 +204,35 @@ fun UpgradeScreen(
 
             Button(
                 onClick = {
-                    val tier = when (selectedPlan) {
-                        Plan.FAMILY -> SubscriptionTier.FAMILY
-                        Plan.LIFETIME -> SubscriptionTier.LIFETIME
-                        else -> SubscriptionTier.PREMIUM
+                    if (isProcessing) return@Button
+                    isProcessing = true
+                    errorMsg = null
+                    scope.launch {
+                        val result = RevenueCatService.purchase(
+                            context as android.app.Activity,
+                            selectedPlan.toRcPlan(),
+                        )
+                        isProcessing = false
+                        if (result.tier != null) {
+                            appViewModel.upgradeTier(result.tier)
+                            navController.popBackStack()
+                        } else if (result.error != "cancelled") {
+                            errorMsg = result.error
+                        }
                     }
-                    appViewModel.upgradeTier(tier)
-                    navController.popBackStack()
                 },
+                enabled = !isProcessing,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = c.accent),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = c.accent,
+                    disabledContainerColor = c.accent.copy(alpha = 0.5f),
+                ),
             ) {
                 Text(
-                    text = when (selectedPlan) {
+                    text = if (isProcessing) "Processing…" else when (selectedPlan) {
                         Plan.ANNUAL -> "Start ${AppConfig.Pricing.ANNUAL_TRIAL_DAYS}-Day Free Trial"
                         Plan.MONTHLY -> "Subscribe for ${AppConfig.Pricing.MONTHLY_DISPLAY}/mo"
                         Plan.FAMILY -> "Start Family Plan"
@@ -223,6 +252,17 @@ fun UpgradeScreen(
                 lineHeight = 15.sp,
             )
             Spacer(modifier = Modifier.height(10.dp))
+            val err = errorMsg
+            if (err != null) {
+                Text(
+                    text = err,
+                    color = c.danger,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                    textAlign = TextAlign.Center,
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+            }
             TextButton(
                 onClick = { navController.popBackStack() },
                 modifier = Modifier.fillMaxWidth(),

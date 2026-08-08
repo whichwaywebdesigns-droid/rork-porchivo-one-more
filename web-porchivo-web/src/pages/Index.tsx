@@ -253,7 +253,7 @@ export default function IndexPage() {
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl font-bold text-slate-100 mb-4">Free to start. Upgrade for HOA package management and neighborhood package safety.</h2>
           <p className="text-slate-400 text-lg mb-8">
-            Track up to 3 packages free. Premium unlocks unlimited tracking, Theft Shield alerts, and 90-second live refresh.
+            Track 1 package free. Premium unlocks unlimited tracking, Theft Shield alerts, and 90-second live refresh.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
