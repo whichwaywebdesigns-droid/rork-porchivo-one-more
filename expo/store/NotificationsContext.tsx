@@ -52,6 +52,14 @@ export const [NotificationsProvider, useNotifications] = createContextHook(() =>
         });
         return;
       }
+      if (data?.packageId && data?.delivery_reminder) {
+        router.push({ pathname: '/package-detail' as any, params: { id: data.packageId as string } });
+        return;
+      }
+      if (data?.packageId) {
+        router.push({ pathname: '/package-detail' as any, params: { id: data.packageId as string } });
+        return;
+      }
       if (data?.shipmentId) {
         router.push({ pathname: '/shipment-detail' as any, params: { id: data.shipmentId as string } });
       }

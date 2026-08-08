@@ -181,3 +181,104 @@ export async function scheduleLocalNotification(
   log('[Notifications] Scheduled notification id:', id);
   return id;
 }
+
+/**
+ * Schedules a delivery-reminder local notification for a package whose status
+ * may change to 'delivered' while the app is in the background.
+ *
+ * Because the JS thread is suspended when the app is backgrounded, the normal
+ * polling loop can't detect the status change and fire sendStatusNotification.
+ * Instead, we proactively schedule a notification timed to the package's
+ * expected delivery window so the user is alerted even with the app closed.
+ *
+ * The notification is tagged with `delivery_reminder: true` in its data payload
+ * so cancelDeliveryReminders() can find and cancel them when the app returns
+ * to the foreground (where real polling takes over).
+ *
+ * @returns The scheduled notification ID, or '' on web/no-op.
+ */
+export async function scheduleDeliveryReminder(pkg: {
+  id: string;
+  name: string;
+  carrier: string;
+  expectedDeliveryDate: string;
+  expectedDeliveryWindowEnd: string | null;
+}): Promise<string> {
+  if (isWeb) return '';
+
+  // Determine the target time: prefer the delivery window end, fall back to
+  // the expected delivery date, then fall back to 30 min from now.
+  const now = Date.now();
+  const windowEnd = pkg.expectedDeliveryWindowEnd
+    ? new Date(pkg.expectedDeliveryWindowEnd).getTime()
+    : null;
+  const deliveryDate = pkg.expectedDeliveryDate
+    ? new Date(pkg.expectedDeliveryDate).getTime()
+    : null;
+
+  let targetMs: number;
+  if (windowEnd && windowEnd > now) {
+    targetMs = windowEnd;
+  } else if (deliveryDate && deliveryDate > now) {
+    targetMs = deliveryDate;
+  } else {
+    // Delivery window already passed or unknown — schedule 30 min from now
+    // so the user gets a check-in prompt.
+    targetMs = now + 30 * 60 * 1000;
+  }
+
+  // Cap at 24 hours to avoid stale notifications far in the future.
+  const maxMs = now + 24 * 60 * 60 * 1000;
+  if (targetMs > maxMs) targetMs = maxMs;
+
+  const seconds = Math.max(1, Math.round((targetMs - now) / 1000));
+
+  log(
+    '[Notifications] Scheduling delivery reminder for', pkg.name,
+    'in', Math.round(seconds / 60), 'min',
+  );
+
+  const id = await Notifications.scheduleNotificationAsync({
+    content: {
+      title: 'Package Delivered?',
+      body: `Your ${pkg.carrier} package "${pkg.name}" should be on your porch. Tap to check its status.`,
+      data: {
+        packageId: pkg.id,
+        delivery_reminder: true,
+        type: 'delivery_reminder',
+      },
+      sound: 'default',
+    },
+    trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+      seconds,
+    },
+  });
+
+  log('[Notifications] Delivery reminder scheduled, id:', id);
+  return id;
+}
+
+/**
+ * Cancels all scheduled delivery-reminder notifications.
+ * Called when the app returns to the foreground so that real polling
+ * can take over and fire accurate status-change notifications.
+ */
+export async function cancelDeliveryReminders(): Promise<void> {
+  if (isWeb) return;
+  try {
+    const scheduled = await Notifications.getAllScheduledNotificationsAsync();
+    const reminderIds = scheduled
+      .filter((n) => (n.content.data as Record<string, unknown> | undefined)?.delivery_reminder === true)
+      .map((n) => n.identifier);
+
+    if (reminderIds.length === 0) return;
+
+    log('[Notifications] Cancelling', reminderIds.length, 'delivery reminders');
+    await Promise.all(
+      reminderIds.map((id) => Notifications.cancelScheduledNotificationAsync(id)),
+    );
+  } catch (e) {
+    log('[Notifications] Error cancelling delivery reminders:', e);
+  }
+}

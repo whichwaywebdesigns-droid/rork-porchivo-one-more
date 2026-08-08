@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import createContextHook from '@nkzw/create-context-hook';
 import { AppState, AppStateStatus } from 'react-native';
 import { TrackedPackage, PackageTrackingStatus, PackageStatusEvent, Carrier, AddressNickname, LiveTrackingEvent } from '@/types';
-import { scheduleLocalNotification } from '@/lib/notifications';
+import { scheduleLocalNotification, scheduleDeliveryReminder, cancelDeliveryReminders } from '@/lib/notifications';
 import { shouldSendNotification } from '@/lib/notificationPreferences';
 import {
   trackShipment,
@@ -334,8 +334,26 @@ export const [PackagesProvider, usePackages] = createContextHook(() => {
 
     const sub = AppState.addEventListener('change', (state: AppStateStatus) => {
       if (state === 'active') {
-        log('[Packages] App active, refreshing tracking');
+        log('[Packages] App active — cancelling delivery reminders and refreshing tracking');
+        void cancelDeliveryReminders();
         void refreshAllPackages();
+      } else if (state === 'background' || state === 'inactive') {
+        log('[Packages] App backgrounded — scheduling delivery reminders for active packages');
+        const activeForReminder = packagesRef.current.filter(
+          (p) =>
+            p.currentStatus !== 'picked_up' &&
+            p.currentStatus !== 'returned' &&
+            p.currentStatus !== 'delivered',
+        );
+        for (const pkg of activeForReminder) {
+          void scheduleDeliveryReminder({
+            id: pkg.id,
+            name: pkg.name,
+            carrier: pkg.carrier,
+            expectedDeliveryDate: pkg.expectedDeliveryDate,
+            expectedDeliveryWindowEnd: pkg.expectedDeliveryWindowEnd ?? null,
+          });
+        }
       }
     });
 
