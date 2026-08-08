@@ -116,7 +116,7 @@ final class RevenueCatService {
         if info.entitlements["lifetime"]?.isActive == true {
             return .lifetime
         }
-        if info.entitlements["family"]?.isActive == true {
+        if info.entitlements["family_household"]?.isActive == true {
             return .family
         }
         if info.entitlements["premium"]?.isActive == true {

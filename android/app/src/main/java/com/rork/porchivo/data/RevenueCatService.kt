@@ -119,7 +119,7 @@ object RevenueCatService {
     /** Maps RevenueCat entitlements to our SubscriptionTier enum. */
     private fun tierFromCustomerInfo(info: CustomerInfo): SubscriptionTier {
         if (info.entitlements["lifetime"]?.isActive == true) return SubscriptionTier.LIFETIME
-        if (info.entitlements["family"]?.isActive == true) return SubscriptionTier.FAMILY
+        if (info.entitlements["family_household"]?.isActive == true) return SubscriptionTier.FAMILY
         if (info.entitlements["premium"]?.isActive == true) return SubscriptionTier.PREMIUM
         return SubscriptionTier.FREE
     }
