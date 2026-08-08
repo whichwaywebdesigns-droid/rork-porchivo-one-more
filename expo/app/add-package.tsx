@@ -12,13 +12,14 @@ import {
   Animated,
 } from 'react-native';
 import { useRouter, Stack } from 'expo-router';
-import { ChevronDown, Calendar, X, HandHeart, MapPin, Star, CheckCircle, ChevronRight } from 'lucide-react-native';
+import { ChevronDown, Calendar, X, HandHeart, MapPin, Star, CheckCircle, ChevronRight, ScanBarcode } from 'lucide-react-native';
 import { useColors, AppColors } from '@/constants/colors';
 import { usePackages } from '@/store/PackagesContext';
 import { useApp } from '@/store/AppContext';
 import { usePorchPartners } from '@/store/PorchPartnersContext';
 import { Carrier, AddressNickname, PorchPartner } from '@/types';
 import { log } from "@/lib/logger";
+import BarcodeScannerModal from '@/components/BarcodeScannerModal';
 
 const CARRIERS: Carrier[] = ['Amazon', 'UPS', 'FedEx', 'USPS', 'Other'];
 const ADDRESS_OPTIONS: AddressNickname[] = ['Home', 'Work', 'Other'];
@@ -53,9 +54,15 @@ export default function AddPackageScreen() {
   const [showCarrierPicker, setShowCarrierPicker] = useState<boolean>(false);
   const [selectedPartnerId, setSelectedPartnerId] = useState<string | null>(null);
   const [showPartnerPicker, setShowPartnerPicker] = useState<boolean>(false);
+  const [showScanner, setShowScanner] = useState<boolean>(false);
   const { activePartners, assignPartnerToPackage } = usePorchPartners();
 
   const selectedPartner = activePartners.find((p) => p.id === selectedPartnerId);
+
+  const handleBarcodeScanned = useCallback((data: string) => {
+    setTrackingNumber(data);
+    setShowScanner(false);
+  }, []);
 
   const submitScale = useRef(new Animated.Value(1)).current;
 
@@ -230,15 +237,27 @@ export default function AddPackageScreen() {
 
         <View style={styles.section}>
           <Text style={styles.label}>Tracking Number</Text>
-          <TextInput
-            style={[styles.input, styles.monoInput]}
-            value={trackingNumber}
-            onChangeText={setTrackingNumber}
-            placeholder="Paste your tracking number"
-            placeholderTextColor={colors.slateLighter}
-            autoCapitalize="characters"
-            testID="input-tracking-number"
-          />
+          <View style={styles.trackingInputRow}>
+            <TextInput
+              style={[styles.input, styles.monoInput, styles.trackingInputWithScan]}
+              value={trackingNumber}
+              onChangeText={setTrackingNumber}
+              placeholder="Paste or scan tracking number"
+              placeholderTextColor={colors.slateLighter}
+              autoCapitalize="characters"
+              testID="input-tracking-number"
+            />
+            <TouchableOpacity
+              style={styles.scanButton}
+              onPress={() => setShowScanner(true)}
+              activeOpacity={0.7}
+              accessibilityLabel="Scan barcode with camera"
+              accessibilityRole="button"
+              testID="btn-scan-barcode"
+            >
+              <ScanBarcode size={20} color={colors.primary} strokeWidth={2.2} />
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={styles.section}>
@@ -379,6 +398,12 @@ export default function AddPackageScreen() {
           </TouchableOpacity>
         </Animated.View>
       </ScrollView>
+
+      <BarcodeScannerModal
+        visible={showScanner}
+        onClose={() => setShowScanner(false)}
+        onScanned={handleBarcodeScanned}
+      />
     </KeyboardAvoidingView>
   );
 }
@@ -423,6 +448,22 @@ function createStyles(colors: AppColors) {
   monoInput: {
     fontFamily: 'monospace',
     letterSpacing: 0.5,
+  },
+  trackingInputRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  trackingInputWithScan: {
+    flex: 1,
+  },
+  scanButton: {
+    backgroundColor: colors.skyBlue,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.borderLight,
   },
   textArea: {
     minHeight: 80,

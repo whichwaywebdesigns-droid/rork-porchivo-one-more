@@ -67,6 +67,12 @@ export default (): { expo: ExpoConfig } => ({
           isAndroidBackgroundLocationEnabled: false,
         },
       ],
+      [
+        "expo-camera",
+        {
+          cameraPermission: "Porchivo needs camera access to scan package barcodes for instant tracking."
+        }
+      ],
     ],
     updates: {
       url: "https://u.expo.dev/1c5be498-5328-4fb7-a200-5c98d55f298f",

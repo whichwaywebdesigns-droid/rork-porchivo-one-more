@@ -22,6 +22,7 @@ import {
   User as UserIcon,
   X,
   ChevronRight,
+  ScanBarcode,
 } from 'lucide-react-native';
 import * as Clipboard from 'expo-clipboard';
 import * as Haptics from 'expo-haptics';
@@ -35,6 +36,7 @@ import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { recordConsent } from '@/lib/consent';
 import { log } from '@/lib/logger';
 import { useRouter } from 'expo-router';
+import BarcodeScannerModal from '@/components/BarcodeScannerModal';
 
 interface TrackingAddDeliveryProps {
   onContinue?: () => void;
@@ -67,6 +69,7 @@ export default function TrackingAddDeliveryScreen({
   const [packageName, setPackageName] = useState<string>('');
   const [selectedCarrier, setSelectedCarrier] = useState<Carrier | null>(null);
   const [clipboardDetected, setClipboardDetected] = useState<boolean>(false);
+  const [showScanner, setShowScanner] = useState<boolean>(false);
 
   // Auth form state
   const [showAuthForm, setShowAuthForm] = useState<boolean>(false);
@@ -156,6 +159,12 @@ export default function TrackingAddDeliveryScreen({
     },
     [],
   );
+
+  const handleBarcodeScanned = useCallback((data: string) => {
+    setTrackingNumber(data);
+    setShowScanner(false);
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  }, []);
 
   const expandAuthForm = useCallback(() => {
     setShowAuthForm(true);
@@ -423,12 +432,23 @@ export default function TrackingAddDeliveryScreen({
                 style={styles.trackingInput}
                 value={trackingNumber}
                 onChangeText={setTrackingNumber}
-                placeholder="Paste or type tracking number"
+                placeholder="Paste, type, or scan tracking number"
                 placeholderTextColor={palette.slate300}
                 autoCapitalize="characters"
                 autoCorrect={false}
                 testID="input-tracking-number"
               />
+              <TouchableOpacity
+                style={styles.scanButton}
+                onPress={() => setShowScanner(true)}
+                hitSlop={8}
+                activeOpacity={0.7}
+                accessibilityLabel="Scan barcode with camera"
+                accessibilityRole="button"
+                testID="btn-scan-barcode"
+              >
+                <ScanBarcode size={18} color={palette.navy} strokeWidth={2.2} />
+              </TouchableOpacity>
               {clipboardDetected && !trackingNumber ? (
                 <TouchableOpacity
                   style={styles.pasteButton}
@@ -612,6 +632,11 @@ export default function TrackingAddDeliveryScreen({
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
+      <BarcodeScannerModal
+        visible={showScanner}
+        onClose={() => setShowScanner(false)}
+        onScanned={handleBarcodeScanned}
+      />
     </SafeAreaView>
   );
 }
@@ -733,6 +758,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: radius.sm,
+  },
+  scanButton: {
+    padding: 6,
+    marginLeft: 2,
   },
   pasteText: {
     fontSize: 13,
