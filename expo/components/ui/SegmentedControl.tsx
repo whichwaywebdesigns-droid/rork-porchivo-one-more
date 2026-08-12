@@ -159,10 +159,16 @@ function createStyles(colors: AppColors) {
       fontWeight: '600' as const,
       color: colors.slateLight,
       letterSpacing: 0.1,
+      textShadowColor: colors.primary,
+      textShadowOffset: { width: 0, height: 0 } as { width: number, height: number },
+      textShadowRadius: 1,
     },
     labelActive: {
       color: colors.slate,
       fontWeight: '700' as const,
+      textShadowColor: colors.primary,
+      textShadowOffset: { width: 0, height: 0 } as { width: number, height: number },
+      textShadowRadius: 1.5,
     },
     badge: {
       minWidth: 18,

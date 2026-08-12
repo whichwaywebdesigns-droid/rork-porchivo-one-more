@@ -542,10 +542,16 @@ function createStyles(colors: AppColors) {
       fontSize: 12,
       fontWeight: '600' as const,
       color: colors.slateLight,
+      textShadowColor: colors.primary,
+      textShadowOffset: { width: 0, height: 0 } as { width: number, height: number },
+      textShadowRadius: 1,
     },
     sortChipTextActive: {
       color: colors.primary,
       fontWeight: '700' as const,
+      textShadowColor: colors.primary,
+      textShadowOffset: { width: 0, height: 0 } as { width: number, height: number },
+      textShadowRadius: 1.5,
     },
     searchBarWrap: {
       paddingHorizontal: space.lg,
