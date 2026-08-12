@@ -21,7 +21,7 @@ import Animated, {
   Easing,
   runOnJS,
 } from 'react-native-reanimated';
-import { ChevronLeft, ChevronRight } from 'lucide-react-native';
+import { ChevronLeft } from 'lucide-react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -30,10 +30,13 @@ import { useAnalytics } from '@/store/AnalyticsContext';
 const HAS_SEEN_SLIDES_KEY = 'porchivo_pre_auth_slides_seen';
 
 const SLIDES = [
+  { image: require('@/assets/images/onboarding-1.png') },
   { image: require('@/assets/images/onboarding-2.png') },
   { image: require('@/assets/images/onboarding-3.png') },
   { image: require('@/assets/images/onboarding-4.png') },
 ];
+
+const FADE_DURATION = 350;
 
 const COLORS = {
   background: '#FFFFFF',
@@ -93,7 +96,7 @@ export default function OnboardingScreen(): React.ReactElement {
     progress.value = 0;
     progress.value = withTiming(
       1,
-      { duration: 450, easing: Easing.inOut(Easing.cubic) },
+      { duration: FADE_DURATION, easing: Easing.inOut(Easing.cubic) },
       (finished) => {
         if (finished) {
           runOnJS(setCurrentIndex)(next);
@@ -127,7 +130,7 @@ export default function OnboardingScreen(): React.ReactElement {
     progress.value = 0;
     progress.value = withTiming(
       1,
-      { duration: 450, easing: Easing.inOut(Easing.cubic) },
+      { duration: FADE_DURATION, easing: Easing.inOut(Easing.cubic) },
       (finished) => {
         if (finished) {
           runOnJS(setCurrentIndex)(previous);
@@ -181,42 +184,13 @@ export default function OnboardingScreen(): React.ReactElement {
     []
   );
 
-  const outgoingStyle = useAnimatedStyle(() => {
-    const rotateY = -progress.value * 90;
-    const scale = 1 - progress.value * 0.05;
-    const opacity = 1 - progress.value;
-    return {
-      transform: [
-        { perspective: 1200 },
-        { rotateY: `${rotateY}deg` },
-        { scale },
-      ],
-      opacity,
-    };
-  });
+  const outgoingStyle = useAnimatedStyle(() => ({
+    opacity: 1 - progress.value,
+  }));
 
-  const incomingStyle = useAnimatedStyle(() => {
-    const delayed = Math.max(0, (progress.value - 0.333) / 0.667);
-    const rotateY = 90 - delayed * 90;
-    const scale = 0.95 + delayed * 0.05;
-    const opacity = delayed;
-    return {
-      transform: [
-        { perspective: 1200 },
-        { rotateY: `${rotateY}deg` },
-        { scale },
-      ],
-      opacity,
-    };
-  });
-
-  const shadowStyle = useAnimatedStyle(() => {
-    const p = progress.value;
-    const shadowOpacity = p < 0.5 ? p * 0.6 : (1 - p) * 0.6;
-    return {
-      shadowOpacity,
-    };
-  });
+  const incomingStyle = useAnimatedStyle(() => ({
+    opacity: progress.value,
+  }));
 
   const swipeHintStyle = useAnimatedStyle(() => {
     const p = pulse.value;
@@ -229,7 +203,6 @@ export default function OnboardingScreen(): React.ReactElement {
   });
 
   const isLastSlide = currentIndex === SLIDES.length - 1;
-  const isFirstSlide = currentIndex === 0;
 
   return (
     <SafeAreaView style={styles.root} testID="onboarding-screen">
@@ -253,7 +226,6 @@ export default function OnboardingScreen(): React.ReactElement {
                 styles.card,
                 { width, height: height - 180 },
                 outgoingStyle,
-                shadowStyle,
               ]}
               pointerEvents={nextIndex !== null ? 'none' : 'auto'}
             >
@@ -271,7 +243,6 @@ export default function OnboardingScreen(): React.ReactElement {
                   styles.card,
                   { width, height: height - 180 },
                   incomingStyle,
-                  shadowStyle,
                 ]}
               >
                 <Image
@@ -359,39 +330,10 @@ const styles = StyleSheet.create({
     position: 'absolute',
     backgroundColor: COLORS.background,
     borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowRadius: 24,
-    elevation: 10,
   },
   image: {
     width: '100%',
     height: '100%',
-  },
-  arrow: {
-    position: 'absolute',
-    top: '50%',
-    marginTop: -22,
-    zIndex: 10,
-  },
-  arrowLeft: {
-    left: 12,
-  },
-  arrowRight: {
-    right: 12,
-  },
-  arrowCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255,255,255,0.85)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 6,
-    elevation: 3,
   },
   footer: {
     paddingHorizontal: 24,
