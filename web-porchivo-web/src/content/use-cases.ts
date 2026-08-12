@@ -94,7 +94,7 @@ export const USE_CASES: UseCase[] = [
       "Single billing and administration",
       "14-day free trial on annual plan",
     ],
-    recommendedPlan: "HOA Annual ($999.33/yr — save 44%)",
+    recommendedPlan: "HOA Annual ($3,000/yr — save 29%)",
     icon: "Users",
   },
   {
@@ -106,7 +106,7 @@ export const USE_CASES: UseCase[] = [
     challenge:
       "Individual plans get expensive quickly for couples or multi-adult households. Package risk affects everyone in the house — a delivery addressed to any member is at risk on the same porch.",
     solution:
-      "The Porchivo Family Plan covers up to 5 household members under one subscription at $8.28/month (billed annually). Every member gets their own account with full Premium access: unlimited tracking, Theft Shield, and Porch Partner features.",
+      "The Porchivo Family Plan covers up to 5 household members under one subscription at $15.00/month (billed annually). Every member gets their own account with full Premium access: unlimited tracking, Theft Shield, and Porch Partner features.",
     keyFeatures: [
       "Up to 5 household members",
       "Each member gets full Premium features",
@@ -114,7 +114,7 @@ export const USE_CASES: UseCase[] = [
       "7-day free trial on annual plan",
       "One renewal for the whole household",
     ],
-    recommendedPlan: "Family Annual ($8.28/mo — $99.33/yr)",
+    recommendedPlan: "Family Annual ($15.00/mo — $179.99/yr)",
     icon: "Heart",
   },
 ];

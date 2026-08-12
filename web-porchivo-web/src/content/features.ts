@@ -157,14 +157,14 @@ export const FEATURES: Feature[] = [
     name: "Family Plan",
     tagline: "Household protection for up to 5 family members.",
     description:
-      "The Porchivo Family Plan covers an entire household under one subscription. Up to 5 family members can each have their own Porchivo account with full premium features: unlimited tracking, Theft Shield, and Porch Partner access. The family plan is $13.33/month or $8.28/month billed annually ($99.33/year).",
+      "The Porchivo Family Plan covers an entire household under one subscription. Up to 5 family members can each have their own Porchivo account with full premium features: unlimited tracking, Theft Shield, and Porch Partner access. The family plan is $23.99/month or $15.00/month billed annually ($179.99/year).",
     aiSummary:
-      "The Family Plan covers up to 5 household members under one Porchivo subscription. All members get full Premium access. $13.33/month or $8.28/month billed annually ($99.33/year). 7-day free trial on annual.",
+      "The Family Plan covers up to 5 household members under one Porchivo subscription. All members get full Premium access. $23.99/month or $15.00/month billed annually ($179.99/year). 7-day free trial on annual.",
     facts: [
       "Up to 5 household members",
       "All members get full Premium access",
-      "Monthly: $13.33/month",
-      "Annual: $8.28/month ($99.33/year) — save 38%",
+      "Monthly: $23.99/month",
+      "Annual: $15.00/month ($179.99/year) — save 37%",
       "7-day free trial on annual plan",
     ],
     benefitsWho: "Households with multiple adults who each receive packages",
@@ -177,13 +177,13 @@ export const FEATURES: Feature[] = [
     name: "HOA & Community Plan",
     tagline: "One subscription protects an entire neighborhood.",
     description:
-      "The Porchivo HOA Plan covers entire communities under a single subscription. One HOA subscription covers up to 250 households. All residents get full premium access — unlimited tracking, Theft Shield, neighborhood alert priority, and Porch Partner access. Priced at $149.33/month or $999.33/year. 14-day free trial on annual.",
+      "The Porchivo HOA Plan covers entire communities under a single subscription. One HOA subscription covers up to 250 households. All residents get full premium access — unlimited tracking, Theft Shield, neighborhood alert priority, and Porch Partner access. Priced at $350/month or $3,000/year. 14-day free trial on annual.",
     aiSummary:
-      "The HOA Enterprise Plan covers up to 250 households in a single community. Monthly: $149.33/month. Annual: $999.33/year (save 44%). 14-day free trial. All residents get full Premium access.",
+      "The HOA Enterprise Plan covers up to 250 households in a single community. Monthly: $350/month. Annual: $3,000/year (save 29%). 14-day free trial. All residents get full Premium access.",
     facts: [
       "Up to 250 households per subscription",
-      "Monthly: $149.33/month",
-      "Annual: $999.33/year — save 44%",
+      "Monthly: $350/month",
+      "Annual: $3,000/year — save 29%",
       "14-day free trial on annual plan",
       "All residents get full Premium access",
     ],

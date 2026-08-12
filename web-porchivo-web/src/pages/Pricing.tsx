@@ -189,8 +189,8 @@ export default function PricingPage() {
             </div>
             <div className="space-y-3">
               {[
-                { label: "Monthly", price: "$149.33/mo", sub: "up to 250 households" },
-                { label: "Annual", price: "$999.33/yr", sub: "$83.28/mo — save 44% · 14-day trial" },
+                { label: "Monthly", price: "$350/mo", sub: "up to 250 households" },
+                { label: "Annual", price: "$3,000/yr", sub: "$250/mo — save 29% · 14-day trial" },
               ].map((row) => (
                 <div key={row.label} className="flex items-center justify-between p-4 rounded-xl bg-slate-800/50">
                   <div>

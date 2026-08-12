@@ -91,14 +91,14 @@ export default function DownloadPage() {
 
             <div className="bg-gradient-to-b from-amber-500/8 to-transparent border border-amber-500/30 rounded-2xl p-7">
               <div className="inline-flex px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-400 text-xs font-semibold mb-3">
-                Best value — save 41%
+                Best value — save 40%
               </div>
               <div className="text-sm font-medium text-slate-400 mb-1">Premium Annual</div>
               <div className="flex items-baseline gap-1 mb-1">
-                <span className="text-3xl font-bold text-slate-100">$4.94</span>
+                <span className="text-3xl font-bold text-slate-100">$8.33</span>
                 <span className="text-slate-500 text-sm">/mo, billed annually</span>
               </div>
-              <div className="text-sm text-slate-500 mb-6">7-day free trial · Cancel anytime</div>
+              <div className="text-sm text-slate-500 mb-6">7-day free trial · $99.99/yr · Cancel anytime</div>
               <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
                 Everything in Free, plus:
               </div>

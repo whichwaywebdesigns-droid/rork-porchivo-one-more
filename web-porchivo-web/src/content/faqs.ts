@@ -72,7 +72,7 @@ export const FAQS: FAQ[] = [
     id: "what-does-premium-include",
     question: "What does Porchivo Premium include?",
     answer:
-      "Porchivo Premium includes: unlimited package tracking, 90-second live tracking refresh, Theft Shield push alerts when risk exceeds 65/100, priority risk scoring, access to the full neighborhood alert history, UPS & Amazon hidden services (intercept, live tracking, access points, and A-to-Z claim filing), and early access to new features. Premium is $9.99/month or $6.67/month billed annually ($79.99/year). Annual plans include a 7-day free trial.",
+      "Porchivo Premium includes: unlimited package tracking, 90-second live tracking refresh, Theft Shield push alerts when risk exceeds 65/100, priority risk scoring, access to the full neighborhood alert history, UPS & Amazon hidden services (intercept, live tracking, access points, and A-to-Z claim filing), and early access to new features. Premium is $13.99/month or $8.33/month billed annually ($99.99/year). Annual plans include a 7-day free trial.",
     category: "pricing",
   },
   {
@@ -86,14 +86,14 @@ export const FAQS: FAQ[] = [
     id: "what-is-the-family-plan",
     question: "What is the Family Plan?",
     answer:
-      "The Family Plan covers up to 5 household members under one subscription. Each member gets their own Porchivo account with full Premium access — unlimited tracking, Theft Shield, and UPS & Amazon hidden services. Family Sharing is enabled so members can be added through Apple Family Sharing. The Family Plan is $14.99/month. A 7-day free trial is available.",
+      "The Family Plan covers up to 5 household members under one subscription. Each member gets their own Porchivo account with full Premium access — unlimited tracking, Theft Shield, and UPS & Amazon hidden services. Family Sharing is enabled so members can be added through Apple Family Sharing. The Family Plan is $23.99/month or $15.00/month billed annually ($179.99/year). A 7-day free trial is available on the annual plan.",
     category: "pricing",
   },
   {
     id: "is-there-an-hoa-plan",
     question: "Is there a plan for HOAs or property managers?",
     answer:
-      "Yes. The Porchivo Enterprise/HOA Plan covers entire communities under one subscription — up to 250 households. All residents get full Premium access. The plan is $149.33/month or $999.33/year (save 44%). A 14-day free trial is available on the annual plan. Contact support@porchivo.com for onboarding assistance for communities larger than 250 households.",
+      "Yes. The Porchivo Enterprise/HOA Plan covers entire communities under one subscription — up to 250 households. All residents get full Premium access. The plan is $350/month or $3,000/year (save 29%). A 14-day free trial is available on the annual plan. Contact support@porchivo.com for onboarding assistance for communities larger than 250 households.",
     category: "pricing",
   },
 

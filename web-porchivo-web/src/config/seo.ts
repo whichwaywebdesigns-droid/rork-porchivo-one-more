@@ -87,7 +87,7 @@ export const PAGE_SEO: Record<string, PageSEO> = {
   pricing: {
     title: "Pricing — Porchivo Plans for Individuals, Families & HOAs",
     description:
-      "Porchivo offers a free tier, a $4.94/mo Premium plan (billed annually), a Family plan, and an HOA plan covering up to 250 households. 7-day free trial on annual.",
+      "Porchivo offers a free tier, an $8.33/mo Premium plan (billed annually at $99.99/yr), a Family plan, and an HOA plan covering up to 250 households. 7-day free trial on annual.",
     canonical: `${BASE_URL}/pricing`,
     ogTitle: "Porchivo Pricing — Plans for Every Household",
     ogDescription:
@@ -96,13 +96,13 @@ export const PAGE_SEO: Record<string, PageSEO> = {
     twitterCard: "summary_large_image",
     robots: "index, follow",
     aiSummary:
-      "Porchivo offers four plan tiers: Free (tracks 1 package), Premium at $13.99/month or $8.33/month billed annually ($99.99/year), Family at $23.99/month or $15.00/month annually (up to 5 members), and Enterprise/HOA at $149.33/month or $999.33/year (up to 250 households). Annual plans include a 7-day free trial.",
+      "Porchivo offers four plan tiers: Free (tracks 1 package), Premium at $13.99/month or $8.33/month billed annually ($99.99/year), Family at $23.99/month or $15.00/month annually (up to 5 members), and Enterprise/HOA at $350/month or $3,000/year (up to 250 households). Annual plans include a 7-day free trial.",
     keyFacts: [
       "Free tier: track 1 package",
       "Premium monthly: $13.99/mo",
       "Premium annual: $8.33/mo ($99.99/yr) — save 40%",
       "Family plan: up to 5 household members",
-      "HOA/Enterprise plan: up to 250 households at $149.33/mo",
+      "HOA/Enterprise plan: up to 250 households at $350/mo or $3,000/yr (save 29%)",
       "7-day free trial on all annual plans",
     ],
     primaryEntity: "Porchivo subscription pricing",
@@ -281,7 +281,7 @@ export const PAGE_SEO: Record<string, PageSEO> = {
       "Available on iOS App Store",
       "Available on Google Play",
       "Free to download",
-      "Premium from $4.94/mo billed annually",
+      "Premium from $8.33/mo billed annually"
     ],
     primaryEntity: "Porchivo app download",
     primaryIntent: "App download — how to install Porchivo",
