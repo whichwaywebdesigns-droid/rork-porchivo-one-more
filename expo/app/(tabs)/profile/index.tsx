@@ -648,7 +648,7 @@ export default function ProfileScreen() {
           <Trash2 size={18} color={Colors.danger} />
           <Text style={styles.deleteAccountText}>Delete Account</Text>
         </TouchableOpacity>
-        <Text style={styles.versionText}>Porchivo v1.0.4</Text>
+        <Text style={styles.versionText}>Porchivo v1.0.6</Text>
       </View>
     </ScrollView>
   );
