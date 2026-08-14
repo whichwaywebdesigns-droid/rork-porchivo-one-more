@@ -1,5 +1,7 @@
 {
   "cli": {
+    "version": ">= 16.0.0",
+    "requireCommit": true,
     "appVersionSource": "local"
   },
   "build": {
@@ -19,11 +21,13 @@
       "credentialsSource": "remote",
       "android": {
         "buildType": "apk",
-        "gradleCommand": ":app:assembleRelease"
+        "gradleCommand": ":app:assembleRelease",
+        "image": "latest"
       },
       "ios": {
         "simulator": false,
-        "credentialsSource": "remote"
+        "credentialsSource": "remote",
+        "image": "latest"
       },
       "env": {
         "APP_ENV": "preview",
@@ -34,10 +38,12 @@
       "channel": "production",
       "credentialsSource": "remote",
       "android": {
-        "buildType": "app-bundle"
+        "buildType": "app-bundle",
+        "image": "latest"
       },
       "ios": {
-        "credentialsSource": "remote"
+        "credentialsSource": "remote",
+        "image": "latest"
       },
       "env": {
         "APP_ENV": "production",
@@ -46,6 +52,18 @@
     }
   },
   "submit": {
+    "internal": {
+      "android": {
+        "serviceAccountKeyPath": "$GOOGLE_SERVICE_ACCOUNT_KEY_JSON",
+        "track": "internal"
+      }
+    },
+    "closedTesting": {
+      "android": {
+        "serviceAccountKeyPath": "$GOOGLE_SERVICE_ACCOUNT_KEY_JSON",
+        "track": "beta"
+      }
+    },
     "production": {
       "ios": {
         "appleId": "yashiyah8782@icloud.com",
@@ -53,8 +71,8 @@
         "appleTeamId": "UL64N5W93Y"
       },
       "android": {
-        "serviceAccountKeyPath": "./google-service-account.json",
-        "track": "internal"
+        "serviceAccountKeyPath": "$GOOGLE_SERVICE_ACCOUNT_KEY_JSON",
+        "track": "production"
       }
     }
   }
