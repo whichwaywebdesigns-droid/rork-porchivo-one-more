@@ -225,11 +225,11 @@ follow the existing pattern for adding a new carrier regex.
 | Terms of Service | `app/terms-of-service.tsx` |
 
 <!-- AUTO-GENERATED:SCREEN-INDEX:START -->
-> _Auto-generated from `expo/app/` on **2026-08-14 21:07 UTC** by `scripts/refresh-docs.mjs`. The
+> _Auto-generated from `expo/app/` on **2026-08-14 21:49 UTC** by `scripts/refresh-docs.mjs`. The
 > curated table above stays hand-written; this list is the complete, always-current
 > set of route files so nothing silently goes missing as the app grows._
 
-**99 route screens detected:**
+**100 route screens detected:**
 
 | Route | File |
 |-------|------|
@@ -285,6 +285,7 @@ follow the existing pattern for adding a new carrier regex.
 | `onboarding-paywall.tsx` | `app/onboarding-paywall.tsx` |
 | `onboarding-setup.tsx` | `app/onboarding-setup.tsx` |
 | `onboarding.tsx` | `app/onboarding.tsx` |
+| `org-signup.tsx` | `app/org-signup.tsx` |
 | `package-detail.tsx` | `app/package-detail.tsx` |
 | `package-ops-board.tsx` | `app/package-ops-board.tsx` |
 | `pain-point.tsx` | `app/pain-point.tsx` |
