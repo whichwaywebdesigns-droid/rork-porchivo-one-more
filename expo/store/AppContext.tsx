@@ -506,18 +506,20 @@ export const [AppProvider, useApp] = createContextHook(() => {
 
   const deleteAccount = useCallback(async () => {
     if (!session?.user?.id) throw new Error('Not authenticated');
-    log('[AppContext] Deleting account...');
+    log('[AppContext] Requesting account deletion (graceful)...');
     try {
-      // Single atomic RPC — deletes all user data + auth.users row in one transaction.
-      // See supabase/delete-account-procedure.sql for the full cascade order.
-      const { data, error } = await supabase.rpc('delete_account_cascade');
+      // Graceful deletion: stamps deletion_requested_at, bans the user (signs out
+      // all sessions), and starts the 30-day grace period. The purge job
+      // permanently deletes data after 30 days.
+      // See supabase/graceful-deletion-migration.sql for the full flow.
+      const { data, error } = await supabase.rpc('request_account_deletion');
       if (error) {
-        log('[AppContext] Account cascade delete error:', error.code);
+        log('[AppContext] Account deletion request error:', error.code);
         throw error;
       }
-      const result = data as { success: boolean; error?: string } | null;
+      const result = data as { success: boolean; error?: string; email?: string } | null;
       if (!result?.success) {
-        throw new Error(result?.error ?? 'Account deletion failed');
+        throw new Error(result?.error ?? 'Account deletion request failed');
       }
       void logoutRevenueCat();
       await supabase.auth.signOut();
@@ -526,7 +528,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
       setIsOnboarded(false);
       setIsPremium(false);
       queryClient.clear();
-      log('[AppContext] Account deleted successfully');
+      log('[AppContext] Account deletion requested successfully');
     } catch (err) {
       log('[AppContext] Account deletion error');
       throw err;

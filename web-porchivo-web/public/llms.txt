@@ -126,7 +126,7 @@ The porch risk score (0–100) is calculated per package from these weighted fac
 ## Trust & Security Signals
 
 - Session tokens stored in device SecureStore (not plain AsyncStorage)
-- Account deletion is atomic (single Postgres transaction)
+- Account deletion uses a graceful 30-day deactivation period (recoverable)
 - RevenueCat webhook is server-authoritative for subscription state
 - Rate limiting on all Supabase Edge Functions
 - EAS build environment separation (dev/preview/production)

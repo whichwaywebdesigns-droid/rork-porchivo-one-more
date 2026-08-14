@@ -307,8 +307,9 @@ export default function PrivacyPolicyPage() {
             anonymized form.
           </p>
           <p>
-            When you delete your account, we will delete or anonymize your personal data within 30 days,
-            except where retention is required by law.
+            When you delete your account, your account is deactivated immediately and we will delete or
+            anonymize your personal data within 30 days, except where retention is required by law.
+            You may contact us within the 30-day window to restore your account.
           </p>
         </Section>
 

@@ -43,6 +43,10 @@ class AppViewModel : ViewModel() {
         repo.signOut()
     }
 
+    suspend fun requestAccountDeletion(): Result<String?> {
+        return repo.requestAccountDeletion()
+    }
+
     fun updateRole(role: UserRole) {
         viewModelScope.launch { repo.updateRole(role) }
     }

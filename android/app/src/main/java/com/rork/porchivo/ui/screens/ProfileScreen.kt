@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material.icons.outlined.CardGiftcard
 import androidx.compose.material.icons.outlined.DarkMode
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.ExitToApp
@@ -32,9 +33,13 @@ import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Phone
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Shield
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -79,6 +84,12 @@ fun ProfileScreen(
     val darkOverride by appViewModel.darkThemeOverride.collectAsStateWithLifecycle()
 
     val isDark = darkOverride ?: androidx.compose.foundation.isSystemInDarkTheme()
+
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var deleteConfirmText by remember { mutableStateOf("") }
+    var isDeleting by remember { mutableStateOf(false) }
+    var deleteError by remember { mutableStateOf<String?>(null) }
+    var deleteSuccess by remember { mutableStateOf(false) }
 
     fun openUrl(url: String) {
         context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
@@ -390,15 +401,131 @@ fun ProfileScreen(
             colors = CardDefaults.cardColors(containerColor = c.surface),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         ) {
-            SettingRow(
-                icon = Icons.Outlined.ExitToApp,
-                iconTint = c.danger,
-                label = "Sign Out",
-                onClick = { appViewModel.signOut() },
-            )
+            Column {
+                SettingRow(
+                    icon = Icons.Outlined.ExitToApp,
+                    iconTint = c.danger,
+                    label = "Sign Out",
+                    onClick = { appViewModel.signOut() },
+                )
+                HorizontalDivider(color = c.border)
+                SettingRow(
+                    icon = Icons.Outlined.Delete,
+                    iconTint = c.danger,
+                    label = "Delete account",
+                    onClick = { showDeleteDialog = true },
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(12.dp))
+    }
+
+    if (showDeleteDialog) {
+        if (deleteSuccess) {
+            AlertDialog(
+                onDismissRequest = { appViewModel.signOut() },
+                title = { Text("Account Deletion Requested") },
+                text = {
+                    Text("We've received your request. Your Porchivo account has been deactivated. Your personal data will be permanently deleted within 30 days. You can contact support@porchivo.com within 30 days to restore your account.")
+                },
+                confirmButton = {
+                    TextButton(onClick = { appViewModel.signOut() }) {
+                        Text("Done", color = c.accent)
+                    }
+                },
+            )
+        } else {
+            AlertDialog(
+                onDismissRequest = {
+                    showDeleteDialog = false
+                    deleteConfirmText = ""
+                    deleteError = null
+                },
+                title = { Text("Delete Your Account?") },
+                text = {
+                    Column {
+                        Text(
+                            "Your account will be deactivated immediately. Your personal data will be permanently deleted within 30 days. Contact support@porchivo.com within 30 days to restore.",
+                            fontSize = 14.sp,
+                            color = c.textSecondary,
+                        )
+                        if (user?.email != null) {
+                            Text(
+                                "Account: ${user!!.email}",
+                                fontSize = 13.sp,
+                                color = c.textMuted,
+                                modifier = Modifier.padding(top = 8.dp),
+                            )
+                        }
+                        Text(
+                            "Type DELETE to confirm:",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = c.textPrimary,
+                            modifier = Modifier.padding(top = 12.dp),
+                        )
+                        OutlinedTextField(
+                            value = deleteConfirmText,
+                            onValueChange = { deleteConfirmText = it.uppercase() },
+                            placeholder = { Text("DELETE") },
+                            singleLine = true,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 4.dp),
+                        )
+                        deleteError?.let { err ->
+                            Text(
+                                text = err,
+                                fontSize = 12.sp,
+                                color = c.danger,
+                                modifier = Modifier.padding(top = 8.dp),
+                            )
+                        }
+                    }
+                },
+                confirmButton = {
+                    if (isDeleting) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            strokeWidth = 2.dp,
+                            color = c.danger,
+                        )
+                    } else {
+                        TextButton(
+                            onClick = {
+                                isDeleting = true
+                                deleteError = null
+                                scope.launch {
+                                    val result = appViewModel.requestAccountDeletion()
+                                    isDeleting = false
+                                    if (result.isSuccess) {
+                                        deleteSuccess = true
+                                    } else {
+                                        deleteError = result.exceptionOrNull()?.message ?: "Deletion failed"
+                                    }
+                                }
+                            },
+                            enabled = deleteConfirmText == "DELETE",
+                        ) {
+                            Text("Delete", color = if (deleteConfirmText == "DELETE") c.danger else c.textMuted)
+                        }
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            showDeleteDialog = false
+                            deleteConfirmText = ""
+                            deleteError = null
+                        },
+                        enabled = !isDeleting,
+                    ) {
+                        Text("Cancel", color = c.accent)
+                    }
+                },
+            )
+        }
     }
 }
 

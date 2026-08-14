@@ -14,6 +14,7 @@ struct SettingsScreen: View {
     @Environment(\.porchivo) private var c
     @State private var notificationsEnabled = true
     @State private var showDeleteConfirm = false
+    @State private var showDeleteSheet = false
 
     var body: some View {
         ScrollView {
@@ -109,13 +110,15 @@ struct SettingsScreen: View {
         .navigationBarTitleDisplayMode(.inline)
         .confirmationDialog("Delete your account?", isPresented: $showDeleteConfirm) {
             Button("Delete account", role: .destructive) {
-                // delete_account_cascade RPC exists on backend; for safety we sign out locally.
-                // TODO: wire actual account deletion via SupabaseService.deleteAccount() once backend RPC is exposed to Swift.
-                Task { await appState.signOut() }
+                showDeleteSheet = true
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("Deleting your account will permanently remove your Porchivo profile and personal information from our system. This action is permanent and cannot be undone.")
+            Text("Your account will be deactivated immediately. Your personal data will be permanently deleted within 30 days. You can contact support@porchivo.com within 30 days to restore your account.")
+        }
+        .sheet(isPresented: $showDeleteSheet) {
+            DeleteAccountSheet()
+                .environment(appState)
         }
     }
 

@@ -26,9 +26,9 @@ export const CHANGELOG: ChangeEntry[] = [
     date: "2026-06-01",
     title: "Security Hardening & Partner Upsell",
     summary:
-      "SecureStore session tokens, atomic account deletion, server-authoritative subscription validation, rate-limited edge functions, and Porch Partner upsell flows for homeowners.",
+      "SecureStore session tokens, graceful account deletion with 30-day grace period, server-authoritative subscription validation, rate-limited edge functions, and Porch Partner upsell flows for homeowners.",
     aiSummary:
-      "Version 2.4.0 replaced AsyncStorage session storage with Expo SecureStore, made account deletion an atomic Postgres transaction, moved RevenueCat subscription authority to a Supabase Edge Function webhook, added per-function rate limiting, and added homeowner-to-partner upsell surfaces throughout the app.",
+      "Version 2.4.0 replaced AsyncStorage session storage with Expo SecureStore, implemented graceful account deletion with a 30-day deactivation period, moved RevenueCat subscription authority to a Supabase Edge Function webhook, added per-function rate limiting, and added homeowner-to-partner upsell surfaces throughout the app.",
     changes: [
       {
         type: "security",
@@ -38,7 +38,7 @@ export const CHANGELOG: ChangeEntry[] = [
       {
         type: "security",
         description:
-          "Account deletion is now an atomic Postgres stored procedure. All user data (packages, alerts, partner assignments, risk scores) is deleted in a single transaction — no partial-delete risk.",
+          "Account deletion now uses a graceful deactivation-first approach. Your account is deactivated immediately and personal data is permanently deleted within 30 days. You can contact support within the 30-day window to restore your account.",
       },
       {
         type: "security",

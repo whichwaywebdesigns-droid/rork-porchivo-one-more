@@ -25,6 +25,14 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
+/** Response from the request_account_deletion RPC. */
+@Serializable
+data class DeletionResult(
+    val success: Boolean = false,
+    val error: String? = null,
+    val email: String? = null,
+)
+
 /**
  * Supabase REST + Auth client using Ktor.
  *
@@ -308,6 +316,27 @@ class SupabaseClient(
         }
         if (response.status.isSuccess()) Result.success(Unit)
         else Result.failure(Exception("Failed to accept shipment"))
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    /**
+     * Graceful account deletion: stamps deletion_requested_at, bans the user
+     * (invalidates sessions), and starts the 30-day grace period.
+     * Returns the user's email for the confirmation email.
+     */
+    suspend fun requestAccountDeletion(): Result<DeletionResult> = try {
+        val response = httpClient.post("$restBase/rpc/request_account_deletion") {
+            authHeaders().forEach { (k, v) -> header(k, v) }
+            contentType(ContentType.Application.Json)
+            setBody(emptyMap<String, Any?>())
+        }
+        if (response.status.isSuccess()) {
+            val result: DeletionResult = response.body()
+            Result.success(result)
+        } else {
+            Result.failure(Exception("Failed to request account deletion: ${response.status}"))
+        }
     } catch (e: Exception) {
         Result.failure(e)
     }

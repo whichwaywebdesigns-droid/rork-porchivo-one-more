@@ -116,7 +116,7 @@ export const FAQS: FAQ[] = [
     id: "how-do-i-delete-my-account",
     question: "How do I delete my Porchivo account?",
     answer:
-      "Go to Profile → Delete account. Confirmation is required. Account deletion is an atomic operation: all your packages, alerts, risk scores, and profile data are permanently deleted in a single transaction. Deletion cannot be undone. If you have an active Premium subscription, cancel it through the App Store or Google Play before deleting your account.",
+      "Go to Profile → Delete account. Confirmation is required. Your account is deactivated immediately and your personal data is permanently deleted within 30 days. You can contact support@porchivo.com within 30 days to restore your account. If you have an active Premium subscription, cancel it through the App Store or Google Play before deleting your account.",
     category: "privacy",
   },
 

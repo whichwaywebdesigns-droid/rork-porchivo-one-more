@@ -185,6 +185,26 @@ class AppRepository(context: Context) {
     }
 
     /**
+     * Graceful account deletion: stamps deletion_requested_at, bans the user
+     * (invalidates sessions), and starts the 30-day grace period before
+     * permanent deletion. Returns the user's email for confirmation.
+     */
+    suspend fun requestAccountDeletion(): Result<String?> {
+        val client = supabase ?: return Result.failure(Exception("Backend not configured"))
+        val result = client.requestAccountDeletion()
+        return if (result.isSuccess) {
+            val deletionResult = result.getOrNull()
+            if (deletionResult != null && deletionResult.success) {
+                Result.success(deletionResult.email)
+            } else {
+                Result.failure(Exception(deletionResult?.error ?: "Deletion request failed"))
+            }
+        } else {
+            Result.failure(result.exceptionOrNull() ?: Exception("Unknown error"))
+        }
+    }
+
+    /**
      * Load all initial data after authentication.
      */
     private suspend fun loadInitialData(userId: String) {

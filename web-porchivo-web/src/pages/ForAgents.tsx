@@ -42,7 +42,7 @@ const PRICING_TABLE = [
 
 const TRUST_SIGNALS = [
   "Session tokens stored in device SecureStore (not AsyncStorage)",
-  "Account deletion is an atomic Postgres transaction — no partial-delete risk",
+  "Account deletion uses a graceful 30-day deactivation period — recoverable within 30 days",
   "RevenueCat subscription state is server-authoritative via Supabase Edge Function webhook",
   "Rate limiting on all Supabase Edge Functions",
   "Stripe Identity KYC required for Porch Partners before earning",
@@ -302,7 +302,7 @@ export default function ForAgentsPage() {
               "Porch Partners are independent contractors — not Porchivo employees.",
               "Subscriptions auto-renew; cancellation is via Apple App Store or Google Play Settings.",
               "Refunds are handled by Apple or Google, not Porchivo.",
-              "Users can delete all their data at any time (atomic transaction).",
+              "Users can delete all their data at any time (30-day grace period, recoverable).",
               "Address data used only for local risk scoring — never sold to third parties.",
               "Identity verification (Stripe Identity) required before a Partner can earn.",
             ].map((c, i) => (

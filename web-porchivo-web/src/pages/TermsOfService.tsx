@@ -409,7 +409,9 @@ export default function TermsOfServicePage() {
             believe violates these Terms, is harmful to other users, or is otherwise objectionable.
           </p>
           <p>
-            You may delete your account at any time through Settings → Account → Delete Account. Upon
+            You may delete your account at any time through Settings → Account → Delete Account. Your
+            account will be deactivated immediately and your personal data will be permanently deleted
+            within 30 days. You may contact us within the 30-day window to restore your account. Upon
             deletion, your personal data will be handled in accordance with our Privacy Policy.
           </p>
         </Section>

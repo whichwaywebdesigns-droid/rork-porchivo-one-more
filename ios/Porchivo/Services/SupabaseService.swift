@@ -660,6 +660,22 @@ actor SupabaseService {
         }
     }
 
+    // MARK: Account deletion (graceful — 30-day deactivation)
+
+    struct DeletionResult: Decodable, Sendable {
+        let success: Bool
+        let error: String?
+        let email: String?
+    }
+
+    func requestAccountDeletion() async -> Result<DeletionResult, Error> {
+        let result: Result<DeletionResult, Error> = await rpc(
+            "request_account_deletion",
+            body: [:]
+        )
+        return result
+    }
+
     private func runRequest<T: Decodable>(_ req: URLRequest, singleton: Bool) async -> Result<T, Error> {
         do {
             let (data, resp) = try await session.data(for: req)

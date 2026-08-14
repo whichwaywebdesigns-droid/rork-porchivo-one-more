@@ -236,10 +236,10 @@ export const PAGE_SEO: Record<string, PageSEO> = {
     twitterCard: "summary",
     robots: "index, follow",
     aiSummary:
-      "The Porchivo changelog lists all app updates in reverse chronological order. Recent additions include: atomic account deletion RPC, SecureStore session hardening, RevenueCat webhook server authority, rate-limited edge functions, partner-to-homeowner upsell flows, and Crime Stoppers USA tip line integration.",
+      "The Porchivo changelog lists all app updates in reverse chronological order. Recent additions include: graceful 30-day account deletion with deactivation, SecureStore session hardening, RevenueCat webhook server authority, rate-limited edge functions, partner-to-homeowner upsell flows, and Crime Stoppers USA tip line integration.",
     keyFacts: [
       "Session tokens moved from AsyncStorage to SecureStore for enhanced security",
-      "Account deletion is now an atomic Postgres transaction",
+      "Account deletion uses a graceful 30-day deactivation period",
       "RevenueCat subscription state is server-authoritative via Supabase Edge Function",
     ],
     primaryEntity: "Porchivo version history",
