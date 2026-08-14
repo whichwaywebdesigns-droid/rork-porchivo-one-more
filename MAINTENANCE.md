@@ -225,11 +225,11 @@ follow the existing pattern for adding a new carrier regex.
 | Terms of Service | `app/terms-of-service.tsx` |
 
 <!-- AUTO-GENERATED:SCREEN-INDEX:START -->
-> _Auto-generated from `expo/app/` on **2026-08-14 20:48 UTC** by `scripts/refresh-docs.mjs`. The
+> _Auto-generated from `expo/app/` on **2026-08-14 21:03 UTC** by `scripts/refresh-docs.mjs`. The
 > curated table above stays hand-written; this list is the complete, always-current
 > set of route files so nothing silently goes missing as the app grows._
 
-**95 route screens detected:**
+**99 route screens detected:**
 
 | Route | File |
 |-------|------|
@@ -237,8 +237,12 @@ follow the existing pattern for adding a new carrier regex.
 | `(tabs)/activity/index.tsx` | `app/(tabs)/activity/index.tsx` |
 | `(tabs)/community.tsx` | `app/(tabs)/community.tsx` |
 | `(tabs)/create/index.tsx` | `app/(tabs)/create/index.tsx` |
+| `(tabs)/more.tsx` | `app/(tabs)/more.tsx` |
 | `(tabs)/packages/index.tsx` | `app/(tabs)/packages/index.tsx` |
+| `(tabs)/payments.tsx` | `app/(tabs)/payments.tsx` |
+| `(tabs)/porch-partner.tsx` | `app/(tabs)/porch-partner.tsx` |
 | `(tabs)/profile/index.tsx` | `app/(tabs)/profile/index.tsx` |
+| `(tabs)/requests.tsx` | `app/(tabs)/requests.tsx` |
 | `activity-history.tsx` | `app/activity-history.tsx` |
 | `add-package.tsx` | `app/add-package.tsx` |
 | `add-property.tsx` | `app/add-property.tsx` |
