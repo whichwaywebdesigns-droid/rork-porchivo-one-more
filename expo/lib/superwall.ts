@@ -1,5 +1,4 @@
 import { Platform } from 'react-native';
-import { router } from 'expo-router';
 import { log, warn } from "./logger";
 
 /**
@@ -31,13 +30,9 @@ import { log, warn } from "./logger";
  * guard to set isPaywallOpen before the route is pushed.
  */
 
-function routeToInAppUpgrade(placement: string): void {
-  try {
-    log('[Superwall] Routing to in-app /upgrade for', placement);
-    router.push(`/upgrade?trigger=${encodeURIComponent(placement)}` as any);
-  } catch (e) {
-    log('[Superwall] Router push failed:', String((e as Error)?.message ?? e));
-  }
+function routeToInAppUpgrade(_placement: string): void {
+  // No-op: IAP/upgrade routes have been removed. PaywallContext always grants access.
+  log('[Superwall] routeToInAppUpgrade is a no-op (IAP removed) for', _placement);
 }
 
 /**

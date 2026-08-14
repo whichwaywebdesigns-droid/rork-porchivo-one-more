@@ -137,10 +137,9 @@ export default function AddPackageScreen() {
       if (err?.message === 'FREE_LIMIT_REACHED') {
         Alert.alert(
           'Free limit reached',
-          'Free accounts can track 1 active package. Upgrade to Premium for unlimited tracking.',
+          'Free accounts can track 1 active package. Join a community on Porchivo to unlock unlimited tracking.',
           [
-            { text: 'Not now', style: 'cancel' },
-            { text: 'Upgrade', onPress: () => router.push('/upgrade?trigger=package_limit' as any) },
+            { text: 'OK', style: 'default' },
           ],
         );
         return;

@@ -13,7 +13,6 @@ import {
 } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { useApp } from '@/store/AppContext';
 import {
   AlertTriangle,
   ArrowRight,
@@ -219,19 +218,6 @@ function ServiceCard({
 
 export default function HubScreen() {
   const router = useRouter();
-  const { isEntitled, isEntitlementLoading, isLoading } = useApp();
-
-  // Hard paywall — UPS/Amazon hidden services are premium-only.
-  // Wait for BOTH auth loading and backend entitlement to resolve before
-  // redirecting, so entitled users aren't false-evicted during launch sync.
-  useEffect(() => {
-    if (!isLoading && !isEntitlementLoading && !isEntitled) {
-      router.replace({
-        pathname: '/upgrade' as any,
-        params: { trigger: 'ups_amazon' },
-      });
-    }
-  }, [isEntitled, isEntitlementLoading, isLoading, router]);
 
   // Header animation
   const heroAnim = useRef(new Animated.Value(0)).current;

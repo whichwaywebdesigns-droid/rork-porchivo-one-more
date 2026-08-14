@@ -36,9 +36,7 @@ import { useNeighborhood } from '@/store/NeighborhoodContext';
 import { usePorchPartners } from '@/store/PorchPartnersContext';
 import { useDrivers } from '@/store/DriversContext';
 import { calculatePorchRisk, RiskLevel, RiskResult } from '@/lib/porchRisk';
-import { useApp } from '@/store/AppContext';
 import { useAnalytics } from '@/store/AnalyticsContext';
-import { usePaywall } from '@/store/PaywallContext';
 
 const LEVEL_META: Record<RiskLevel, {
   label: string;
@@ -89,12 +87,7 @@ export default function PorchRiskScreen() {
       setRefreshing(false);
     }
   }, [refreshAllPackages]);
-  const { isEntitled, capabilities } = useApp();
   const { track } = useAnalytics();
-  const { guardPremiumAccess } = usePaywall();
-  // isEntitled uses backend-confirmed state, falling back to RC SDK isPremium.
-  // Prevents showing the gate during grace periods or renewal lag.
-  const showSoftGate = !isEntitled && !capabilities.theftShield;
 
   const pkg = useMemo(() => {
     if (id) return packages.find((p) => p.id === id) ?? null;
@@ -182,11 +175,7 @@ export default function PorchRiskScreen() {
       label: 'Set a delivery window',
       sub: 'Tell drivers the safest time to drop.',
       icon: <Clock size={18} color={palette.navy} />,
-      onPress: () => guardPremiumAccess({
-        trigger: 'manual',
-        feature: 'Delivery Windows',
-        action: () => router.push('/delivery-windows' as never),
-      }),
+      onPress: () => router.push('/delivery-windows' as never),
       show: true,
     },
     {
@@ -287,55 +276,6 @@ export default function PorchRiskScreen() {
             </View>
           ))}
         </View>
-
-        {showSoftGate && (
-          <TouchableOpacity
-            style={styles.softGateCard}
-            activeOpacity={0.9}
-            onPress={() => {
-              if (Platform.OS !== 'web') {
-                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              }
-              track('paywall_view', { trigger: 'theft_shield', source: 'porch_risk' });
-              router.push({ pathname: '/upgrade' as never, params: { trigger: 'theft_shield' } });
-            }}
-            testID="risk-soft-gate"
-          >
-            <View style={styles.softGateGlow} />
-            <View style={styles.softGateRow}>
-              <View style={styles.softGateIcon}>
-                <Crown size={18} color={palette.gold} />
-              </View>
-              <View style={{ flex: 1 }}>
-                <View style={styles.softGateTitleRow}>
-                  <Text style={styles.softGateTitle}>Unlock Theft Shield</Text>
-                  <View style={styles.softGateTrialPill}>
-                    <Sparkles size={10} color={palette.gold} />
-                    <Text style={styles.softGateTrialText}>7-day free trial</Text>
-                  </View>
-                </View>
-                <Text style={styles.softGateBody}>
-                  Real-time porch alerts, photo-on-delivery reminders, and priority routing — $13.99/mo or $99.99/yr.
-                </Text>
-              </View>
-              <ChevronRight size={18} color={palette.slate500} />
-            </View>
-            <View style={styles.softGateLockedRow}>
-              <View style={styles.softGateLockedItem}>
-                <Lock size={11} color={palette.slate500} />
-                <Text style={styles.softGateLockedText}>Geofenced alerts</Text>
-              </View>
-              <View style={styles.softGateLockedItem}>
-                <Lock size={11} color={palette.slate500} />
-                <Text style={styles.softGateLockedText}>Photo proof reminders</Text>
-              </View>
-              <View style={styles.softGateLockedItem}>
-                <Lock size={11} color={palette.slate500} />
-                <Text style={styles.softGateLockedText}>Priority routing</Text>
-              </View>
-            </View>
-          </TouchableOpacity>
-        )}
 
         {planActions.length > 0 ? (
           <>

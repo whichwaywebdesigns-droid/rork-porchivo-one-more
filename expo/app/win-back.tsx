@@ -76,7 +76,7 @@ export default function WinBackScreen() {
   const handleClaim = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     track('winback_claim_tapped');
-    router.push('/upgrade?trigger=day7_hard' as any);
+    router.replace('/(tabs)/(home)' as any);
   }, [router, track]);
 
   const handleDismiss = useCallback(() => {

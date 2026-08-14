@@ -76,10 +76,7 @@ export default function TodayRiskCard() {
   const { weekCount } = useNeighborhood();
   const { getHoldForPackage } = usePorchPartners();
   const { getDriverForPackage } = useDrivers();
-  const { isEntitled, capabilities } = useApp();
-  // isEntitled uses backend-confirmed state, preventing a flash of the soft
-  // gate during renewal lag or grace periods.
-  const showSoftGate = !isEntitled && !capabilities.theftShield;
+  const showSoftGate = false;
 
   const pkg = useMemo(() => pickNextInboundPackage(packages), [packages]);
 

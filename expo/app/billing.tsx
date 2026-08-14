@@ -492,7 +492,7 @@ export default function BillingScreen() {
   const handleUpgrade = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
     track('billing_upgrade_tap', { from: billingState });
-    router.push('/upgrade?trigger=manual' as any);
+    router.push('/org-signup' as any);
   }, [router, billingState, track]);
 
   const handleTrustEngine = useCallback(() => {
@@ -504,7 +504,7 @@ export default function BillingScreen() {
   const handleResubscribe = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
     track('billing_resubscribe_tap');
-    router.push('/upgrade?trigger=manual' as any);
+    router.push('/org-signup' as any);
   }, [router, track]);
 
   // ── Render helpers ──────────────────────────────────────────────────────────
