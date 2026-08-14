@@ -20,6 +20,7 @@ import {
   Users,
   BarChart2,
   LayoutDashboard,
+  CreditCard,
 } from 'lucide-react-native';
 import { useColors } from '@/constants/colors';
 import { useOrganization } from '@/store/OrganizationContext';
@@ -130,6 +131,12 @@ export default function MoreScreen() {
           icon: <Users size={18} color={Colors.primary} />,
           iconBg: Colors.primary + '18',
           route: '/role-management',
+        },
+        {
+          label: 'Manage Subscription',
+          icon: <CreditCard size={18} color={Colors.primary} />,
+          iconBg: Colors.primary + '18',
+          route: '/manage-subscription',
         },
         {
           label: 'Analytics',

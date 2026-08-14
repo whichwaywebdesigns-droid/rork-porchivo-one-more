@@ -255,6 +255,7 @@ function RootLayoutNav() {
       <Stack.Screen name="delivery-alerts" options={{ headerShown: false }} />
       <Stack.Screen name="join-community" options={{ presentation: "modal", headerShown: false }} />
       <Stack.Screen name="org-signup" options={{ headerShown: false }} />
+      <Stack.Screen name="manage-subscription" options={{ title: "Manage Subscription" }} />
       <Stack.Screen name="billing" options={{ title: "Manage Plan", presentation: "modal" }} />
       <Stack.Screen name="partner-onboarding" options={{ headerShown: false }} />
       <Stack.Screen name="admin-funnel" options={{ headerShown: false, presentation: "modal" }} />
