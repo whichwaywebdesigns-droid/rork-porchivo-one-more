@@ -115,6 +115,15 @@ export default function ProfileScreen() {
               <Text style={styles.communityBtnText}>Enter Invitation Code</Text>
             </TouchableOpacity>
             <TouchableOpacity
+              style={[styles.communityOrgBtn, { borderColor: Colors.primary }]}
+              onPress={() => router.push('/org-signup' as any)}
+              activeOpacity={0.8}
+              testID="create-community-btn"
+            >
+              <Building2 size={16} color={Colors.primary} />
+              <Text style={styles.communityOrgBtnText}>I Manage a Community — Sign Up Here</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
               style={[styles.communitySecondary, { borderColor: Colors.border }]}
               onPress={() => void Linking.openURL('mailto:support@porchivo.com?subject=Request%20Community%20Invitation')}
               activeOpacity={0.7}
@@ -680,5 +689,21 @@ const styles = StyleSheet.create({
   communitySecondaryText: {
     fontSize: 14,
     fontWeight: '500' as const,
+  },
+  communityOrgBtn: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    gap: 8,
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    marginBottom: 10,
+  },
+  communityOrgBtnText: {
+    fontSize: 14,
+    fontWeight: '600' as const,
+    color: Colors.primary,
+    textAlign: 'center' as const,
   },
 });
