@@ -107,7 +107,6 @@ function RootLayoutNav() {
     currentSegment === "value-preview" ||
     currentSegment === "location-consent" ||
     currentSegment === "onboarding-setup" ||
-    currentSegment === "onboarding-paywall" ||
     currentSegment === "notifications-permission" ||
     currentSegment === "delivery-alerts" ||
     currentSegment === "safe-dropoff" ||
@@ -154,7 +153,6 @@ function RootLayoutNav() {
       currentSegment === "value-preview" ||
       currentSegment === "location-consent" ||
       currentSegment === "onboarding-setup" ||
-      currentSegment === "onboarding-paywall" ||
       currentSegment === "notifications-permission" ||
       currentSegment === "delivery-alerts" ||
       currentSegment === "safe-dropoff" ||
@@ -223,7 +221,6 @@ function RootLayoutNav() {
       <Stack.Screen name="role-selection" options={{ headerShown: false }} />
       <Stack.Screen name="pain-point" options={{ headerShown: false }} />
       <Stack.Screen name="value-preview" options={{ headerShown: false }} />
-      <Stack.Screen name="onboarding-paywall" options={{ headerShown: false }} />
       <Stack.Screen name="onboarding-setup" options={{ headerShown: false }} />
       <Stack.Screen name="reset-password" options={{ headerShown: false, presentation: "modal" }} />
       <Stack.Screen name="safe-dropoff" options={{ headerShown: false, presentation: "modal" }} />
@@ -257,7 +254,6 @@ function RootLayoutNav() {
       <Stack.Screen name="notifications-permission" options={{ headerShown: false, presentation: "modal" }} />
       <Stack.Screen name="delivery-alerts" options={{ headerShown: false }} />
       <Stack.Screen name="join-community" options={{ presentation: "modal", headerShown: false }} />
-      <Stack.Screen name="upgrade" options={{ headerShown: false }} />
       <Stack.Screen name="billing" options={{ title: "Manage Plan", presentation: "modal" }} />
       <Stack.Screen name="partner-onboarding" options={{ headerShown: false }} />
       <Stack.Screen name="admin-funnel" options={{ headerShown: false, presentation: "modal" }} />
