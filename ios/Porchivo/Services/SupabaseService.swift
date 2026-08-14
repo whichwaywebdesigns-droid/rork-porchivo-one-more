@@ -469,7 +469,7 @@ actor SupabaseService {
     }
 
     func fetchDirectory(orgMemberId: String) async -> Result<[DbDirectoryRow], Error> {
-        await rpc("get_org_directory", body: ["p_member_id": orgMemberId])
+        await rpc("get_org_directory", body: ["p_org_id": orgMemberId])
     }
 
     func fetchChatMessages(threadId: String, limit: Int = 100) async -> Result<[DbChatMessage], Error> {

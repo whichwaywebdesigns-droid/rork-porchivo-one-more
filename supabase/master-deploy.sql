@@ -8595,12 +8595,12 @@ CREATE POLICY "Users delete own avatar"
 -- #############################################################
 -- ##  delete-account-procedure.sql
 -- #############################################################
--- Atomic account deletion stored procedure
+-- Account deletion stored procedure (used internally by purge_deleted_accounts)
 -- Run in Supabase SQL Editor AFTER migration.sql.
 --
--- Replaces the fragile client-side cascade in AppContext.deleteAccount.
--- The client calls  supabase.rpc('delete_account_cascade')  and gets a single
--- success/failure result. All deletes happen inside one transaction — either
+-- Clients call supabase.rpc('request_account_deletion') for graceful deactivation.
+-- This procedure is called internally by purge_deleted_accounts() after the 30-day grace period.
+-- All deletes happen inside one transaction — either
 -- everything is removed or nothing is, preventing partial-delete corruption.
 --
 -- The function runs as SECURITY DEFINER (elevated privileges) so it can:

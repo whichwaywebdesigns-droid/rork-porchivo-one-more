@@ -182,17 +182,17 @@ export const CHANGELOG: ChangeEntry[] = [
     summary:
       "Family Plan (up to 5 members) and HOA Enterprise Plan (up to 250 households) added to the subscription system.",
     aiSummary:
-      "Version 1.5.0 added Family Plan ($99.33/year, up to 5 members) and HOA/Enterprise Plan ($999.33/year, up to 250 households) to Porchivo's subscription offerings. Both plans include full Premium access for all covered members.",
+      "Version 1.5.0 added Family Plan ($179.99/year, up to 5 members) and HOA/Enterprise Plan ($3,000/year, up to 250 households) to Porchivo's subscription offerings. Both plans include full Premium access for all covered members.",
     changes: [
       {
         type: "feature",
         description:
-          "Family Plan added: up to 5 household members, $13.33/month or $8.28/month billed annually ($99.33/year).",
+          "Family Plan added: up to 5 household members, $23.99/month or $15.00/month billed annually ($179.99/year).",
       },
       {
         type: "feature",
         description:
-          "HOA Enterprise Plan added: up to 250 households, $149.33/month or $999.33/year (save 44%).",
+          "HOA Enterprise Plan added: up to 250 households, $350/month or $3,000/year (save 29%).",
       },
     ],
   },

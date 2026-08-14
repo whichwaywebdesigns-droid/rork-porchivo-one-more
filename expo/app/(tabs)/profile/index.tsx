@@ -294,8 +294,8 @@ export default function ProfileScreen() {
           >
             <Crown size={15} color="#C8941E" />
             <View style={styles.annualUpsellText}>
-              <Text style={styles.annualUpsellTitle}>Save 33\u202F— switch to Annual</Text>
-              <Text style={styles.annualUpsellSub}>$79.99/yr \u00B7 $6.67/mo \u00B7 same Premium features</Text>
+              <Text style={styles.annualUpsellTitle}>Save 40 — switch to Annual</Text>
+              <Text style={styles.annualUpsellSub}>$99.99/yr · $8.33/mo · same Premium features</Text>
             </View>
             <ArrowRight size={14} color="#C8941E" />
           </TouchableOpacity>
@@ -398,7 +398,7 @@ export default function ProfileScreen() {
             <BadgeDollarSign size={15} color={Colors.success} />
             <View style={styles.annualUpsellText}>
               <Text style={styles.payoutSetupTitle}>Set up payout account</Text>
-              <Text style={styles.payoutSetupSub}>Earn $5–25 per hold · deposited via Stripe</Text>
+              <Text style={styles.payoutSetupSub}>Earn $3–25 per hold · deposited via Stripe</Text>
             </View>
             <ArrowRight size={14} color={Colors.success} />
           </TouchableOpacity>

@@ -142,7 +142,7 @@ The porch risk score (0–100) is calculated per package from these weighted fac
 - Porch Partners are independent contractors (not employees)
 - Subscriptions auto-renew; cancellation via App Store/Google Play
 - Refunds handled by Apple or Google, not Porchivo
-- Users can delete all their data at any time (atomic deletion)
+- Users can delete all their data at any time (graceful deletion with 30-day window)
 
 ---
 

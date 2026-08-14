@@ -71,7 +71,7 @@ export default function HowItWorksScreen() {
               </View>
               <View style={styles.stepContent}>
                 <Text style={[styles.stepTitle, { color: Colors.slate }]}>Earn as a Partner</Text>
-                <Text style={[styles.stepDesc, { color: Colors.slateLight }]}>Want to be the trusted neighbor? Become a verified Porch Partner and earn $5–25 per hold — up to $180/mo on a flexible schedule.</Text>
+                <Text style={[styles.stepDesc, { color: Colors.slateLight }]}>Want to be the trusted neighbor? Become a verified Porch Partner and earn $3–25 per hold — up to $180/mo on a flexible schedule.</Text>
                 <TouchableOpacity
                   onPress={() => router.push('/partner-onboarding' as any)}
                   style={styles.earnLink}

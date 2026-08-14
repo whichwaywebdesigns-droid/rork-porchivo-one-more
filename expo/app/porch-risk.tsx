@@ -315,7 +315,7 @@ export default function PorchRiskScreen() {
                   </View>
                 </View>
                 <Text style={styles.softGateBody}>
-                  Real-time porch alerts, photo-on-delivery reminders, and priority routing — $4.99/mo or $29.99/yr.
+                  Real-time porch alerts, photo-on-delivery reminders, and priority routing — $13.99/mo or $99.99/yr.
                 </Text>
               </View>
               <ChevronRight size={18} color={palette.slate500} />

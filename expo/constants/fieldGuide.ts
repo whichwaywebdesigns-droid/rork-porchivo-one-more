@@ -145,11 +145,11 @@ export const FIELD_GUIDE: ManualSection[] = [
     teaser: 'Be the trusted neighbor — and get paid for it.',
     audience: 'partner',
     blocks: [
-      { type: 'paragraph', text: 'Verified Porch Partners earn **$5–25** per hold on a fully flexible schedule. Active partners make up to **$180** a month just by being home and reliable.' },
+      { type: 'paragraph', text: 'Verified Porch Partners earn **$3–25** per hold on a fully flexible schedule. Active partners make up to **$180** a month just by being home and reliable.' },
       { type: 'table', headers: ['Hold type', 'Typical pay'], rows: [
-        ['Standard (under 24h)', '$5 – 8'],
-        ['Overnight', '$10 – 15'],
-        ['Multi-day / fragile', '$15 – 25'],
+        ['Small (under 24h)', '$3 – $4.20'],
+        ['Medium (overnight)', '$8 – $9.60'],
+        ['Large (multi-day / fragile)', '$18 – $25.20'],
       ] },
       { type: 'tip', text: 'Complete identity verification before your first hold — it unlocks payouts and boosts your match priority.' },
     ],

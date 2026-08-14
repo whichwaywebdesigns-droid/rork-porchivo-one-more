@@ -455,9 +455,13 @@ class AppRepository(context: Context) {
 
         val result = client.invokeFunction("risk-score", mapOf("zip" to zip), RiskScoreResponse.serializer())
         return if (result.isSuccess) {
-            val response = result.getOrNull()!!
-            cachedRiskScore = response
-            response
+            val response = result.getOrNull()
+            if (response != null) {
+                cachedRiskScore = response
+                response
+            } else {
+                RiskScoreResponse(zip = zip.take(5), score = 34, level = "LOW", cached = false)
+            }
         } else {
             // Network/edge function failure — use demo score so onboarding continues
             RiskScoreResponse(zip = zip.take(5), score = 34, level = "LOW", cached = false)

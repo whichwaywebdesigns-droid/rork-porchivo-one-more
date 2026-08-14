@@ -55,19 +55,19 @@ type TierTab = 'premium' | 'family' | 'enterprise';
 
 // ── Revenue projection visible to founder in code comments ──────────────────
 // ✅ CONFIRMED IN APP STORE CONNECT (June 2026 — all 175 territories):
-// Premium:      $9.99/mo  |   $79.99/yr — Tier 10 / Tier 80
-// Family:      $14.99/mo  |   (annual not yet created in ASC)
-// Enterprise: $149.33/mo  |  $999.33/yr — HOA/community (up to 250 homes)
-// Lifetime:   $299.33 one-time          — sacred number, Ahayah Ashar Ahayah
+// Premium:      $13.99/mo  |   $99.99/yr — Tier 14 / Tier 100
+// Family:      $23.99/mo  |  $179.99/yr
+// Enterprise:   $350/mo  |  $3,000/yr — HOA/community (up to 250 homes)
+// Lifetime:    $500 one-time          — sacred number, Ahayah Ashar Ahayah
 //
 // ⚠️  7-day trial blocked until first App Review approval (Apple platform constraint)
 // ⚠️  family_annual productId needs ASC product created before enabling
 //
 // Enterprise revenue target (conservative):
-//    50 HOAs × $999.33/yr  =  $49,967/yr
-//   100 HOAs × $999.33/yr  =  $99,933/yr
-//   200 HOAs × $999.33/yr  = $199,866/yr
-//   100 HOAs × $149.33/mo  = $179,196/yr (full monthly)
+//    50 HOAs × $3,000/yr  =  $150,000/yr
+//   100 HOAs × $3,000/yr  =  $300,000/yr
+//   200 HOAs × $3,000/yr  =  $600,000/yr
+//   100 HOAs × $350/mo    =  $420,000/yr (full monthly)
 // ─────────────────────────────────────────────────────────────────────────────
 
 const TOP_FEATURES = [
@@ -95,7 +95,7 @@ const FAMILY_EXTRAS = [
 ] as const;
 
 const ENTERPRISE_FEATURES = [
-  { icon: Building2,  label: '250 homes under one subscription — $0.25/home/mo at annual' },
+  { icon: Building2,  label: '250 homes under one subscription — $1.00/home/mo at annual' },
   { icon: MapPin,     label: 'Community-wide theft network — one alert reaches every resident' },
   { icon: Users,      label: 'Unlimited resident accounts — no per-seat charges, ever' },
   { icon: BarChart3,  label: 'HOA admin dashboard: delivery density, theft patterns, stats' },
@@ -380,7 +380,7 @@ export default function UpgradeScreen() {
           <Text style={styles.heroTitle}>{isEnterprise ? 'Protect Your Whole Community' : copy.title}</Text>
           <Text style={styles.heroSubtitle}>
             {isEnterprise
-              ? '$0.25 per home per month (annual). One bill. 250 homes protected. Community theft network, Partner marketplace, and automated tax invoicing — built for HOA boards that mean business.'
+              ? '$1.00 per home per month (annual). One bill. 250 homes protected. Community theft network, Partner marketplace, and automated tax invoicing — built for HOA boards that mean business.'
               : copy.subtitle}
           </Text>
 

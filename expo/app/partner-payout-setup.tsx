@@ -7,8 +7,8 @@
  *   3. Profile completion
  *
  * Note: Full Stripe Connect deployment is tracked in STRIPE_SETUP.md.
- * The UI is complete; backend endpoints (create_connect_account,
- * get_verification_session) are wired in supabase/functions/stripe-connect.
+ * The UI is complete; backend endpoints (initiate-verification and
+ * create-connect-account) are wired in supabase/functions/.
  */
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
@@ -41,7 +41,10 @@ import Colors from '@/constants/colors';
 import { palette, radius, space } from '@/constants/theme';
 import { useApp } from '@/store/AppContext';
 import { useAnalytics } from '@/store/AnalyticsContext';
-import { supabase } from '@/lib/supabase';
+import {
+  initiateVerification,
+  initiateConnectOnboarding,
+} from '@/lib/partnerVerification';
 import { EARNING_TIERS_SETUP, PARTNER_SHARE_PCT } from '@/lib/partnerRates';
 
 type SetupStep = 'identity' | 'bank' | 'profile' | 'done';
@@ -87,12 +90,9 @@ export default function PartnerPayoutSetupScreen() {
     setStatus((s) => ({ ...s, identity: 'in_progress' }));
     track('partner_identity_verify_start');
     try {
-      const { data, error } = await supabase.functions.invoke('stripe-connect', {
-        body: { action: 'create_verification_session', userId: user.id },
-      });
-      if (error) throw error;
-      if (data?.url) {
-        await Linking.openURL(data.url);
+      const result = await initiateVerification();
+      if (result?.verificationUrl) {
+        await Linking.openURL(result.verificationUrl);
         // After returning from Stripe Identity, mark as complete (webhook confirms)
         setStatus((s) => ({ ...s, identity: 'complete' }));
         setStep('bank');
@@ -124,12 +124,9 @@ export default function PartnerPayoutSetupScreen() {
     setStatus((s) => ({ ...s, bank: 'in_progress' }));
     track('partner_bank_connect_start');
     try {
-      const { data, error } = await supabase.functions.invoke('stripe-connect', {
-        body: { action: 'create_connect_account', userId: user.id, email: user.email },
-      });
-      if (error) throw error;
-      if (data?.url) {
-        await Linking.openURL(data.url);
+      const result = await initiateConnectOnboarding();
+      if (result?.onboardingUrl) {
+        await Linking.openURL(result.onboardingUrl);
         setStatus((s) => ({ ...s, bank: 'complete' }));
         setStep('profile');
         track('partner_bank_connect_redirected');

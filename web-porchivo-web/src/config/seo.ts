@@ -216,8 +216,8 @@ export const PAGE_SEO: Record<string, PageSEO> = {
       "The Porchivo Field Guide is the complete user manual for the Porchivo app, organized into 14 sections: Welcome, Porch Dashboard, Tracking Deliveries, Adding a Package, Delivery Windows, Neighborhood Watch, Porch Partners, Becoming a Partner & Earning, Instant Alerts, Block Safety Score, Premium & Billing, Privacy & Your Data, Notifications Setup, and Help & Support. It explains every feature in plain language for homeowners, renters, and Porch Partners.",
     keyFacts: [
       "The Field Guide covers 14 sections of Porchivo features",
-      "Free plan tracks up to 20 active packages; Premium is unlimited",
-      "Verified Porch Partners earn $5–25 per hold",
+      "Free plan tracks 1 package; Premium is unlimited",
+      "Verified Porch Partners earn $3–25 per hold",
       "Block Safety Score runs from 0 to 100 — higher is safer",
     ],
     primaryEntity: "Porchivo Field Guide (user manual)",
@@ -271,12 +271,12 @@ export const PAGE_SEO: Record<string, PageSEO> = {
     canonical: `${BASE_URL}/download`,
     ogTitle: "Download Porchivo — Free on iOS & Android",
     ogDescription:
-      "Get Porchivo on iPhone or Android. Free tier available. Premium from $4.94/mo. Protect every delivery.",
+      "Get Porchivo on iPhone or Android. Free tier available. Premium from $8.33/mo. Protect every delivery.",
     ogImage: OG_IMAGE,
     twitterCard: "summary_large_image",
     robots: "index, follow",
     aiSummary:
-      "Porchivo is available as a free download on iOS (App Store) and Android (Google Play). The app requires iOS 16+ or Android 8+. A free tier is available; Premium plans start at $9.99/month.",
+      "Porchivo is available as a free download on iOS (App Store) and Android (Google Play). The app requires iOS 16+ or Android 8+. A free tier is available; Premium plans start at $13.99/month.",
     keyFacts: [
       "Available on iOS App Store",
       "Available on Google Play",

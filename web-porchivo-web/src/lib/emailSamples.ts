@@ -79,9 +79,9 @@ export const SAMPLE_EMAILS: SampleEmail[] = [
     template: {
       heading: "Your Porchivo Premium receipt",
       bodyHtml:
-        "<p>Thanks for being a Premium member! Here's your receipt for this billing period:</p><p><strong>Plan:</strong> Porchivo Premium (Annual)<br/><strong>Amount:</strong> $59.99<br/><strong>Date:</strong> July 16, 2026<br/><strong>Payment method:</strong> Visa •••• 4242</p><p>Your subscription renews on July 16, 2027. You can manage your subscription anytime from Profile → Subscription.</p>",
+        "<p>Thanks for being a Premium member! Here's your receipt for this billing period:</p><p><strong>Plan:</strong> Porchivo Premium (Annual)<br/><strong>Amount:</strong> $99.99<br/><strong>Date:</strong> July 16, 2026<br/><strong>Payment method:</strong> Visa •••• 4242</p><p>Your subscription renews on July 16, 2027. You can manage your subscription anytime from Profile → Subscription.</p>",
       bodyText:
-        "Thanks for being a Premium member! Here's your receipt for this billing period:\n\nPlan: Porchivo Premium (Annual)\nAmount: $59.99\nDate: July 16, 2026\nPayment method: Visa ending in 4242\n\nYour subscription renews on July 16, 2027. You can manage your subscription anytime from Profile -> Subscription.",
+        "Thanks for being a Premium member! Here's your receipt for this billing period:\n\nPlan: Porchivo Premium (Annual)\nAmount: $99.99\nDate: July 16, 2026\nPayment method: Visa ending in 4242\n\nYour subscription renews on July 16, 2027. You can manage your subscription anytime from Profile -> Subscription.",
       cta: { label: "View Billing History", url: "https://porchivo.com" },
     },
   },
