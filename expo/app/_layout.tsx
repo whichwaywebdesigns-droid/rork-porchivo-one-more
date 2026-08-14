@@ -261,9 +261,8 @@ function RootLayoutNav() {
       <Stack.Screen name="admin-funnel" options={{ headerShown: false, presentation: "modal" }} />
       {/* UPS & Amazon Hidden Services subsection — 6-screen delivery webflow */}
       <Stack.Screen name="ups-amazon" options={{ headerShown: false }} />
-      {/* Revenue — referral, win-back, payout setup */}
+      {/* Revenue — referral, payout setup */}
       <Stack.Screen name="referral" options={{ headerShown: false, title: "Invite & Earn" }} />
-      <Stack.Screen name="win-back" options={{ headerShown: false, presentation: "fullScreenModal" }} />
       <Stack.Screen name="partner-payout-setup" options={{ headerShown: false }} />
       <Stack.Screen name="partner-verify" options={{ title: "Identity Verification" }} />
       <Stack.Screen name="partner-earnings" options={{ title: "Partner Earnings" }} />

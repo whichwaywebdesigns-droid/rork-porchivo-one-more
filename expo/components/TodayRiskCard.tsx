@@ -9,7 +9,7 @@ import {
   Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { ChevronRight, Shield, ShieldAlert, ShieldCheck, Crown, Package } from 'lucide-react-native';
+import { ChevronRight, Shield, ShieldAlert, ShieldCheck, Package } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { palette, radius, space, type as ttype } from '@/constants/theme';
 import { calculatePorchRisk, pickNextInboundPackage, RiskLevel } from '@/lib/porchRisk';
@@ -76,7 +76,6 @@ export default function TodayRiskCard() {
   const { weekCount } = useNeighborhood();
   const { getHoldForPackage } = usePorchPartners();
   const { getDriverForPackage } = useDrivers();
-  const showSoftGate = false;
 
   const pkg = useMemo(() => pickNextInboundPackage(packages), [packages]);
 
@@ -204,20 +203,7 @@ export default function TodayRiskCard() {
         </View>
       </View>
 
-      {showSoftGate && (
-        <TouchableOpacity
-          style={styles.softGate}
-          activeOpacity={0.85}
-          onPress={() => router.push('/upgrade?trigger=theft_shield' as any)}
-          testID="today-risk-soft-gate"
-          accessibilityRole="button"
-          accessibilityLabel="Unlock Theft Shield"
-        >
-          <Crown size={11} color={palette.accent} />
-          <Text style={styles.softGateText}>Unlock Theft Shield — 7-day free trial</Text>
-          <ChevronRight size={11} color={palette.accent} />
-        </TouchableOpacity>
-      )}
+
     </TouchableOpacity>
   );
 }
@@ -329,22 +315,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '700' as const,
     color: palette.accent,
-  },
-  softGate: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginTop: space.md,
-    paddingTop: space.sm,
-    borderTopWidth: 1,
-    borderTopColor: palette.borderDark,
-  },
-  softGateText: {
-    flex: 1,
-    fontSize: 12,
-    fontWeight: '700' as const,
-    color: palette.accent,
-    letterSpacing: 0.2,
   },
   emptyRow: {
     flexDirection: 'row',

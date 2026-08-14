@@ -29,9 +29,8 @@
  *
  * Rules
  * ─────
- * • NEVER redirect to /upgrade from useEffect, useFocusEffect, or onMount.
+ * • NEVER redirect from useEffect, useFocusEffect, or onMount.
  * • NEVER check subscription state in tab switch handlers.
- * • NEVER use router.push('/upgrade') — use guardPremiumAccess instead.
  * • The only exception is the Day-7 hard paywall, which is managed exclusively
  *   by PaywallContext (never from a screen-level effect).
  */
@@ -81,8 +80,6 @@ export const ROUTE_ACCESS: Record<string, RouteAccess> = {
   'contact-support': 'free',
   'support-ticket-detail': 'free',
   billing: 'free',
-  upgrade: 'free', // paywall itself is always reachable
-  'win-back': 'free',
   'admin-funnel': 'free',
   'porch-risk': 'free', // viewable; Theft Shield toggle inside is gated
   'safe-dropoff': 'free',
