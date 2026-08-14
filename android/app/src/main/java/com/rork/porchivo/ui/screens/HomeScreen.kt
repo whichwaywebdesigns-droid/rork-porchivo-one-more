@@ -74,7 +74,7 @@ fun HomeScreen(
     val unreadCount by notificationsViewModel.unreadCount.collectAsStateWithLifecycle()
     val shipmentsLoadState by shipmentsViewModel.shipmentsLoadState.collectAsStateWithLifecycle()
 
-    val isFree = tier == SubscriptionTier.FREE
+    val isFree = false // HOA-provisioned model — all users have full access
     val riskScore = remember(myShipments) { RiskEngine.score(myShipments) }
     val theftFact = remember {
         val dayOfYear = Calendar.getInstance().get(Calendar.DAY_OF_YEAR)

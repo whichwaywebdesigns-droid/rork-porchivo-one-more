@@ -72,31 +72,26 @@ struct ProfileScreen: View {
     private var tierCard: some View {
         HStack(spacing: 12) {
             ZStack {
-                Circle().fill(appState.tier == .free ? c.elevated : c.goldSoft)
-                Image(systemName: appState.tier == .free ? "person.fill" : "crown.fill")
-                    .foregroundStyle(appState.tier == .free ? c.textMuted : c.gold)
+                Circle().fill(c.goldSoft)
+                Image(systemName: "crown.fill")
+                    .foregroundStyle(c.gold)
             }
             .frame(width: 40, height: 40)
             VStack(alignment: .leading, spacing: 1) {
-                Text(appState.tier.label)
+                Text("Community Plan")
                     .font(.system(size: 15, weight: .bold))
                     .foregroundStyle(c.textPrimary)
-                Text(appState.tier == .free ? "Unlock unlimited tracking & alerts" : "Thanks for supporting Porchivo")
+                Text("Provided by your HOA")
                     .font(.system(size: 11))
                     .foregroundStyle(c.textSecondary)
             }
             Spacer()
-            if appState.tier == .free {
-                NavigationLink(value: Route.upgrade) {
-                    Text("Upgrade")
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundStyle(c.onAccent)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 7)
-                        .background(c.accent, in: .rect(cornerRadius: Radius.sm))
-                }
-                .buttonStyle(.plain)
-            }
+            Text("Active")
+                .font(.system(size: 12, weight: .bold))
+                .foregroundStyle(c.success)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 7)
+                .background(c.successSoft, in: .rect(cornerRadius: Radius.sm))
         }
         .padding(Space.md)
         .background(c.surface, in: .rect(cornerRadius: Radius.lg))

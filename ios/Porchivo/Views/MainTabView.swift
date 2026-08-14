@@ -37,7 +37,7 @@ struct MainTabView: View {
 
             ProfileScreen()
                 .tabItem {
-                    Label(appState.tier == .free ? "Go Pro" : "Profile", systemImage: "person.fill")
+                    Label("Profile", systemImage: "person.fill")
                 }
                 .tag(4)
         }

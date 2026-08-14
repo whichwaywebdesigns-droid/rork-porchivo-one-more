@@ -69,8 +69,7 @@ fun AddPackageScreen(
     val tier by appViewModel.tier.collectAsStateWithLifecycle()
     val packages by packagesViewModel.packages.collectAsStateWithLifecycle()
 
-    val atFreeLimit = tier == SubscriptionTier.FREE &&
-        packages.size >= AppConfig.FreeLimits.MAX_PACKAGES
+    val atFreeLimit = false // HOA-provisioned model — no free tier limit
 
     var name by remember { mutableStateOf("") }
     var carrier by remember { mutableStateOf<Carrier?>(null) }

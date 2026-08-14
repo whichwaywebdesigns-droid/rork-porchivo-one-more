@@ -24,7 +24,7 @@ struct PorchivoApp: App {
                 .tint(.porchivoAccent)
                 .privacyShield()
         .task {
-                    RevenueCatService.shared.configure()
+                    // HOA-provisioned model — no RevenueCat/IAP
                     await appState.restoreSession()
                 }
                 .onAppear {

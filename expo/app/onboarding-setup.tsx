@@ -87,7 +87,8 @@ export default function OnboardingSetupScreen() {
     markCompleted();
     track('onboarding_completed', { role, skipped: !building.trim() && !unit.trim() });
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    router.replace('/onboarding-paywall' as any);
+    // HOA-provisioned model — go straight to home, no paywall.
+    router.replace('/(tabs)/(home)' as any);
   };
 
   const fieldStyle = (key: 'building' | 'unit') => [

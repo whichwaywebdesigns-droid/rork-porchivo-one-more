@@ -63,15 +63,11 @@ export default function LocationConsentScreen() {
         hasPreciseLocationConsent: preciseGranted,
         ...(userName ? { name: userName } : {}),
       });
-      // Post-onboarding upgrade push — user has just completed setup and seen
-      // the full value proposition. Surface the paywall now while intent is high.
-      // The upgrade screen has a back button so this is a soft push, not a hard block.
-      router.replace({ pathname: '/upgrade' as any, params: { trigger: 'first_delivery' } });
     } catch (e) {
       log('[LocationConsent] completeOnboarding error:', e);
-      // Still route forward so the user isn't stranded on a completed step.
-      router.replace({ pathname: '/upgrade' as any, params: { trigger: 'first_delivery' } });
     } finally {
+      // HOA-provisioned model — go straight to home, no paywall.
+      router.replace('/(tabs)/(home)' as any);
       setIsSubmitting(false);
     }
   };
@@ -86,12 +82,10 @@ export default function LocationConsentScreen() {
         hasLocationConsent: false,
         ...(userName ? { name: userName } : {}),
       });
-      // Post-onboarding upgrade push (skip path)
-      router.replace({ pathname: '/upgrade' as any, params: { trigger: 'first_delivery' } });
     } catch (e) {
       log('[LocationConsent] skip completeOnboarding error:', e);
-      router.replace({ pathname: '/upgrade' as any, params: { trigger: 'first_delivery' } });
     } finally {
+      router.replace('/(tabs)/(home)' as any);
       setIsSubmitting(false);
     }
   };

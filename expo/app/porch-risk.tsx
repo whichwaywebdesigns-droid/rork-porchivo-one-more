@@ -38,7 +38,6 @@ import { useDrivers } from '@/store/DriversContext';
 import { calculatePorchRisk, RiskLevel, RiskResult } from '@/lib/porchRisk';
 import { useApp } from '@/store/AppContext';
 import { useAnalytics } from '@/store/AnalyticsContext';
-import { usePaywall } from '@/store/PaywallContext';
 
 const LEVEL_META: Record<RiskLevel, {
   label: string;
@@ -89,12 +88,10 @@ export default function PorchRiskScreen() {
       setRefreshing(false);
     }
   }, [refreshAllPackages]);
-  const { isEntitled, capabilities } = useApp();
+  const { capabilities } = useApp();
   const { track } = useAnalytics();
-  const { guardPremiumAccess } = usePaywall();
-  // isEntitled uses backend-confirmed state, falling back to RC SDK isPremium.
-  // Prevents showing the gate during grace periods or renewal lag.
-  const showSoftGate = !isEntitled && !capabilities.theftShield;
+  // HOA-provisioned model — all users have full access.
+  const showSoftGate = false;
 
   const pkg = useMemo(() => {
     if (id) return packages.find((p) => p.id === id) ?? null;
@@ -182,11 +179,7 @@ export default function PorchRiskScreen() {
       label: 'Set a delivery window',
       sub: 'Tell drivers the safest time to drop.',
       icon: <Clock size={18} color={palette.navy} />,
-      onPress: () => guardPremiumAccess({
-        trigger: 'manual',
-        feature: 'Delivery Windows',
-        action: () => router.push('/delivery-windows' as never),
-      }),
+      onPress: () => router.push('/delivery-windows' as never),
       show: true,
     },
     {
@@ -296,8 +289,8 @@ export default function PorchRiskScreen() {
               if (Platform.OS !== 'web') {
                 void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               }
-              track('paywall_view', { trigger: 'theft_shield', source: 'porch_risk' });
-              router.push({ pathname: '/upgrade' as never, params: { trigger: 'theft_shield' } });
+              track('theftshield_viewed', { source: 'porch_risk' });
+              router.push('/porch-risk' as never);
             }}
             testID="risk-soft-gate"
           >

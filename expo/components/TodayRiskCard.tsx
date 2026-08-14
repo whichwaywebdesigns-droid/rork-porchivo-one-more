@@ -9,7 +9,7 @@ import {
   Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { ChevronRight, Shield, ShieldAlert, ShieldCheck, Crown, Package } from 'lucide-react-native';
+import { ChevronRight, Shield, ShieldAlert, ShieldCheck, Package } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { palette, radius, space, type as ttype } from '@/constants/theme';
 import { calculatePorchRisk, pickNextInboundPackage, RiskLevel } from '@/lib/porchRisk';
@@ -77,9 +77,8 @@ export default function TodayRiskCard() {
   const { getHoldForPackage } = usePorchPartners();
   const { getDriverForPackage } = useDrivers();
   const { isEntitled, capabilities } = useApp();
-  // isEntitled uses backend-confirmed state, preventing a flash of the soft
-  // gate during renewal lag or grace periods.
-  const showSoftGate = !isEntitled && !capabilities.theftShield;
+  // HOA-provisioned model — all users have full access, no soft gate.
+  const showSoftGate = false;
 
   const pkg = useMemo(() => pickNextInboundPackage(packages), [packages]);
 
@@ -207,20 +206,7 @@ export default function TodayRiskCard() {
         </View>
       </View>
 
-      {showSoftGate && (
-        <TouchableOpacity
-          style={styles.softGate}
-          activeOpacity={0.85}
-          onPress={() => router.push('/upgrade?trigger=theft_shield' as any)}
-          testID="today-risk-soft-gate"
-          accessibilityRole="button"
-          accessibilityLabel="Unlock Theft Shield"
-        >
-          <Crown size={11} color={palette.accent} />
-          <Text style={styles.softGateText}>Unlock Theft Shield — 7-day free trial</Text>
-          <ChevronRight size={11} color={palette.accent} />
-        </TouchableOpacity>
-      )}
+      {/* Soft gate removed — HOA-provisioned model */}
     </TouchableOpacity>
   );
 }

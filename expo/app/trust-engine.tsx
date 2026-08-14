@@ -454,8 +454,8 @@ export default function TrustEngineScreen() {
 
   const handleUpgrade = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
-    track('trust_engine_upgrade_tap');
-    router.push('/upgrade?trigger=trust_engine' as any);
+    track('trust_engine_view', { source: 'locked_screen' });
+    router.push('/trust-engine' as any);
   }, [router, track]);
 
   const handleExportReport = useCallback(async () => {

@@ -65,7 +65,6 @@ import com.rork.porchivo.config.AppConfig
 import com.rork.porchivo.model.SubscriptionTier
 import com.rork.porchivo.model.UserRole
 import com.rork.porchivo.ui.navigation.Routes
-import com.rork.porchivo.data.RevenueCatService
 import com.rork.porchivo.ui.theme.PorchivoTheme
 import kotlinx.coroutines.launch
 import com.rork.porchivo.ui.viewmodel.AppViewModel
@@ -186,38 +185,25 @@ fun ProfileScreen(
                     Icon(
                         imageVector = Icons.Filled.WorkspacePremium,
                         contentDescription = null,
-                        tint = if (tier == SubscriptionTier.FREE) c.textSecondary else c.gold,
+                        tint = c.gold,
                         modifier = Modifier.size(18.dp),
                     )
                     Text(
-                        text = tier.label,
+                        text = "Community Plan",
                         color = c.textPrimary,
                         fontSize = 15.sp,
                         fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.weight(1f),
                     )
-                    if (tier == SubscriptionTier.FREE) {
-                        Text(
-                            text = "Upgrade",
-                            color = c.onAccent,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier
-                                .background(c.accent, RoundedCornerShape(999.dp))
-                                .clickable { navController.navigate(Routes.UPGRADE) }
-                                .padding(horizontal = 14.dp, vertical = 7.dp),
-                        )
-                    } else {
-                        Text(
-                            text = "Active",
-                            color = c.success,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier
-                                .background(c.successSoft, RoundedCornerShape(999.dp))
-                                .padding(horizontal = 14.dp, vertical = 7.dp),
-                        )
-                    }
+                    Text(
+                        text = "Active",
+                        color = c.success,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .background(c.successSoft, RoundedCornerShape(999.dp))
+                            .padding(horizontal = 14.dp, vertical = 7.dp),
+                    )
                 }
                 HorizontalDivider(color = c.border)
                 SettingRow(
@@ -232,18 +218,13 @@ fun ProfileScreen(
                     iconTint = c.accent,
                     label = "Restore Purchases",
                     onClick = {
-                        scope.launch {
-                            val result = RevenueCatService.restorePurchases()
-                            if (result.tier != null) {
-                                appViewModel.upgradeTier(result.tier)
-                            }
-                        }
+                        // HOA-provisioned model — no purchases to restore
                     },
                 )
             }
         }
         Text(
-            text = "Subscriptions are billed through Google Play and auto-renew unless canceled at least 24 hours before the end of the current period. Manage or cancel in Google Play › Payments & subscriptions.",
+            text = "Your Porchivo access is provided by your HOA or property manager.",
             color = c.textMuted,
             fontSize = 11.sp,
             lineHeight = 15.sp,

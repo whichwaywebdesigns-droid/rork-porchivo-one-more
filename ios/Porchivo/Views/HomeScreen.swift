@@ -29,10 +29,7 @@ struct HomeScreen: View {
                     }
                     .buttonStyle(.plain)
 
-                    if appState.tier == .free {
-                        NavigationLink(value: Route.upgrade) { winbackBanner }
-                            .buttonStyle(.plain)
-                    }
+                    // HOA-provisioned model — no winback banner
 
                     NavigationLink(value: Route.safety) { todayRiskCard }
                         .buttonStyle(.plain)
