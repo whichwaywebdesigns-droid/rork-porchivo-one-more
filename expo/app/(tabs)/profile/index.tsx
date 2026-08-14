@@ -10,6 +10,8 @@ import { useTheme } from '@/store/ThemeContext';
 import { useApp } from '@/store/AppContext';
 import { UserRole } from '@/types';
 import { useRouter } from 'expo-router';
+import { usePaywall } from '@/store/PaywallContext';
+import { PAYWALL_TRIGGERS } from '@/lib/tiers';
 import { isEnabled } from '@/lib/featureFlags';
 import { manualRequestReview } from '@/lib/storeReview';
 import { log } from "@/lib/logger";
@@ -48,7 +50,7 @@ export default function ProfileScreen() {
     referralCreditUntil,
     restorePurchase,
   } = useApp();
-  const router = useRouter();
+  const { guardPremiumAccess } = usePaywall();
   // Dynamic colors — override static module-level Colors
   // eslint-disable-next-line @typescript-eslint/no-shadow
   const Colors = useColors();
@@ -56,13 +58,32 @@ export default function ProfileScreen() {
   const [restoring, setRestoring] = React.useState<boolean>(false);
 
   const handleRestore = React.useCallback(async () => {
-    // HOA-provisioned model — no purchases to restore
-    Alert.alert('Community Plan', 'Your access is provided by your HOA or property manager. There are no purchases to restore.');
-  }, []);
+    if (restoring) return;
+    setRestoring(true);
+    try {
+      const ok = await restorePurchase();
+      if (ok) {
+        Alert.alert('Restored', 'Your previous purchase has been restored.');
+      } else {
+        Alert.alert('No Purchase Found', 'We couldn\u2019t find a previous purchase on this account.');
+      }
+    } catch (err) {
+      log('[Profile] Restore error:', err);
+      Alert.alert('Restore Failed', 'Something went wrong. Please try again.');
+    } finally {
+      setRestoring(false);
+    }
+  }, [restoring, restorePurchase]);
 
   const handleManageSubscription = React.useCallback(() => {
-    router.push('/billing' as any);
-  }, [router]);
+    const url = Platform.OS === 'ios'
+      ? 'https://apps.apple.com/account/subscriptions'
+      : Platform.OS === 'android'
+        ? 'https://play.google.com/store/account/subscriptions'
+        : 'https://apps.apple.com/account/subscriptions';
+    void Linking.openURL(url).catch(() => Alert.alert('Error', 'Could not open the link.'));
+  }, []);
+  const router = useRouter();
   const [chimePickerOpen, setChimePickerOpen] = React.useState<boolean>(false);
   const [inviting, setInviting] = React.useState(false);
 
@@ -122,19 +143,35 @@ export default function ProfileScreen() {
         <View style={[styles.infoCard, { backgroundColor: Colors.surface }]}>
           <View style={styles.settingRow}>
             <View style={styles.settingLeft}>
-              <Crown size={18} color={'#C8941E'} />
+              <Crown size={18} color={tier === 'free' ? Colors.slateLight : '#C8941E'} />
               <View>
                 <Text style={[styles.settingText, { color: Colors.slate }]}>
-                  Community Plan
+                  {tier === 'lifetime' ? 'Lifetime' : tier === 'family' ? 'Family Plan' : tier === 'premium' ? 'Premium' : 'Free Plan'}
                 </Text>
-                <Text style={[styles.settingText, { fontSize: 11, color: Colors.slateLighter, marginTop: 1 }]}>
-                  Provided by your HOA
-                </Text>
+                {referralCreditUntil && Date.now() < referralCreditUntil && (
+                  <Text style={styles.referralText}>Referral credit active</Text>
+                )}
               </View>
             </View>
-            <View style={styles.activePill}>
-              <Text style={styles.activePillText}>Active</Text>
-            </View>
+            {tier === 'free' ? (
+              <TouchableOpacity
+                style={styles.upgradePill}
+                onPress={() => {
+                  // C-3: route through guardPremiumAccess with a real
+                  // PAYWALL_TRIGGERS value so the placement passed to Superwall
+                  // is a configured campaign, not a dead 'remove_ads_upgrade'.
+                  guardPremiumAccess({ trigger: PAYWALL_TRIGGERS.manual });
+                }}
+                activeOpacity={0.85}
+                testID="open-upgrade"
+              >
+                <Text style={styles.upgradePillText}>Upgrade</Text>
+              </TouchableOpacity>
+            ) : (
+              <View style={styles.activePill}>
+                <Text style={styles.activePillText}>Active</Text>
+              </View>
+            )}
           </View>
 
           {capabilities.theftShield && (
@@ -217,8 +254,7 @@ export default function ProfileScreen() {
             <ChevronRight size={18} color={Colors.slateLighter} />
           </TouchableOpacity>
 
-          {/* HOA-provisioned model — always show billing link */}
-          {
+          {tier !== 'free' && (
             <>
               <View style={styles.infoRowDivider} />
               <TouchableOpacity
@@ -230,22 +266,40 @@ export default function ProfileScreen() {
                 <View style={styles.settingLeft}>
                   <CreditCard size={18} color={'#C8941E'} />
                   <View>
-                    <Text style={[styles.settingText, { color: Colors.slate }]}>My Plan</Text>
+                    <Text style={[styles.settingText, { color: Colors.slate }]}>Manage Plan</Text>
                     <Text style={[styles.settingText, { fontSize: 11, color: Colors.slateLighter, marginTop: 1 }]}>
-                      Community Plan — Full Access
+                      {tier === 'lifetime' ? 'Lifetime Member' : tier === 'family' ? 'Family Plan' : tier === 'enterprise' ? 'HOA Enterprise' : 'Premium Active'}
                     </Text>
                   </View>
                 </View>
                 <ChevronRight size={18} color={Colors.slateLighter} />
               </TouchableOpacity>
             </>
-          }
+          )}
         </View>
 
         <Text style={styles.subDisclosure}>
-          Your Porchivo access is provided by your HOA or property manager.
+          {Platform.OS === 'android'
+            ? 'Subscriptions are billed through Google Play and auto-renew unless canceled at least 24 hours before the end of the current period. Manage or cancel in Google Play \u203A Payments & subscriptions.'
+            : 'Subscriptions are billed through your Apple ID and auto-renew unless canceled at least 24 hours before the end of the current period. Manage or cancel in Settings \u203A Apple ID \u203A Subscriptions.'}
         </Text>
 
+        {/* Annual upsell nudge — shown to premium (monthly) users */}
+        {tier === 'premium' && (
+          <TouchableOpacity
+            style={styles.annualUpsellCard}
+            onPress={() => router.push('/upgrade?trigger=manual' as any)}
+            activeOpacity={0.88}
+            testID="annual-upsell-nudge"
+          >
+            <Crown size={15} color="#C8941E" />
+            <View style={styles.annualUpsellText}>
+              <Text style={styles.annualUpsellTitle}>Save 40 — switch to Annual</Text>
+              <Text style={styles.annualUpsellSub}>$99.99/yr · $8.33/mo · same Premium features</Text>
+            </View>
+            <ArrowRight size={14} color="#C8941E" />
+          </TouchableOpacity>
+        )}
       </View>
 
       {showPorchPartners && (

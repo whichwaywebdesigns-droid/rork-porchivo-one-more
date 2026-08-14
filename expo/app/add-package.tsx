@@ -135,8 +135,14 @@ export default function AddPackageScreen() {
       );
     } catch (err: any) {
       if (err?.message === 'FREE_LIMIT_REACHED') {
-        // HOA-provisioned model — this should never trigger, but handle gracefully.
-        Alert.alert('Limit reached', 'Please contact your community administrator if you need to track additional packages.');
+        Alert.alert(
+          'Free limit reached',
+          'Free accounts can track 1 active package. Upgrade to Premium for unlimited tracking.',
+          [
+            { text: 'Not now', style: 'cancel' },
+            { text: 'Upgrade', onPress: () => router.push('/upgrade?trigger=package_limit' as any) },
+          ],
+        );
         return;
       }
       Alert.alert('Error', 'Could not add package. Please try again.');

@@ -89,10 +89,10 @@ struct AddPackageScreen: View {
 
     private var limitBanner: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Label("Contact your community administrator", systemImage: "building.2.fill")
+            Label("Free plan limit reached", systemImage: "crown.fill")
                 .font(.system(size: 14, weight: .bold))
                 .foregroundStyle(c.gold)
-            Text("Porchivo access is provided by your HOA or property manager.")
+            Text("You can track \(AppConfig.FreeLimits.maxPackages) package on the free plan. Upgrade for unlimited tracking.")
                 .font(.system(size: 12))
                 .foregroundStyle(c.textSecondary)
         }

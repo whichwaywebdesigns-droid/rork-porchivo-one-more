@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { View, Text, StyleSheet, FlatList, RefreshControl, TouchableOpacity, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Stack } from 'expo-router';
-import { Shield, MapPin, ShieldAlert, Bell, BarChart3, Plus, Zap, BadgeDollarSign, ArrowRight, Users } from 'lucide-react-native';
+import { Shield, MapPin, ShieldAlert, Bell, BarChart3, Plus, Crown, Zap, BadgeDollarSign, ArrowRight, Users } from 'lucide-react-native';
 import { useQueryClient } from '@tanstack/react-query';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -21,7 +21,10 @@ import TodayRiskCard from '@/components/TodayRiskCard';
 import DailyStreakCard from '@/components/DailyStreakCard';
 import ReferralCard from '@/components/ReferralCard';
 import InviteNeighborsCard from '@/components/InviteNeighborsCard';
+import { usePaywall } from '@/store/PaywallContext';
+import { PAYWALL_TRIGGERS } from '@/lib/tiers';
 import { log } from '@/lib/logger';
+import { PRICING } from '@/config/app';
 import { isEnabled } from '@/lib/featureFlags';
 import { Shipment } from '@/types';
 
@@ -35,7 +38,8 @@ export default function HomeScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const colors = useColors();
-  const { user, isHomeowner, isPartner, session } = useApp();
+  const { user, isHomeowner, isPartner, session, isEntitled, tier, daysSinceInstall } = useApp();
+  const { guardPremiumAccess } = usePaywall();
   const { myShipments, nearbyShipments, acceptShipment } = useShipments();
   const { unreadNotificationCount } = useNotifications();
   const [refreshing, setRefreshing] = useState(false);
@@ -58,9 +62,12 @@ export default function HomeScreen() {
     return () => { cancelled = true; };
   }, []);
 
-  // HOA-provisioned model — all users have full access, no paywall.
-  const isFree = false;
-  const showWinbackBanner = false;
+  // Day-7 hard paywall is now handled exclusively by PaywallContext.
+  // No paywall logic belongs in screen-level effects.
+
+  // Use backend-confirmed isEntitled for access decisions.
+  const isFree = tier === 'free' && !isEntitled;
+  const showWinbackBanner = isFree && daysSinceInstall >= WINBACK_MIN_DAYS;
 
   // P-3: maturity-gated section visibility. First-time users (appOpens <= 2 or
   // no delivered shipments yet) get a minimal home; upsells/facts/streaks
@@ -102,7 +109,7 @@ export default function HomeScreen() {
 
   // P-3: partner-view-dependent gates, declared after isPartnerView.
   const showDailyStreak = !isPartnerView && isMatureUser;
-  const showReferral = !isPartnerView && user && isMatureUser;
+  const showReferral = !isPartnerView && isFree && user && isMatureUser;
 
   const renderItem = useCallback(({ item }: { item: Shipment }) => (
     <ShipmentCard
@@ -146,7 +153,30 @@ export default function HomeScreen() {
         </TouchableOpacity>
       )}
 
-      {/* Winback banner removed — HOA-provisioned model, no paywall */}
+      {showWinbackBanner && (
+        <TouchableOpacity
+          style={styles.winbackBanner}
+          onPress={() => {
+            // C-3: route through guardPremiumAccess with a real
+            // PAYWALL_TRIGGERS value so the placement passed to Superwall is
+            // a configured campaign, not a dead string.
+            guardPremiumAccess({ trigger: PAYWALL_TRIGGERS.day7Hard });
+          }}
+          activeOpacity={0.88}
+          testID="winback-banner"
+        >
+          <View style={styles.winbackIcon}>
+            <Crown size={14} color={palette.onAccent} />
+          </View>
+          <View style={styles.winbackText}>
+            <Text style={styles.winbackTitle}>Special offer — {PRICING.winback.label}</Text>
+            <Text style={styles.winbackSub}>Only {PRICING.winback.displayPrice} · Upgrade to protect more</Text>
+          </View>
+          <View style={styles.winbackCta}>
+            <Text style={styles.winbackCtaText}>Claim</Text>
+          </View>
+        </TouchableOpacity>
+      )}
 
       {!isPartnerView && <TodayRiskCard />}
 

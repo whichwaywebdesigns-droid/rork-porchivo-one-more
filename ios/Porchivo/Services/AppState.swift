@@ -32,7 +32,7 @@ final class AppState {
 
     // User & tier
     var user: User?
-    var tier: SubscriptionTier = .premium
+    var tier: SubscriptionTier = .free
 
     // Server data
     var shipments: [Shipment] = []
@@ -305,7 +305,8 @@ final class AppState {
         needsBiometricEnrollment = false
         authState = .unauthenticated
         user = nil
-        tier = .premium        shipments = []
+        tier = .free
+        shipments = []
         notifications = []
         directory = []
         shipmentsLoadState = .idle
@@ -314,7 +315,8 @@ final class AppState {
 
     private func seedDemoUser() {
         user = MockData.user
-        tier = .premium        shipments = MockData.shipments
+        tier = .free
+        shipments = MockData.shipments
         notifications = MockData.notifications
         packages = MockData.trackedPackages
         saveLocalPackages()
@@ -574,7 +576,8 @@ final class AppState {
     }
 
     func canAddPackage() -> Bool {
-        return true // HOA-provisioned model — all users have full access
+        if tier != .free { return true }
+        return packages.count < AppConfig.FreeLimits.maxPackages
     }
 
     func addPackage(_ pkg: TrackedPackage) {

@@ -13,6 +13,7 @@ import { PaywallProvider } from "@/store/PaywallContext";
 import { NotificationsProvider } from "@/store/NotificationsContext";
 import { ShipmentsProvider } from "@/store/ShipmentsContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import { initSuperwall } from "@/lib/superwall";
 import { log } from "@/lib/logger";
 import { PackagesProvider } from "@/store/PackagesContext";
 import { DriversProvider } from "@/store/DriversContext";
@@ -61,6 +62,9 @@ async function checkForUpdates() {
   }
 }
 void checkForUpdates();
+
+// SDK 54 build
+void initSuperwall();
 
 const queryClient = new QueryClient();
 

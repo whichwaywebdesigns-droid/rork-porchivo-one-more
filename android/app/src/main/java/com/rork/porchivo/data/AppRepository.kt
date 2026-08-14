@@ -382,7 +382,8 @@ class AppRepository(context: Context) {
     }
 
     fun canAddPackage(): Boolean {
-        return true // HOA-provisioned model — all users have full access
+        if (_tier.value != SubscriptionTier.FREE) return true
+        return _packages.value.size < com.rork.porchivo.config.AppConfig.FreeLimits.MAX_PACKAGES
     }
 
     fun addPackage(pkg: TrackedPackage) {

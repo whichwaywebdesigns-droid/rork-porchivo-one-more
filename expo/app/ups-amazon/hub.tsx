@@ -219,9 +219,19 @@ function ServiceCard({
 
 export default function HubScreen() {
   const router = useRouter();
-  const { isLoading } = useApp();
+  const { isEntitled, isEntitlementLoading, isLoading } = useApp();
 
-  // HOA-provisioned model — all users have full access, no paywall redirect.
+  // Hard paywall — UPS/Amazon hidden services are premium-only.
+  // Wait for BOTH auth loading and backend entitlement to resolve before
+  // redirecting, so entitled users aren't false-evicted during launch sync.
+  useEffect(() => {
+    if (!isLoading && !isEntitlementLoading && !isEntitled) {
+      router.replace({
+        pathname: '/upgrade' as any,
+        params: { trigger: 'ups_amazon' },
+      });
+    }
+  }, [isEntitled, isEntitlementLoading, isLoading, router]);
 
   // Header animation
   const heroAnim = useRef(new Animated.Value(0)).current;

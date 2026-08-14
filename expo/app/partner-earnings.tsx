@@ -32,6 +32,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { palette, tabularNums } from '@/constants/theme';
 import Colors from '@/constants/colors';
 import { useApp } from '@/store/AppContext';
+import { usePaywall } from '@/store/PaywallContext';
 import {
   fetchMyVerification,
   fetchMyAssignments,
@@ -359,6 +360,7 @@ export default function PartnerEarningsScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { user } = useApp();
+  const { guardPremiumAccess } = usePaywall();
   const [connectLoading, setConnectLoading] = React.useState(false);
 
   const { data: verification, isLoading: verifLoading, refetch: refetchVerif } = useQuery({
@@ -623,7 +625,11 @@ export default function PartnerEarningsScreen() {
           {/* ── View all holds shortcut ── */}
           <TouchableOpacity
             style={styles.holdsLink}
-            onPress={() => router.push('/partner-holds' as any)}
+            onPress={() => guardPremiumAccess({
+              trigger: 'manual',
+              feature: 'Package Holds',
+              action: () => router.push('/partner-holds' as any),
+            })}
             activeOpacity={0.8}
           >
             <HandHeart size={16} color={Colors.primary} />

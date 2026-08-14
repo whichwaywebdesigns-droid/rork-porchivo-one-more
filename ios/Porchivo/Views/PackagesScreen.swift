@@ -45,7 +45,7 @@ struct PackagesScreen: View {
                         packageSummaryHeader
                     }
 
-                    if false { // HOA-provisioned model — no free tier banner
+                    if appState.tier == .free {
                         freeTierBanner
                     }
 

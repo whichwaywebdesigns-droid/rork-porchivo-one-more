@@ -42,9 +42,9 @@ const styles = StyleSheet.create({
 });
 
 export default function TabLayout() {
-  const { isHomeowner } = useApp();
+  const { isHomeowner, tier } = useApp();
   const Colors = useColors();
-  const isFree = false; // HOA-provisioned model — all users have full access
+  const isFree = tier === 'free';
   const { isOrgMember, isOrgPending } = useOrganization();
   const showCommunity = isEnabled('COMMUNITY_MODE');
   const showPorchPartners = isEnabled('PORCH_PARTNERS');

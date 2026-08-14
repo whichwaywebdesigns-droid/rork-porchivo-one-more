@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Building2, ArrowRight, Check } from "lucide-react";
+import { ShieldAlert, Check, Smartphone, ChevronRight } from "lucide-react";
 import PageLayout from "@/components/PageLayout";
 import SEOHead from "@/components/SEOHead";
 import BreadcrumbNav from "@/components/BreadcrumbNav";
@@ -10,14 +10,20 @@ import { BRAND } from "@/config/brand";
 
 const seo = getPageSEO("download");
 
-const COMMUNITY_FEATURES = [
-  "Unlimited package tracking — every carrier, no cap",
-  "Theft Shield real-time porch risk alerts",
-  "Porch Partner neighborhood network",
-  "Community-wide theft alert feed",
-  "HOA announcements and document portal",
-  "Maintenance request management",
-  "Resident directory and messaging",
+const FREE_INCLUDES = [
+  "Track 1 package simultaneously",
+  "Porch risk score for every delivery",
+  "Neighborhood theft alerts",
+  "10-minute live tracking refresh",
+  "Porch Partner access",
+];
+
+const PREMIUM_ADDS = [
+  "Unlimited package tracking",
+  "90-second live refresh",
+  "Theft Shield push alerts",
+  "Priority risk scoring",
+  "Full neighborhood alert history",
 ];
 
 export default function DownloadPage() {
@@ -30,66 +36,167 @@ export default function DownloadPage() {
   return (
     <PageLayout>
       <SEOHead
-        title="Download Porchivo — Community Access on iOS & Android"
-        description="Porchivo is available on iOS and Android. Access is provided by your homeowners association or property manager. Contact your community administrator for an invitation."
+        title={seo.title}
+        description={seo.description}
         canonical={seo.canonical}
-        ogTitle="Download Porchivo — Community Access"
-        ogDescription="Get Porchivo on iPhone or Android. Access is provided by your HOA or property manager."
+        ogTitle={seo.ogTitle}
+        ogDescription={seo.ogDescription}
         schemas={schemas}
       />
 
       {/* Header */}
-      <section className="pt-16 pb-20 px-4 sm:px-6 border-b border-slate-800">
-        <div className="max-w-3xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-800/60 border border-slate-700 mb-6">
-            <Building2 className="w-4 h-4 text-amber-400" />
-            <span className="text-sm font-medium text-slate-300">HOA-Provided Access</span>
+      <section className="pt-16 pb-20 px-4 sm:px-6 border-b border-slate-800 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-amber-500/5 via-transparent to-transparent pointer-events-none" />
+        <div className="max-w-4xl mx-auto relative">
+          <BreadcrumbNav items={[{ label: "Home", href: "/" }, { label: "Download", href: "/download" }]} />
+          <div className="mt-8 text-center">
+            <div className="w-20 h-20 rounded-3xl bg-amber-500 flex items-center justify-center mx-auto mb-6">
+              <ShieldAlert className="w-10 h-10 text-slate-950" strokeWidth={2} />
+            </div>
+            <h1 className="text-4xl sm:text-5xl font-bold text-slate-100 mb-4">
+              Download Porchivo
+            </h1>
+            <p className="text-lg font-medium text-slate-300 max-w-xl mx-auto mb-3">
+              From blocks to buildings — superior package and property tracking for homeowners and homeowner associations.
+            </p>
+            <p className="text-xl text-slate-400 max-w-xl mx-auto mb-10">
+              Free on iOS and Android. Start protecting your deliveries in under 2 minutes.
+            </p>
+            <AppStoreBadges orientation="row" size="lg" />
+            <p className="text-sm text-slate-600 mt-5">Free download · No credit card required</p>
           </div>
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-100 mb-6 tracking-tight">
-            Your community. <span className="text-amber-400">One app.</span>
-          </h1>
-          <p className="text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed mb-8">
-            Download Porchivo on iOS or Android. Access is provided by your homeowners association
-            or property manager — no subscriptions, no in-app purchases.
-          </p>
-          <AppStoreBadges />
         </div>
       </section>
 
-      {/* Community Plan Features */}
+      {/* Free vs Premium */}
       <section className="py-20 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-8 items-start">
-            <div>
-              <h2 className="text-2xl font-bold text-slate-100 mb-4">What's included</h2>
-              <p className="text-slate-400 mb-6">
-                Every resident gets full access through their community's plan:
-              </p>
-              <div className="space-y-3">
-                {COMMUNITY_FEATURES.map((feature) => (
-                  <div key={feature} className="flex items-start gap-2">
-                    <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-slate-300">{feature}</span>
-                  </div>
+          <h2 className="text-2xl font-bold text-slate-100 text-center mb-12">
+            Start free. Upgrade when you need more.
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-7">
+              <div className="text-sm font-medium text-slate-500 mb-1">Free tier</div>
+              <div className="text-3xl font-bold text-slate-100 mb-1">$0</div>
+              <div className="text-sm text-slate-500 mb-6">No time limit. Always free.</div>
+              <ul className="space-y-3">
+                {FREE_INCLUDES.map((f) => (
+                  <li key={f} className="flex items-start gap-2.5 text-sm text-slate-400">
+                    <Check className="w-4 h-4 text-slate-500 flex-shrink-0 mt-0.5" />
+                    {f}
+                  </li>
                 ))}
-              </div>
+              </ul>
             </div>
 
-            <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-8">
-              <h3 className="text-lg font-bold text-slate-100 mb-3">Don't have access yet?</h3>
-              <p className="text-sm text-slate-400 mb-6">
-                Porchivo access is provided by your HOA board or property manager. If your community
-                isn't on Porchivo yet, have them visit porchivo.com to get started.
-              </p>
-              <Link
-                to="/pricing"
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl border border-slate-700 hover:border-slate-500 text-slate-300 font-medium transition-colors"
-              >
-                Learn how it works
-                <ArrowRight className="w-4 h-4" />
-              </Link>
+            <div className="bg-gradient-to-b from-amber-500/8 to-transparent border border-amber-500/30 rounded-2xl p-7">
+              <div className="inline-flex px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-400 text-xs font-semibold mb-3">
+                Best value — save 40%
+              </div>
+              <div className="text-sm font-medium text-slate-400 mb-1">Premium Annual</div>
+              <div className="flex items-baseline gap-1 mb-1">
+                <span className="text-3xl font-bold text-slate-100">$8.33</span>
+                <span className="text-slate-500 text-sm">/mo, billed annually</span>
+              </div>
+              <div className="text-sm text-slate-500 mb-6">7-day free trial · $99.99/yr · Cancel anytime</div>
+              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
+                Everything in Free, plus:
+              </div>
+              <ul className="space-y-3">
+                {PREMIUM_ADDS.map((f) => (
+                  <li key={f} className="flex items-start gap-2.5 text-sm text-slate-300">
+                    <Check className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
+
+          <div className="mt-5 text-center">
+            <Link
+              to="/pricing"
+              className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-300 transition-colors"
+            >
+              View all plans including Family and HOA
+              <ChevronRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* System requirements */}
+      <section className="py-16 px-4 sm:px-6 bg-slate-900/40 border-y border-slate-800">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-xl font-bold text-slate-100 mb-8 text-center">System requirements</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            {[
+              {
+                platform: "iPhone (iOS)",
+                icon: "🍎",
+                requirements: [
+                  "iOS 16.0 or later",
+                  "iPhone 8 or newer recommended",
+                  "~50 MB storage",
+                  "Internet connection required",
+                ],
+                storeLink: BRAND.appStoreUrl,
+                storeName: "App Store",
+                appId: `ID: ${BRAND.appStoreId}`,
+              },
+              {
+                platform: "Android",
+                icon: "🤖",
+                requirements: [
+                  "Android 8.0 (Oreo) or later",
+                  "~45 MB storage",
+                  "Internet connection required",
+                ],
+                storeLink: BRAND.playStoreUrl,
+                storeName: "Google Play",
+                appId: "app.rork.porchivo_neighborhood_safety",
+              },
+            ].map((platform) => (
+              <div key={platform.platform} className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="text-2xl">{platform.icon}</span>
+                  <div>
+                    <div className="text-base font-semibold text-slate-200">{platform.platform}</div>
+                    <div className="text-xs text-slate-600 font-mono">{platform.appId}</div>
+                  </div>
+                </div>
+                <ul className="space-y-2 mb-5">
+                  {platform.requirements.map((req) => (
+                    <li key={req} className="flex items-start gap-2 text-sm text-slate-400">
+                      <Smartphone className="w-3.5 h-3.5 text-slate-600 flex-shrink-0 mt-0.5" />
+                      {req}
+                    </li>
+                  ))}
+                </ul>
+                <a
+                  href={platform.storeLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block text-center py-2.5 rounded-lg border border-slate-700 hover:border-slate-500 text-sm font-medium text-slate-300 hover:text-slate-100 transition-colors"
+                >
+                  Download on {platform.storeName}
+                </a>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Deep link section */}
+      <section className="py-20 px-4 sm:px-6 text-center">
+        <div className="max-w-xl mx-auto">
+          <h2 className="text-2xl font-bold text-slate-100 mb-4">
+            Get your first risk score in under 2 minutes
+          </h2>
+          <p className="text-slate-400 text-sm mb-8 leading-relaxed">
+            Download → Create account → Enter your address → Add a tracking number. Your porch risk score is live before the app finishes loading.
+          </p>
+          <AppStoreBadges orientation="row" size="lg" />
         </div>
       </section>
     </PageLayout>
