@@ -3,7 +3,7 @@ import SEOHead from "@/components/SEOHead";
 import BreadcrumbNav from "@/components/BreadcrumbNav";
 import { BRAND } from "@/config/brand";
 
-const EFFECTIVE_DATE = "June 22, 2026";
+const EFFECTIVE_DATE = "August 14, 2026";
 const COMPANY = "WhichWay Web Labs LLC";
 
 function Section({ number, title, children }: { number: string; title: string; children: React.ReactNode }) {
@@ -15,6 +15,10 @@ function Section({ number, title, children }: { number: string; title: string; c
       <div className="text-slate-300 leading-relaxed space-y-3">{children}</div>
     </section>
   );
+}
+
+function SubHeading({ children }: { children: React.ReactNode }) {
+  return <h3 className="text-base font-semibold text-slate-200 mt-4 mb-2">{children}</h3>;
 }
 
 function Bullet({ children }: { children: React.ReactNode }) {
@@ -55,14 +59,14 @@ export default function TermsOfServicePage() {
         {/* Intro */}
         <div className="bg-slate-800/60 border border-slate-700 rounded-xl p-6 mb-10 text-slate-300 leading-relaxed">
           <p>
-            Welcome to <strong className="text-slate-100">Porchivo</strong>, a mobile application developed
-            and operated by <strong className="text-slate-100">{COMPANY}</strong> ("Company," "we," "our," or
-            "us"). These Terms of Service ("Terms") govern your access to and use of the Porchivo application
-            ("App"), including all features, content, and services available through it.
+            Welcome to <strong className="text-slate-100">Porchivo</strong>, a community management platform
+            developed and operated by <strong className="text-slate-100">{COMPANY}</strong> ("Company," "we,"
+            "our," or "us"). These Terms of Service ("Terms") govern your access to and use of the Porchivo
+            application ("App"), including all features, content, and services available through it.
           </p>
           <p className="mt-3">
             By creating an account or using Porchivo, you agree to be bound by these Terms and our{" "}
-            <a href="#/privacy" className="text-amber-400 hover:text-amber-300 transition-colors underline">
+            <a href="/privacy" className="text-amber-400 hover:text-amber-300 transition-colors underline">
               Privacy Policy
             </a>
             . If you do not agree, do not download, install, or use the App.
@@ -96,8 +100,9 @@ export default function TermsOfServicePage() {
 
         <Section number="3" title="Description of Service">
           <p>
-            Porchivo is a free, ad-supported neighborhood safety application designed to help communities
-            prevent package theft. The App provides the following features:
+            Porchivo is a community management platform that helps homeowners associations, residents, board
+            members, and property managers communicate, manage payments, handle maintenance requests, and access
+            community documents. The App provides the following features:
           </p>
           <ul className="space-y-1.5 mt-2">
             <Bullet>
@@ -200,28 +205,106 @@ export default function TermsOfServicePage() {
           </p>
         </Section>
 
-        <Section number="8" title="Porch Partner Responsibilities">
-          <p>If you choose the Porch Partner role, you agree to:</p>
+        <Section number="8" title="Porch Partner Program Disclaimer">
+          <SubHeading>a. What the Porch Partner Feature Is</SubHeading>
+          <p>
+            The Porch Partner feature allows a Porchivo resident ("Requesting Resident") to designate a fellow
+            neighbor who is also a Porchivo user ("Porch Partner") to temporarily receive and hold a package on
+            their behalf until the Requesting Resident is available to retrieve it. This feature exists to help
+            residents reduce the risk of package theft, commonly known as porch piracy.
+          </p>
+
+          <SubHeading>b. Porchivo's Role Is Limited to the Platform</SubHeading>
+          <p>
+            Porchivo provides the technology that connects Requesting Residents with their chosen Porch
+            Partners. Porchivo is not a party to the arrangement between a Requesting Resident and their Porch
+            Partner. Porchivo does not:
+          </p>
           <ul className="space-y-1.5 mt-2">
-            <Bullet>Handle all packages entrusted to you with reasonable care.</Bullet>
+            <Bullet>Select, screen, background check, verify, or vet any Porch Partner</Bullet>
+            <Bullet>Supervise, monitor, or control the actions of any Porch Partner</Bullet>
+            <Bullet>Inspect, handle, store, or take custody of any package at any time</Bullet>
+            <Bullet>Guarantee that a Porch Partner will be available, reliable, or responsible</Bullet>
+            <Bullet>Insure or reimburse any user for lost, damaged, opened, stolen, or mishandled packages</Bullet>
+          </ul>
+
+          <SubHeading>c. The Porch Partner Relationship Is Between Neighbors</SubHeading>
+          <p>
+            The arrangement between a Requesting Resident and a Porch Partner is a voluntary, neighbor-to-neighbor
+            agreement. By using the Porch Partner feature, both the Requesting Resident and the Porch Partner
+            agree that:
+          </p>
+          <ul className="space-y-1.5 mt-2">
             <Bullet>
-              Pick up packages promptly after delivery notification and return them to the homeowner within the
-              agreed timeframe.
+              <strong>Porchivo bears no responsibility</strong> for what happens to a package once it is in the
+              possession of, or on the property of, a Porch Partner.
             </Bullet>
-            <Bullet>Not open, tamper with, or damage any package.</Bullet>
             <Bullet>
-              Not share tracking numbers, delivery details, or personal information of homeowners with any
-              third party.
+              <strong>The Porch Partner is not an employee, agent, or contractor of Porchivo</strong> in any
+              capacity. Porch Partners act entirely on their own and on behalf of their neighbor — not on
+              behalf of Porchivo.
+            </Bullet>
+            <Bullet>
+              <strong>Any dispute over a package</strong> — including loss, damage, theft, delay in return, or
+              any other issue — is solely between the Requesting Resident and the Porch Partner, and must be
+              resolved between those parties directly.
+            </Bullet>
+            <Bullet>
+              <strong>Porchivo is not liable</strong> for any loss, damage, or harm arising from the Porch
+              Partner arrangement, including property damage, personal injury, theft, or any other claim.
             </Bullet>
           </ul>
-          <div className="bg-slate-700/50 border border-slate-600 rounded-lg p-4 mt-4">
-            <p className="font-semibold text-slate-200 mb-1">Important Disclaimer</p>
-            <p className="text-slate-400 text-sm">
-              Porchivo is a coordination platform only. {COMPANY} is not responsible for lost, stolen, or
-              damaged packages. All package hand-offs between Homeowners and Porch Partners are voluntary,
-              neighbor-to-neighbor arrangements. Users participate at their own risk.
-            </p>
-          </div>
+
+          <SubHeading>d. Requesting Residents Acknowledge</SubHeading>
+          <p>By requesting a Porch Partner through Porchivo, you acknowledge and agree that:</p>
+          <ul className="space-y-1.5 mt-2">
+            <Bullet>You are choosing your Porch Partner voluntarily and at your own risk</Bullet>
+            <Bullet>
+              You are responsible for communicating clearly with your Porch Partner about pickup timing and
+              instructions
+            </Bullet>
+            <Bullet>
+              Porchivo has not vetted or approved your Porch Partner's suitability to hold your package
+            </Bullet>
+            <Bullet>
+              If your package is lost, damaged, or not returned, your recourse is with your Porch Partner and/or
+              your carrier or supplier — not with Porchivo
+            </Bullet>
+            <Bullet>Porchivo is not responsible for and will not reimburse the value of any package</Bullet>
+          </ul>
+
+          <SubHeading>e. Porch Partners Acknowledge</SubHeading>
+          <p>By agreeing to serve as a Porch Partner through Porchivo, you acknowledge and agree that:</p>
+          <ul className="space-y-1.5 mt-2">
+            <Bullet>You are voluntarily accepting temporary responsibility for another resident's package</Bullet>
+            <Bullet>
+              You will handle the package with reasonable care and return it to the Requesting Resident promptly
+            </Bullet>
+            <Bullet>You will not open, use, damage, or fail to return any package entrusted to you</Bullet>
+            <Bullet>
+              Any failure to return or any damage to a package may expose you to civil liability with the
+              Requesting Resident
+            </Bullet>
+            <Bullet>
+              Porchivo is not responsible for any dispute that arises from your role as a Porch Partner
+            </Bullet>
+          </ul>
+
+          <SubHeading>f. Boards and Property Managers Acknowledge</SubHeading>
+          <p>
+            HOA boards and property managers who enable the Porch Partner feature for their community
+            acknowledge that:
+          </p>
+          <ul className="space-y-1.5 mt-2">
+            <Bullet>Porchivo provides the Porch Partner feature as a platform tool only</Bullet>
+            <Bullet>
+              Enabling this feature does not make the HOA, association, or property management company liable
+              for package arrangements between residents
+            </Bullet>
+            <Bullet>
+              Porchivo is not responsible for any community-level disputes that arise from Porch Partner use
+            </Bullet>
+          </ul>
         </Section>
 
         <Section number="9" title="No Vetting, Background Checks, or Endorsement">
@@ -314,12 +397,34 @@ export default function TermsOfServicePage() {
           </ul>
         </Section>
 
-        <Section number="12" title="Advertising">
+        <Section number="12" title="No Affiliation With Carriers or Suppliers">
           <p>
-            Porchivo is a free application supported by third-party advertisements. By using the App, you
-            agree to the display of ads within the App. Ad content is provided by third-party networks and
-            does not constitute our endorsement. Your interactions with advertisers are solely between you and
-            the advertiser.
+            Porchivo is a community management platform. We are not a shipping carrier, delivery service,
+            retailer, or product supplier. Porchivo is not affiliated with, endorsed by, or partnered with any
+            carrier or supplier, including but not limited to UPS, FedEx, USPS, Amazon, DHL, OnTrac, or any
+            other delivery or retail company.
+          </p>
+          <p>
+            Any package delivery information entered into or tracked through Porchivo — including expected
+            deliveries, delivery notifications, or delivery status updates — is provided by the user for
+            personal organizational purposes only. Porchivo does not verify, guarantee, or take responsibility
+            for:
+          </p>
+          <ul className="space-y-1.5 mt-2">
+            <Bullet>The accuracy of any delivery information entered by users</Bullet>
+            <Bullet>The timing, condition, or completion of any delivery</Bullet>
+            <Bullet>Any item lost, stolen, damaged, delayed, or misdelivered by a carrier or supplier</Bullet>
+            <Bullet>Any dispute between a user and a carrier or supplier regarding an order or delivery</Bullet>
+          </ul>
+          <div className="bg-amber-900/20 border border-amber-700/30 rounded-lg p-4 mt-4 text-amber-300">
+            <strong>If you have a question, concern, or dispute about a delivery, order, or product, you must
+            contact the carrier or supplier directly.</strong> Porchivo cannot intervene in, escalate, or
+            resolve disputes with third-party carriers or suppliers on your behalf.
+          </div>
+          <p className="mt-3">
+            This disclaimer applies to all Porchivo account holders and users in every role, including but not
+            limited to: Homeowners and residents, HOA board members, Condominium association members,
+            Multi-unit community residents, Property managers, and Porch Partners.
           </p>
         </Section>
 
@@ -338,7 +443,7 @@ export default function TermsOfServicePage() {
         <Section number="14" title="Privacy">
           <p>
             Your use of Porchivo is also governed by our{" "}
-            <a href="#/privacy" className="text-amber-400 hover:text-amber-300 transition-colors underline">
+            <a href="/privacy" className="text-amber-400 hover:text-amber-300 transition-colors underline">
               Privacy Policy
             </a>
             , which describes how we collect, use, share, and protect your information. By using the App, you
@@ -350,9 +455,9 @@ export default function TermsOfServicePage() {
         <Section number="15" title="Third-Party Services">
           <p>
             The App may contain links to or integrations with third-party services, including but not limited
-            to mapping services, carrier tracking APIs, and ad networks. These third-party services are
-            governed by their own terms and privacy policies. {COMPANY} is not responsible for the content,
-            accuracy, or practices of any third-party service.
+            to mapping services and carrier tracking APIs. These third-party services are governed by their own
+            terms and privacy policies. {COMPANY} is not responsible for the content, accuracy, or practices
+            of any third-party service.
           </p>
         </Section>
 
@@ -376,12 +481,20 @@ export default function TermsOfServicePage() {
         <Section number="17" title="Limitation of Liability">
           <div className="bg-slate-700/50 border border-slate-600 rounded-lg p-4 text-sm uppercase tracking-wide leading-relaxed space-y-3">
             <p>
-              TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, {COMPANY.toUpperCase()}, ITS OFFICERS,
-              DIRECTORS, EMPLOYEES, AND AGENTS SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL,
-              CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING BUT NOT LIMITED TO LOSS OF PROFITS, DATA, OR
-              PROPERTY, ARISING OUT OF OR RELATED TO YOUR USE OF THE APP.
+              TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, PORCHIVO SHALL NOT BE LIABLE FOR ANY DIRECT,
+              INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES ARISING OUT OF OR RELATED TO:
             </p>
-            <p>
+            <ul className="space-y-1.5">
+              <Bullet>ANY DELIVERY, NON-DELIVERY, OR CONDITION OF ANY PACKAGE OR ORDER</Bullet>
+              <Bullet>ANY ACTION OR INACTION OF A CARRIER, SUPPLIER, OR PORCH PARTNER</Bullet>
+              <Bullet>ANY LOSS, THEFT, OR DAMAGE TO PROPERTY IN CONNECTION WITH THE PORCH PARTNER FEATURE</Bullet>
+              <Bullet>ANY DISPUTE BETWEEN USERS RELATED TO PACKAGE HANDLING</Bullet>
+            </ul>
+            <p className="mt-3">
+              THIS LIMITATION APPLIES REGARDLESS OF WHETHER PORCHIVO HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH
+              DAMAGES AND REGARDLESS OF THE LEGAL THEORY UNDER WHICH DAMAGES ARE SOUGHT.
+            </p>
+            <p className="mt-3">
               IN NO EVENT SHALL OUR TOTAL LIABILITY TO YOU EXCEED THE AMOUNT YOU PAID US IN THE TWELVE (12)
               MONTHS PRECEDING THE CLAIM, OR $100 USD, WHICHEVER IS GREATER.
             </p>
@@ -390,7 +503,14 @@ export default function TermsOfServicePage() {
 
         <Section number="18" title="Indemnification">
           <p>
-            You agree to defend, indemnify, and hold harmless {COMPANY} and its officers, directors,
+            By using Porchivo's Porch Partner feature — whether as a Requesting Resident or as a Porch Partner —
+            you agree to indemnify, defend, and hold harmless Porchivo, its officers, employees, and agents
+            from and against any claims, damages, losses, liabilities, costs, or expenses (including
+            reasonable attorneys' fees) arising out of or related to your participation in a Porch Partner
+            arrangement.
+          </p>
+          <p className="mt-3">
+            You also agree to defend, indemnify, and hold harmless {COMPANY} and its officers, directors,
             employees, and agents from and against any claims, liabilities, damages, losses, and expenses
             (including reasonable attorneys' fees) arising out of or related to:
           </p>
@@ -403,7 +523,16 @@ export default function TermsOfServicePage() {
           </ul>
         </Section>
 
-        <Section number="19" title="Account Termination">
+        <Section number="19" title="No Guarantee Against Porch Piracy">
+          <p>
+            The Porch Partner feature is designed to help reduce the risk of package theft. However, Porchivo
+            does not guarantee that use of the Porch Partner feature will prevent theft, loss, or damage to any
+            package. Porchivo makes no warranty, express or implied, regarding the effectiveness of this
+            feature in preventing porch piracy or any other form of package loss.
+          </p>
+        </Section>
+
+        <Section number="20" title="Account Termination">
           <p>
             We may suspend or terminate your account at any time, with or without notice, for conduct that we
             believe violates these Terms, is harmful to other users, or is otherwise objectionable.
@@ -416,7 +545,7 @@ export default function TermsOfServicePage() {
           </p>
         </Section>
 
-        <Section number="20" title="Governing Law and Dispute Resolution">
+        <Section number="21" title="Governing Law and Dispute Resolution">
           <p>
             These Terms shall be governed by and construed in accordance with the laws of the State of
             Indiana, United States, without regard to its conflict of law provisions.
@@ -430,7 +559,7 @@ export default function TermsOfServicePage() {
           </p>
         </Section>
 
-        <Section number="21" title="Changes to These Terms">
+        <Section number="22" title="Changes to These Terms">
           <p>
             We reserve the right to modify these Terms at any time. When we make material changes, we will
             notify you through the App or by email and update the "Effective Date" at the top of this
@@ -439,14 +568,14 @@ export default function TermsOfServicePage() {
           </p>
         </Section>
 
-        <Section number="22" title="Severability">
+        <Section number="23" title="Severability">
           <p>
             If any provision of these Terms is held to be invalid or unenforceable, the remaining provisions
             shall remain in full force and effect.
           </p>
         </Section>
 
-        <Section number="23" title="Entire Agreement">
+        <Section number="24" title="Entire Agreement">
           <p>
             These Terms, together with the Privacy Policy and any other legal documents referenced herein,
             constitute the entire agreement between you and {COMPANY} regarding your use of Porchivo and
@@ -454,7 +583,49 @@ export default function TermsOfServicePage() {
           </p>
         </Section>
 
-        <Section number="24" title="Contact Us">
+        <Section number="25" title="Where to Direct Concerns">
+          <p>
+            If you are unsure who to contact about a specific issue, use the following guide:
+          </p>
+          <div className="overflow-x-auto mt-3">
+            <table className="w-full text-sm border border-slate-700 rounded-lg overflow-hidden">
+              <thead>
+                <tr className="bg-slate-800 text-slate-200">
+                  <th className="text-left px-4 py-2 font-semibold">Issue</th>
+                  <th className="text-left px-4 py-2 font-semibold">Who to Contact</th>
+                </tr>
+              </thead>
+              <tbody className="text-slate-300">
+                <tr className="border-t border-slate-700">
+                  <td className="px-4 py-2">Package not delivered / delayed</td>
+                  <td className="px-4 py-2">Your carrier (UPS, FedEx, USPS, etc.)</td>
+                </tr>
+                <tr className="border-t border-slate-700">
+                  <td className="px-4 py-2">Wrong item / damaged item from order</td>
+                  <td className="px-4 py-2">Your supplier or retailer</td>
+                </tr>
+                <tr className="border-t border-slate-700">
+                  <td className="px-4 py-2">Porch Partner dispute</td>
+                  <td className="px-4 py-2">Resolve directly with your neighbor</td>
+                </tr>
+                <tr className="border-t border-slate-700">
+                  <td className="px-4 py-2">HOA community concerns</td>
+                  <td className="px-4 py-2">Your HOA board or property manager</td>
+                </tr>
+                <tr className="border-t border-slate-700">
+                  <td className="px-4 py-2">Porchivo platform issues</td>
+                  <td className="px-4 py-2">
+                    <a href="mailto:support@porchivo.com" className="text-amber-400 hover:text-amber-300 transition-colors">
+                      support@porchivo.com
+                    </a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </Section>
+
+        <Section number="26" title="Contact Us">
           <p>If you have questions or concerns about these Terms, please contact us at:</p>
           <div className="bg-slate-800 border border-slate-700 rounded-xl p-5 mt-4 space-y-3">
             <div className="flex items-center gap-3">
@@ -474,8 +645,19 @@ export default function TermsOfServicePage() {
           </div>
         </Section>
 
+        {/* Legal notice */}
+        <div className="mt-8 bg-slate-800/40 border border-slate-700/50 rounded-lg p-4">
+          <p className="text-xs text-slate-500 leading-relaxed">
+            <strong>Legal Notice:</strong> This disclaimer was drafted to reflect Porchivo's known platform
+            structure and features as of the effective date. Given that the Porch Partner feature involves one
+            user taking physical custody of another user's property, it is strongly recommended that a licensed
+            attorney review these Terms before the Porch Partner feature is made publicly available. Liability
+            exposure in user-to-user physical property arrangements can vary significantly by state.
+          </p>
+        </div>
+
         {/* Footer */}
-        <div className="mt-12 pt-8 border-t border-slate-700 text-center text-sm text-slate-500">
+        <div className="mt-8 pt-8 border-t border-slate-700 text-center text-sm text-slate-500">
           © 2026 {COMPANY}. All rights reserved. · Porchivo is a product of {COMPANY}.
         </div>
       </div>

@@ -4,7 +4,7 @@ import { Stack, useRouter } from 'expo-router';
 import { ChevronLeft, FileText, Mail, MapPin, Building2 } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 
-const EFFECTIVE_DATE = 'June 22, 2026';
+const EFFECTIVE_DATE = 'August 14, 2026';
 
 interface SectionProps {
   number: string;
@@ -28,6 +28,10 @@ function Bullet({ text }: { text: string }) {
       <Text style={styles.bulletText}>{text}</Text>
     </View>
   );
+}
+
+function SubHeading({ text }: { text: string }) {
+  return <Text style={styles.subHeading}>{text}</Text>;
 }
 
 export default function TermsOfServiceScreen() {
@@ -60,7 +64,7 @@ export default function TermsOfServiceScreen() {
 
         <View style={styles.introCard}>
           <Text style={styles.introText}>
-            Welcome to <Text style={styles.bold}>Porchivo</Text>, a mobile application developed and operated by{' '}
+            Welcome to <Text style={styles.bold}>Porchivo</Text>, a community management platform developed and operated by{' '}
             <Text style={styles.bold}>WhichWay Web Labs LLC</Text> ("Company," "we," "our," or "us"). These Terms of Service ("Terms") govern your access to and use of the Porchivo application ("App"), including all features, content, and services available through it.
           </Text>
           <Text style={[styles.introText, { marginTop: 10 }]}>
@@ -88,7 +92,7 @@ export default function TermsOfServiceScreen() {
 
         <Section number="3" title="Description of Service">
           <Text style={styles.body}>
-            Porchivo is a free, ad-supported neighborhood safety application designed to help communities prevent package theft. The App provides the following features:
+            Porchivo is a community management platform that helps homeowners associations, residents, board members, and property managers communicate, manage payments, handle maintenance requests, and access community documents. The App provides the following features:
           </Text>
           <Bullet text="Track Every Delivery: Log incoming packages, add tracking numbers, and receive real-time status updates." />
           <Bullet text="Neighborhood Watch: View anonymized delivery activity on your block in near real-time." />
@@ -97,15 +101,6 @@ export default function TermsOfServiceScreen() {
           <Text style={[styles.body, { marginTop: 8 }]}>
             Users may select one of two roles upon sign-in: Homeowner or Porch Partner. Roles may be changed at any time within the App.
           </Text>
-          <View style={styles.legalNote}>
-            <Text style={styles.legalNoteTitle}>Tracking Only — Carrier Responsibility</Text>
-            <Text style={styles.legalNoteText}>
-              Porchivo provides package tracking by relaying status information from third-party shipping carriers (such as Amazon, UPS, USPS, and FedEx). We are not a shipping carrier, and we have no affiliation, partnership, or relationship with any carrier. We do not pick up, transport, hold, deliver, or take possession of your packages.
-            </Text>
-            <Text style={[styles.legalNoteText, { marginTop: 8 }]}>
-              If your package is missing, lost, delayed, misdelivered, stolen, or damaged, you must contact the carrier handling that shipment directly. The carrier holds your package and is solely responsible for delivery, investigations, refunds, and claims. WhichWay Web Labs LLC is not responsible or liable for any package, its condition, or its delivery, and cannot resolve carrier issues on your behalf.
-            </Text>
-          </View>
         </Section>
 
         <Section number="4" title="License to Use">
@@ -159,18 +154,54 @@ export default function TermsOfServiceScreen() {
           </Text>
         </Section>
 
-        <Section number="8" title="Porch Partner Responsibilities">
-          <Text style={styles.body}>If you choose the Porch Partner role, you agree to:</Text>
-          <Bullet text="Handle all packages entrusted to you with reasonable care." />
-          <Bullet text="Pick up packages promptly after delivery notification and return them to the homeowner within the agreed timeframe." />
-          <Bullet text="Not open, tamper with, or damage any package." />
-          <Bullet text="Not share tracking numbers, delivery details, or personal information of homeowners with any third party." />
-          <View style={styles.legalNote}>
-            <Text style={styles.legalNoteTitle}>Important Disclaimer</Text>
-            <Text style={styles.legalNoteText}>
-              Porchivo is a coordination platform only. WhichWay Web Labs LLC is not responsible for lost, stolen, or damaged packages. All package hand-offs between Homeowners and Porch Partners are voluntary, neighbor-to-neighbor arrangements. Users participate at their own risk.
-            </Text>
-          </View>
+        <Section number="8" title="Porch Partner Program Disclaimer">
+          <SubHeading text="a. What the Porch Partner Feature Is" />
+          <Text style={styles.body}>
+            The Porch Partner feature allows a Porchivo resident ("Requesting Resident") to designate a fellow neighbor who is also a Porchivo user ("Porch Partner") to temporarily receive and hold a package on their behalf until the Requesting Resident is available to retrieve it. This feature exists to help residents reduce the risk of package theft, commonly known as porch piracy.
+          </Text>
+
+          <SubHeading text="b. Porchivo's Role Is Limited to the Platform" />
+          <Text style={styles.body}>
+            Porchivo provides the technology that connects Requesting Residents with their chosen Porch Partners. Porchivo is not a party to the arrangement between a Requesting Resident and their Porch Partner. Porchivo does not:
+          </Text>
+          <Bullet text="Select, screen, background check, verify, or vet any Porch Partner" />
+          <Bullet text="Supervise, monitor, or control the actions of any Porch Partner" />
+          <Bullet text="Inspect, handle, store, or take custody of any package at any time" />
+          <Bullet text="Guarantee that a Porch Partner will be available, reliable, or responsible" />
+          <Bullet text="Insure or reimburse any user for lost, damaged, opened, stolen, or mishandled packages" />
+
+          <SubHeading text="c. The Porch Partner Relationship Is Between Neighbors" />
+          <Text style={styles.body}>
+            The arrangement between a Requesting Resident and a Porch Partner is a voluntary, neighbor-to-neighbor agreement. By using the Porch Partner feature, both the Requesting Resident and the Porch Partner agree that:
+          </Text>
+          <Bullet text="Porchivo bears no responsibility for what happens to a package once it is in the possession of, or on the property of, a Porch Partner." />
+          <Bullet text="The Porch Partner is not an employee, agent, or contractor of Porchivo in any capacity. Porch Partners act entirely on their own and on behalf of their neighbor — not on behalf of Porchivo." />
+          <Bullet text="Any dispute over a package — including loss, damage, theft, delay in return, or any other issue — is solely between the Requesting Resident and the Porch Partner, and must be resolved between those parties directly." />
+          <Bullet text="Porchivo is not liable for any loss, damage, or harm arising from the Porch Partner arrangement, including property damage, personal injury, theft, or any other claim." />
+
+          <SubHeading text="d. Requesting Residents Acknowledge" />
+          <Text style={styles.body}>By requesting a Porch Partner through Porchivo, you acknowledge and agree that:</Text>
+          <Bullet text="You are choosing your Porch Partner voluntarily and at your own risk" />
+          <Bullet text="You are responsible for communicating clearly with your Porch Partner about pickup timing and instructions" />
+          <Bullet text="Porchivo has not vetted or approved your Porch Partner's suitability to hold your package" />
+          <Bullet text="If your package is lost, damaged, or not returned, your recourse is with your Porch Partner and/or your carrier or supplier — not with Porchivo" />
+          <Bullet text="Porchivo is not responsible for and will not reimburse the value of any package" />
+
+          <SubHeading text="e. Porch Partners Acknowledge" />
+          <Text style={styles.body}>By agreeing to serve as a Porch Partner through Porchivo, you acknowledge and agree that:</Text>
+          <Bullet text="You are voluntarily accepting temporary responsibility for another resident's package" />
+          <Bullet text="You will handle the package with reasonable care and return it to the Requesting Resident promptly" />
+          <Bullet text="You will not open, use, damage, or fail to return any package entrusted to you" />
+          <Bullet text="Any failure to return or any damage to a package may expose you to civil liability with the Requesting Resident" />
+          <Bullet text="Porchivo is not responsible for any dispute that arises from your role as a Porch Partner" />
+
+          <SubHeading text="f. Boards and Property Managers Acknowledge" />
+          <Text style={styles.body}>
+            HOA boards and property managers who enable the Porch Partner feature for their community acknowledge that:
+          </Text>
+          <Bullet text="Porchivo provides the Porch Partner feature as a platform tool only" />
+          <Bullet text="Enabling this feature does not make the HOA, association, or property management company liable for package arrangements between residents" />
+          <Bullet text="Porchivo is not responsible for any community-level disputes that arise from Porch Partner use" />
         </Section>
 
         <Section number="9" title="No Vetting, Background Checks, or Endorsement">
@@ -215,9 +246,24 @@ export default function TermsOfServiceScreen() {
           <Bullet text="Submitting knowingly false reports may result in account termination and may violate applicable laws." />
         </Section>
 
-        <Section number="12" title="Advertising">
+        <Section number="12" title="No Affiliation With Carriers or Suppliers">
           <Text style={styles.body}>
-            Porchivo is a free application supported by third-party advertisements. By using the App, you agree to the display of ads within the App. Ad content is provided by third-party networks and does not constitute our endorsement. Your interactions with advertisers are solely between you and the advertiser.
+            Porchivo is a community management platform. We are not a shipping carrier, delivery service, retailer, or product supplier. Porchivo is not affiliated with, endorsed by, or partnered with any carrier or supplier, including but not limited to UPS, FedEx, USPS, Amazon, DHL, OnTrac, or any other delivery or retail company.
+          </Text>
+          <Text style={styles.body}>
+            Any package delivery information entered into or tracked through Porchivo — including expected deliveries, delivery notifications, or delivery status updates — is provided by the user for personal organizational purposes only. Porchivo does not verify, guarantee, or take responsibility for:
+          </Text>
+          <Bullet text="The accuracy of any delivery information entered by users" />
+          <Bullet text="The timing, condition, or completion of any delivery" />
+          <Bullet text="Any item lost, stolen, damaged, delayed, or misdelivered by a carrier or supplier" />
+          <Bullet text="Any dispute between a user and a carrier or supplier regarding an order or delivery" />
+          <View style={styles.highlightBox}>
+            <Text style={styles.highlightText}>
+              If you have a question, concern, or dispute about a delivery, order, or product, you must contact the carrier or supplier directly. Porchivo cannot intervene in, escalate, or resolve disputes with third-party carriers or suppliers on your behalf.
+            </Text>
+          </View>
+          <Text style={[styles.body, { marginTop: 8 }]}>
+            This disclaimer applies to all Porchivo account holders and users in every role, including but not limited to: Homeowners and residents, HOA board members, Condominium association members, Multi-unit community residents, Property managers, and Porch Partners.
           </Text>
         </Section>
 
@@ -238,7 +284,7 @@ export default function TermsOfServiceScreen() {
 
         <Section number="15" title="Third-Party Services">
           <Text style={styles.body}>
-            The App may contain links to or integrations with third-party services, including but not limited to mapping services, carrier tracking APIs, and ad networks. These third-party services are governed by their own terms and privacy policies. WhichWay Web Labs LLC is not responsible for the content, accuracy, or practices of any third-party service.
+            The App may contain links to or integrations with third-party services, including but not limited to mapping services and carrier tracking APIs. These third-party services are governed by their own terms and privacy policies. WhichWay Web Labs LLC is not responsible for the content, accuracy, or practices of any third-party service.
           </Text>
         </Section>
 
@@ -258,7 +304,14 @@ export default function TermsOfServiceScreen() {
         <Section number="17" title="Limitation of Liability">
           <View style={styles.legalNote}>
             <Text style={styles.legalNoteText}>
-              TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, WHICHWAY WEB LABS LLC, ITS OFFICERS, DIRECTORS, EMPLOYEES, AND AGENTS SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING BUT NOT LIMITED TO LOSS OF PROFITS, DATA, OR PROPERTY, ARISING OUT OF OR RELATED TO YOUR USE OF THE APP.
+              TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, PORCHIVO SHALL NOT BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES ARISING OUT OF OR RELATED TO:
+            </Text>
+            <Bullet text="ANY DELIVERY, NON-DELIVERY, OR CONDITION OF ANY PACKAGE OR ORDER" />
+            <Bullet text="ANY ACTION OR INACTION OF A CARRIER, SUPPLIER, OR PORCH PARTNER" />
+            <Bullet text="ANY LOSS, THEFT, OR DAMAGE TO PROPERTY IN CONNECTION WITH THE PORCH PARTNER FEATURE" />
+            <Bullet text="ANY DISPUTE BETWEEN USERS RELATED TO PACKAGE HANDLING" />
+            <Text style={[styles.legalNoteText, { marginTop: 8 }]}>
+              THIS LIMITATION APPLIES REGARDLESS OF WHETHER PORCHIVO HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES AND REGARDLESS OF THE LEGAL THEORY UNDER WHICH DAMAGES ARE SOUGHT.
             </Text>
             <Text style={[styles.legalNoteText, { marginTop: 8 }]}>
               IN NO EVENT SHALL OUR TOTAL LIABILITY TO YOU EXCEED THE AMOUNT YOU PAID US IN THE TWELVE (12) MONTHS PRECEDING THE CLAIM, OR $100 USD, WHICHEVER IS GREATER.
@@ -268,7 +321,10 @@ export default function TermsOfServiceScreen() {
 
         <Section number="18" title="Indemnification">
           <Text style={styles.body}>
-            You agree to defend, indemnify, and hold harmless WhichWay Web Labs LLC and its officers, directors, employees, and agents from and against any claims, liabilities, damages, losses, and expenses (including reasonable attorneys' fees) arising out of or related to:
+            By using Porchivo's Porch Partner feature — whether as a Requesting Resident or as a Porch Partner — you agree to indemnify, defend, and hold harmless Porchivo, its officers, employees, and agents from and against any claims, damages, losses, liabilities, costs, or expenses (including reasonable attorneys' fees) arising out of or related to your participation in a Porch Partner arrangement.
+          </Text>
+          <Text style={[styles.body, { marginTop: 8 }]}>
+            You also agree to defend, indemnify, and hold harmless WhichWay Web Labs LLC and its officers, directors, employees, and agents from and against any claims, liabilities, damages, losses, and expenses (including reasonable attorneys' fees) arising out of or related to:
           </Text>
           <Bullet text="Your use or misuse of the App." />
           <Bullet text="Your User Content." />
@@ -277,16 +333,22 @@ export default function TermsOfServiceScreen() {
           <Bullet text="Any package loss, damage, or theft occurring during a Porch Partner arrangement." />
         </Section>
 
-        <Section number="19" title="Account Termination">
+        <Section number="19" title="No Guarantee Against Porch Piracy">
+          <Text style={styles.body}>
+            The Porch Partner feature is designed to help reduce the risk of package theft. However, Porchivo does not guarantee that use of the Porch Partner feature will prevent theft, loss, or damage to any package. Porchivo makes no warranty, express or implied, regarding the effectiveness of this feature in preventing porch piracy or any other form of package loss.
+          </Text>
+        </Section>
+
+        <Section number="20" title="Account Termination">
           <Text style={styles.body}>
             We may suspend or terminate your account at any time, with or without notice, for conduct that we believe violates these Terms, is harmful to other users, or is otherwise objectionable.
           </Text>
           <Text style={[styles.body, { marginTop: 8 }]}>
-            You may delete your account at any time through Settings → Account → Delete Account. Upon deletion, your personal data will be handled in accordance with our Privacy Policy.
+            You may delete your account at any time through Settings → Account → Delete Account. Your account will be deactivated immediately and your personal data will be permanently deleted within 30 days. You may contact us within the 30-day window to restore your account. Upon deletion, your personal data will be handled in accordance with our Privacy Policy.
           </Text>
         </Section>
 
-        <Section number="20" title="Governing Law and Dispute Resolution">
+        <Section number="21" title="Governing Law and Dispute Resolution">
           <Text style={styles.body}>
             These Terms shall be governed by and construed in accordance with the laws of the State of Indiana, United States, without regard to its conflict of law provisions.
           </Text>
@@ -295,25 +357,53 @@ export default function TermsOfServiceScreen() {
           </Text>
         </Section>
 
-        <Section number="21" title="Changes to These Terms">
+        <Section number="22" title="Changes to These Terms">
           <Text style={styles.body}>
             We reserve the right to modify these Terms at any time. When we make material changes, we will notify you through the App or by email and update the "Effective Date" at the top of this document. Your continued use of Porchivo after changes are posted constitutes acceptance of the revised Terms. If you do not agree with the changes, you must stop using the App and delete your account.
           </Text>
         </Section>
 
-        <Section number="22" title="Severability">
+        <Section number="23" title="Severability">
           <Text style={styles.body}>
             If any provision of these Terms is held to be invalid or unenforceable, the remaining provisions shall remain in full force and effect.
           </Text>
         </Section>
 
-        <Section number="23" title="Entire Agreement">
+        <Section number="24" title="Entire Agreement">
           <Text style={styles.body}>
             These Terms, together with the Privacy Policy and any other legal documents referenced herein, constitute the entire agreement between you and WhichWay Web Labs LLC regarding your use of Porchivo and supersede all prior agreements and understandings.
           </Text>
         </Section>
 
-        <Section number="24" title="Contact Us">
+        <Section number="25" title="Where to Direct Concerns">
+          <Text style={styles.body}>
+            If you are unsure who to contact about a specific issue, use the following guide:
+          </Text>
+          <View style={styles.providerTable}>
+            <View style={styles.providerRow}>
+              <Text style={styles.providerName}>Package not delivered / delayed</Text>
+              <Text style={styles.providerPurpose}>Your carrier (UPS, FedEx, USPS, etc.)</Text>
+            </View>
+            <View style={styles.providerRow}>
+              <Text style={styles.providerName}>Wrong item / damaged item</Text>
+              <Text style={styles.providerPurpose}>Your supplier or retailer</Text>
+            </View>
+            <View style={styles.providerRow}>
+              <Text style={styles.providerName}>Porch Partner dispute</Text>
+              <Text style={styles.providerPurpose}>Resolve directly with your neighbor</Text>
+            </View>
+            <View style={styles.providerRow}>
+              <Text style={styles.providerName}>HOA community concerns</Text>
+              <Text style={styles.providerPurpose}>Your HOA board or property manager</Text>
+            </View>
+            <View style={styles.providerRow}>
+              <Text style={styles.providerName}>Porchivo platform issues</Text>
+              <Text style={styles.providerPurpose}>support@porchivo.com</Text>
+            </View>
+          </View>
+        </Section>
+
+        <Section number="26" title="Contact Us">
           <Text style={styles.body}>
             If you have questions or concerns about these Terms, please contact us at:
           </Text>
@@ -332,6 +422,12 @@ export default function TermsOfServiceScreen() {
             </View>
           </View>
         </Section>
+
+        <View style={styles.legalNotice}>
+          <Text style={styles.legalNoteText}>
+            <Text style={styles.bold}>Legal Notice:</Text> This disclaimer was drafted to reflect Porchivo's known platform structure and features as of the effective date. Given that the Porch Partner feature involves one user taking physical custody of another user's property, it is strongly recommended that a licensed attorney review these Terms before the Porch Partner feature is made publicly available. Liability exposure in user-to-user physical property arrangements can vary significantly by state.
+          </Text>
+        </View>
 
         <View style={styles.footer}>
           <Text style={styles.footerText}>© 2026 WhichWay Web Labs LLC. All rights reserved.</Text>
@@ -407,6 +503,13 @@ const styles = StyleSheet.create({
     color: Colors.primary,
     marginBottom: 12,
   },
+  subHeading: {
+    fontSize: 15,
+    fontWeight: '600' as const,
+    color: Colors.slate,
+    marginTop: 12,
+    marginBottom: 8,
+  },
   body: {
     fontSize: 14,
     color: Colors.slateLight,
@@ -449,16 +552,44 @@ const styles = StyleSheet.create({
     padding: 14,
     marginTop: 4,
   },
-  legalNoteTitle: {
-    fontSize: 14,
-    fontWeight: '600' as const,
-    color: Colors.slate,
-    marginBottom: 4,
-  },
   legalNoteText: {
     fontSize: 13,
     color: Colors.slateLight,
     lineHeight: 20,
+  },
+  providerTable: {
+    marginTop: 10,
+    backgroundColor: Colors.background,
+    borderRadius: 10,
+    overflow: 'hidden',
+  },
+  providerRow: {
+    flexDirection: 'row',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border || '#E5E7EB',
+    gap: 10,
+  },
+  providerName: {
+    flexShrink: 0,
+    fontSize: 13,
+    fontWeight: '600' as const,
+    color: Colors.slate,
+    width: 150,
+  },
+  providerPurpose: {
+    flex: 1,
+    fontSize: 13,
+    color: Colors.slateLight,
+    lineHeight: 19,
+  },
+  legalNotice: {
+    marginHorizontal: 16,
+    marginTop: 16,
+    backgroundColor: Colors.white,
+    borderRadius: 10,
+    padding: 14,
   },
   contactCard: {
     backgroundColor: Colors.background,
