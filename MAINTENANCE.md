@@ -225,11 +225,11 @@ follow the existing pattern for adding a new carrier regex.
 | Terms of Service | `app/terms-of-service.tsx` |
 
 <!-- AUTO-GENERATED:SCREEN-INDEX:START -->
-> _Auto-generated from `expo/app/` on **2026-08-14 22:35 UTC** by `scripts/refresh-docs.mjs`. The
+> _Auto-generated from `expo/app/` on **2026-08-14 22:46 UTC** by `scripts/refresh-docs.mjs`. The
 > curated table above stays hand-written; this list is the complete, always-current
 > set of route files so nothing silently goes missing as the app grows._
 
-**101 route screens detected:**
+**98 route screens detected:**
 
 | Route | File |
 |-------|------|
@@ -283,7 +283,6 @@ follow the existing pattern for adding a new carrier regex.
 | `network-map.tsx` | `app/network-map.tsx` |
 | `notifications-permission.tsx` | `app/notifications-permission.tsx` |
 | `notifications.tsx` | `app/notifications.tsx` |
-| `onboarding-paywall.tsx` | `app/onboarding-paywall.tsx` |
 | `onboarding-setup.tsx` | `app/onboarding-setup.tsx` |
 | `onboarding.tsx` | `app/onboarding.tsx` |
 | `org-signup.tsx` | `app/org-signup.tsx` |
@@ -323,7 +322,6 @@ follow the existing pattern for adding a new carrier regex.
 | `tracking-theft-shield.tsx` | `app/tracking-theft-shield.tsx` |
 | `tracking-welcome.tsx` | `app/tracking-welcome.tsx` |
 | `trust-engine.tsx` | `app/trust-engine.tsx` |
-| `upgrade.tsx` | `app/upgrade.tsx` |
 | `ups-amazon/access-points.tsx` | `app/ups-amazon/access-points.tsx` |
 | `ups-amazon/code-ready.tsx` | `app/ups-amazon/code-ready.tsx` |
 | `ups-amazon/hub.tsx` | `app/ups-amazon/hub.tsx` |
@@ -333,7 +331,6 @@ follow the existing pattern for adding a new carrier regex.
 | `value-preview.tsx` | `app/value-preview.tsx` |
 | `welcome-features.tsx` | `app/welcome-features.tsx` |
 | `welcome.tsx` | `app/welcome.tsx` |
-| `win-back.tsx` | `app/win-back.tsx` |
 <!-- AUTO-GENERATED:SCREEN-INDEX:END -->
 
 **Shared components** (used across multiple screens):
