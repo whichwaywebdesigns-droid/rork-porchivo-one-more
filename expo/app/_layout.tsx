@@ -276,6 +276,7 @@ function RootLayoutNav() {
       <Stack.Screen name="+not-found" />
       {/* Settings — headerShown:false because PorchLightHero replaces the header */}
       <Stack.Screen name="settings" options={{ headerShown: false, presentation: 'modal' }} />
+      <Stack.Screen name="delete-account" options={{ title: "Delete Account", presentation: "modal" }} />
     </Stack>
     {/* In-app rating prompt — shown at session milestones after onboarding */}
     <ReviewPromptSheet

@@ -252,11 +252,45 @@ export const COPY = {
     helpButton: 'Help & Support',
     signOutButton: 'Sign out',
     deleteAccountButton: 'Delete account',
-    // Delete account confirmation
-    deleteAccountConfirmTitle: 'Delete your account?',
-    deleteAccountConfirmBody: 'This will permanently delete all your data, packages, and alerts. This cannot be undone.',
-    deleteAccountConfirmCta: 'Yes, delete my account',
-    deleteAccountCancelCta: 'Cancel',
+  },
+
+
+  // ── DELETE ACCOUNT ────────────────────────────────────────────────────────
+
+  deleteAccount: {
+    menuLabel: 'Delete account',
+    menuSubtext: 'Remove your Porchivo account and personal data',
+    infoTitle: 'Before You Delete Your Account',
+    infoBody: 'Deleting your account will permanently remove your Porchivo profile and personal information from our system.',
+    infoWhatHappensHeader: "Here's what happens when you delete:",
+    infoWhatHappens: [
+      'Your name, email, and contact details will be removed',
+      'Your notification preferences and app settings will be cleared',
+      'Your tracked packages, delivery history, and safety scores will no longer be accessible',
+      'Your Porch Partner assignments and volunteer status will be removed',
+    ],
+    infoWhatStaysHeader: 'What stays on record:',
+    infoWhatStays: 'Payment transactions may be retained by Apple or Google for legally required recordkeeping purposes.',
+    infoImportant: 'Deleting your Porchivo account does not cancel any active subscriptions. Cancel your Premium subscription through the App Store or Google Play before deleting.',
+    infoContinueCta: 'Continue to Delete',
+    infoBackCta: 'Never Mind, Take Me Back',
+    confirmTitle: 'Are You Sure?',
+    confirmBody: 'This action is permanent and cannot be undone.',
+    confirmDetail: (email: string) => `Your Porchivo account for ${email} will be deleted within 30 days. During that time, your account will be deactivated and you will not be able to log in. After 30 days, your personal data will be permanently removed from Porchivo's systems.`,
+    confirmRestore: 'If you change your mind, contact us at support@porchivo.com within 30 days and we can restore your account.',
+    confirmInputLabel: 'Type DELETE to confirm',
+    confirmInputPlaceholder: 'DELETE',
+    confirmCta: 'Yes, Delete My Account',
+    confirmCancelCta: 'Cancel',
+    successTitle: 'Account Deletion Requested',
+    successBody: (email: string) => `We've received your request. Your Porchivo account has been deactivated. Your personal data will be permanently deleted within 30 days. You'll receive a confirmation email at ${email} once the deletion is complete.`,
+    successRestore: 'Need to change your mind? Email us at support@porchivo.com within 30 days.',
+    successDoneCta: 'Done',
+    errorTitle: 'Something Went Wrong',
+    errorBody: "We weren't able to process your deletion request right now. Please try again in a few minutes.",
+    errorSupport: "If this keeps happening, contact us directly at support@porchivo.com and we'll take care of it for you.",
+    errorRetryCta: 'Try Again',
+    errorCancelCta: 'Cancel',
   },
 
 

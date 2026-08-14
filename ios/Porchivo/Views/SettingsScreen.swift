@@ -110,11 +110,12 @@ struct SettingsScreen: View {
         .confirmationDialog("Delete your account?", isPresented: $showDeleteConfirm) {
             Button("Delete account", role: .destructive) {
                 // delete_account_cascade RPC exists on backend; for safety we sign out locally.
+                // TODO: wire actual account deletion via SupabaseService.deleteAccount() once backend RPC is exposed to Swift.
                 Task { await appState.signOut() }
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("This permanently removes your profile, shipments, and tracked packages. This cannot be undone.")
+            Text("Deleting your account will permanently remove your Porchivo profile and personal information from our system. This action is permanent and cannot be undone.")
         }
     }
 

@@ -4,6 +4,7 @@ import { Stack } from 'expo-router';
 import { Image } from 'expo-image';
 import { MapPin, Mail, Phone, Home, Shield, Bell, UserPlus, ChevronRight, FileText, Pencil, Send, LogOut, HelpCircle, CheckCircle, Trash2, Crown, Music, ShieldCheck, Gift, RefreshCw, CreditCard, Moon, Sun, BadgeDollarSign, ArrowRight, Handshake, BookOpen, Star } from 'lucide-react-native';
 import { sendSMSInvite } from '@/utils/invite';
+import { COPY } from '@/config/copy';
 import { useColors, getColors } from '@/constants/colors';
 import { useTheme } from '@/store/ThemeContext';
 import { useApp } from '@/store/AppContext';
@@ -599,54 +600,15 @@ export default function ProfileScreen() {
       <View style={styles.section}>
         <TouchableOpacity
           style={styles.deleteAccountButton}
-          onPress={() => {
-            Alert.alert(
-              'Delete Account',
-              'Are you sure you want to permanently delete your account? This will remove all your data including packages, notifications, and profile information. This action cannot be undone.',
-              [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                  text: 'Delete Account',
-                  style: 'destructive',
-                  onPress: () => {
-                    Alert.alert(
-                      'Final Confirmation',
-                      'This is permanent. Delete your account and all associated data?',
-                      [
-                        { text: 'Keep Account', style: 'cancel' },
-                        {
-                          text: 'Delete Forever',
-                          style: 'destructive',
-                          onPress: async () => {
-                            try {
-                              await deleteAccount();
-                              log('[Profile] Account deleted successfully');
-                              router.replace('/welcome' as any);
-                            } catch (err) {
-                              log('[Profile] Account deletion error:', err);
-                              Alert.alert(
-                                'Error',
-                                'Could not delete your account. Please try again or contact support.',
-                                [
-                                  { text: 'OK', style: 'cancel' },
-                                  { text: 'Contact Support', onPress: () => void Linking.openURL('mailto:support@porchivo.com?subject=Porchivo%20Account%20Deletion%20Help') },
-                                ]
-                              );
-                            }
-                          },
-                        },
-                      ]
-                    );
-                  },
-                },
-              ]
-            );
-          }}
+          onPress={() => router.push('/delete-account' as any)}
           activeOpacity={0.8}
           testID="delete-account-btn"
         >
           <Trash2 size={18} color={Colors.danger} />
-          <Text style={styles.deleteAccountText}>Delete Account</Text>
+          <View style={styles.deleteAccountTextWrapper}>
+            <Text style={styles.deleteAccountText}>{COPY.deleteAccount.menuLabel}</Text>
+            <Text style={styles.deleteAccountSubtext}>{COPY.deleteAccount.menuSubtext}</Text>
+          </View>
         </TouchableOpacity>
         <Text style={styles.versionText}>Porchivo v1.0.6</Text>
       </View>
@@ -987,15 +949,24 @@ const styles = StyleSheet.create({
   deleteAccountButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     gap: 8,
     backgroundColor: 'transparent',
     paddingVertical: 12,
   },
+  deleteAccountTextWrapper: {
+    flex: 1,
+    gap: 2,
+  },
   deleteAccountText: {
     fontSize: 13,
-    fontWeight: '500' as const,
+    fontWeight: '600' as const,
     color: '#E5484D',
+  },
+  deleteAccountSubtext: {
+    fontSize: 11,
+    color: Colors.slateLighter,
+    lineHeight: 14,
   },
   // Annual upsell nudge (shown to premium/monthly users)
   annualUpsellCard: {
