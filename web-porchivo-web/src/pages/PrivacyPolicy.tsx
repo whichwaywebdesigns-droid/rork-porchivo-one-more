@@ -3,9 +3,9 @@ import SEOHead from "@/components/SEOHead";
 import BreadcrumbNav from "@/components/BreadcrumbNav";
 import { BRAND } from "@/config/brand";
 
-const EFFECTIVE_DATE = "February 19, 2026";
-const LAST_UPDATED = "February 19, 2026";
-const POLICY_VERSION = "1.0";
+const EFFECTIVE_DATE = "August 14, 2026";
+const LAST_UPDATED = "August 14, 2026";
+const POLICY_VERSION = "2.0";
 const COMPANY = "WhichWay Web Labs LLC";
 
 interface RevisionEntry {
@@ -15,6 +15,12 @@ interface RevisionEntry {
 }
 
 const REVISION_HISTORY: RevisionEntry[] = [
+  {
+    version: "2.0",
+    date: "August 14, 2026",
+    summary:
+      "Comprehensive rewrite reflecting Porchivo's evolution into a community management platform. Adds HOA payments, maintenance requests, amenity reservations, document library, and community governance data practices. Removes all advertising-related sections. Adds service provider table.",
+  },
   {
     version: "1.0",
     date: "February 19, 2026",
@@ -80,274 +86,366 @@ export default function PrivacyPolicyPage() {
         {/* Intro */}
         <div className="bg-emerald-900/20 border border-emerald-700/30 rounded-xl p-6 mb-10 text-slate-300 leading-relaxed">
           <p>
-            <strong className="text-slate-100">Porchivo</strong> is a product of{" "}
-            <strong className="text-slate-100">{COMPANY}</strong> ("we," "our," or "us"). This Privacy Policy
-            explains how we collect, use, share, and protect your information when you use the Porchivo mobile
-            application ("App"). By downloading, installing, or using Porchivo, you agree to the practices
-            described in this policy.
+            <strong className="text-slate-100">Porchivo</strong> ("Porchivo," "we," "us," or "our") is a community
+            management platform that helps homeowners associations, residents, board members, and property managers
+            communicate, manage payments, handle maintenance requests, and access community documents — all in one
+            place.
+          </p>
+          <p className="mt-3">
+            This Privacy Policy explains what information we collect, how we use it, who we share it with, and what
+            rights you have over your data.
+          </p>
+          <p className="mt-3">
+            If you have questions, contact us at:{" "}
+            <a href="mailto:support@porchivo.com" className="text-emerald-400 hover:text-emerald-300 transition-colors">
+              <strong>support@porchivo.com</strong>
+            </a>
           </p>
         </div>
 
-        <Section number="1" title="Information We Collect">
-          <SubHeading>a. Information You Provide</SubHeading>
-          <ul className="space-y-1.5">
-            <Bullet>
-              <strong>Account information:</strong> Name, email address, phone number, and password when you
-              create a Porchivo account.
-            </Bullet>
-            <Bullet>
-              <strong>Profile information:</strong> Role selection (Homeowner or Porch Partner), display name,
-              avatar, home address or address nickname (e.g., "Home," "Work"), shipping address, billing
-              address, and delivery preferences.
-            </Bullet>
-            <Bullet>
-              <strong>Package information:</strong> Carrier name, tracking numbers, expected delivery windows,
-              item descriptions, and notes shared with your selected Porch Partner.
-            </Bullet>
-            <Bullet>
-              <strong>Delivery details:</strong> Safe-drop preferences, access codes, gate codes, and delivery
-              instructions — shared only with your assigned Porch Partner.
-            </Bullet>
-            <Bullet>
-              <strong>Alerts and reports:</strong> Category, description text (up to 250 characters), and
-              optional photos you submit through the Instant Alerts feature.
-            </Bullet>
-            <Bullet>
-              <strong>Porch Partner data:</strong> Legal name, government ID details (processed by Stripe
-              Identity), payout bank information (processed by Stripe Connect), partner bio, accepted package
-              sizes, and service availability.
-            </Bullet>
-            <Bullet>
-              <strong>Communications:</strong> Messages, feedback, or support requests you send to us or to
-              other users through the App.
-            </Bullet>
-          </ul>
-
-          <SubHeading>b. Information Collected Automatically</SubHeading>
-          <ul className="space-y-1.5">
-            <Bullet>
-              <strong>Location data:</strong> With your explicit consent, we collect your approximate location
-              (street and block level) to group you with nearby neighbors, display neighborhood activity, and
-              power the Instant Alerts feature. We use foreground location permission only and do not track
-              your precise location in the background.
-            </Bullet>
-            <Bullet>
-              <strong>Device information:</strong> Device model, operating system version, unique device
-              identifiers, and mobile network information.
-            </Bullet>
-            <Bullet>
-              <strong>Usage data:</strong> App activity, session duration, feature interactions, crash logs,
-              and performance diagnostics.
-            </Bullet>
-            <Bullet>
-              <strong>Push notification tokens:</strong> Device tokens used to deliver notifications about
-              package status changes, Porch Partner updates, and neighborhood alerts.
-            </Bullet>
-          </ul>
-
-          <SubHeading>c. Information from Third Parties</SubHeading>
-          <ul className="space-y-1.5">
-            <Bullet>
-              <strong>Contacts:</strong> If you choose to invite neighbors, we access your device contacts
-              solely to facilitate SMS or email invitations. We do not store your full contact list on our
-              servers.
-            </Bullet>
-            <Bullet>
-              <strong>Stripe:</strong> For Porch Partners, Stripe processes identity verification and payout
-              account information. We receive verification status and payout account IDs only — not raw ID
-              documents or full financial account details.
-            </Bullet>
-            <Bullet>
-              <strong>Advertising partners:</strong> Our ad-serving partners may collect device identifiers
-              and general usage data to display relevant ads (see Section 4).
-            </Bullet>
-          </ul>
-        </Section>
-
-        <Section number="2" title="How We Use Your Information">
-          <p>We use the information we collect to:</p>
+        <Section number="1" title="Who This Policy Applies To">
+          <p>This policy applies to:</p>
           <ul className="space-y-1.5 mt-2">
             <Bullet>
-              Operate, maintain, and improve the Porchivo App and its features (Track Every Delivery,
-              Neighborhood Watch, Porch Partners, Instant Alerts).
-            </Bullet>
-            <Bullet>Create and manage your account and authenticate your identity.</Bullet>
-            <Bullet>
-              Facilitate package tracking, Porch Partner coordination, and delivery driver assignments.
+              <strong>Residents and homeowners</strong> who use the Porchivo mobile app to interact with their
+              community
             </Bullet>
             <Bullet>
-              Share shipping address and delivery instructions with your assigned Porch Partner so they can
-              retrieve your packages accurately.
+              <strong>HOA board members</strong> who use Porchivo to manage their community
             </Bullet>
             <Bullet>
-              Process Porch Partner payouts via Stripe Connect, and generate 1099 tax documents for partners
-              earning above IRS thresholds.
+              <strong>Property managers</strong> who use Porchivo to manage one or more communities
             </Bullet>
             <Bullet>
-              Send push notifications for package status updates, pickup confirmations, and suspicious
-              activity alerts on your block.
+              <strong>Visitors</strong> to our website at porchivo.com
             </Bullet>
-            <Bullet>
-              Display anonymized neighborhood delivery activity (e.g., "Package delivered on your block")
-              without revealing exact addresses or personal details to other users.
-            </Bullet>
-            <Bullet>Display advertisements within the App to support our free service.</Bullet>
-            <Bullet>Respond to your inquiries, feedback, and support requests.</Bullet>
-            <Bullet>
-              Detect, prevent, and address fraud, abuse, security issues, and technical problems.
-            </Bullet>
-            <Bullet>Comply with applicable legal obligations.</Bullet>
           </ul>
+          <p className="mt-3">
+            If your HOA or property management company has a separate agreement with Porchivo, that agreement may
+            include additional privacy terms that apply to your community's data.
+          </p>
         </Section>
 
-        <Section number="3" title="How We Share Your Information">
+        <Section number="2" title="What Information We Collect">
+          <SubHeading>a. Information You Give Us Directly</SubHeading>
+          <ul className="space-y-1.5">
+            <Bullet>
+              <strong>Account information</strong> — your name, email address, phone number, and password when you
+              create an account
+            </Bullet>
+            <Bullet>
+              <strong>Profile information</strong> — your unit or property address, role in the community (resident,
+              board member, property manager), and community membership
+            </Bullet>
+            <Bullet>
+              <strong>Maintenance requests</strong> — descriptions, photos, and details you submit when reporting a
+              maintenance issue
+            </Bullet>
+            <Bullet>
+              <strong>Messages and announcements</strong> — content you post, publish, or send through the platform
+            </Bullet>
+            <Bullet>
+              <strong>Documents</strong> — files you upload or access through your community's document library
+            </Bullet>
+            <Bullet>
+              <strong>Amenity reservations</strong> — dates, times, and details of reservations you make for community
+              spaces
+            </Bullet>
+            <Bullet>
+              <strong>Support communications</strong> — messages you send us when you contact support
+            </Bullet>
+          </ul>
+
+          <SubHeading>b. Payment Information</SubHeading>
+          <p>
+            When you pay HOA dues, assessments, or fees through Porchivo, payment processing is handled by our
+            third-party payment processor. We do not store your full credit card number, debit card number, or bank
+            account details on our servers. We receive and store:
+          </p>
+          <ul className="space-y-1.5 mt-2">
+            <Bullet>Payment confirmation and transaction ID</Bullet>
+            <Bullet>Payment amount, date, and type</Bullet>
+            <Bullet>Last four digits of the card used (for your records)</Bullet>
+            <Bullet>Payment status and history</Bullet>
+          </ul>
+          <p className="mt-3">
+            Your full payment credentials are handled exclusively by our payment processor under their own security
+            and privacy standards.
+          </p>
+
+          <SubHeading>c. Information Collected Automatically</SubHeading>
+          <p>When you use the Porchivo app or website, we automatically collect:</p>
+          <ul className="space-y-1.5 mt-2">
+            <Bullet>
+              <strong>Device information</strong> — device type, operating system, and app version
+            </Bullet>
+            <Bullet>
+              <strong>Usage data</strong> — features you use, screens you visit, and actions you take in the app
+            </Bullet>
+            <Bullet>
+              <strong>Push notification tokens</strong> — a device identifier used to deliver notifications to your
+              device
+            </Bullet>
+            <Bullet>
+              <strong>Crash and error reports</strong> — technical information about app errors to help us fix
+              problems
+            </Bullet>
+            <Bullet>
+              <strong>IP address and general location</strong> — used for security and fraud prevention, not for
+              precise location tracking
+            </Bullet>
+          </ul>
+          <p className="mt-3">
+            We do not collect your precise GPS location unless you explicitly grant location permission for a specific
+            feature that requires it.
+          </p>
+
+          <SubHeading>d. Information From Your Community</SubHeading>
+          <p>
+            Because Porchivo is a community platform, some information about you may be provided by your HOA or
+            property management company when they set up your community account. This may include your name, unit
+            address, email, and community role. This information is used solely to give you access to your community's
+            Porchivo account.
+          </p>
+        </Section>
+
+        <Section number="3" title="How We Use Your Information">
+          <p>We use your information to:</p>
+          <ul className="space-y-1.5 mt-2">
+            <Bullet>Create and manage your Porchivo account</Bullet>
+            <Bullet>Give you access to your community's announcements, documents, and tools</Bullet>
+            <Bullet>Process HOA dues payments and maintain payment records</Bullet>
+            <Bullet>Send and receive maintenance requests within your community</Bullet>
+            <Bullet>
+              Deliver push notifications about community updates, payment reminders, and maintenance status
+            </Bullet>
+            <Bullet>Respond to your support requests</Bullet>
+            <Bullet>Improve the Porchivo platform and fix bugs</Bullet>
+            <Bullet>Detect, prevent, and address fraud, abuse, and security incidents</Bullet>
+            <Bullet>Meet our legal obligations</Bullet>
+          </ul>
+          <div className="bg-emerald-900/20 border border-emerald-700/30 rounded-lg p-4 mt-4 font-semibold text-emerald-300">
+            We do not use your information to serve you ads. Porchivo does not sell your personal information to
+            anyone.
+          </div>
+        </Section>
+
+        <Section number="4" title="Push Notifications">
+          <p>
+            Porchivo sends push notifications to keep you informed about your community. Notifications may include:
+          </p>
+          <ul className="space-y-1.5 mt-2">
+            <Bullet>Community announcements and alerts</Bullet>
+            <Bullet>Payment reminders and confirmations</Bullet>
+            <Bullet>Maintenance request status updates</Bullet>
+            <Bullet>Meeting and event reminders</Bullet>
+          </ul>
+          <p className="mt-3">
+            <strong className="text-slate-100">You are in control.</strong> You can turn off push notifications at any
+            time through your device settings or within the Porchivo app. Turning off notifications does not affect
+            your ability to use the app.
+          </p>
+          <p className="mt-2">
+            We do not include sensitive information — such as payment amounts, delinquency status, or personal
+            details — in the notification text itself. Sensitive details are only visible inside the app after you log
+            in.
+          </p>
+        </Section>
+
+        <Section number="5" title="How We Share Your Information">
           <div className="bg-emerald-900/20 border border-emerald-700/30 rounded-lg p-4 font-semibold text-emerald-300">
-            We do not sell your personal information.
+            We do not sell your personal information. We share your information only in these circumstances:
           </div>
-          <p>We may share your data in the following limited circumstances:</p>
-          <ul className="space-y-1.5 mt-2">
-            <Bullet>
-              <strong>With your Porch Partner:</strong> When you select a Porch Partner for a package, we
-              share relevant delivery details (carrier, tracking number, delivery window, shipping address,
-              delivery instructions, and access code) with that specific partner only.
-            </Bullet>
-            <Bullet>
-              <strong>With neighbors on your block:</strong> Instant Alerts you submit are shared in
-              anonymized form (approximate location, category, description) with opted-in neighbors. Your name
-              and exact address are never displayed.
-            </Bullet>
-            <Bullet>
-              <strong>With Stripe:</strong> Identity verification data and payout account information for
-              Porch Partners is processed by Stripe. We share only what is required for identity
-              verification and payout processing.
-            </Bullet>
-            <Bullet>
-              <strong>Service providers:</strong> We work with trusted third-party providers for cloud
-              hosting, analytics, crash reporting, and push notification delivery. These providers process
-              data on our behalf and are contractually required to protect your information.
-            </Bullet>
-            <Bullet>
-              <strong>Advertising partners:</strong> We use third-party ad networks to serve ads. These
-              partners may collect device identifiers and general usage data in accordance with their own
-              privacy policies. We do not share your name, address, tracking numbers, or package details with
-              advertisers.
-            </Bullet>
-            <Bullet>
-              <strong>Legal requirements:</strong> We may disclose your information if required by law,
-              regulation, legal process, or enforceable governmental request, or to protect the rights,
-              safety, or property of {COMPANY}, our users, or the public.
-            </Bullet>
-          </ul>
+
+          <SubHeading>a. With Your Community</SubHeading>
+          <p>
+            Information you submit — such as maintenance requests, document uploads, and announcements — is shared
+            with authorized members of your HOA board or property management company as part of the platform's
+            function. This is necessary for the service to work.
+          </p>
+
+          <SubHeading>b. With Service Providers</SubHeading>
+          <p>
+            We use trusted third-party companies to help us operate Porchivo. These providers only process your data
+            on our behalf and under our instructions:
+          </p>
+          <div className="overflow-x-auto mt-3">
+            <table className="w-full text-sm border border-slate-700 rounded-lg overflow-hidden">
+              <thead>
+                <tr className="bg-slate-800 text-slate-200">
+                  <th className="text-left px-4 py-2 font-semibold">Provider</th>
+                  <th className="text-left px-4 py-2 font-semibold">Purpose</th>
+                </tr>
+              </thead>
+              <tbody className="text-slate-300">
+                <tr className="border-t border-slate-700">
+                  <td className="px-4 py-2 font-medium text-slate-100">Supabase</td>
+                  <td className="px-4 py-2">Database and authentication infrastructure</td>
+                </tr>
+                <tr className="border-t border-slate-700">
+                  <td className="px-4 py-2 font-medium text-slate-100">Resend</td>
+                  <td className="px-4 py-2">Transactional email delivery (account confirmations, deletion notices)</td>
+                </tr>
+                <tr className="border-t border-slate-700">
+                  <td className="px-4 py-2 font-medium text-slate-100">Payment processor (e.g., Stripe)</td>
+                  <td className="px-4 py-2">Secure payment processing for HOA dues and fees</td>
+                </tr>
+                <tr className="border-t border-slate-700">
+                  <td className="px-4 py-2 font-medium text-slate-100">Push notification service</td>
+                  <td className="px-4 py-2">Delivery of app notifications to your device</td>
+                </tr>
+                <tr className="border-t border-slate-700">
+                  <td className="px-4 py-2 font-medium text-slate-100">Crash reporting service</td>
+                  <td className="px-4 py-2">App error detection and stability monitoring</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <SubHeading>c. For Legal Reasons</SubHeading>
+          <p>
+            We may disclose your information if required by law, court order, or government authority, or if we
+            believe disclosure is necessary to protect the safety of any person or to prevent fraud or illegal
+            activity.
+          </p>
+
+          <SubHeading>d. Business Transfers</SubHeading>
+          <p>
+            If Porchivo is acquired, merged with, or sold to another company, your information may be transferred as
+            part of that transaction. We will notify you before your information becomes subject to a different
+            privacy policy.
+          </p>
         </Section>
 
-        <Section number="4" title="Advertising">
+        <Section number="6" title="Data Retention">
           <p>
-            Porchivo is a free, ad-supported application. Third-party ad networks may use cookies, device
-            identifiers, and similar technologies to serve relevant advertisements. You can limit personalized
-            advertising through your device settings:
+            We keep your personal information for as long as your account is active or as long as needed to provide
+            the service.
           </p>
-          <ul className="space-y-1.5 mt-2">
-            <Bullet>iOS: Settings → Privacy &amp; Security → Tracking</Bullet>
-            <Bullet>Android: Settings → Privacy → Ads</Bullet>
-          </ul>
+          <div className="bg-blue-900/20 border border-blue-700/30 rounded-lg p-4 mt-3">
+            <p className="text-slate-300 text-sm">
+              <strong className="text-blue-300">HOA payment and transaction records</strong> may be retained beyond
+              account deletion as required by your homeowners association's legal and financial recordkeeping
+              obligations. This data belongs to the community's records, not your personal profile.
+            </p>
+          </div>
+          <p className="mt-3">
+            When you request account deletion, your personal data is permanently removed within{" "}
+            <strong className="text-slate-100">30 days</strong>. See "Your Rights and Choices" below for details.
+          </p>
         </Section>
 
-        <Section number="5" title="Your Rights and Choices">
-          <p>
-            Depending on your location, you may have the following rights regarding your personal data:
-          </p>
-          <ul className="space-y-1.5 mt-2">
-            <Bullet>
-              <strong>Access:</strong> Request a copy of the personal data we hold about you.
-            </Bullet>
-            <Bullet>
-              <strong>Correction:</strong> Request that we correct inaccurate or incomplete data.
-            </Bullet>
-            <Bullet>
-              <strong>Deletion:</strong> Request that we delete your account and associated personal data.
-              You can initiate account deletion from Settings → Account → Delete Account within the App.
-            </Bullet>
-            <Bullet>
-              <strong>Opt-out of notifications:</strong> You can manage or disable push notifications at any
-              time through your device settings or the in-app notification preferences screen.
-            </Bullet>
-            <Bullet>
-              <strong>Opt-out of location:</strong> You can revoke location permissions at any time through
-              your device settings. Some features (Neighborhood Watch, Instant Alerts) will have reduced
-              functionality without location access.
-            </Bullet>
-            <Bullet>
-              <strong>Opt-out of data sharing for ads:</strong> See Section 4 above.
-            </Bullet>
-          </ul>
+        <Section number="7" title="Your Rights and Choices">
+          <SubHeading>a. Access and Correction</SubHeading>
+          <p>You can view and update your account information at any time from your profile settings in the app.</p>
 
-          <div className="bg-blue-900/20 border border-blue-700/30 rounded-lg p-4 mt-4">
-            <p className="font-semibold text-blue-300 mb-1">For California residents (CCPA/CPRA)</p>
+          <SubHeading>b. Account Deletion</SubHeading>
+          <p>
+            You can request permanent deletion of your Porchivo account from{" "}
+            <strong className="text-slate-100">Settings → Account → Delete Account</strong>. Your account will be
+            deactivated immediately and permanently deleted within 30 days. You may cancel this request within 30 days
+            by contacting{" "}
+            <a href="mailto:support@porchivo.com" className="text-emerald-400 hover:text-emerald-300 transition-colors">
+              support@porchivo.com
+            </a>
+            .
+          </p>
+          <p className="mt-2 text-sm text-slate-400">
+            Note: Account deletion removes your personal profile data. It does not erase HOA financial records that
+            your association is legally required to retain.
+          </p>
+
+          <SubHeading>c. Push Notifications</SubHeading>
+          <p>
+            You can disable push notifications through your device settings or inside the Porchivo app at any time.
+          </p>
+
+          <SubHeading>d. Photo and Camera Access</SubHeading>
+          <p>
+            Porchivo requests camera or photo library access only when you choose to attach a photo to a maintenance
+            request. You can revoke this permission at any time through your device settings.
+          </p>
+
+          <SubHeading>e. California Residents (CCPA)</SubHeading>
+          <div className="bg-blue-900/20 border border-blue-700/30 rounded-lg p-4 mt-2">
             <p className="text-slate-400 text-sm">
-              You have the right to know what personal information we collect, request deletion, and opt out
-              of the sale of personal information. We do not sell personal information. To exercise your
-              rights, contact us at the address below.
+              If you are a California resident, you have the right to:
+            </p>
+            <ul className="space-y-1.5 mt-2">
+              <Bullet>Know what personal information we collect and how we use it</Bullet>
+              <Bullet>Request deletion of your personal information</Bullet>
+              <Bullet>Opt out of the sale of your personal information (we do not sell personal information)</Bullet>
+              <Bullet>Not be discriminated against for exercising your privacy rights</Bullet>
+            </ul>
+            <p className="text-slate-400 text-sm mt-2">
+              To make a request, contact us at{" "}
+              <a href="mailto:support@porchivo.com" className="text-blue-300 hover:text-blue-200 transition-colors">
+                support@porchivo.com
+              </a>
+              .
             </p>
           </div>
 
-          <div className="bg-slate-800/60 border border-slate-700 rounded-lg p-4 mt-4">
-            <p className="font-semibold text-slate-200 mb-1">For EU/EEA residents (GDPR)</p>
-            <p className="text-slate-400 text-sm">
-              You have additional rights including data portability and the right to lodge a complaint with
-              your local data protection authority.
-            </p>
-          </div>
-        </Section>
-
-        <Section number="6" title="Data Retention and Deletion">
+          <SubHeading>f. Virginia, Colorado, and Other U.S. State Privacy Laws</SubHeading>
           <p>
-            We retain your personal data for as long as your account is active or as needed to provide you
-            with our services. Package tracking data is retained for 90 days after delivery completion, then
-            automatically deleted. Instant Alert reports are retained for 30 days, then archived in
-            anonymized form.
-          </p>
-          <p>
-            When you delete your account, your account is deactivated immediately and we will delete or
-            anonymize your personal data within 30 days, except where retention is required by law.
-            You may contact us within the 30-day window to restore your account.
-          </p>
-        </Section>
-
-        <Section number="7" title="Data Security">
-          <p>
-            We implement industry-standard security measures to protect your personal information, including
-            encryption of data in transit (TLS/SSL), secure cloud storage, and access controls. Sensitive
-            fields such as access codes and delivery instructions are shared only with verified, assigned
-            Porch Partners and never stored in plain-readable form accessible to third parties.
-          </p>
-          <p>
-            However, no method of electronic transmission or storage is 100% secure. We cannot guarantee
-            absolute security but are committed to protecting your data to the best of our ability.
+            Residents of states with comprehensive privacy laws (including Virginia, Colorado, Connecticut, Utah, and
+            others) have similar rights to access, correct, delete, and opt out of certain uses of personal data.
+            Contact us at{" "}
+            <a href="mailto:support@porchivo.com" className="text-emerald-400 hover:text-emerald-300 transition-colors">
+              support@porchivo.com
+            </a>{" "}
+            to make a request.
           </p>
         </Section>
 
         <Section number="8" title="Children's Privacy">
           <p>
-            Porchivo is not intended for use by children under the age of 13. We do not knowingly collect
-            personal information from children under 13. If we discover that a child under 13 has provided
-            us with personal information, we will promptly delete it. If you believe a child has provided us
-            with personal data, please contact us immediately.
+            Porchivo is not directed to children under the age of 13. We do not knowingly collect personal
+            information from children under 13. If you believe a child under 13 has provided us with personal
+            information, please contact us at{" "}
+            <a href="mailto:support@porchivo.com" className="text-emerald-400 hover:text-emerald-300 transition-colors">
+              support@porchivo.com
+            </a>{" "}
+            and we will delete it.
           </p>
         </Section>
 
-        <Section number="9" title="Changes to This Privacy Policy">
+        <Section number="9" title="Security">
           <p>
-            We may update this Privacy Policy from time to time. When we make material changes, we will
-            notify you through the App or by email and update the "Effective Date" at the top of this policy.
-            Your continued use of Porchivo after changes are posted constitutes your acceptance of the
-            updated policy.
+            We take reasonable technical and organizational measures to protect your information from unauthorized
+            access, disclosure, or loss. This includes encrypted data transmission (HTTPS/TLS), secure authentication,
+            and role-based access controls so that only authorized community members can see community-specific data.
+          </p>
+          <p>
+            No system is completely secure. If you believe your account has been compromised, contact us immediately
+            at{" "}
+            <a href="mailto:support@porchivo.com" className="text-emerald-400 hover:text-emerald-300 transition-colors">
+              support@porchivo.com
+            </a>
+            .
           </p>
         </Section>
 
-        <Section number="10" title="Revision History">
+        <Section number="10" title="Third-Party Links">
           <p>
-            We maintain a versioned record of material changes to this policy so you can verify which
-            practices were in effect on a given date.
+            The Porchivo app or your community's documents may contain links to external websites or resources. We are
+            not responsible for the privacy practices of those third parties. Review their privacy policies before
+            providing them with any information.
+          </p>
+        </Section>
+
+        <Section number="11" title="Changes to This Privacy Policy">
+          <p>
+            We may update this Privacy Policy from time to time. When we make material changes, we will notify you
+            through the app or by email before the changes take effect. Your continued use of Porchivo after the
+            effective date of any update means you accept the revised policy.
+          </p>
+        </Section>
+
+        <Section number="12" title="Revision History">
+          <p>
+            We maintain a versioned record of material changes to this policy so you can verify which practices were
+            in effect on a given date.
           </p>
           <ul className="space-y-3 mt-3">
             {REVISION_HISTORY.map((entry) => (
@@ -365,15 +463,14 @@ export default function PrivacyPolicyPage() {
           </ul>
         </Section>
 
-        <Section number="11" title="Contact Us">
+        <Section number="13" title="Contact Us">
           <p>
-            If you have questions, concerns, or requests regarding this Privacy Policy or your personal data,
-            please contact us at:
+            If you have questions, concerns, or requests related to this Privacy Policy, contact us at:
           </p>
           <div className="bg-slate-800 border border-slate-700 rounded-xl p-5 mt-4 space-y-3">
             <div className="flex items-center gap-3">
               <span className="text-emerald-400">🏢</span>
-              <span className="text-slate-200 font-semibold">{COMPANY}</span>
+              <span className="text-slate-200 font-semibold">Porchivo Support</span>
             </div>
             <div className="flex items-center gap-3">
               <span className="text-emerald-400">✉️</span>
@@ -382,14 +479,24 @@ export default function PrivacyPolicyPage() {
               </a>
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-emerald-400">📍</span>
-              <span className="text-slate-300">Indianapolis, Indiana, United States</span>
+              <span className="text-emerald-400">🌐</span>
+              <span className="text-slate-300">porchivo.com</span>
             </div>
           </div>
         </Section>
 
+        {/* Legal notice */}
+        <div className="mt-8 bg-slate-800/40 border border-slate-700/50 rounded-lg p-4">
+          <p className="text-xs text-slate-500 leading-relaxed">
+            <strong>Legal Notice:</strong> This document was drafted to reflect Porchivo's known data practices as of
+            the effective date. It is strongly recommended that a licensed attorney review this policy before
+            publishing, particularly if Porchivo operates in or serves users in jurisdictions with specific privacy
+            law requirements (including California, the European Union, or Canada).
+          </p>
+        </div>
+
         {/* Footer */}
-        <div className="mt-12 pt-8 border-t border-slate-700 text-center text-sm text-slate-500">
+        <div className="mt-8 pt-8 border-t border-slate-700 text-center text-sm text-slate-500">
           © 2026 {COMPANY}. All rights reserved. · Porchivo is a product of {COMPANY}.
         </div>
       </div>
