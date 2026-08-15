@@ -25,6 +25,7 @@ import {
 import { useColors } from '@/constants/colors';
 import { useOrganization } from '@/store/OrganizationContext';
 import { isEnabled } from '@/lib/featureFlags';
+import { SubscriptionStatusCard } from '@/components/SubscriptionStatusCard';
 
 /**
  * More tab — Community Tier only.
@@ -165,21 +166,9 @@ export default function MoreScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.primary} />
         }
       >
-        {/* Org header */}
+        {/* Org subscription status card */}
         {activeOrg && (
-          <View style={[styles.orgHeader, { backgroundColor: Colors.surface, borderColor: Colors.border }]}>
-            <View style={[styles.orgIcon, { backgroundColor: Colors.primary + '18' }]}>
-              <Building2 size={22} color={Colors.primary} />
-            </View>
-            <View style={styles.orgInfo}>
-              <Text style={[styles.orgName, { color: Colors.slate }]} numberOfLines={1}>
-                {activeOrg.name}
-              </Text>
-              <Text style={[styles.orgType, { color: Colors.slateLighter }]}>
-                {activeOrg.city ? `${activeOrg.city}, ${activeOrg.state}` : 'Community Member'}
-              </Text>
-            </View>
-          </View>
+          <SubscriptionStatusCard />
         )}
 
         {sections.map((section) => (
@@ -216,25 +205,6 @@ export default function MoreScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   content: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 40 },
-  orgHeader: {
-    flexDirection: 'row' as const,
-    alignItems: 'center' as const,
-    gap: 12,
-    padding: 16,
-    borderRadius: 14,
-    borderWidth: 1,
-    marginBottom: 20,
-  },
-  orgIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  orgInfo: { flex: 1 },
-  orgName: { fontSize: 16, fontWeight: '700' as const, marginBottom: 2 },
-  orgType: { fontSize: 13 },
   section: { marginBottom: 20 },
   sectionTitle: {
     fontSize: 13,
