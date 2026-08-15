@@ -193,6 +193,7 @@ export default function AdminFunnelScreen() {
       </View>
 
       <ScrollView
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 32 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={palette.railAccent} />}
         testID="admin-funnel-scroll"

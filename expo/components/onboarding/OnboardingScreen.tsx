@@ -49,7 +49,7 @@ export default function OnboardingScreen({
           { paddingTop: insets.top + 8 },
           contentStyle as ViewStyle,
         ]}
-        showsVerticalScrollIndicator={Platform.OS === 'web'}
+        showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
         {children}

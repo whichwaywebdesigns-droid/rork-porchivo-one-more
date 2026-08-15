@@ -237,6 +237,7 @@ export default function DeleteAccountScreen() {
         }}
       />
       <ScrollView
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
