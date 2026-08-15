@@ -4,6 +4,7 @@ import com.rork.porchivo.BuildConfig
 import com.rork.porchivo.data.dto.AuthSession
 import com.rork.porchivo.data.dto.AuthUser
 import com.rork.porchivo.data.dto.DbNotification
+import com.rork.porchivo.data.dto.DbOrgContextRow
 import com.rork.porchivo.data.dto.DbProfile
 import com.rork.porchivo.data.dto.DbShipment
 import io.ktor.client.HttpClient
@@ -339,6 +340,27 @@ class SupabaseClient(
         }
     } catch (e: Exception) {
         Result.failure(e)
+    }
+
+    /**
+     * Fetch the current user's org memberships via `get_my_org_context` RPC.
+     * Returns active + pending memberships. Empty list if the user belongs
+     * to no org or the RPC is unavailable.
+     */
+    suspend fun fetchOrgContext(): Result<List<DbOrgContextRow>> = try {
+        val response = httpClient.post("$restBase/rpc/get_my_org_context") {
+            authHeaders().forEach { (k, v) -> header(k, v) }
+            contentType(ContentType.Application.Json)
+            setBody(emptyMap<String, Any?>())
+        }
+        if (response.status.isSuccess()) {
+            val list: List<DbOrgContextRow> = response.body()
+            Result.success(list)
+        } else {
+            Result.success(emptyList())
+        }
+    } catch (e: Exception) {
+        Result.success(emptyList())
     }
 
     // ── Edge Functions ───────────────────────────────────────────────────

@@ -130,29 +130,20 @@ struct PackagesScreen: View {
 
     private var freeTierBanner: some View {
         HStack(spacing: 10) {
-            Image(systemName: "crown.fill")
-                .foregroundStyle(c.gold)
+            Image(systemName: "shippingbox.fill")
+                .foregroundStyle(c.accent)
             VStack(alignment: .leading, spacing: 1) {
-                Text("Free plan: 1 package max")
+                Text("Track unlimited packages")
                     .font(.system(size: 13, weight: .bold))
                     .foregroundStyle(c.textPrimary)
-                Text("Upgrade to track unlimited packages.")
+                Text("Join your community for full access.")
                     .font(.system(size: 11))
                     .foregroundStyle(c.textSecondary)
             }
             Spacer()
-            NavigationLink(value: Route.upgrade) {
-                Text("Upgrade")
-                    .font(.system(size: 12, weight: .bold))
-                    .foregroundStyle(c.onAccent)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 7)
-                    .background(c.accent, in: .rect(cornerRadius: Radius.sm))
-            }
-            .buttonStyle(.plain)
         }
         .padding(12)
-        .background(c.goldSoft, in: .rect(cornerRadius: Radius.md))
+        .background(c.accentSoft, in: .rect(cornerRadius: Radius.md))
     }
 
     private func packageCard(_ pkg: TrackedPackage) -> some View {

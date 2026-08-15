@@ -184,11 +184,11 @@ struct DeleteAccountSheet: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
                     .background(
-                        confirmText.trimmed == "DELETE" ? c.danger : c.danger.opacity(0.4),
+                        confirmText.trimmingCharacters(in: .whitespaces) == "DELETE" ? c.danger : c.danger.opacity(0.4),
                         in: .rect(cornerRadius: 12)
                     )
                 }
-                .disabled(confirmText.trimmed != "DELETE" || isLoading)
+                .disabled(confirmText.trimmingCharacters(in: .whitespaces) != "DELETE" || isLoading)
 
                 Button { dismiss() } label: {
                     Text("Cancel")
@@ -330,7 +330,7 @@ struct DeleteAccountSheet: View {
     }
 
     private func requestDeletion() {
-        guard confirmText.trimmed == "DELETE" else { return }
+        guard confirmText.trimmingCharacters(in: .whitespaces) == "DELETE" else { return }
         isLoading = true
         errorMessage = ""
         Task {

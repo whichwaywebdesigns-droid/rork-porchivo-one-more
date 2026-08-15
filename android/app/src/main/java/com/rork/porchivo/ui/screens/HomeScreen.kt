@@ -20,7 +20,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material.icons.outlined.GppMaybe
 import androidx.compose.material.icons.outlined.Notifications
@@ -45,10 +44,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.rork.porchivo.config.AppConfig
 import com.rork.porchivo.data.MockData
 import com.rork.porchivo.data.LoadState
-import com.rork.porchivo.model.SubscriptionTier
 import com.rork.porchivo.ui.components.EmptyState
 import com.rork.porchivo.ui.components.ShipmentCard
 import com.rork.porchivo.ui.navigation.Routes
@@ -69,12 +66,10 @@ fun HomeScreen(
 ) {
     val c = PorchivoTheme.colors
     val user by appViewModel.user.collectAsStateWithLifecycle()
-    val tier by appViewModel.tier.collectAsStateWithLifecycle()
     val myShipments by shipmentsViewModel.myShipments.collectAsStateWithLifecycle()
     val unreadCount by notificationsViewModel.unreadCount.collectAsStateWithLifecycle()
     val shipmentsLoadState by shipmentsViewModel.shipmentsLoadState.collectAsStateWithLifecycle()
 
-    val isFree = tier == SubscriptionTier.FREE
     val riskScore = remember(myShipments) { RiskEngine.score(myShipments) }
     val theftFact = remember {
         val dayOfYear = Calendar.getInstance().get(Calendar.DAY_OF_YEAR)
@@ -103,12 +98,6 @@ fun HomeScreen(
 
         item {
             PartnerUpsellBanner(onClick = { navController.navigate(Routes.CREATE) })
-        }
-
-        if (isFree) {
-            item {
-                WinbackBanner(onClick = { navController.navigate(Routes.UPGRADE) })
-            }
         }
 
         item {
@@ -297,61 +286,6 @@ private fun PartnerUpsellBanner(onClick: () -> Unit, modifier: Modifier = Modifi
                 contentDescription = null,
                 tint = c.success,
                 modifier = Modifier.size(16.dp),
-            )
-        }
-    }
-}
-
-@Composable
-private fun WinbackBanner(onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val c = PorchivoTheme.colors
-    Card(
-        onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = c.accent),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-    ) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(30.dp)
-                    .background(Color(0x33FFFFFF), CircleShape),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.WorkspacePremium,
-                    contentDescription = null,
-                    tint = c.onAccent,
-                    modifier = Modifier.size(14.dp),
-                )
-            }
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "Special offer — ${AppConfig.Pricing.WINBACK_LABEL}",
-                    color = c.onAccent,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-                Text(
-                    text = "Only ${AppConfig.Pricing.WINBACK_DISPLAY} · Upgrade to protect more",
-                    color = Color(0xBFFFFFFF),
-                    fontSize = 11.sp,
-                )
-            }
-            Text(
-                text = "CLAIM",
-                color = c.accent,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Black,
-                letterSpacing = 0.3.sp,
-                modifier = Modifier
-                    .background(c.onAccent, RoundedCornerShape(8.dp))
-                    .padding(horizontal = 12.dp, vertical = 7.dp),
             )
         }
     }

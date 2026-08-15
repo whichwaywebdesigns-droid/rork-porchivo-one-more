@@ -158,7 +158,7 @@ fun AddPackageScreen(
                     )
                     Spacer(modifier = Modifier.height(20.dp))
                     Button(
-                        onClick = { navController.navigate(Routes.UPGRADE) },
+                        onClick = { navController.navigate(Routes.ORG_SIGNUP) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(52.dp),
@@ -166,7 +166,7 @@ fun AddPackageScreen(
                         colors = ButtonDefaults.buttonColors(containerColor = c.accent),
                     ) {
                         Text(
-                            text = "Upgrade to Premium",
+                            text = "Join Your Community",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                         )

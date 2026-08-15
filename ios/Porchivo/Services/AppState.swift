@@ -41,6 +41,14 @@ final class AppState {
     var notificationsLoadState: LoadState<Unit> = .idle
     var directory: [DirectoryEntry] = []
 
+    // Org membership — determines Free vs Community tier
+    var orgMembership: OrgMembership? = nil
+    var orgLoadState: LoadState<Unit> = .idle
+
+    var isOrgMember: Bool { orgMembership?.isActive == true }
+    var isOrgPending: Bool { orgMembership?.isPending == true }
+    var isOrgAdmin: Bool { orgMembership?.isAdmin == true }
+
     // Local data (UserDefaults — mirrors AsyncStorage/SharedPreferences)
     var packages: [TrackedPackage] = []
 
@@ -296,8 +304,6 @@ final class AppState {
     @MainActor
     func signOut() async {
         await supabase.signOut()
-        // Disabling biometrics on sign-out avoids a stale unlock prompt for a
-        // different user's restored session on the next cold start.
         biometricUnlockEnabled = false
         UserDefaults.standard.set(false, forKey: biometricPrefKey)
         biometricEnrollmentDeclined = false
@@ -309,6 +315,8 @@ final class AppState {
         shipments = []
         notifications = []
         directory = []
+        orgMembership = nil
+        orgLoadState = .idle
         shipmentsLoadState = .idle
         notificationsLoadState = .idle
     }
@@ -328,6 +336,7 @@ final class AppState {
         await loadProfile(userId: userId)
         await loadShipments(userId: userId)
         await loadNotifications(userId: userId)
+        await loadOrgContext(userId: userId)
         loadLocalPackages()
     }
 
@@ -642,6 +651,41 @@ final class AppState {
         if case .success(let rows) = result {
             directory = rows.map { Mappers.toDirectoryEntry($0) }
         }
+    }
+
+    // MARK: - Org membership (Free vs Community tier)
+
+    @MainActor
+    func loadOrgContext(userId: String) async {
+        guard isSupabaseConfigured else { return }
+        orgLoadState = .loading
+        let result = await supabase.fetchOrgContext()
+        switch result {
+        case .success(let rows):
+            let active = rows.first(where: { $0.status == "active" })
+                ?? rows.first(where: { $0.status == "pending" })
+            if let row = active {
+                orgMembership = OrgMembership(
+                    orgId: row.orgId,
+                    orgName: row.orgName,
+                    role: row.role,
+                    status: row.status,
+                    inviteCode: nil
+                )
+            } else {
+                orgMembership = nil
+            }
+            orgLoadState = .success(Unit())
+        case .failure:
+            orgMembership = nil
+            orgLoadState = .idle
+        }
+    }
+
+    @MainActor
+    func refreshOrgContext() async {
+        guard let userId = currentUserId else { return }
+        await loadOrgContext(userId: userId)
     }
 
     // MARK: - Theme

@@ -9,7 +9,6 @@ import SwiftUI
 
 enum Route: Hashable {
     case create
-    case upgrade
     case safety
     case alerts
     case addPackage
@@ -19,13 +18,15 @@ enum Route: Hashable {
     case chat(String) // threadId
     case editProfile
     case settings
+    case orgSignup
 
     static func == (lhs: Route, rhs: Route) -> Bool {
         switch (lhs, rhs) {
-        case (.create, .create), (.upgrade, .upgrade), (.safety, .safety),
+        case (.create, .create), (.safety, .safety),
              (.alerts, .alerts), (.addPackage, .addPackage),
              (.residentDirectory, .residentDirectory),
-             (.editProfile, .editProfile), (.settings, .settings):
+             (.editProfile, .editProfile), (.settings, .settings),
+             (.orgSignup, .orgSignup):
             return true
         case (.shipmentDetail(let a), .shipmentDetail(let b)): return a == b
         case (.packageDetail(let a), .packageDetail(let b)): return a == b
@@ -37,7 +38,6 @@ enum Route: Hashable {
     func hash(into hasher: inout Hasher) {
         switch self {
         case .create: hasher.combine(0)
-        case .upgrade: hasher.combine(1)
         case .safety: hasher.combine(2)
         case .alerts: hasher.combine(3)
         case .addPackage: hasher.combine(4)
@@ -47,6 +47,7 @@ enum Route: Hashable {
         case .chat(let id): hasher.combine(8); hasher.combine(id)
         case .editProfile: hasher.combine(9)
         case .settings: hasher.combine(10)
+        case .orgSignup: hasher.combine(11)
         }
     }
 }
@@ -59,7 +60,6 @@ struct RouteView: View {
     var body: some View {
         switch route {
         case .create:        CreateScreen()
-        case .upgrade:       UpgradeScreen()
         case .safety:        SafetyScreen()
         case .alerts:        AlertsScreen()
         case .addPackage:    AddPackageScreen()
@@ -69,6 +69,7 @@ struct RouteView: View {
         case .chat(let threadId):      ChatScreen(threadId: threadId)
         case .editProfile:   EditProfileScreen()
         case .settings:      SettingsScreen()
+        case .orgSignup:     OrgSignupScreen()
         }
     }
 }

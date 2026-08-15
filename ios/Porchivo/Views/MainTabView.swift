@@ -2,9 +2,9 @@
 //  MainTabView.swift
 //  Porchivo
 //
-//  5-tab TabView matching Expo/Android. Each tab hosts a NavigationStack so
-//  detail screens push within the tab. Glass material on the bar (iOS 26) or
-//  ultraThinMaterial fallback.
+//  Hybrid navigation — Free Tier (3 tabs: Deliveries, Porch Partner, Account)
+//  vs Community Tier (4 tabs: Home, Payments, Requests, More).
+//  Tier is determined by `appState.isOrgMember` (active org membership).
 //
 
 import SwiftUI
@@ -15,32 +15,54 @@ struct MainTabView: View {
     @State private var selection = 0
 
     var body: some View {
+        Group {
+            if appState.isOrgMember {
+                communityTabs
+            } else {
+                freeTabs
+            }
+        }
+        .tint(c.accent)
+        .animation(.easeInOut(duration: 0.3), value: appState.isOrgMember)
+    }
+
+    // MARK: - Free Tier (3 tabs)
+
+    private var freeTabs: some View {
+        TabView(selection: $selection) {
+            HomeScreen()
+                .tabItem { Label("Deliveries", systemImage: "shippingbox.fill") }
+                .tag(0)
+
+            PorchPartnerScreen()
+                .tabItem { Label("Porch Partner", systemImage: "hand.raised.fill") }
+                .tag(1)
+
+            ProfileScreen()
+                .tabItem { Label("Account", systemImage: "person.fill") }
+                .tag(2)
+        }
+    }
+
+    // MARK: - Community Tier (4 tabs)
+
+    private var communityTabs: some View {
         TabView(selection: $selection) {
             HomeScreen()
                 .tabItem { Label("Home", systemImage: "house.fill") }
                 .tag(0)
 
-            PackagesScreen()
-                .tabItem { Label("Packages", systemImage: "shippingbox.fill") }
+            PaymentsScreen()
+                .tabItem { Label("Payments", systemImage: "creditcard.fill") }
                 .tag(1)
 
-            CreateScreen()
-                .tabItem { Label("Create", systemImage: "plus.circle.fill") }
+            RequestsScreen()
+                .tabItem { Label("Requests", systemImage: "wrench.and.screwdriver.fill") }
                 .tag(2)
 
-            ActivityScreen()
-                .tabItem {
-                    Label("Activity", systemImage: "clock.fill")
-                        .badge(appState.unreadCount)
-                }
+            MoreScreen()
+                .tabItem { Label("More", systemImage: "ellipsis.circle.fill") }
                 .tag(3)
-
-            ProfileScreen()
-                .tabItem {
-                    Label(appState.tier == .free ? "Go Pro" : "Profile", systemImage: "person.fill")
-                }
-                .tag(4)
         }
-        .tint(c.accent)
     }
 }

@@ -204,6 +204,66 @@ nonisolated struct DbChatMessage: Codable, Sendable {
     }
 }
 
+/// Org context row from `get_my_org_context` RPC — mirrors OrgContextRow in Expo.
+nonisolated struct DbOrgContextRow: Codable, Sendable {
+    let membershipId: String
+    let orgId: String
+    let orgName: String
+    let orgType: String?
+    let orgLogoUrl: String?
+    let orgIsVerified: Bool?
+    let unitId: String?
+    let unitNumber: String?
+    let role: String
+    let status: String
+    let joinedAt: String?
+
+    enum CodingKeys: String, CodingKey {
+        case membershipId = "membership_id"
+        case orgId = "org_id"
+        case orgName = "org_name"
+        case orgType = "org_type"
+        case orgLogoUrl = "org_logo_url"
+        case orgIsVerified = "org_is_verified"
+        case unitId = "unit_id"
+        case unitNumber = "unit_number"
+        case role
+        case status
+        case joinedAt = "joined_at"
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        membershipId = try c.decodeIfPresent(String.self, forKey: .membershipId) ?? ""
+        orgId = try c.decodeIfPresent(String.self, forKey: .orgId) ?? ""
+        orgName = try c.decodeIfPresent(String.self, forKey: .orgName) ?? ""
+        orgType = try c.decodeIfPresent(String.self, forKey: .orgType)
+        orgLogoUrl = try c.decodeIfPresent(String.self, forKey: .orgLogoUrl)
+        orgIsVerified = try c.decodeIfPresent(Bool.self, forKey: .orgIsVerified)
+        unitId = try c.decodeIfPresent(String.self, forKey: .unitId)
+        unitNumber = try c.decodeIfPresent(String.self, forKey: .unitNumber)
+        role = try c.decodeIfPresent(String.self, forKey: .role) ?? "resident"
+        status = try c.decodeIfPresent(String.self, forKey: .status) ?? "pending"
+        joinedAt = try c.decodeIfPresent(String.self, forKey: .joinedAt)
+    }
+}
+
+/// Lightweight org membership for AppState.
+nonisolated struct OrgMembership: Equatable, Sendable {
+    let orgId: String
+    let orgName: String
+    let role: String
+    let status: String
+    let inviteCode: String?
+
+    var isActive: Bool { status == "active" }
+    var isPending: Bool { status == "pending" }
+    var isAdmin: Bool {
+        let adminRoles: Set<String> = ["hoa_admin", "property_manager", "board_member"]
+        return isActive && adminRoles.contains(role)
+    }
+}
+
 // MARK: - SupabaseService
 
 actor SupabaseService {
@@ -470,6 +530,13 @@ actor SupabaseService {
 
     func fetchDirectory(orgMemberId: String) async -> Result<[DbDirectoryRow], Error> {
         await rpc("get_org_directory", body: ["p_org_id": orgMemberId])
+    }
+
+    /// Fetches the current user's org memberships via `get_my_org_context` RPC.
+    /// Returns active + pending memberships. Empty array if the user belongs
+    /// to no org or the RPC is unavailable.
+    func fetchOrgContext() async -> Result<[DbOrgContextRow], Error> {
+        await rpc("get_my_org_context", body: [:])
     }
 
     func fetchChatMessages(threadId: String, limit: Int = 100) async -> Result<[DbChatMessage], Error> {

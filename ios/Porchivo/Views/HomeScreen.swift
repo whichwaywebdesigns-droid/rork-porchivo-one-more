@@ -2,8 +2,9 @@
 //  HomeScreen.swift
 //  Porchivo
 //
-//  Home tab — greeting, daily theft fact, partner upsell, winback banner (free),
-//  today's porch risk, quick links, and my shipments list.
+//  Home tab — greeting, daily theft fact, partner upsell, today's porch risk,
+//  quick links, and my shipments list. No IAP/winback banner — the hybrid
+//  model uses org membership for tier switching, not in-app purchases.
 //
 
 import SwiftUI
@@ -28,11 +29,6 @@ struct HomeScreen: View {
                         partnerUpsell
                     }
                     .buttonStyle(.plain)
-
-                    if appState.tier == .free {
-                        NavigationLink(value: Route.upgrade) { winbackBanner }
-                            .buttonStyle(.plain)
-                    }
 
                     NavigationLink(value: Route.safety) { todayRiskCard }
                         .buttonStyle(.plain)
@@ -136,36 +132,6 @@ struct HomeScreen: View {
         .padding(12)
         .background(c.surface, in: .rect(cornerRadius: Radius.lg))
         .shadow(color: c.textPrimary.opacity(0.06), radius: 8, y: 3)
-    }
-
-    private var winbackBanner: some View {
-        HStack(spacing: 10) {
-            ZStack {
-                Circle().fill(Color.white.opacity(0.2))
-                Image(systemName: "crown.fill")
-                    .font(.system(size: 13, weight: .bold))
-                    .foregroundStyle(c.onAccent)
-            }
-            .frame(width: 30, height: 30)
-            VStack(alignment: .leading, spacing: 1) {
-                Text("Special offer — \(AppConfig.Pricing.winbackLabel)")
-                    .font(.system(size: 13, weight: .bold))
-                    .foregroundStyle(c.onAccent)
-                Text("Only \(AppConfig.Pricing.winbackDisplay) · Upgrade to protect more")
-                    .font(.system(size: 11))
-                    .foregroundStyle(c.onAccent.opacity(0.8))
-            }
-            Spacer()
-            Text("CLAIM")
-                .font(.system(size: 12, weight: .black))
-                .foregroundStyle(c.accent)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 7)
-                .background(c.onAccent, in: .rect(cornerRadius: Radius.sm))
-        }
-        .padding(12)
-        .background(c.accent, in: .rect(cornerRadius: Radius.lg))
-        .shadow(color: c.accent.opacity(0.3), radius: 8, y: 4)
     }
 
     private var todayRiskCard: some View {

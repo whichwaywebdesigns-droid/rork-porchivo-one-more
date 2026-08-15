@@ -2,8 +2,10 @@
 //  ProfileScreen.swift
 //  Porchivo
 //
-//  Profile tab — avatar, tier badge, stats, settings links, edit profile,
-//  sign out.
+//  Account tab — avatar, stats, settings links, edit profile, sign out.
+//  No IAP/subscription section. Free users see a "Join Your Community"
+//  section with invitation code entry and B2B signup link. Community
+//  users see their org membership card.
 //
 
 import SwiftUI
@@ -19,8 +21,12 @@ struct ProfileScreen: View {
             ScrollView {
                 VStack(spacing: 16) {
                     header
-                    tierCard
                     statsRow
+                    if appState.isOrgMember {
+                        orgMembershipCard
+                    } else {
+                        joinCommunityCard
+                    }
                     linksSection
                     signOutButton
                 }
@@ -69,40 +75,6 @@ struct ProfileScreen: View {
         .padding(.vertical, 12)
     }
 
-    private var tierCard: some View {
-        HStack(spacing: 12) {
-            ZStack {
-                Circle().fill(appState.tier == .free ? c.elevated : c.goldSoft)
-                Image(systemName: appState.tier == .free ? "person.fill" : "crown.fill")
-                    .foregroundStyle(appState.tier == .free ? c.textMuted : c.gold)
-            }
-            .frame(width: 40, height: 40)
-            VStack(alignment: .leading, spacing: 1) {
-                Text(appState.tier.label)
-                    .font(.system(size: 15, weight: .bold))
-                    .foregroundStyle(c.textPrimary)
-                Text(appState.tier == .free ? "Unlock unlimited tracking & alerts" : "Thanks for supporting Porchivo")
-                    .font(.system(size: 11))
-                    .foregroundStyle(c.textSecondary)
-            }
-            Spacer()
-            if appState.tier == .free {
-                NavigationLink(value: Route.upgrade) {
-                    Text("Upgrade")
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundStyle(c.onAccent)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 7)
-                        .background(c.accent, in: .rect(cornerRadius: Radius.sm))
-                }
-                .buttonStyle(.plain)
-            }
-        }
-        .padding(Space.md)
-        .background(c.surface, in: .rect(cornerRadius: Radius.lg))
-        .shadow(color: c.textPrimary.opacity(0.05), radius: 6, y: 2)
-    }
-
     private var statsRow: some View {
         HStack(spacing: 12) {
             stat(appState.shipments.count, "Shipments")
@@ -125,6 +97,93 @@ struct ProfileScreen: View {
         .background(c.surface, in: .rect(cornerRadius: Radius.md))
         .shadow(color: c.textPrimary.opacity(0.04), radius: 4, y: 2)
     }
+
+    // MARK: - Org membership card (Community tier)
+
+    private var orgMembershipCard: some View {
+        HStack(spacing: 12) {
+            ZStack {
+                Circle().fill(c.accentSoft)
+                Image(systemName: "building.2.fill")
+                    .foregroundStyle(c.accent)
+            }
+            .frame(width: 40, height: 40)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(appState.orgMembership?.orgName ?? "Your Community")
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundStyle(c.textPrimary)
+                Text("Connected · \(appState.orgMembership?.role.capitalized ?? "Resident")")
+                    .font(.system(size: 11))
+                    .foregroundStyle(c.textSecondary)
+            }
+            Spacer()
+            Pill(text: "Community", tint: c.success, softTint: c.successSoft)
+        }
+        .padding(Space.md)
+        .background(c.surface, in: .rect(cornerRadius: Radius.lg))
+        .shadow(color: c.textPrimary.opacity(0.05), radius: 6, y: 2)
+    }
+
+    // MARK: - Join Your Community (Free tier)
+
+    private var joinCommunityCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            VStack(spacing: 6) {
+                HStack(spacing: 10) {
+                    ZStack {
+                        Circle().fill(c.accentSoft)
+                        Image(systemName: "building.2.fill")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundStyle(c.accent)
+                    }
+                    .frame(width: 40, height: 40)
+                    Text("Join Your Community")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundStyle(c.textPrimary)
+                    Spacer()
+                }
+                Text("Your community may already be on Porchivo. If your HOA, condo association, or property manager uses Porchivo, ask them to send you an invitation. Once you accept, you'll get access to announcements, dues payments, documents, maintenance requests, and more — at no cost to you.")
+                    .font(.system(size: 12))
+                    .foregroundStyle(c.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            VStack(spacing: 8) {
+                Button(action: { Haptics.light(); path.append(Route.orgSignup) }) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "building.2.badge.gearshape.fill")
+                            .font(.system(size: 14, weight: .bold))
+                        Text("I Manage a Community — Sign Up Here")
+                            .font(.system(size: 13, weight: .bold))
+                    }
+                    .foregroundStyle(c.onAccent)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .background(c.accent, in: .rect(cornerRadius: Radius.md))
+                }
+                .buttonStyle(.plain)
+
+                Button(action: {
+                    Haptics.light()
+                    if let url = URL(string: "mailto:support@porchivo.com?subject=Request%20Community%20Invitation") {
+                        UIApplication.shared.open(url)
+                    }
+                }) {
+                    Text("Request an Invitation")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(c.textSecondary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(16)
+        .background(c.surface, in: .rect(cornerRadius: Radius.lg))
+        .shadow(color: c.textPrimary.opacity(0.05), radius: 6, y: 2)
+    }
+
+    // MARK: - Links section
 
     private var linksSection: some View {
         VStack(spacing: 0) {

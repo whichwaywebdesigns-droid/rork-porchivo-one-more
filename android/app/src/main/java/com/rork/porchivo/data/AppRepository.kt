@@ -4,9 +4,11 @@ import android.content.Context
 import com.rork.porchivo.BuildConfig
 import com.rork.porchivo.data.dto.AuthSession
 import com.rork.porchivo.data.dto.DbNotification
+import com.rork.porchivo.data.dto.DbOrgContextRow
 import com.rork.porchivo.data.dto.DbProfile
 import com.rork.porchivo.data.dto.DbShipment
 import com.rork.porchivo.data.dto.RiskScoreResponse
+import com.rork.porchivo.data.dto.OrgMembership
 import com.rork.porchivo.model.Carrier
 import com.rork.porchivo.model.DeliveryNotification
 import com.rork.porchivo.model.DeliveryStatus
@@ -100,6 +102,13 @@ class AppRepository(context: Context) {
     private val _authError = MutableStateFlow<String?>(null)
     val authError: StateFlow<String?> = _authError.asStateFlow()
 
+    // ── Org membership (Free vs Community tier) ────────────────────────
+    private val _orgMembership = MutableStateFlow<OrgMembership?>(null)
+    val orgMembership: StateFlow<OrgMembership?> = _orgMembership.asStateFlow()
+
+    val isOrgMember: Boolean get() = _orgMembership.value?.isActive == true
+    val isOrgAdmin: Boolean get() = _orgMembership.value?.isAdmin == true
+
     // Local storage for tracked packages (SharedPreferences — mirrors Expo AsyncStorage)
     private val packagesPrefs = context.getSharedPreferences("porchivo_packages", Context.MODE_PRIVATE)
     private val packagesJson = kotlinx.serialization.json.Json {
@@ -180,6 +189,7 @@ class AppRepository(context: Context) {
         _tier.value = SubscriptionTier.FREE
         _shipments.value = emptyList()
         _notifications.value = emptyList()
+        _orgMembership.value = null
         _shipmentsLoadState.value = LoadState.Idle
         _notificationsLoadState.value = LoadState.Idle
     }
@@ -211,6 +221,7 @@ class AppRepository(context: Context) {
         loadProfile(userId)
         loadShipments(userId)
         loadNotifications(userId)
+        loadOrgContext()
         loadLocalPackages()
     }
 
@@ -472,6 +483,33 @@ class AppRepository(context: Context) {
 
     fun setDarkTheme(dark: Boolean) {
         _darkThemeOverride.value = dark
+    }
+
+    // ── Org membership (Free vs Community tier) ────────────────────────
+
+    suspend fun loadOrgContext() {
+        val client = supabase ?: return
+        val result = client.fetchOrgContext()
+        if (result.isSuccess) {
+            val rows = result.getOrNull() ?: emptyList()
+            val active = rows.firstOrNull { it.status == "active" }
+                ?: rows.firstOrNull { it.status == "pending" }
+            if (active != null && active.orgId != null) {
+                _orgMembership.value = OrgMembership(
+                    orgId = active.orgId,
+                    orgName = active.orgName ?: "Your Community",
+                    role = active.role ?: "resident",
+                    status = active.status ?: "pending",
+                    inviteCode = null,
+                )
+            } else {
+                _orgMembership.value = null
+            }
+        }
+    }
+
+    suspend fun refreshOrgContext() {
+        loadOrgContext()
     }
 
     // ── Subscription ────────────────────────────────────────────────────

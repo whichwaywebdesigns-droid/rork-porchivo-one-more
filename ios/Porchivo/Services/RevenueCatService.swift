@@ -155,7 +155,7 @@ final class RevenueCatService {
     }
 }
 
-/// Plan types matching the UpgradeScreen picker.
+/// Plan types for legacy IAP (unused in hybrid model — kept for compatibility).
 enum UpgradePlan: String, CaseIterable, Identifiable {
     case monthly, annual, family, lifetime
     var id: String { rawValue }

@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.WorkspacePremium
+import androidx.compose.material.icons.outlined.Apartment
 import androidx.compose.material.icons.outlined.CardGiftcard
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Delete
@@ -62,10 +63,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.rork.porchivo.config.AppConfig
-import com.rork.porchivo.model.SubscriptionTier
 import com.rork.porchivo.model.UserRole
 import com.rork.porchivo.ui.navigation.Routes
-import com.rork.porchivo.data.RevenueCatService
 import com.rork.porchivo.ui.theme.PorchivoTheme
 import kotlinx.coroutines.launch
 import com.rork.porchivo.ui.viewmodel.AppViewModel
@@ -80,7 +79,7 @@ fun ProfileScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val user by appViewModel.user.collectAsStateWithLifecycle()
-    val tier by appViewModel.tier.collectAsStateWithLifecycle()
+    val orgMembership by appViewModel.orgMembership.collectAsStateWithLifecycle()
     val darkOverride by appViewModel.darkThemeOverride.collectAsStateWithLifecycle()
 
     val isDark = darkOverride ?: androidx.compose.foundation.isSystemInDarkTheme()
@@ -167,15 +166,15 @@ fun ProfileScreen(
             }
         }
 
-        // Subscription
-        SectionTitle("SUBSCRIPTION")
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = c.surface),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        ) {
-            Column {
+        // Join Your Community / Org membership
+        if (orgMembership?.isActive == true) {
+            SectionTitle("YOUR COMMUNITY")
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = c.surface),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+            ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -184,70 +183,81 @@ fun ProfileScreen(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     Icon(
-                        imageVector = Icons.Filled.WorkspacePremium,
+                        imageVector = Icons.Outlined.Apartment,
                         contentDescription = null,
-                        tint = if (tier == SubscriptionTier.FREE) c.textSecondary else c.gold,
+                        tint = c.accent,
                         modifier = Modifier.size(18.dp),
                     )
-                    Text(
-                        text = tier.label,
-                        color = c.textPrimary,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.weight(1f),
-                    )
-                    if (tier == SubscriptionTier.FREE) {
+                    Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "Upgrade",
-                            color = c.onAccent,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier
-                                .background(c.accent, RoundedCornerShape(999.dp))
-                                .clickable { navController.navigate(Routes.UPGRADE) }
-                                .padding(horizontal = 14.dp, vertical = 7.dp),
+                            text = orgMembership?.orgName ?: "Your Community",
+                            color = c.textPrimary,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.SemiBold,
                         )
-                    } else {
                         Text(
-                            text = "Active",
-                            color = c.success,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier
-                                .background(c.successSoft, RoundedCornerShape(999.dp))
-                                .padding(horizontal = 14.dp, vertical = 7.dp),
+                            text = "Connected · ${orgMembership?.role?.replaceFirstChar { it.uppercase() } ?: "Resident"}",
+                            color = c.textSecondary,
+                            fontSize = 12.sp,
                         )
                     }
+                    Text(
+                        text = "Community",
+                        color = c.success,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .background(c.successSoft, RoundedCornerShape(999.dp))
+                            .padding(horizontal = 14.dp, vertical = 7.dp),
+                    )
                 }
-                HorizontalDivider(color = c.border)
-                SettingRow(
-                    icon = Icons.Outlined.CardGiftcard,
-                    iconTint = c.warmOrange,
-                    label = "Invite friend, get 1 month free",
-                    onClick = { },
-                )
-                HorizontalDivider(color = c.border)
-                SettingRow(
-                    icon = Icons.Outlined.Refresh,
-                    iconTint = c.accent,
-                    label = "Restore Purchases",
-                    onClick = {
-                        scope.launch {
-                            val result = RevenueCatService.restorePurchases()
-                            if (result.tier != null) {
-                                appViewModel.upgradeTier(result.tier)
+            }
+        } else {
+            SectionTitle("JOIN YOUR COMMUNITY")
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = c.surface),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Text(
+                        text = "Your community may already be on Porchivo. If your HOA, condo association, or property manager uses Porchivo, ask them to send you an invitation.",
+                        color = c.textSecondary,
+                        fontSize = 13.sp,
+                        lineHeight = 18.sp,
+                    )
+                    Text(
+                        text = "I Manage a Community — Sign Up Here",
+                        color = c.onAccent,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(c.accent, RoundedCornerShape(12.dp))
+                            .clickable { navController.navigate(Routes.ORG_SIGNUP) }
+                            .padding(vertical = 12.dp),
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    )
+                    Text(
+                        text = "Request an Invitation",
+                        color = c.textSecondary,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                context.startActivity(Intent(Intent.ACTION_VIEW, "mailto:support@porchivo.com?subject=Request%20Community%20Invitation".toUri()))
                             }
-                        }
-                    },
-                )
+                            .padding(vertical = 10.dp),
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    )
+                }
             }
         }
-        Text(
-            text = "Subscriptions are billed through Google Play and auto-renew unless canceled at least 24 hours before the end of the current period. Manage or cancel in Google Play › Payments & subscriptions.",
-            color = c.textMuted,
-            fontSize = 11.sp,
-            lineHeight = 15.sp,
-        )
 
         // Role
         SectionTitle("YOUR ROLE")
