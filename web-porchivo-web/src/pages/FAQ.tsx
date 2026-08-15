@@ -40,14 +40,14 @@ export default function FAQPage() {
       />
 
       {/* Header */}
-      <section className="pt-16 pb-16 px-4 sm:px-6 border-b border-slate-800">
+      <section className="pt-16 pb-16 px-4 sm:px-6 border-b border-brand-navy-500/40">
         <div className="max-w-3xl mx-auto">
           <BreadcrumbNav items={[{ label: "Home", href: "/" }, { label: "FAQ", href: "/faq" }]} />
           <div className="mt-8">
-            <h1 className="text-4xl sm:text-5xl font-bold text-slate-100 mb-4">
+            <h1 className="text-4xl sm:text-5xl font-bold text-brand-text-primary mb-4">
               Frequently asked questions
             </h1>
-            <p className="text-xl text-slate-400">
+            <p className="text-xl text-brand-text-secondary">
               Everything you need to know about Porchivo, the risk score, tracking, pricing, and privacy.
             </p>
           </div>
@@ -55,14 +55,14 @@ export default function FAQPage() {
       </section>
 
       {/* Category nav */}
-      <section className="py-8 px-4 sm:px-6 border-b border-slate-800">
+      <section className="py-8 px-4 sm:px-6 border-b border-brand-navy-500/40">
         <div className="max-w-3xl mx-auto">
           <div className="flex flex-wrap gap-2">
             {CATEGORIES.map((cat) => (
               <a
                 key={cat.id}
                 href={`#${cat.id}`}
-                className="px-3.5 py-1.5 rounded-lg bg-slate-900 border border-slate-800 hover:border-slate-600 text-sm text-slate-400 hover:text-slate-200 transition-colors"
+                className="px-3.5 py-1.5 rounded-lg bg-brand-navy-900 border border-brand-navy-500/40 hover:border-brand-navy-500/60 text-sm text-brand-text-secondary hover:text-brand-text-primary transition-colors"
               >
                 {cat.label}
               </a>
@@ -78,10 +78,10 @@ export default function FAQPage() {
           if (categoryFAQs.length === 0) return null;
 
           return (
-            <section key={cat.id} id={cat.id} className="scroll-mt-20 border-b border-slate-800">
+            <section key={cat.id} id={cat.id} className="scroll-mt-20 border-b border-brand-navy-500/40">
               <div className="px-4 sm:px-6 pt-12 pb-2">
-                <h2 className="text-xl font-bold text-slate-100">{cat.label}</h2>
-                <p className="text-sm text-slate-500 mt-1">{cat.description}</p>
+                <h2 className="text-xl font-bold text-brand-text-primary">{cat.label}</h2>
+                <p className="text-sm text-brand-text-muted mt-1">{cat.description}</p>
               </div>
               <FAQSection faqs={categoryFAQs} />
             </section>
@@ -92,24 +92,24 @@ export default function FAQPage() {
       {/* Still need help */}
       <section className="py-16 px-4 sm:px-6 text-center">
         <div className="max-w-xl mx-auto">
-          <h2 className="text-2xl font-bold text-slate-100 mb-3">Still have a question?</h2>
-          <p className="text-slate-400 mb-6 text-sm">
+          <h2 className="text-2xl font-bold text-brand-text-primary mb-3">Still have a question?</h2>
+          <p className="text-brand-text-secondary mb-6 text-sm">
             Our support team responds within 24 hours on business days.
           </p>
           <a
             href={`mailto:${BRAND.supportEmail}`}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium text-sm transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-navy-700 hover:bg-brand-navy-600 text-brand-text-primary font-medium text-sm transition-colors"
           >
             Email {BRAND.supportEmail}
             <ChevronRight className="w-4 h-4" />
           </a>
-          <div className="mt-8 pt-8 border-t border-slate-800">
-            <p className="text-xs text-slate-600 mb-3">Related resources</p>
+          <div className="mt-8 pt-8 border-t border-brand-navy-500/40">
+            <p className="text-xs text-brand-text-muted mb-3">Related resources</p>
             <div className="flex flex-wrap justify-center gap-4 text-sm">
-              <Link to="/features" className="text-amber-400 hover:text-amber-300 transition-colors">Features</Link>
-              <Link to="/pricing" className="text-amber-400 hover:text-amber-300 transition-colors">Pricing</Link>
-              <Link to="/privacy" className="text-amber-400 hover:text-amber-300 transition-colors">Privacy Policy</Link>
-              <Link to="/terms" className="text-amber-400 hover:text-amber-300 transition-colors">Terms of Service</Link>
+              <Link to="/features" className="text-brand-orange hover:text-brand-orange-light transition-colors">Features</Link>
+              <Link to="/pricing" className="text-brand-orange hover:text-brand-orange-light transition-colors">Pricing</Link>
+              <Link to="/privacy" className="text-brand-orange hover:text-brand-orange-light transition-colors">Privacy Policy</Link>
+              <Link to="/terms" className="text-brand-orange hover:text-brand-orange-light transition-colors">Terms of Service</Link>
             </div>
           </div>
         </div>

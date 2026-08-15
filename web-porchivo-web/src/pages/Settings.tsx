@@ -1,5 +1,7 @@
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Settings as SettingsIcon, Globe, Check } from "lucide-react";
+import { Settings as SettingsIcon, Globe, Check, Sun, Moon, Monitor } from "lucide-react";
+import { useTheme } from "next-themes";
 
 import PageLayout from "@/components/PageLayout";
 import SEOHead from "@/components/SEOHead";
@@ -8,8 +10,23 @@ import LanguageSelector from "@/components/LanguageSelector";
 import { getLanguageMeta } from "@/i18n/languages";
 import { BRAND } from "@/config/brand";
 
+type ThemeOption = "light" | "system" | "dark";
+
+const THEME_OPTIONS: { value: ThemeOption; icon: typeof Sun; label: string; description: string }[] = [
+  { value: "light", icon: Sun, label: "Light", description: "Bright background, dark text" },
+  { value: "system", icon: Monitor, label: "System", description: "Follow your device preference" },
+  { value: "dark", icon: Moon, label: "Dark", description: "Dark navy background, light text" },
+];
+
 export default function SettingsPage() {
   const { i18n, t } = useTranslation();
+  const { theme, setTheme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const meta = getLanguageMeta(i18n.language);
   const locale = i18n.language || "en";
 
@@ -104,6 +121,60 @@ export default function SettingsPage() {
               </div>
             </dl>
           </div>
+        </section>
+        {/* Appearance card */}
+        <section
+          aria-labelledby="appearance-heading"
+          className="rounded-2xl border border-brand-navy-500/40 bg-brand-navy-800/40 p-6 sm:p-8 mt-6"
+        >
+          <div className="flex items-center gap-2.5 mb-1.5">
+            {mounted && resolvedTheme === "dark" ? (
+              <Moon className="w-5 h-5 text-brand-blue-light" />
+            ) : (
+              <Sun className="w-5 h-5 text-brand-blue-light" />
+            )}
+            <h2 id="appearance-heading" className="text-xl font-semibold text-brand-text-primary">
+              Appearance
+            </h2>
+          </div>
+          <p className="text-sm text-brand-text-muted leading-relaxed mb-6 max-w-prose">
+            Choose how Porchivo looks. System mode follows your device's dark or light setting automatically.
+          </p>
+
+          <div className="grid sm:grid-cols-3 gap-3">
+            {THEME_OPTIONS.map(({ value, icon: Icon, label, description }) => {
+              const active = mounted && (theme === value || (!theme && value === "system"));
+              return (
+                <button
+                  key={value}
+                  onClick={() => setTheme(value)}
+                  className={`flex flex-col items-center text-center rounded-xl border p-5 transition-all ${
+                    active
+                      ? "bg-brand-blue/10 border-brand-blue/40 ring-1 ring-brand-blue/20"
+                      : "bg-brand-navy-900/40 border-brand-navy-500/30 hover:border-brand-navy-500/60 hover:bg-brand-navy-700/40"
+                  }`}
+                  aria-pressed={active}
+                >
+                  <Icon className={`w-6 h-6 mb-2 ${active ? "text-brand-blue-light" : "text-brand-text-muted"}`} />
+                  <span className={`text-sm font-semibold ${active ? "text-brand-blue-light" : "text-brand-text-primary"}`}>
+                    {label}
+                  </span>
+                  <span className="text-xs text-brand-text-muted mt-1 leading-snug">
+                    {description}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {mounted && theme === "system" && (
+            <div className="mt-4 flex items-center gap-2 rounded-xl bg-brand-blue/5 border border-brand-blue/20 px-4 py-3">
+              <Monitor className="w-4 h-4 text-brand-blue-light flex-shrink-0" />
+              <p className="text-[13px] text-brand-text-secondary">
+                Currently using <span className="font-semibold text-brand-text-primary">{resolvedTheme}</span> mode based on your system preference.
+              </p>
+            </div>
+          )}
         </section>
       </div>
     </PageLayout>

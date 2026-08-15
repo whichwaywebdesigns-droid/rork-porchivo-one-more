@@ -58,26 +58,26 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        // ── Porchivo brand palette (matches Expo/Android dark theme) ──
+        // ── Porchivo brand palette (CSS vars — switches with light/dark theme) ──
         "brand-navy": {
-          500: "#1E2F58",
-          600: "#1A2B52",
-          700: "#132040",
-          800: "#0F1D38",
-          900: "#0D1B3E",
+          500: "var(--brand-navy-500)",
+          600: "var(--brand-navy-600)",
+          700: "var(--brand-navy-700)",
+          800: "var(--brand-navy-800)",
+          900: "var(--brand-navy-900)",
         },
         "brand-blue": {
-          DEFAULT: "#4A8FE8",
-          light: "#6BA8F5",
+          DEFAULT: "var(--brand-blue)",
+          light: "var(--brand-blue-light)",
         },
         "brand-orange": {
-          DEFAULT: "#F07840",
-          light: "#F59E6B",
+          DEFAULT: "var(--brand-orange)",
+          light: "var(--brand-orange-light)",
         },
         "brand-text": {
-          primary: "#E8EEF8",
-          secondary: "rgba(232, 238, 248, 0.65)",
-          muted: "rgba(232, 238, 248, 0.40)",
+          primary: "var(--brand-text-primary)",
+          secondary: "var(--brand-text-secondary)",
+          muted: "var(--brand-text-muted)",
         },
       },
       borderRadius: {

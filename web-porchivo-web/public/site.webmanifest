@@ -4,8 +4,8 @@
   "description": "Neighborhood watch powered by the community — track packages, report porch pirates, and keep your block safe.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#102040",
-  "theme_color": "#1B3A78",
+  "background_color": "#F5F7FA",
+  "theme_color": "#3A7BD5",
   "icons": [
     {
       "src": "/favicon.png",

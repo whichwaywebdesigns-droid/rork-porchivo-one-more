@@ -2,54 +2,79 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* ───────────────────────────────────────────────────────────────────────────
+   Porchivo theme system — light (default) + dark (.dark class on <html>)
+   Brand colors mirror expo/constants/theme.ts lightPalette / darkPalette.
+   shadcn/ui semantic tokens use HSL component format (H S L).
+   Brand tokens use complete color values for rgba support.
+   ─────────────────────────────────────────────────────────────────────────── */
 
 @layer base {
-  /* ── Porchivo dark theme (matches Expo/Android app) ── */
+  /* ── Light theme (default) ── */
   :root {
-    --background: 223 65 15;
-    --foreground: 217 53 94;
+    /* shadcn/ui semantic tokens — light */
+    --background: 216 33 97;
+    --foreground: 219 48 20;
 
-    --card: 223 54 16;
-    --card-foreground: 217 53 94;
+    --card: 0 0 100;
+    --card-foreground: 219 48 20;
 
-    --popover: 223 54 16;
-    --popover-foreground: 217 53 94;
+    --popover: 0 0 100;
+    --popover-foreground: 219 48 20;
 
-    --primary: 214 77 60;
+    --primary: 215 65 53;
     --primary-foreground: 0 0 100;
 
-    --secondary: 222 52 21;
-    --secondary-foreground: 217 53 94;
+    --secondary: 217 48 95;
+    --secondary-foreground: 219 48 20;
 
-    --muted: 222 52 21;
-    --muted-foreground: 215 20 55;
+    --muted: 217 48 95;
+    --muted-foreground: 215 20 45;
 
-    --accent: 222 52 21;
-    --accent-foreground: 217 53 94;
+    --accent: 217 48 95;
+    --accent-foreground: 219 48 20;
 
-    --destructive: 0 70 60;
-    --destructive-foreground: 217 53 94;
+    --destructive: 358 75 59;
+    --destructive-foreground: 0 0 100;
 
-    --border: 222 49 23;
-    --input: 222 49 23;
-    --ring: 214 77 60;
+    --border: 210 44 89;
+    --input: 210 44 89;
+    --ring: 215 65 53;
 
     --radius: 0.5rem;
 
-    --sidebar-background: 225 65 10;
-    --sidebar-foreground: 217 53 94;
-    --sidebar-primary: 214 77 60;
+    --sidebar-background: 210 36 96;
+    --sidebar-foreground: 219 48 20;
+    --sidebar-primary: 215 65 53;
     --sidebar-primary-foreground: 0 0 100;
-    --sidebar-accent: 222 52 21;
-    --sidebar-accent-foreground: 217 53 94;
-    --sidebar-border: 222 49 23;
-    --sidebar-ring: 214 77 60;
+    --sidebar-accent: 217 48 95;
+    --sidebar-accent-foreground: 219 48 20;
+    --sidebar-border: 210 44 89;
+    --sidebar-ring: 215 65 53;
+
+    /* Brand palette — light (matches Expo lightPalette) */
+    --brand-navy-500: #D8E4F0;
+    --brand-navy-600: #EBF0F8;
+    --brand-navy-700: #E8EDF5;
+    --brand-navy-800: #FFFFFF;
+    --brand-navy-900: #F5F7FA;
+
+    --brand-blue: #3A7BD5;
+    --brand-blue-light: #5B93E8;
+
+    --brand-orange: #E8622A;
+    --brand-orange-light: #ED8A5A;
+
+    --brand-text-primary: #1A2B4A;
+    --brand-text-secondary: rgba(26, 43, 74, 0.55);
+    --brand-text-muted: rgba(26, 43, 74, 0.38);
+
+    --theme-color: #3A7BD5;
   }
 
+  /* ── Dark theme (.dark on <html>) ── */
   .dark {
+    /* shadcn/ui semantic tokens — dark */
     --background: 223 65 15;
     --foreground: 217 53 94;
 
@@ -77,6 +102,7 @@ All colors MUST be HSL.
     --border: 222 49 23;
     --input: 222 49 23;
     --ring: 214 77 60;
+
     --sidebar-background: 225 65 10;
     --sidebar-foreground: 217 53 94;
     --sidebar-primary: 214 77 60;
@@ -85,6 +111,25 @@ All colors MUST be HSL.
     --sidebar-accent-foreground: 217 53 94;
     --sidebar-border: 222 49 23;
     --sidebar-ring: 214 77 60;
+
+    /* Brand palette — dark (matches Expo darkPalette) */
+    --brand-navy-500: #1E2F58;
+    --brand-navy-600: #1A2B52;
+    --brand-navy-700: #132040;
+    --brand-navy-800: #0F1D38;
+    --brand-navy-900: #0D1B3E;
+
+    --brand-blue: #4A8FE8;
+    --brand-blue-light: #6BA8F5;
+
+    --brand-orange: #F07840;
+    --brand-orange-light: #F59E6B;
+
+    --brand-text-primary: #E8EEF8;
+    --brand-text-secondary: rgba(232, 238, 248, 0.65);
+    --brand-text-muted: rgba(232, 238, 248, 0.40);
+
+    --theme-color: #0D1B3E;
   }
 }
 
@@ -96,4 +141,40 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* ── Component utilities ─────────────────────────────────────────────────── */
+
+@layer components {
+  .btn-orange {
+    @apply bg-brand-orange text-white font-semibold transition-colors duration-150;
+  }
+  .btn-orange:hover {
+    @apply bg-brand-orange-light;
+  }
+
+  .card-lift {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .card-lift:hover {
+    transform: translateY(-2px);
+  }
+}
+
+/* ── Theme transition ────────────────────────────────────────────────────── */
+/* Smooth color transition when switching themes. Only applies to color/background
+   properties so layout transitions aren't affected. */
+@media (prefers-reduced-motion: no-preference) {
+  *, *::before, *::after {
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.15s ease;
+  }
+}
+
+/* ── Invisible scrollbars (matches mobile apps) ──────────────────────────── */
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+* {
+  scrollbar-width: none;
 }

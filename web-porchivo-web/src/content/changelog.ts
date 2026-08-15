@@ -225,8 +225,8 @@ export const CHANGE_TYPE_LABELS: Record<ChangeType, string> = {
 
 export const CHANGE_TYPE_COLORS: Record<ChangeType, string> = {
   feature: "text-emerald-400 bg-emerald-400/10",
-  security: "text-amber-400 bg-amber-400/10",
+  security: "text-brand-orange bg-brand-orange/10",
   fix: "text-blue-400 bg-blue-400/10",
   performance: "text-violet-400 bg-violet-400/10",
-  infra: "text-slate-400 bg-slate-400/10",
+  infra: "text-brand-text-secondary bg-brand-navy-800/40",
 };

@@ -32,16 +32,16 @@ const REVISION_HISTORY: RevisionEntry[] = [
 function Section({ number, title, children }: { number: string; title: string; children: React.ReactNode }) {
   return (
     <section className="mb-8">
-      <h2 className="text-lg font-bold text-slate-100 mb-3">
+      <h2 className="text-lg font-bold text-brand-text-primary mb-3">
         {number}. {title}
       </h2>
-      <div className="text-slate-300 leading-relaxed space-y-3">{children}</div>
+      <div className="text-brand-text-secondary leading-relaxed space-y-3">{children}</div>
     </section>
   );
 }
 
 function SubHeading({ children }: { children: React.ReactNode }) {
-  return <h3 className="text-base font-semibold text-slate-200 mt-4 mb-2">{children}</h3>;
+  return <h3 className="text-base font-semibold text-brand-text-primary mt-4 mb-2">{children}</h3>;
 }
 
 function Bullet({ children }: { children: React.ReactNode }) {
@@ -68,25 +68,25 @@ export default function PrivacyPolicyPage() {
         <BreadcrumbNav items={[{ label: "Home", href: "/" }, { label: "Privacy Policy", href: "/privacy" }]} />
 
         {/* Header */}
-        <div className="mt-8 mb-12 pb-8 border-b border-slate-700">
+        <div className="mt-8 mb-12 pb-8 border-b border-brand-navy-500/50">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-400/10 border border-emerald-400/20 text-emerald-400 text-xs font-semibold mb-4">
             🛡️ Privacy
           </div>
-          <h1 className="text-4xl font-bold text-slate-100 mb-3">Privacy Policy</h1>
-          <p className="text-slate-400 text-sm">
-            Effective Date: <span className="text-slate-300 font-medium">{EFFECTIVE_DATE}</span>
-            &ensp;·&ensp;Operated by <span className="text-slate-300 font-medium">{COMPANY}</span>
+          <h1 className="text-4xl font-bold text-brand-text-primary mb-3">Privacy Policy</h1>
+          <p className="text-brand-text-secondary text-sm">
+            Effective Date: <span className="text-brand-text-secondary font-medium">{EFFECTIVE_DATE}</span>
+            &ensp;·&ensp;Operated by <span className="text-brand-text-secondary font-medium">{COMPANY}</span>
           </p>
-          <p className="text-slate-500 text-xs mt-1.5">
-            Version <span className="text-slate-400 font-medium">{POLICY_VERSION}</span> · Last updated{" "}
-            <span className="text-slate-400 font-medium">{LAST_UPDATED}</span>
+          <p className="text-brand-text-muted text-xs mt-1.5">
+            Version <span className="text-brand-text-secondary font-medium">{POLICY_VERSION}</span> · Last updated{" "}
+            <span className="text-brand-text-secondary font-medium">{LAST_UPDATED}</span>
           </p>
         </div>
 
         {/* Intro */}
-        <div className="bg-emerald-900/20 border border-emerald-700/30 rounded-xl p-6 mb-10 text-slate-300 leading-relaxed">
+        <div className="bg-emerald-900/20 border border-emerald-700/30 rounded-xl p-6 mb-10 text-brand-text-secondary leading-relaxed">
           <p>
-            <strong className="text-slate-100">Porchivo</strong> ("Porchivo," "we," "us," or "our") is a community
+            <strong className="text-brand-text-primary">Porchivo</strong> ("Porchivo," "we," "us," or "our") is a community
             management platform that helps homeowners associations, residents, board members, and property managers
             communicate, manage payments, handle maintenance requests, and access community documents — all in one
             place.
@@ -241,7 +241,7 @@ export default function PrivacyPolicyPage() {
             <Bullet>Meeting and event reminders</Bullet>
           </ul>
           <p className="mt-3">
-            <strong className="text-slate-100">You are in control.</strong> You can turn off push notifications at any
+            <strong className="text-brand-text-primary">You are in control.</strong> You can turn off push notifications at any
             time through your device settings or within the Porchivo app. Turning off notifications does not affect
             your ability to use the app.
           </p>
@@ -270,32 +270,32 @@ export default function PrivacyPolicyPage() {
             on our behalf and under our instructions:
           </p>
           <div className="overflow-x-auto mt-3">
-            <table className="w-full text-sm border border-slate-700 rounded-lg overflow-hidden">
+            <table className="w-full text-sm border border-brand-navy-500/50 rounded-lg overflow-hidden">
               <thead>
-                <tr className="bg-slate-800 text-slate-200">
+                <tr className="bg-brand-navy-700 text-brand-text-primary">
                   <th className="text-left px-4 py-2 font-semibold">Provider</th>
                   <th className="text-left px-4 py-2 font-semibold">Purpose</th>
                 </tr>
               </thead>
-              <tbody className="text-slate-300">
-                <tr className="border-t border-slate-700">
-                  <td className="px-4 py-2 font-medium text-slate-100">Supabase</td>
+              <tbody className="text-brand-text-secondary">
+                <tr className="border-t border-brand-navy-500/50">
+                  <td className="px-4 py-2 font-medium text-brand-text-primary">Supabase</td>
                   <td className="px-4 py-2">Database and authentication infrastructure</td>
                 </tr>
-                <tr className="border-t border-slate-700">
-                  <td className="px-4 py-2 font-medium text-slate-100">Resend</td>
+                <tr className="border-t border-brand-navy-500/50">
+                  <td className="px-4 py-2 font-medium text-brand-text-primary">Resend</td>
                   <td className="px-4 py-2">Transactional email delivery (account confirmations, deletion notices)</td>
                 </tr>
-                <tr className="border-t border-slate-700">
-                  <td className="px-4 py-2 font-medium text-slate-100">Payment processor (e.g., Stripe)</td>
+                <tr className="border-t border-brand-navy-500/50">
+                  <td className="px-4 py-2 font-medium text-brand-text-primary">Payment processor (e.g., Stripe)</td>
                   <td className="px-4 py-2">Secure payment processing for HOA dues and fees</td>
                 </tr>
-                <tr className="border-t border-slate-700">
-                  <td className="px-4 py-2 font-medium text-slate-100">Push notification service</td>
+                <tr className="border-t border-brand-navy-500/50">
+                  <td className="px-4 py-2 font-medium text-brand-text-primary">Push notification service</td>
                   <td className="px-4 py-2">Delivery of app notifications to your device</td>
                 </tr>
-                <tr className="border-t border-slate-700">
-                  <td className="px-4 py-2 font-medium text-slate-100">Crash reporting service</td>
+                <tr className="border-t border-brand-navy-500/50">
+                  <td className="px-4 py-2 font-medium text-brand-text-primary">Crash reporting service</td>
                   <td className="px-4 py-2">App error detection and stability monitoring</td>
                 </tr>
               </tbody>
@@ -323,7 +323,7 @@ export default function PrivacyPolicyPage() {
             the service.
           </p>
           <div className="bg-blue-900/20 border border-blue-700/30 rounded-lg p-4 mt-3">
-            <p className="text-slate-300 text-sm">
+            <p className="text-brand-text-secondary text-sm">
               <strong className="text-blue-300">HOA payment and transaction records</strong> may be retained beyond
               account deletion as required by your homeowners association's legal and financial recordkeeping
               obligations. This data belongs to the community's records, not your personal profile.
@@ -331,7 +331,7 @@ export default function PrivacyPolicyPage() {
           </div>
           <p className="mt-3">
             When you request account deletion, your personal data is permanently removed within{" "}
-            <strong className="text-slate-100">30 days</strong>. See "Your Rights and Choices" below for details.
+            <strong className="text-brand-text-primary">30 days</strong>. See "Your Rights and Choices" below for details.
           </p>
         </Section>
 
@@ -342,7 +342,7 @@ export default function PrivacyPolicyPage() {
           <SubHeading>b. Account Deletion</SubHeading>
           <p>
             You can request permanent deletion of your Porchivo account from{" "}
-            <strong className="text-slate-100">Settings → Account → Delete Account</strong>. Your account will be
+            <strong className="text-brand-text-primary">Settings → Account → Delete Account</strong>. Your account will be
             deactivated immediately and permanently deleted within 30 days. You may cancel this request within 30 days
             by contacting{" "}
             <a href="mailto:support@porchivo.com" className="text-emerald-400 hover:text-emerald-300 transition-colors">
@@ -350,7 +350,7 @@ export default function PrivacyPolicyPage() {
             </a>
             .
           </p>
-          <p className="mt-2 text-sm text-slate-400">
+          <p className="mt-2 text-sm text-brand-text-secondary">
             Note: Account deletion removes your personal profile data. It does not erase HOA financial records that
             your association is legally required to retain.
           </p>
@@ -368,7 +368,7 @@ export default function PrivacyPolicyPage() {
 
           <SubHeading>e. California Residents (CCPA)</SubHeading>
           <div className="bg-blue-900/20 border border-blue-700/30 rounded-lg p-4 mt-2">
-            <p className="text-slate-400 text-sm">
+            <p className="text-brand-text-secondary text-sm">
               If you are a California resident, you have the right to:
             </p>
             <ul className="space-y-1.5 mt-2">
@@ -377,7 +377,7 @@ export default function PrivacyPolicyPage() {
               <Bullet>Opt out of the sale of your personal information (we do not sell personal information)</Bullet>
               <Bullet>Not be discriminated against for exercising your privacy rights</Bullet>
             </ul>
-            <p className="text-slate-400 text-sm mt-2">
+            <p className="text-brand-text-secondary text-sm mt-2">
               To make a request, contact us at{" "}
               <a href="mailto:support@porchivo.com" className="text-blue-300 hover:text-blue-200 transition-colors">
                 support@porchivo.com
@@ -451,13 +451,13 @@ export default function PrivacyPolicyPage() {
             {REVISION_HISTORY.map((entry) => (
               <li
                 key={entry.version}
-                className="bg-slate-800/60 border border-slate-700 rounded-lg p-4"
+                className="bg-brand-navy-800/60 border border-brand-navy-500/50 rounded-lg p-4"
               >
                 <div className="flex items-baseline gap-2 mb-1">
-                  <span className="text-slate-100 font-semibold">Version {entry.version}</span>
-                  <span className="text-slate-500 text-sm">· {entry.date}</span>
+                  <span className="text-brand-text-primary font-semibold">Version {entry.version}</span>
+                  <span className="text-brand-text-muted text-sm">· {entry.date}</span>
                 </div>
-                <p className="text-slate-400 text-sm">{entry.summary}</p>
+                <p className="text-brand-text-secondary text-sm">{entry.summary}</p>
               </li>
             ))}
           </ul>
@@ -467,27 +467,27 @@ export default function PrivacyPolicyPage() {
           <p>
             If you have questions, concerns, or requests related to this Privacy Policy, contact us at:
           </p>
-          <div className="bg-slate-800 border border-slate-700 rounded-xl p-5 mt-4 space-y-3">
+          <div className="bg-brand-navy-700 border border-brand-navy-500/50 rounded-xl p-5 mt-4 space-y-3">
             <div className="flex items-center gap-3">
               <span className="text-emerald-400">🏢</span>
-              <span className="text-slate-200 font-semibold">Porchivo Support</span>
+              <span className="text-brand-text-primary font-semibold">Porchivo Support</span>
             </div>
             <div className="flex items-center gap-3">
               <span className="text-emerald-400">✉️</span>
-              <a href="mailto:support@porchivo.com" className="text-slate-300 hover:text-emerald-400 transition-colors">
+              <a href="mailto:support@porchivo.com" className="text-brand-text-secondary hover:text-emerald-400 transition-colors">
                 support@porchivo.com
               </a>
             </div>
             <div className="flex items-center gap-3">
               <span className="text-emerald-400">🌐</span>
-              <span className="text-slate-300">porchivo.com</span>
+              <span className="text-brand-text-secondary">porchivo.com</span>
             </div>
           </div>
         </Section>
 
         {/* Legal notice */}
-        <div className="mt-8 bg-slate-800/40 border border-slate-700/50 rounded-lg p-4">
-          <p className="text-xs text-slate-500 leading-relaxed">
+        <div className="mt-8 bg-brand-navy-800/40 border border-brand-navy-500/50/50 rounded-lg p-4">
+          <p className="text-xs text-brand-text-muted leading-relaxed">
             <strong>Legal Notice:</strong> This document was drafted to reflect Porchivo's known data practices as of
             the effective date. It is strongly recommended that a licensed attorney review this policy before
             publishing, particularly if Porchivo operates in or serves users in jurisdictions with specific privacy
@@ -496,7 +496,7 @@ export default function PrivacyPolicyPage() {
         </div>
 
         {/* Footer */}
-        <div className="mt-8 pt-8 border-t border-slate-700 text-center text-sm text-slate-500">
+        <div className="mt-8 pt-8 border-t border-brand-navy-500/50 text-center text-sm text-brand-text-muted">
           © 2026 {COMPANY}. All rights reserved. · Porchivo is a product of {COMPANY}.
         </div>
       </div>

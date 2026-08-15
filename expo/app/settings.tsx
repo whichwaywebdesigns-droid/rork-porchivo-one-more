@@ -605,7 +605,7 @@ export default function SettingsScreen() {
           <SettingRow
             icon={<Info size={16} color={tokens.accent} strokeWidth={2} />}
             label="App version"
-            value="1.0.4"
+            value="1.0.6"
             tokens={tokens}
           />
           <SettingRow

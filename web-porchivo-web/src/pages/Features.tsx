@@ -146,13 +146,13 @@ const FEATURES_DETAILED = [
 ];
 
 const accentClasses: Record<string, { text: string; bg: string; border: string }> = {
-  amber: { text: "text-amber-400", bg: "bg-amber-400/10", border: "border-amber-400/20" },
+  amber: { text: "text-brand-orange", bg: "bg-brand-orange/10", border: "border-brand-orange/20" },
   red: { text: "text-red-400", bg: "bg-red-400/10", border: "border-red-400/20" },
   blue: { text: "text-blue-400", bg: "bg-blue-400/10", border: "border-blue-400/20" },
   violet: { text: "text-violet-400", bg: "bg-violet-400/10", border: "border-violet-400/20" },
   emerald: { text: "text-emerald-400", bg: "bg-emerald-400/10", border: "border-emerald-400/20" },
   orange: { text: "text-orange-400", bg: "bg-orange-400/10", border: "border-orange-400/20" },
-  slate: { text: "text-slate-400", bg: "bg-slate-400/10", border: "border-slate-400/20" },
+  slate: { text: "text-brand-text-secondary", bg: "bg-brand-navy-800/40", border: "border-brand-navy-500/30" },
 };
 
 export default function FeaturesPage() {
@@ -174,14 +174,14 @@ export default function FeaturesPage() {
       />
 
       {/* Header */}
-      <section className="pt-16 pb-20 px-4 sm:px-6 border-b border-slate-800">
+      <section className="pt-16 pb-20 px-4 sm:px-6 border-b border-brand-navy-500/40">
         <div className="max-w-5xl mx-auto">
           <BreadcrumbNav items={[{ label: "Home", href: "/" }, { label: "Features", href: "/features" }]} />
           <div className="mt-8 max-w-2xl">
-            <h1 className="text-4xl sm:text-5xl font-bold text-slate-100 leading-tight mb-5">
+            <h1 className="text-4xl sm:text-5xl font-bold text-brand-text-primary leading-tight mb-5">
               Every tool to protect your deliveries
             </h1>
-            <p className="text-xl text-slate-400 leading-relaxed">
+            <p className="text-xl text-brand-text-secondary leading-relaxed">
               {seo.aiSummary}
             </p>
           </div>
@@ -206,21 +206,21 @@ export default function FeaturesPage() {
                     {Icon && <Icon className={`w-5 h-5 ${ac.text}`} />}
                   </div>
                   {feat.isPremium && (
-                    <span className="px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 text-xs font-semibold border border-amber-500/20">
+                    <span className="px-2.5 py-0.5 rounded-full bg-brand-orange/10 text-brand-orange text-xs font-semibold border border-brand-orange/20">
                       Premium
                     </span>
                   )}
                 </div>
-                <h2 className="text-2xl font-bold text-slate-100 mb-2">{feat.name}</h2>
+                <h2 className="text-2xl font-bold text-brand-text-primary mb-2">{feat.name}</h2>
                 <p className={`text-sm font-medium ${ac.text} mb-4`}>{feat.tagline}</p>
-                <p className="text-slate-400 leading-relaxed">{feat.description}</p>
+                <p className="text-brand-text-secondary leading-relaxed">{feat.description}</p>
               </div>
 
-              <div className="bg-slate-900 rounded-2xl border border-slate-800 p-5">
-                <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4">Key facts</div>
+              <div className="bg-brand-navy-900 rounded-2xl border border-brand-navy-500/40 p-5">
+                <div className="text-xs font-semibold text-brand-text-muted uppercase tracking-wider mb-4">Key facts</div>
                 <ul className="space-y-3">
                   {feat.facts.map((fact) => (
-                    <li key={fact} className="flex items-start gap-2.5 text-sm text-slate-400">
+                    <li key={fact} className="flex items-start gap-2.5 text-sm text-brand-text-secondary">
                       <Check className={`w-4 h-4 ${ac.text} flex-shrink-0 mt-0.5`} />
                       {fact}
                     </li>
@@ -235,63 +235,63 @@ export default function FeaturesPage() {
                 <div className="w-10 h-10 rounded-xl bg-blue-400/10 flex items-center justify-center">
                   <MapPin className="w-5 h-5 text-blue-400" />
                 </div>
-                <span className="px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 text-xs font-semibold border border-amber-500/20">
+                <span className="px-2.5 py-0.5 rounded-full bg-brand-orange/10 text-brand-orange text-xs font-semibold border border-brand-orange/20">
                   Premium
                 </span>
               </div>
-              <h2 className="text-2xl font-bold text-slate-100 mb-2">Porchivo Delivery Insights</h2>
+              <h2 className="text-2xl font-bold text-brand-text-primary mb-2">Porchivo Delivery Insights</h2>
               <p className="text-sm font-medium text-blue-400 mb-4">Carrier tools that put you in control of every drop-off.</p>
-              <p className="text-slate-400 leading-relaxed mb-10 max-w-3xl">
+              <p className="text-brand-text-secondary leading-relaxed mb-10 max-w-3xl">
                 Porchivo surfaces the native delivery controls already built into UPS and Amazon so you can steer packages before they ever reach your porch. Available on Premium plans and above, this feature brings scattered carrier settings into one dashboard instead of leaving them buried in separate apps.
               </p>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-slate-900 rounded-2xl border border-slate-800 p-5">
-                  <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4">UPS My Choice</div>
+                <div className="bg-brand-navy-900 rounded-2xl border border-brand-navy-500/40 p-5">
+                  <div className="text-xs font-semibold text-brand-text-muted uppercase tracking-wider mb-4">UPS My Choice</div>
                   <ul className="space-y-3">
-                    <li className="flex items-start gap-2.5 text-sm text-slate-400">
+                    <li className="flex items-start gap-2.5 text-sm text-brand-text-secondary">
                       <Check className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
                       Free account setup with delivery alerts by text or email
                     </li>
-                    <li className="flex items-start gap-2.5 text-sm text-slate-400">
+                    <li className="flex items-start gap-2.5 text-sm text-brand-text-secondary">
                       <Check className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
                       Leave At instructions set a default drop spot for your driver
                     </li>
-                    <li className="flex items-start gap-2.5 text-sm text-slate-400">
+                    <li className="flex items-start gap-2.5 text-sm text-brand-text-secondary">
                       <Check className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
                       Custom notes for gate codes or entry instructions
                     </li>
-                    <li className="flex items-start gap-2.5 text-sm text-slate-400">
+                    <li className="flex items-start gap-2.5 text-sm text-brand-text-secondary">
                       <Check className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
                       Vacation Holds pause deliveries while you're away
                     </li>
-                    <li className="flex items-start gap-2.5 text-sm text-slate-400">
+                    <li className="flex items-start gap-2.5 text-sm text-brand-text-secondary">
                       <Check className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
                       Driver preferences saved and applied to future shipments
                     </li>
                   </ul>
                 </div>
 
-                <div className="bg-slate-900 rounded-2xl border border-slate-800 p-5">
-                  <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4">Amazon Delivery Options</div>
+                <div className="bg-brand-navy-900 rounded-2xl border border-brand-navy-500/40 p-5">
+                  <div className="text-xs font-semibold text-brand-text-muted uppercase tracking-wider mb-4">Amazon Delivery Options</div>
                   <ul className="space-y-3">
-                    <li className="flex items-start gap-2.5 text-sm text-slate-400">
+                    <li className="flex items-start gap-2.5 text-sm text-brand-text-secondary">
                       <Check className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
                       Amazon Key in-garage delivery for Prime members with a smart garage hub
                     </li>
-                    <li className="flex items-start gap-2.5 text-sm text-slate-400">
+                    <li className="flex items-start gap-2.5 text-sm text-brand-text-secondary">
                       <Check className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
                       Amazon Hub lockers and counters, free with a 3–14 day pickup window
                     </li>
-                    <li className="flex items-start gap-2.5 text-sm text-slate-400">
+                    <li className="flex items-start gap-2.5 text-sm text-brand-text-secondary">
                       <Check className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
                       Amazon Day consolidates weekly shipments into one delivery day
                     </li>
-                    <li className="flex items-start gap-2.5 text-sm text-slate-400">
+                    <li className="flex items-start gap-2.5 text-sm text-brand-text-secondary">
                       <Check className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
                       Live map tracking once a driver is within 10 stops of your home
                     </li>
-                    <li className="flex items-start gap-2.5 text-sm text-slate-400">
+                    <li className="flex items-start gap-2.5 text-sm text-brand-text-secondary">
                       <Check className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
                       Free for all packages fulfilled directly by Amazon Logistics
                     </li>
@@ -302,11 +302,11 @@ export default function FeaturesPage() {
       </div>
 
       {/* CTA */}
-      <section className="py-20 px-4 sm:px-6 bg-slate-900/40 border-t border-slate-800">
+      <section className="py-20 px-4 sm:px-6 bg-brand-navy-900/40 border-t border-brand-navy-500/40">
         <div className="max-w-2xl mx-auto text-center">
-          <h2 className="text-3xl font-bold text-slate-100 mb-4">Ready to score your first delivery?</h2>
-          <p className="text-slate-400 mb-8">Free download. Track 1 package at no cost. Upgrade whenever you're ready.</p>
-          <Link to="/download" className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold transition-all hover:scale-[1.02]">
+          <h2 className="text-3xl font-bold text-brand-text-primary mb-4">Ready to score your first delivery?</h2>
+          <p className="text-brand-text-secondary mb-8">Free download. Track 1 package at no cost. Upgrade whenever you're ready.</p>
+          <Link to="/download" className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-brand-orange hover:bg-brand-orange text-brand-text-primary font-bold transition-all hover:scale-[1.02]">
             Download Porchivo
             <ArrowRight className="w-4 h-4" />
           </Link>

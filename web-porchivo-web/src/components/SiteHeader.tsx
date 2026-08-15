@@ -5,6 +5,7 @@ import { Menu, X, HelpCircle, ChevronRight } from "lucide-react";
 import { PRIMARY_NAV } from "@/config/navigation";
 import { BRAND } from "@/config/brand";
 import LanguageSelector from "./LanguageSelector";
+import ThemeToggle from "./ThemeToggle";
 
 /** Maps nav hrefs to translation keys so labels stay localized. */
 const NAV_LABEL_KEYS: Record<string, string> = {
@@ -179,18 +180,21 @@ export default function SiteHeader() {
             </div>
 
             {/* ── Mobile toggle ─────────────────────────────────────────── */}
-            <button
-              className="md:hidden p-2.5 rounded-xl text-brand-text-muted hover:text-brand-text-primary hover:bg-brand-navy-600/50 transition-colors"
-              onClick={() => setMenuOpen(!menuOpen)}
-              aria-label={menuOpen ? "Close menu" : "Open menu"}
-              aria-expanded={menuOpen}
-              aria-controls="mobile-menu"
-            >
-              {menuOpen
-                ? <X className="w-5 h-5" />
-                : <Menu className="w-5 h-5" />
-              }
-            </button>
+            <div className="md:hidden flex items-center gap-1">
+              <ThemeToggle />
+              <button
+                className="p-2.5 rounded-xl text-brand-text-muted hover:text-brand-text-primary hover:bg-brand-navy-600/50 transition-colors"
+                onClick={() => setMenuOpen(!menuOpen)}
+                aria-label={menuOpen ? "Close menu" : "Open menu"}
+                aria-expanded={menuOpen}
+                aria-controls="mobile-menu"
+              >
+                {menuOpen
+                  ? <X className="w-5 h-5" />
+                  : <Menu className="w-5 h-5" />
+                }
+              </button>
+            </div>
           </div>
         </div>
 

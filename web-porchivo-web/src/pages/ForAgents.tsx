@@ -101,17 +101,17 @@ export default function ForAgentsPage() {
       />
 
       {/* Header */}
-      <section className="pt-16 pb-12 px-4 sm:px-6 border-b border-slate-800">
+      <section className="pt-16 pb-12 px-4 sm:px-6 border-b border-brand-navy-500/40">
         <div className="max-w-4xl mx-auto">
           <BreadcrumbNav items={[{ label: "Home", href: "/" }, { label: "For AI Agents", href: "/for-agents" }]} />
           <div className="mt-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-400/10 border border-blue-400/20 text-blue-400 text-xs font-semibold mb-5">
               Machine-readable product overview
             </div>
-            <h1 className="text-4xl sm:text-5xl font-bold text-slate-100 mb-4">
+            <h1 className="text-4xl sm:text-5xl font-bold text-brand-text-primary mb-4">
               Porchivo — AI Agent Overview
             </h1>
-            <p className="text-lg text-slate-400 max-w-2xl">
+            <p className="text-lg text-brand-text-secondary max-w-2xl">
               Structured, plain-language product facts for AI agents, LLMs, and automated systems. Also available as{" "}
               <a href="/llms.txt" className="text-blue-400 hover:text-blue-300 underline transition-colors" target="_blank" rel="noopener noreferrer">
                 /llms.txt
@@ -125,20 +125,20 @@ export default function ForAgentsPage() {
 
         {/* Product definition */}
         <section>
-          <h2 className="text-xl font-bold text-slate-100 mb-4 pb-2 border-b border-slate-800">Product Definition</h2>
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
-            <p className="text-slate-300 leading-relaxed font-medium">{BRAND.description}</p>
+          <h2 className="text-xl font-bold text-brand-text-primary mb-4 pb-2 border-b border-brand-navy-500/40">Product Definition</h2>
+          <div className="bg-brand-navy-900 border border-brand-navy-500/40 rounded-xl p-5">
+            <p className="text-brand-text-secondary leading-relaxed font-medium">{BRAND.description}</p>
           </div>
         </section>
 
         {/* Quick facts */}
         <section>
-          <h2 className="text-xl font-bold text-slate-100 mb-4 pb-2 border-b border-slate-800">Quick Facts</h2>
+          <h2 className="text-xl font-bold text-brand-text-primary mb-4 pb-2 border-b border-brand-navy-500/40">Quick Facts</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {QUICK_FACTS.map((fact) => (
-              <div key={fact.label} className="flex items-start gap-3 bg-slate-900/60 border border-slate-800 rounded-lg px-4 py-3">
-                <span className="text-xs text-slate-500 font-medium min-w-[120px] mt-0.5">{fact.label}</span>
-                <span className="text-sm text-slate-300 font-mono">{fact.value}</span>
+              <div key={fact.label} className="flex items-start gap-3 bg-brand-navy-900/60 border border-brand-navy-500/40 rounded-lg px-4 py-3">
+                <span className="text-xs text-brand-text-muted font-medium min-w-[120px] mt-0.5">{fact.label}</span>
+                <span className="text-sm text-brand-text-secondary font-mono">{fact.value}</span>
               </div>
             ))}
           </div>
@@ -146,11 +146,11 @@ export default function ForAgentsPage() {
 
         {/* Capabilities */}
         <section>
-          <h2 className="text-xl font-bold text-slate-100 mb-4 pb-2 border-b border-slate-800">Core Capabilities</h2>
+          <h2 className="text-xl font-bold text-brand-text-primary mb-4 pb-2 border-b border-brand-navy-500/40">Core Capabilities</h2>
           <ul className="space-y-2.5">
             {CAPABILITIES.map((cap, i) => (
-              <li key={i} className="flex items-start gap-3 text-sm text-slate-400">
-                <span className="w-5 h-5 rounded-full bg-slate-800 text-slate-500 text-xs flex items-center justify-center flex-shrink-0 mt-0.5 font-mono">
+              <li key={i} className="flex items-start gap-3 text-sm text-brand-text-secondary">
+                <span className="w-5 h-5 rounded-full bg-brand-navy-700 text-brand-text-muted text-xs flex items-center justify-center flex-shrink-0 mt-0.5 font-mono">
                   {i + 1}
                 </span>
                 {cap}
@@ -161,13 +161,13 @@ export default function ForAgentsPage() {
 
         {/* Risk score logic */}
         <section>
-          <h2 className="text-xl font-bold text-slate-100 mb-4 pb-2 border-b border-slate-800">Risk Score Logic</h2>
+          <h2 className="text-xl font-bold text-brand-text-primary mb-4 pb-2 border-b border-brand-navy-500/40">Risk Score Logic</h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-800">
-                  <th className="text-left py-2 text-slate-500 font-medium">Factor</th>
-                  <th className="text-right py-2 text-slate-500 font-medium">Score impact</th>
+                <tr className="border-b border-brand-navy-500/40">
+                  <th className="text-left py-2 text-brand-text-muted font-medium">Factor</th>
+                  <th className="text-right py-2 text-brand-text-muted font-medium">Score impact</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/50">
@@ -184,51 +184,51 @@ export default function ForAgentsPage() {
                   ["Drop instructions added", "−4"],
                 ].map(([factor, impact]) => (
                   <tr key={factor}>
-                    <td className="py-2 text-slate-400">{factor}</td>
-                    <td className={`py-2 text-right font-mono font-semibold ${impact.startsWith("+") ? "text-amber-400" : "text-emerald-400"}`}>{impact}</td>
+                    <td className="py-2 text-brand-text-secondary">{factor}</td>
+                    <td className={`py-2 text-right font-mono font-semibold ${impact.startsWith("+") ? "text-brand-orange" : "text-emerald-400"}`}>{impact}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          <p className="text-xs text-slate-600 mt-3 font-mono">Base score: 30 · High risk: ≥65 · Medium: 35–64 · Low: &lt;35</p>
+          <p className="text-xs text-brand-text-muted mt-3 font-mono">Base score: 30 · High risk: ≥65 · Medium: 35–64 · Low: &lt;35</p>
         </section>
 
         {/* Pricing */}
         <section>
-          <h2 className="text-xl font-bold text-slate-100 mb-4 pb-2 border-b border-slate-800">Pricing</h2>
+          <h2 className="text-xl font-bold text-brand-text-primary mb-4 pb-2 border-b border-brand-navy-500/40">Pricing</h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-800">
+                <tr className="border-b border-brand-navy-500/40">
                   {["Plan", "Monthly", "Annual", "Members", "Package limit"].map((h) => (
-                    <th key={h} className="text-left py-2 text-slate-500 font-medium pr-4">{h}</th>
+                    <th key={h} className="text-left py-2 text-brand-text-muted font-medium pr-4">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/50">
                 {PRICING_TABLE.map((row) => (
                   <tr key={row.plan}>
-                    <td className="py-2.5 pr-4 font-medium text-slate-200">{row.plan}</td>
-                    <td className="py-2.5 pr-4 text-slate-400 font-mono text-xs">{row.monthly}</td>
-                    <td className="py-2.5 pr-4 text-slate-400 font-mono text-xs">{row.annual}</td>
-                    <td className="py-2.5 pr-4 text-slate-400">{row.members}</td>
-                    <td className="py-2.5 text-slate-400">{row.limit}</td>
+                    <td className="py-2.5 pr-4 font-medium text-brand-text-primary">{row.plan}</td>
+                    <td className="py-2.5 pr-4 text-brand-text-secondary font-mono text-xs">{row.monthly}</td>
+                    <td className="py-2.5 pr-4 text-brand-text-secondary font-mono text-xs">{row.annual}</td>
+                    <td className="py-2.5 pr-4 text-brand-text-secondary">{row.members}</td>
+                    <td className="py-2.5 text-brand-text-secondary">{row.limit}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          <p className="text-xs text-slate-600 mt-3">Annual plans include 7-day free trial (14-day for HOA). Cancel anytime via App Store/Google Play.</p>
+          <p className="text-xs text-brand-text-muted mt-3">Annual plans include 7-day free trial (14-day for HOA). Cancel anytime via App Store/Google Play.</p>
         </section>
 
         {/* Differentiators */}
         <section>
-          <h2 className="text-xl font-bold text-slate-100 mb-4 pb-2 border-b border-slate-800">Differentiators</h2>
+          <h2 className="text-xl font-bold text-brand-text-primary mb-4 pb-2 border-b border-brand-navy-500/40">Differentiators</h2>
           <ul className="space-y-2.5">
             {BRAND.differentiators.map((d, i) => (
-              <li key={i} className="flex items-start gap-3 text-sm text-slate-400">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-1.5 flex-shrink-0" />
+              <li key={i} className="flex items-start gap-3 text-sm text-brand-text-secondary">
+                <span className="w-1.5 h-1.5 rounded-full bg-brand-orange mt-1.5 flex-shrink-0" />
                 {d}
               </li>
             ))}
@@ -237,10 +237,10 @@ export default function ForAgentsPage() {
 
         {/* Trust signals */}
         <section>
-          <h2 className="text-xl font-bold text-slate-100 mb-4 pb-2 border-b border-slate-800">Trust &amp; Security Signals</h2>
+          <h2 className="text-xl font-bold text-brand-text-primary mb-4 pb-2 border-b border-brand-navy-500/40">Trust &amp; Security Signals</h2>
           <ul className="space-y-2.5">
             {TRUST_SIGNALS.map((t, i) => (
-              <li key={i} className="flex items-start gap-3 text-sm text-slate-400">
+              <li key={i} className="flex items-start gap-3 text-sm text-brand-text-secondary">
                 <span className="w-4 h-4 rounded-full bg-emerald-400/10 text-emerald-400 text-[9px] flex items-center justify-center flex-shrink-0 mt-0.5">✓</span>
                 {t}
               </li>
@@ -250,12 +250,12 @@ export default function ForAgentsPage() {
 
         {/* Integrations */}
         <section>
-          <h2 className="text-xl font-bold text-slate-100 mb-4 pb-2 border-b border-slate-800">Integration Map</h2>
+          <h2 className="text-xl font-bold text-brand-text-primary mb-4 pb-2 border-b border-brand-navy-500/40">Integration Map</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {INTEGRATIONS.map((int) => (
-              <div key={int.name} className="bg-slate-900/60 border border-slate-800 rounded-lg px-4 py-3">
-                <div className="text-sm font-semibold text-slate-200 mb-0.5">{int.name}</div>
-                <div className="text-xs text-slate-500">{int.role}</div>
+              <div key={int.name} className="bg-brand-navy-900/60 border border-brand-navy-500/40 rounded-lg px-4 py-3">
+                <div className="text-sm font-semibold text-brand-text-primary mb-0.5">{int.name}</div>
+                <div className="text-xs text-brand-text-muted">{int.role}</div>
               </div>
             ))}
           </div>
@@ -263,12 +263,12 @@ export default function ForAgentsPage() {
 
         {/* Terminology */}
         <section>
-          <h2 className="text-xl font-bold text-slate-100 mb-4 pb-2 border-b border-slate-800">Terminology Glossary</h2>
+          <h2 className="text-xl font-bold text-brand-text-primary mb-4 pb-2 border-b border-brand-navy-500/40">Terminology Glossary</h2>
           <div className="space-y-4">
             {TERMINOLOGY.map((t) => (
               <div key={t.term}>
-                <div className="text-sm font-semibold text-slate-200 font-mono">{t.term}</div>
-                <div className="text-sm text-slate-500 mt-1">{t.def}</div>
+                <div className="text-sm font-semibold text-brand-text-primary font-mono">{t.term}</div>
+                <div className="text-sm text-brand-text-muted mt-1">{t.def}</div>
               </div>
             ))}
           </div>
@@ -276,7 +276,7 @@ export default function ForAgentsPage() {
 
         {/* Official sources */}
         <section>
-          <h2 className="text-xl font-bold text-slate-100 mb-4 pb-2 border-b border-slate-800">Official Sources of Truth</h2>
+          <h2 className="text-xl font-bold text-brand-text-primary mb-4 pb-2 border-b border-brand-navy-500/40">Official Sources of Truth</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {OFFICIAL_SOURCES.map((src) => (
               <a
@@ -284,10 +284,10 @@ export default function ForAgentsPage() {
                 href={src.url}
                 target={src.url.startsWith("http") ? "_blank" : undefined}
                 rel={src.url.startsWith("http") ? "noopener noreferrer" : undefined}
-                className="flex items-center justify-between bg-slate-900/60 border border-slate-800 hover:border-slate-600 rounded-lg px-4 py-3 group transition-colors"
+                className="flex items-center justify-between bg-brand-navy-900/60 border border-brand-navy-500/40 hover:border-brand-navy-500/60 rounded-lg px-4 py-3 group transition-colors"
               >
-                <span className="text-sm text-slate-300 group-hover:text-slate-100 transition-colors">{src.label}</span>
-                <ExternalLink className="w-3.5 h-3.5 text-slate-600 group-hover:text-slate-400 transition-colors" />
+                <span className="text-sm text-brand-text-secondary group-hover:text-brand-text-primary transition-colors">{src.label}</span>
+                <ExternalLink className="w-3.5 h-3.5 text-brand-text-muted group-hover:text-brand-text-secondary transition-colors" />
               </a>
             ))}
           </div>
@@ -295,8 +295,8 @@ export default function ForAgentsPage() {
 
         {/* Constraints */}
         <section>
-          <h2 className="text-xl font-bold text-slate-100 mb-4 pb-2 border-b border-slate-800">Constraints &amp; Compliance Notes</h2>
-          <ul className="space-y-2.5 text-sm text-slate-400">
+          <h2 className="text-xl font-bold text-brand-text-primary mb-4 pb-2 border-b border-brand-navy-500/40">Constraints &amp; Compliance Notes</h2>
+          <ul className="space-y-2.5 text-sm text-brand-text-secondary">
             {[
               "Service available in the United States. Package tracking works internationally.",
               "Porch Partners are independent contractors — not Porchivo employees.",
@@ -307,7 +307,7 @@ export default function ForAgentsPage() {
               "Identity verification (Stripe Identity) required before a Partner can earn.",
             ].map((c, i) => (
               <li key={i} className="flex items-start gap-3">
-                <span className="w-1.5 h-1.5 rounded-full bg-slate-600 mt-1.5 flex-shrink-0" />
+                <span className="w-1.5 h-1.5 rounded-full bg-brand-navy-500 mt-1.5 flex-shrink-0" />
                 {c}
               </li>
             ))}
@@ -316,7 +316,7 @@ export default function ForAgentsPage() {
 
         {/* Page index */}
         <section>
-          <h2 className="text-xl font-bold text-slate-100 mb-4 pb-2 border-b border-slate-800">Page Index</h2>
+          <h2 className="text-xl font-bold text-brand-text-primary mb-4 pb-2 border-b border-brand-navy-500/40">Page Index</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-sm">
             {[
               { label: "Home", href: "/" },
@@ -334,7 +334,7 @@ export default function ForAgentsPage() {
               <Link
                 key={p.href}
                 to={p.href}
-                className="px-3 py-2 rounded-lg bg-slate-900/60 border border-slate-800 hover:border-slate-600 text-slate-400 hover:text-slate-200 transition-colors font-mono text-xs"
+                className="px-3 py-2 rounded-lg bg-brand-navy-900/60 border border-brand-navy-500/40 hover:border-brand-navy-500/60 text-brand-text-secondary hover:text-brand-text-primary transition-colors font-mono text-xs"
               >
                 {p.href}
               </Link>

@@ -103,13 +103,13 @@ export default function PricingPage() {
       />
 
       {/* Header */}
-      <section className="pt-16 pb-20 px-4 sm:px-6 text-center border-b border-slate-800">
+      <section className="pt-16 pb-20 px-4 sm:px-6 text-center border-b border-brand-navy-500/40">
         <div className="max-w-3xl mx-auto">
           <BreadcrumbNav items={[{ label: "Home", href: "/" }, { label: "Pricing", href: "/pricing" }]} />
-          <h1 className="mt-8 text-4xl sm:text-5xl font-bold text-slate-100 mb-4">
+          <h1 className="mt-8 text-4xl sm:text-5xl font-bold text-brand-text-primary mb-4">
             Plans for every household
           </h1>
-          <p className="text-xl text-slate-400">
+          <p className="text-xl text-brand-text-secondary">
             Start free, no time limit. Upgrade for unlimited tracking, Theft Shield, and full risk intelligence.
           </p>
         </div>
@@ -124,36 +124,36 @@ export default function PricingPage() {
                 key={plan.name}
                 className={`rounded-2xl border p-7 flex flex-col ${
                   plan.highlight
-                    ? "border-amber-500/50 bg-gradient-to-b from-amber-500/5 to-transparent"
-                    : "border-slate-800 bg-slate-900"
+                    ? "border-brand-orange/50 bg-gradient-to-b from-amber-500/5 to-transparent"
+                    : "border-brand-navy-500/40 bg-brand-navy-900"
                 }`}
               >
                 {plan.badge && (
-                  <div className="inline-flex self-start mb-4 px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-400 text-xs font-semibold">
+                  <div className="inline-flex self-start mb-4 px-2.5 py-1 rounded-full bg-brand-orange/15 text-brand-orange text-xs font-semibold">
                     {plan.badge}
                   </div>
                 )}
-                <div className="text-slate-400 text-sm font-medium mb-1">{plan.name}</div>
+                <div className="text-brand-text-secondary text-sm font-medium mb-1">{plan.name}</div>
                 <div className="flex items-baseline gap-1 mb-1">
-                  <span className="text-4xl font-bold text-slate-100">{plan.price}</span>
-                  <span className="text-slate-500 text-sm">{plan.period}</span>
+                  <span className="text-4xl font-bold text-brand-text-primary">{plan.price}</span>
+                  <span className="text-brand-text-muted text-sm">{plan.period}</span>
                 </div>
                 {plan.altPrice && (
-                  <div className="text-xs text-slate-600 mb-3">{plan.altPrice}</div>
+                  <div className="text-xs text-brand-text-muted mb-3">{plan.altPrice}</div>
                 )}
-                <p className="text-sm text-slate-400 mb-6">{plan.description}</p>
+                <p className="text-sm text-brand-text-secondary mb-6">{plan.description}</p>
 
                 <ul className="space-y-2.5 mb-8 flex-1">
                   {plan.features.map((f) => (
                     <li key={f.text} className="flex items-start gap-2.5 text-sm">
                       {f.included ? (
-                        <Check className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
+                        <Check className="w-4 h-4 text-brand-orange flex-shrink-0 mt-0.5" />
                       ) : (
                         <span className="w-4 h-4 flex-shrink-0 mt-0.5 flex items-center justify-center">
-                          <span className="w-3 h-px bg-slate-700" />
+                          <span className="w-3 h-px bg-brand-navy-700" />
                         </span>
                       )}
-                      <span className={f.included ? "text-slate-300" : "text-slate-600"}>{f.text}</span>
+                      <span className={f.included ? "text-brand-text-secondary" : "text-brand-text-muted"}>{f.text}</span>
                     </li>
                   ))}
                 </ul>
@@ -162,8 +162,8 @@ export default function PricingPage() {
                   to={plan.ctaHref}
                   className={`block text-center py-3 rounded-xl text-sm font-semibold transition-all ${
                     plan.highlight
-                      ? "bg-amber-500 hover:bg-amber-400 text-slate-950 hover:scale-[1.02]"
-                      : "border border-slate-700 hover:border-slate-500 text-slate-300 hover:text-slate-100"
+                      ? "bg-brand-orange hover:bg-brand-orange text-brand-text-primary hover:scale-[1.02]"
+                      : "border border-brand-navy-500/50 hover:border-brand-navy-500 text-brand-text-secondary hover:text-brand-text-primary"
                   }`}
                 >
                   {plan.cta}
@@ -177,13 +177,13 @@ export default function PricingPage() {
       {/* HOA Enterprise */}
       <section className="py-12 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto">
-          <div className="rounded-2xl border border-slate-700 bg-slate-900 p-8 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+          <div className="rounded-2xl border border-brand-navy-500/50 bg-brand-navy-900 p-8 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
             <div>
-              <div className="inline-flex px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 text-xs font-semibold mb-3">
+              <div className="inline-flex px-2.5 py-1 rounded-full bg-brand-navy-700 text-brand-text-secondary text-xs font-semibold mb-3">
                 HOA &amp; Enterprise — Up to 250 households
               </div>
-              <h2 className="text-2xl font-bold text-slate-100 mb-3">Protect an entire community</h2>
-              <p className="text-slate-400 text-sm leading-relaxed">
+              <h2 className="text-2xl font-bold text-brand-text-primary mb-3">Protect an entire community</h2>
+              <p className="text-brand-text-secondary text-sm leading-relaxed">
                 One Porchivo subscription covers up to 250 households. All residents get full Premium access — unified billing, denser neighborhood alert data, and community-wide risk intelligence.
               </p>
             </div>
@@ -192,17 +192,17 @@ export default function PricingPage() {
                 { label: "Monthly", price: "$350/mo", sub: "up to 250 households" },
                 { label: "Annual", price: "$3,000/yr", sub: "$250/mo — save 29% · 14-day trial" },
               ].map((row) => (
-                <div key={row.label} className="flex items-center justify-between p-4 rounded-xl bg-slate-800/50">
+                <div key={row.label} className="flex items-center justify-between p-4 rounded-xl bg-brand-navy-700/50">
                   <div>
-                    <div className="text-sm font-medium text-slate-200">{row.label}</div>
-                    <div className="text-xs text-slate-500">{row.sub}</div>
+                    <div className="text-sm font-medium text-brand-text-primary">{row.label}</div>
+                    <div className="text-xs text-brand-text-muted">{row.sub}</div>
                   </div>
-                  <div className="text-lg font-bold text-amber-400">{row.price}</div>
+                  <div className="text-lg font-bold text-brand-orange">{row.price}</div>
                 </div>
               ))}
               <Link
                 to="/download"
-                className="flex items-center justify-center gap-2 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold text-sm transition-colors"
+                className="flex items-center justify-center gap-2 py-3 rounded-xl bg-brand-orange hover:bg-brand-orange text-brand-text-primary font-semibold text-sm transition-colors"
               >
                 Get started
                 <ArrowRight className="w-4 h-4" />
@@ -213,39 +213,39 @@ export default function PricingPage() {
       </section>
 
       {/* Risk score reference table */}
-      <section className="py-16 px-4 sm:px-6 bg-slate-900/40 border-t border-slate-800">
+      <section className="py-16 px-4 sm:px-6 bg-brand-navy-900/40 border-t border-brand-navy-500/40">
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-2xl font-bold text-slate-100 mb-2">How the risk score is calculated</h2>
-          <p className="text-slate-400 text-sm mb-8">
+          <h2 className="text-2xl font-bold text-brand-text-primary mb-2">How the risk score is calculated</h2>
+          <p className="text-brand-text-secondary text-sm mb-8">
             The porch risk score (0–100) is calculated from 10 weighted factors. Higher scores mean higher theft probability.
           </p>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-800">
-                  <th className="text-left py-3 text-slate-500 font-medium">Factor</th>
-                  <th className="text-right py-3 text-slate-500 font-medium">Score impact</th>
+                <tr className="border-b border-brand-navy-500/40">
+                  <th className="text-left py-3 text-brand-text-muted font-medium">Factor</th>
+                  <th className="text-right py-3 text-brand-text-muted font-medium">Score impact</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60">
                 {RISK_FACTORS.map((r) => (
                   <tr key={r.factor}>
-                    <td className="py-3 text-slate-300">{r.factor}</td>
+                    <td className="py-3 text-brand-text-secondary">{r.factor}</td>
                     <td className={`py-3 text-right font-semibold ${
                       r.severity === "high" ? "text-red-400" :
-                      r.severity === "medium" ? "text-amber-400" : "text-emerald-400"
+                      r.severity === "medium" ? "text-brand-orange" : "text-emerald-400"
                     }`}>{r.impact}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          <p className="text-xs text-slate-600 mt-4">Base score: 30 · High risk: ≥65 · Medium: 35–64 · Low: &lt;35</p>
+          <p className="text-xs text-brand-text-muted mt-4">Base score: 30 · High risk: ≥65 · Medium: 35–64 · Low: &lt;35</p>
         </div>
       </section>
 
       {/* FAQ */}
-      <div className="bg-slate-950">
+      <div className="bg-brand-navy-900">
         <FAQSection
           faqs={pricingFAQs}
           title="Pricing questions answered"

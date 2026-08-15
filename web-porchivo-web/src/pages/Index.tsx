@@ -36,13 +36,13 @@ function StatCard({ value, suffix, label }: { value: number; suffix?: string; la
   return (
     <div
       ref={ref as React.RefObject<HTMLDivElement>}
-      className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 text-center"
+      className="bg-brand-navy-900/60 border border-brand-navy-500/40 rounded-2xl p-6 text-center"
     >
-      <div className="text-4xl sm:text-5xl font-bold text-amber-400 mb-2">
+      <div className="text-4xl sm:text-5xl font-bold text-brand-orange mb-2">
         {count.toLocaleString()}
         {suffix}
       </div>
-      <div className="text-sm text-slate-400 leading-snug">{label}</div>
+      <div className="text-sm text-brand-text-secondary leading-snug">{label}</div>
     </div>
   );
 }
@@ -67,8 +67,8 @@ export default function IndexPage() {
       />
 
       {/* Hero */}
-      <section className="pt-20 pb-24 px-4 sm:px-6 border-b border-slate-800 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-amber-500/8 via-transparent to-transparent pointer-events-none" />
+      <section className="pt-20 pb-24 px-4 sm:px-6 border-b border-brand-navy-500/40 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-brand-orange/8 via-transparent to-transparent pointer-events-none" />
         <div className="max-w-5xl mx-auto relative text-center">
           {/* Hero image: premium gradient glow + soft edges */}
           <div className="relative mx-auto mb-8 max-w-md">
@@ -83,43 +83,43 @@ export default function IndexPage() {
             <div className="absolute inset-x-0 -bottom-1 h-24 bg-gradient-to-t from-slate-950 to-transparent rounded-b-[2.5rem]" />
           </div>
 
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-400/10 border border-amber-400/20 text-amber-400 text-sm font-medium mb-6">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-orange/10 border border-brand-orange/20 text-brand-orange text-sm font-medium mb-6">
+            <span className="w-1.5 h-1.5 rounded-full bg-brand-orange animate-pulse" />
             {BRAND.shortTagline}
           </div>
-          <h1 className="text-4xl sm:text-6xl font-bold text-slate-100 leading-tight mb-4">
+          <h1 className="text-4xl sm:text-6xl font-bold text-brand-text-primary leading-tight mb-4">
             Porch pirate protection starts with knowing your porch risk{" "}
-            <span className="text-amber-400">before every delivery</span>
+            <span className="text-brand-orange">before every delivery</span>
           </h1>
-          <p className="text-lg sm:text-xl font-medium text-slate-300 max-w-2xl mx-auto mb-6">
+          <p className="text-lg sm:text-xl font-medium text-brand-text-secondary max-w-2xl mx-auto mb-6">
             From blocks to buildings — superior package and property tracking for homeowners, homeowner associations, and HOA package management.
           </p>
-          <p className="text-xl text-slate-400 leading-relaxed max-w-3xl mx-auto mb-6">
+          <p className="text-xl text-brand-text-secondary leading-relaxed max-w-3xl mx-auto mb-6">
             {BRAND.description}
           </p>
-          <p className="text-lg text-slate-300 leading-relaxed max-w-3xl mx-auto mb-4">
+          <p className="text-lg text-brand-text-secondary leading-relaxed max-w-3xl mx-auto mb-4">
             Porchivo is the package delivery security app for modern homes.
           </p>
-          <p className="text-lg text-slate-300 leading-relaxed max-w-3xl mx-auto mb-6">
+          <p className="text-lg text-brand-text-secondary leading-relaxed max-w-3xl mx-auto mb-6">
             It's smart home package protection for every package that lands at your door.
           </p>
           <div className="flex justify-center mb-10">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/60 border border-slate-800 text-slate-300 text-sm font-medium">
-              <Globe className="w-4 h-4 text-amber-400" />
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-navy-900/60 border border-brand-navy-500/40 text-brand-text-secondary text-sm font-medium">
+              <Globe className="w-4 h-4 text-brand-orange" />
               Built to work in 190+ countries worldwide
             </div>
           </div>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
             <Link
               to="/download"
-              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold transition-all hover:scale-[1.02]"
+              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-brand-orange hover:bg-brand-orange text-brand-text-primary font-bold transition-all hover:scale-[1.02]"
             >
               Download Porchivo
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
               to="/features"
-              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl border border-slate-700 hover:border-slate-500 text-slate-300 font-medium transition-colors"
+              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl border border-brand-navy-500/50 hover:border-brand-navy-500 text-brand-text-secondary font-medium transition-colors"
             >
               See how it works
             </Link>
@@ -131,7 +131,7 @@ export default function IndexPage() {
       </section>
 
       {/* Stats */}
-      <section className="py-16 px-4 sm:px-6 border-b border-slate-800">
+      <section className="py-16 px-4 sm:px-6 border-b border-brand-navy-500/40">
         <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-5">
           <StatCard value={119} suffix="M" label="packages stolen in the US every year" />
           <StatCard value={20} suffix="%" label="of delivered packages are stolen from porches" />
@@ -140,16 +140,16 @@ export default function IndexPage() {
       </section>
 
       {/* How it works */}
-      <section id="how-it-works" className="py-20 px-4 sm:px-6 border-b border-slate-800">
+      <section id="how-it-works" className="py-20 px-4 sm:px-6 border-b border-brand-navy-500/40">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
-            <h2 className="text-3xl sm:text-4xl font-bold text-slate-100 mb-4">How Porchivo works: package delivery security app</h2>
-            <p className="text-lg text-slate-400 max-w-2xl mx-auto">
+            <h2 className="text-3xl sm:text-4xl font-bold text-brand-text-primary mb-4">How Porchivo works: package delivery security app</h2>
+            <p className="text-lg text-brand-text-secondary max-w-2xl mx-auto">
               From porch-piracy problem to protected delivery — in four simple steps.
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div className="bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden">
+            <div className="bg-brand-navy-900/60 border border-brand-navy-500/40 rounded-2xl overflow-hidden">
               <img
                 src="/images/why-porchivo-porch-piracy.png"
                 alt="Porch pirate protection starts with understanding porch piracy — 1 in 5 households are hit"
@@ -157,13 +157,13 @@ export default function IndexPage() {
                 className="w-full h-auto"
               />
               <div className="p-5">
-                <p className="text-sm font-semibold text-amber-400 mb-1">1. The problem</p>
-                <p className="text-slate-400 text-sm leading-relaxed">
+                <p className="text-sm font-semibold text-brand-orange mb-1">1. The problem</p>
+                <p className="text-brand-text-secondary text-sm leading-relaxed">
                   Porch piracy is an everyday problem — 1 in 5 households are hit.
                 </p>
               </div>
             </div>
-            <div className="bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden">
+            <div className="bg-brand-navy-900/60 border border-brand-navy-500/40 rounded-2xl overflow-hidden">
               <img
                 src="/images/how-it-works-three-taps.png"
                 alt="Porch package security workflow: track, assign a Porch Partner, and receive in three taps"
@@ -171,16 +171,16 @@ export default function IndexPage() {
                 className="w-full h-auto"
               />
               <div className="p-5">
-                <p className="text-sm font-semibold text-amber-400 mb-1">2. The solution</p>
-                <p className="text-slate-400 text-sm leading-relaxed">
+                <p className="text-sm font-semibold text-brand-orange mb-1">2. The solution</p>
+                <p className="text-brand-text-secondary text-sm leading-relaxed">
                   Track your package, assign a trusted neighbor, and receive — three taps.
                 </p>
-                <p className="text-slate-500 text-sm leading-relaxed mt-2">
+                <p className="text-brand-text-muted text-sm leading-relaxed mt-2">
                   Great for when you are going to be home late or about to take a vacation!
                 </p>
               </div>
             </div>
-            <div className="bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden">
+            <div className="bg-brand-navy-900/60 border border-brand-navy-500/40 rounded-2xl overflow-hidden">
               <img
                 src="/images/how-it-works-package-secured.png"
                 alt="Delivery theft alert and package secured confirmation when your Porch Partner takes custody"
@@ -188,13 +188,13 @@ export default function IndexPage() {
                 className="w-full h-auto"
               />
               <div className="p-5">
-                <p className="text-sm font-semibold text-amber-400 mb-1">3. The outcome</p>
-                <p className="text-slate-400 text-sm leading-relaxed">
+                <p className="text-sm font-semibold text-brand-orange mb-1">3. The outcome</p>
+                <p className="text-brand-text-secondary text-sm leading-relaxed">
                   Get an instant "Package secured" confirmation when your partner takes custody.
                 </p>
               </div>
             </div>
-            <div className="bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden">
+            <div className="bg-brand-navy-900/60 border border-brand-navy-500/40 rounded-2xl overflow-hidden">
               <img
                 src="/images/built-on-trust-real-neighbors.png"
                 alt="Trusted neighbor delivery hold and neighborhood package safety with verified Porchivo neighbors"
@@ -202,8 +202,8 @@ export default function IndexPage() {
                 className="w-full h-auto"
               />
               <div className="p-5">
-                <p className="text-sm font-semibold text-amber-400 mb-1">4. The trust layer</p>
-                <p className="text-slate-400 text-sm leading-relaxed">
+                <p className="text-sm font-semibold text-brand-orange mb-1">4. The trust layer</p>
+                <p className="text-brand-text-secondary text-sm leading-relaxed">
                   Verified, private, local. Real neighbors keep each other accountable.
                 </p>
               </div>
@@ -213,16 +213,16 @@ export default function IndexPage() {
       </section>
 
       {/* Feature highlights */}
-      <section className="py-20 px-4 sm:px-6 border-b border-slate-800">
+      <section className="py-20 px-4 sm:px-6 border-b border-brand-navy-500/40">
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-12">
             <div>
-              <h2 className="text-3xl font-bold text-slate-100 mb-3">Porch package security, delivery theft alerts, and trusted neighbor delivery holds</h2>
-              <p className="text-slate-400 text-lg">Everything you need for neighborhood package safety and HOA package management.</p>
+              <h2 className="text-3xl font-bold text-brand-text-primary mb-3">Porch package security, delivery theft alerts, and trusted neighbor delivery holds</h2>
+              <p className="text-brand-text-secondary text-lg">Everything you need for neighborhood package safety and HOA package management.</p>
             </div>
             <Link
               to="/features"
-              className="inline-flex items-center gap-2 text-amber-400 hover:text-amber-300 font-medium transition-colors"
+              className="inline-flex items-center gap-2 text-brand-orange hover:text-brand-orange-light font-medium transition-colors"
             >
               All features
               <ArrowRight className="w-4 h-4" />
@@ -234,13 +234,13 @@ export default function IndexPage() {
               return (
                 <div
                   key={feature.id}
-                  className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 hover:border-slate-700 transition-colors"
+                  className="bg-brand-navy-900/60 border border-brand-navy-500/40 rounded-2xl p-6 hover:border-brand-navy-500/50 transition-colors"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-amber-400/10 flex items-center justify-center mb-4">
-                    <Icon className="w-5 h-5 text-amber-400" />
+                  <div className="w-10 h-10 rounded-xl bg-brand-orange/10 flex items-center justify-center mb-4">
+                    <Icon className="w-5 h-5 text-brand-orange" />
                   </div>
-                  <h3 className="text-lg font-semibold text-slate-100 mb-2">{feature.name}</h3>
-                  <p className="text-slate-400 text-sm leading-relaxed">{feature.tagline}</p>
+                  <h3 className="text-lg font-semibold text-brand-text-primary mb-2">{feature.name}</h3>
+                  <p className="text-brand-text-secondary text-sm leading-relaxed">{feature.tagline}</p>
                 </div>
               );
             })}
@@ -249,16 +249,16 @@ export default function IndexPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-20 px-4 sm:px-6 border-b border-slate-800">
+      <section className="py-20 px-4 sm:px-6 border-b border-brand-navy-500/40">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl font-bold text-slate-100 mb-4">Free to start. Upgrade for HOA package management and neighborhood package safety.</h2>
-          <p className="text-slate-400 text-lg mb-8">
+          <h2 className="text-3xl font-bold text-brand-text-primary mb-4">Free to start. Upgrade for HOA package management and neighborhood package safety.</h2>
+          <p className="text-brand-text-secondary text-lg mb-8">
             Track 1 package free. Premium unlocks unlimited tracking, Theft Shield alerts, and 90-second live refresh.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               to="/pricing"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-slate-700 hover:border-slate-500 text-slate-300 font-medium transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-brand-navy-500/50 hover:border-brand-navy-500 text-brand-text-secondary font-medium transition-colors"
             >
               View pricing
             </Link>
