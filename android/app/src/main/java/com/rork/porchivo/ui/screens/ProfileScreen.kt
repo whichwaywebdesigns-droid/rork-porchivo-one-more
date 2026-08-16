@@ -93,6 +93,7 @@ fun ProfileScreen(
 
     val isDark = darkOverride ?: androidx.compose.foundation.isSystemInDarkTheme()
 
+    var showDeleteConfirm by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
     var deleteConfirmText by remember { mutableStateOf("") }
     var isDeleting by remember { mutableStateOf(false) }
@@ -497,12 +498,43 @@ fun ProfileScreen(
                     icon = Icons.Outlined.Delete,
                     iconTint = c.danger,
                     label = "Delete account",
-                    onClick = { showDeleteDialog = true },
+                    onClick = { showDeleteConfirm = true },
                 )
             }
         }
 
         Spacer(modifier = Modifier.height(12.dp))
+    }
+
+    if (showDeleteConfirm) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirm = false },
+            title = { Text("Delete Account?") },
+            text = {
+                Text(
+                    "This will start the account deletion process. Your account will be deactivated immediately and your data permanently deleted within 30 days. This action cannot be undone.",
+                    fontSize = 14.sp,
+                    color = c.textSecondary,
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteConfirm = false
+                        showDeleteDialog = true
+                    },
+                ) {
+                    Text("Continue", color = c.danger)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showDeleteConfirm = false },
+                ) {
+                    Text("Cancel", color = c.accent)
+                }
+            },
+        )
     }
 
     if (showDeleteDialog) {

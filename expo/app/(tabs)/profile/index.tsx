@@ -1,5 +1,5 @@
-import React, { useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Switch, Linking } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Switch, Linking, Modal } from 'react-native';
 import { Stack } from 'expo-router';
 import { Image } from 'expo-image';
 import { MapPin, Mail, Phone, Home, Shield, Bell, UserPlus, ChevronRight, FileText, Pencil, Send, LogOut, HelpCircle, CheckCircle, Trash2, Moon, Sun, ArrowRight, Handshake, BookOpen, Star, Building2, MailOpen, Globe } from 'lucide-react-native';
@@ -42,6 +42,7 @@ export default function ProfileScreen() {
   const { isDark, toggleTheme } = useTheme();
   const router = useRouter();
   const [inviting, setInviting] = React.useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const handleInvite = React.useCallback(async () => {
     if (!user || inviting) return;
@@ -426,7 +427,7 @@ export default function ProfileScreen() {
       <View style={styles.section}>
         <TouchableOpacity
           style={styles.deleteAccountButton}
-          onPress={() => router.push('/delete-account' as any)}
+          onPress={() => setShowDeleteConfirm(true)}
           activeOpacity={0.8}
           testID="delete-account-btn"
         >
@@ -438,6 +439,45 @@ export default function ProfileScreen() {
         </TouchableOpacity>
         <Text style={styles.versionText}>Porchivo v1.0.6</Text>
       </View>
+
+      {/* Confirmation modal before opening the deletion flow */}
+      <Modal
+        visible={showDeleteConfirm}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowDeleteConfirm(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalCard, { backgroundColor: Colors.white }]}> 
+            <View style={[styles.modalIconWrap, { backgroundColor: Colors.dangerLight }]}>
+              <Trash2 size={28} color={Colors.danger} />
+            </View>
+            <Text style={[styles.modalTitle, { color: Colors.slate }]}>Delete Account?</Text>
+            <Text style={[styles.modalBody, { color: Colors.slateLighter }]}>
+              This will start the account deletion process. Your account will be deactivated immediately and your data permanently deleted within 30 days.
+            </Text>
+            <View style={styles.modalButtonStack}>
+              <TouchableOpacity
+                style={[styles.modalDangerBtn, { backgroundColor: Colors.danger }]}
+                onPress={() => {
+                  setShowDeleteConfirm(false);
+                  router.push('/delete-account' as any);
+                }}
+                activeOpacity={0.8}
+              >
+                <Text style={[styles.modalBtnText, { color: Colors.white }]}>Continue</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.modalCancelBtn}
+                onPress={() => setShowDeleteConfirm(false)}
+                activeOpacity={0.8}
+              >
+                <Text style={[styles.modalCancelText, { color: Colors.primary }]}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -729,6 +769,63 @@ const styles = StyleSheet.create({
     fontWeight: '600' as const,
     color: Colors.primary,
     textAlign: 'center' as const,
+  },
+  // Delete confirmation modal
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    padding: 24,
+  },
+  modalCard: {
+    borderRadius: 20,
+    padding: 28,
+    alignItems: 'center',
+    width: '100%',
+  },
+  modalIconWrap: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700' as const,
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  modalBody: {
+    fontSize: 14,
+    lineHeight: 20,
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  modalButtonStack: {
+    width: '100%',
+  },
+  modalDangerBtn: {
+    height: 48,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  modalBtnText: {
+    fontSize: 16,
+    fontWeight: '600' as const,
+  },
+  modalCancelBtn: {
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalCancelText: {
+    fontSize: 15,
+    fontWeight: '600' as const,
   },
   inviteBtn: {
     flexDirection: 'row' as const,
