@@ -178,11 +178,34 @@
   transition: opacity 0.2s ease;
 }
 
-/* ── Invisible scrollbars (matches mobile apps) ──────────────────────────── */
-::-webkit-scrollbar {
-  width: 0;
-  height: 0;
-}
+/* ── Thin overlay scrollbars (modern shadow style) ─────────────────────────── */
+/* Auto-hides when idle, thin rounded bar that looks like a page shadow.
+   Works across WebKit (Chrome/Safari/Edge) and Firefox. */
+
+/* Firefox */
 * {
-  scrollbar-width: none;
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--foreground) / 0.18) transparent;
+}
+
+/* WebKit (Chrome / Safari / Edge) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--foreground) / 0.15);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--foreground) / 0.28);
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
 }
