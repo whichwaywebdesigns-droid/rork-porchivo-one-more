@@ -107,7 +107,9 @@ fun MoreScreen(
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
             ) {
                 Column {
-                    LinkRow(icon = Icons.Outlined.Campaign, tint = c.warmOrange, label = "Announcements") { }
+                    LinkRow(icon = Icons.Outlined.Campaign, tint = c.warmOrange, label = "Announcements") {
+                        navController.navigate(Routes.ANNOUNCEMENTS)
+                    }
                     HorizontalDivider(color = c.border)
                     LinkRow(icon = Icons.Outlined.CalendarMonth, tint = c.accent, label = "Calendar") { }
                     HorizontalDivider(color = c.border)

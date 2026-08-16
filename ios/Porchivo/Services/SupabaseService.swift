@@ -264,6 +264,107 @@ nonisolated struct OrgMembership: Equatable, Sendable {
     }
 }
 
+// MARK: - Announcements
+
+nonisolated struct DbAnnouncement: Codable, Sendable {
+    let id: String
+    var orgId: String?
+    var authorId: String?
+    var authorDisplayName: String?
+    var title: String
+    var body: String
+    var priority: String?
+    var category: String?
+    var isPinned: Bool?
+    var expiresAt: String?
+    var scheduledAt: String?
+    var viewCount: Int?
+    var createdAt: String?
+    var updatedAt: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case orgId = "org_id"
+        case authorId = "author_id"
+        case authorDisplayName = "author_display_name"
+        case title, body, priority, category
+        case isPinned = "is_pinned"
+        case expiresAt = "expires_at"
+        case scheduledAt = "scheduled_at"
+        case viewCount = "view_count"
+        case createdAt = "created_at"
+        case updatedAt = "updated_at"
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decodeIfPresent(String.self, forKey: .id) ?? ""
+        orgId = try c.decodeIfPresent(String.self, forKey: .orgId)
+        authorId = try c.decodeIfPresent(String.self, forKey: .authorId)
+        authorDisplayName = try c.decodeIfPresent(String.self, forKey: .authorDisplayName)
+        title = try c.decodeIfPresent(String.self, forKey: .title) ?? ""
+        body = try c.decodeIfPresent(String.self, forKey: .body) ?? ""
+        priority = try c.decodeIfPresent(String.self, forKey: .priority)
+        category = try c.decodeIfPresent(String.self, forKey: .category)
+        isPinned = try c.decodeIfPresent(Bool.self, forKey: .isPinned)
+        expiresAt = try c.decodeIfPresent(String.self, forKey: .expiresAt)
+        scheduledAt = try c.decodeIfPresent(String.self, forKey: .scheduledAt)
+        viewCount = try c.decodeIfPresent(Int.self, forKey: .viewCount)
+        createdAt = try c.decodeIfPresent(String.self, forKey: .createdAt)
+        updatedAt = try c.decodeIfPresent(String.self, forKey: .updatedAt)
+    }
+}
+
+// MARK: - Maintenance RPC row
+
+/// Row returned by `get_my_maintenance_requests` RPC (resident-facing, fewer fields).
+nonisolated struct DbMyMaintenanceRequest: Codable, Sendable {
+    let id: String
+    var category: String?
+    var priority: String?
+    var status: String?
+    var title: String?
+    var description: String?
+    var locationDetail: String?
+    var residentVisibleNote: String?
+    var resolutionCode: String?
+    var scheduledFor: String?
+    var completedAt: String?
+    var commentCount: Int?
+    var createdAt: String?
+    var updatedAt: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id, category, priority, status, title, description
+        case locationDetail = "location_detail"
+        case residentVisibleNote = "resident_visible_note"
+        case resolutionCode = "resolution_code"
+        case scheduledFor = "scheduled_for"
+        case completedAt = "completed_at"
+        case commentCount = "comment_count"
+        case createdAt = "created_at"
+        case updatedAt = "updated_at"
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decodeIfPresent(String.self, forKey: .id) ?? ""
+        category = try c.decodeIfPresent(String.self, forKey: .category)
+        priority = try c.decodeIfPresent(String.self, forKey: .priority)
+        status = try c.decodeIfPresent(String.self, forKey: .status)
+        title = try c.decodeIfPresent(String.self, forKey: .title)
+        description = try c.decodeIfPresent(String.self, forKey: .description)
+        locationDetail = try c.decodeIfPresent(String.self, forKey: .locationDetail)
+        residentVisibleNote = try c.decodeIfPresent(String.self, forKey: .residentVisibleNote)
+        resolutionCode = try c.decodeIfPresent(String.self, forKey: .resolutionCode)
+        scheduledFor = try c.decodeIfPresent(String.self, forKey: .scheduledFor)
+        completedAt = try c.decodeIfPresent(String.self, forKey: .completedAt)
+        commentCount = try c.decodeIfPresent(Int.self, forKey: .commentCount)
+        createdAt = try c.decodeIfPresent(String.self, forKey: .createdAt)
+        updatedAt = try c.decodeIfPresent(String.self, forKey: .updatedAt)
+    }
+}
+
 // MARK: - SupabaseService
 
 actor SupabaseService {
@@ -560,6 +661,50 @@ actor SupabaseService {
             "body": body,
         ]
         return await restPost(url: baseURL.appendingPathComponent("rest/v1/chat_messages"), body: payload, singleton: true)
+    }
+
+    // MARK: - Announcements (direct table read/write — RLS handles permissions)
+
+    /// Fetches published announcements for the user's org, ordered pinned-first then newest.
+    func fetchAnnouncements(orgId: String) async -> Result<[DbAnnouncement], Error> {
+        guard let comps = URLComponents(url: baseURL.appendingPathComponent("rest/v1/org_announcements"), resolvingAgainstBaseURL: false),
+              let url = comps.url else { return .failure(URLError(.badURL)) }
+        var c = comps
+        c.queryItems = [
+            URLQueryItem(name: "org_id", value: "eq.\(orgId)"),
+            URLQueryItem(name: "or", value: "(scheduled_at.is.null,scheduled_at.lte.now())"),
+            URLQueryItem(name: "order", value: "is_pinned.desc,created_at.desc"),
+            URLQueryItem(name: "limit", value: "30"),
+        ]
+        return await restGet(url: c.url ?? url)
+    }
+
+    /// Posts a new announcement to the org_announcements table. Staff/admin only (enforced by RLS).
+    func insertAnnouncement(_ body: [String: Any?]) async -> Result<DbAnnouncement, Error> {
+        await restPost(url: baseURL.appendingPathComponent("rest/v1/org_announcements"), body: body, singleton: true)
+    }
+
+    // MARK: - Maintenance RPCs
+
+    /// Submits a new maintenance request via the `submit_maintenance_request` RPC.
+    /// Returns the new request UUID.
+    func submitMaintenanceRequest(orgId: String, category: String, priority: String,
+                                  title: String, description: String?, location: String?) async -> Result<String, Error> {
+        let body: [String: Any?] = [
+            "p_org_id": orgId,
+            "p_category": category,
+            "p_priority": priority,
+            "p_title": title,
+            "p_description": description,
+            "p_location": location,
+        ]
+        let result: Result<String, Error> = await rpc("submit_maintenance_request", body: body)
+        return result
+    }
+
+    /// Fetches the current user's maintenance requests via `get_my_maintenance_requests` RPC.
+    func fetchMyMaintenanceRequests(orgId: String) async -> Result<[DbMyMaintenanceRequest], Error> {
+        await rpc("get_my_maintenance_requests", body: ["p_org_id": orgId])
     }
 
     // MARK: Storage (avatars)

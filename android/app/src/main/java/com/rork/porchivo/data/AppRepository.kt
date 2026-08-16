@@ -2,6 +2,8 @@ package com.rork.porchivo.data
 
 import android.content.Context
 import com.rork.porchivo.BuildConfig
+import com.rork.porchivo.data.dto.DbAnnouncement
+import com.rork.porchivo.data.dto.DbMyMaintenanceRequest
 import com.rork.porchivo.data.dto.AuthSession
 import com.rork.porchivo.data.dto.DbNotification
 import com.rork.porchivo.data.dto.DbOrgContextRow
@@ -11,6 +13,8 @@ import com.rork.porchivo.data.dto.OrgCheckoutResponse
 import com.rork.porchivo.data.dto.OrgConfirmResponse
 import com.rork.porchivo.data.dto.OrgMembership
 import com.rork.porchivo.data.dto.RiskScoreResponse
+import com.rork.porchivo.model.Announcement
+import com.rork.porchivo.model.MaintenanceRequest
 import com.rork.porchivo.model.Carrier
 import com.rork.porchivo.model.DeliveryNotification
 import com.rork.porchivo.model.DeliveryStatus
@@ -116,6 +120,13 @@ class AppRepository(context: Context) {
     val isOrgMember: Boolean get() = _orgMembership.value?.isActive == true
     val isOrgAdmin: Boolean get() = _orgMembership.value?.isAdmin == true
 
+    // ── Announcements + Maintenance (loaded when org member) ──────────
+    private val _announcements = MutableStateFlow<List<Announcement>>(emptyList())
+    val announcements: StateFlow<List<Announcement>> = _announcements.asStateFlow()
+
+    private val _maintenanceRequests = MutableStateFlow<List<MaintenanceRequest>>(emptyList())
+    val maintenanceRequests: StateFlow<List<MaintenanceRequest>> = _maintenanceRequests.asStateFlow()
+
     // ── Org signup deep link redirect ─────────────────────────────────
     private val _orgSignupRedirectUrl = MutableStateFlow<String?>(null)
     val orgSignupRedirectUrl: StateFlow<String?> = _orgSignupRedirectUrl.asStateFlow()
@@ -216,6 +227,8 @@ class AppRepository(context: Context) {
         _shipments.value = emptyList()
         _notifications.value = emptyList()
         _orgMembership.value = null
+        _announcements.value = emptyList()
+        _maintenanceRequests.value = emptyList()
         _shipmentsLoadState.value = LoadState.Idle
         _notificationsLoadState.value = LoadState.Idle
     }
@@ -248,6 +261,12 @@ class AppRepository(context: Context) {
         loadShipments(userId)
         loadNotifications(userId)
         loadOrgContext()
+        if (isOrgMember) {
+            _orgMembership.value?.orgId?.let { orgId ->
+                loadAnnouncements(orgId)
+                loadMaintenanceRequests(orgId)
+            }
+        }
         loadLocalPackages()
     }
 
@@ -600,6 +619,79 @@ class AppRepository(context: Context) {
 
     suspend fun refreshOrgContext() {
         loadOrgContext()
+        if (isOrgMember) {
+            _orgMembership.value?.orgId?.let { orgId ->
+                loadAnnouncements(orgId)
+                loadMaintenanceRequests(orgId)
+            }
+        }
+    }
+
+    // ── Announcements ─────────────────────────────────────────────────
+
+    suspend fun loadAnnouncements(orgId: String) {
+        val client = supabase ?: return
+        val result = client.fetchAnnouncements(orgId)
+        if (result.isSuccess) {
+            val rows = result.getOrNull() ?: emptyList()
+            _announcements.value = rows.map { Mappers.dbAnnouncementToAnnouncement(it) }
+        }
+    }
+
+    suspend fun postAnnouncement(title: String, body: String): Boolean {
+        val client = supabase ?: return false
+        val orgId = _orgMembership.value?.orgId ?: return false
+        val userId = (authState.value as? AuthState.Authenticated)?.userId ?: return false
+        val payload = buildMap<String, Any?> {
+            put("org_id", orgId)
+            put("author_id", userId)
+            put("title", title)
+            put("body", body)
+            put("priority", "normal")
+            put("category", "general")
+            put("is_pinned", false)
+        }
+        val result = client.insertAnnouncement(payload)
+        return if (result.isSuccess) {
+            result.getOrNull()?.let { Mappers.dbAnnouncementToAnnouncement(it) }?.let { item ->
+                _announcements.value = listOf(item) + _announcements.value
+            }
+            true
+        } else false
+    }
+
+    // ── Maintenance ──────────────────────────────────────────────────
+
+    suspend fun loadMaintenanceRequests(orgId: String) {
+        val client = supabase ?: return
+        val result = client.fetchMyMaintenanceRequests(orgId)
+        if (result.isSuccess) {
+            val rows = result.getOrNull() ?: emptyList()
+            _maintenanceRequests.value = rows.map { Mappers.dbMyMaintenanceToRequest(it) }
+        }
+    }
+
+    suspend fun submitMaintenanceRequest(
+        category: String,
+        priority: String,
+        title: String,
+        description: String?,
+        location: String?,
+    ): Boolean {
+        val client = supabase ?: return false
+        val orgId = _orgMembership.value?.orgId ?: return false
+        val result = client.submitMaintenanceRequest(
+            orgId = orgId,
+            category = category,
+            priority = priority,
+            title = title,
+            description = description,
+            location = location,
+        )
+        return if (result.isSuccess) {
+            loadMaintenanceRequests(orgId)
+            true
+        } else false
     }
 
     // ── Subscription ────────────────────────────────────────────────────

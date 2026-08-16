@@ -3,7 +3,8 @@
 //  Porchivo
 //
 //  Community tier tab — maintenance request submission and tracking.
-//  Shown when user has an active org membership.
+//  Fetches real data via `get_my_maintenance_requests` RPC and submits
+//  via `submit_maintenance_request` RPC.
 //
 
 import SwiftUI
@@ -19,7 +20,7 @@ struct RequestsScreen: View {
             ScrollView {
                 VStack(spacing: 16) {
                     newRequestCard
-                    activeRequestsSection
+                    myRequestsSection
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 16)
@@ -64,34 +65,131 @@ struct RequestsScreen: View {
         .buttonStyle(.plain)
     }
 
-    private var activeRequestsSection: some View {
+    @ViewBuilder
+    private var myRequestsSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("My Requests")
                 .font(.system(size: 18, weight: .bold))
                 .foregroundStyle(c.textPrimary)
 
-            EmptyState(
-                symbol: "wrench.and.screwdriver.fill",
-                title: "No active requests",
-                message: "Submit a maintenance or service request to your community management."
-            )
+            switch appState.maintenanceLoadState {
+            case .loading:
+                HStack {
+                    Spacer()
+                    ProgressView()
+                    Spacer()
+                }
+                .padding(.vertical, 40)
+
+            case .error(let msg):
+                EmptyState(
+                    symbol: "exclamationmark.triangle.fill",
+                    title: "Couldn't load requests",
+                    message: msg
+                )
+
+            default:
+                if appState.maintenanceRequests.isEmpty {
+                    EmptyState(
+                        symbol: "wrench.and.screwdriver.fill",
+                        title: "No active requests",
+                        message: "Submit a maintenance or service request to your community management."
+                    )
+                } else {
+                    ForEach(appState.maintenanceRequests) { req in
+                        MaintenanceRequestCard(request: req)
+                    }
+                }
+            }
         }
     }
 }
 
-/// Sheet for submitting a new maintenance request.
+private struct MaintenanceRequestCard: View {
+    @Environment(\.porchivo) private var c
+    let request: MaintenanceRequest
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 10) {
+                Image(systemName: request.category.sfSymbol)
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundStyle(c.accent)
+                    .frame(width: 36, height: 36)
+                    .background(c.accentSoft, in: .rect(cornerRadius: Radius.md))
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(request.title)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(c.textPrimary)
+                        .lineLimit(2)
+                    Text(request.category.label)
+                        .font(.system(size: 12))
+                        .foregroundStyle(c.textSecondary)
+                }
+
+                Spacer()
+
+                statusPill
+            }
+
+            if let desc = request.description, !desc.isEmpty {
+                Text(desc)
+                    .font(.system(size: 12))
+                    .foregroundStyle(c.textSecondary)
+                    .lineLimit(2)
+            }
+
+            HStack(spacing: 6) {
+                Image(systemName: "clock")
+                    .font(.system(size: 10))
+                    .foregroundStyle(c.textMuted)
+                Text(request.createdAt.formatted(date: .abbreviated, time: .shortened))
+                    .font(.system(size: 11))
+                    .foregroundStyle(c.textMuted)
+                if request.commentCount > 0 {
+                    Text("·")
+                        .font(.system(size: 11))
+                        .foregroundStyle(c.textMuted)
+                    Image(systemName: "bubble.left.fill")
+                        .font(.system(size: 10))
+                        .foregroundStyle(c.textMuted)
+                    Text("\(request.commentCount)")
+                        .font(.system(size: 11))
+                        .foregroundStyle(c.textMuted)
+                }
+            }
+        }
+        .padding(12)
+        .background(c.surface, in: .rect(cornerRadius: Radius.md))
+        .shadow(color: c.textPrimary.opacity(0.04), radius: 4, y: 2)
+    }
+
+    private var statusPill: some View {
+        let tint: Color = request.status == .completed ? c.success
+            : (request.status == .cancelled ? c.danger
+            : (request.status == .inProgress ? c.warmOrange : c.accent))
+        return Text(request.status.label)
+            .font(.system(size: 10, weight: .bold))
+            .foregroundStyle(tint)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 3)
+            .background(tint.opacity(0.12), in: .rect(cornerRadius: Radius.sm))
+    }
+}
+
+/// Sheet for submitting a new maintenance request via `submit_maintenance_request` RPC.
 private struct NewMaintenanceRequestSheet: View {
     @Environment(AppState.self) private var appState
     @Environment(\.porchivo) private var c
     @Environment(\.dismiss) private var dismiss
     @State private var title = ""
-    @State private var category = "General"
-    @State private var priority = "Normal"
+    @State private var category: MaintenanceCategory = .other
+    @State private var priority: MaintenancePriority = .normal
     @State private var description = ""
     @State private var location = ""
-
-    private let categories = ["General", "Plumbing", "Electrical", "HVAC", "Appliance", "Structural", "Landscaping", "Other"]
-    private let priorities = ["Low", "Normal", "High", "Urgent"]
+    @State private var isSubmitting = false
+    @State private var errorMsg: String?
 
     var body: some View {
         NavigationStack {
@@ -102,14 +200,17 @@ private struct NewMaintenanceRequestSheet: View {
                             .textFieldStyle(.roundedBorder)
                     }
                     fieldGroup("Category") {
-                        Picker("Category", selection: $category) {
-                            ForEach(categories, id: \.self) { Text($0).tag($0) }
+                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 100)), GridItem(.adaptive(minimum: 100))], spacing: 8) {
+                            ForEach(MaintenanceCategory.allCases, id: \.self) { cat in
+                                categoryChip(cat)
+                            }
                         }
-                        .pickerStyle(.menu)
                     }
                     fieldGroup("Priority") {
                         Picker("Priority", selection: $priority) {
-                            ForEach(priorities, id: \.self) { Text($0).tag($0) }
+                            ForEach(MaintenancePriority.allCases, id: \.self) { p in
+                                Text(p.label).tag(p)
+                            }
                         }
                         .pickerStyle(.segmented)
                     }
@@ -123,6 +224,11 @@ private struct NewMaintenanceRequestSheet: View {
                             .padding(8)
                             .background(c.elevated, in: .rect(cornerRadius: Radius.sm))
                     }
+                    if let err = errorMsg {
+                        Text(err)
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundStyle(c.danger)
+                    }
                 }
                 .padding(16)
             }
@@ -135,14 +241,30 @@ private struct NewMaintenanceRequestSheet: View {
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Submit") {
-                        Haptics.success()
-                        dismiss()
+                        Task { await submit() }
                     }
-                    .disabled(title.isEmpty)
+                    .disabled(title.isEmpty || isSubmitting)
                     .fontWeight(.bold)
                 }
             }
         }
+    }
+
+    private func categoryChip(_ cat: MaintenanceCategory) -> some View {
+        let isSelected = cat == category
+        return Button(action: { Haptics.selection(); category = cat }) {
+            HStack(spacing: 6) {
+                Image(systemName: cat.sfSymbol)
+                    .font(.system(size: 12, weight: .bold))
+                Text(cat.label)
+                    .font(.system(size: 12, weight: .semibold))
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 8)
+            .foregroundStyle(isSelected ? c.onAccent : c.textSecondary)
+            .background(isSelected ? c.accent : c.elevated, in: .rect(cornerRadius: Radius.sm))
+        }
+        .buttonStyle(.plain)
     }
 
     private func fieldGroup<Content: View>(_ label: String, @ViewBuilder content: () -> Content) -> some View {
@@ -151,6 +273,27 @@ private struct NewMaintenanceRequestSheet: View {
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundStyle(c.textSecondary)
             content()
+        }
+    }
+
+    @MainActor
+    private func submit() async {
+        isSubmitting = true
+        errorMsg = nil
+        let success = await appState.submitMaintenanceRequest(
+            category: category,
+            priority: priority,
+            title: title.trimmingCharacters(in: .whitespacesAndNewlines),
+            description: description.isEmpty ? nil : description,
+            location: location.isEmpty ? nil : location
+        )
+        isSubmitting = false
+        if success {
+            Haptics.success()
+            dismiss()
+        } else {
+            errorMsg = "Failed to submit request. Please try again."
+            Haptics.error()
         }
     }
 }

@@ -10,6 +10,8 @@ import com.rork.porchivo.data.dto.OrgMembership
 import com.rork.porchivo.data.dto.OrgCheckoutResponse
 import com.rork.porchivo.data.dto.OrgConfirmResponse
 import com.rork.porchivo.data.dto.RiskScoreResponse
+import com.rork.porchivo.model.Announcement
+import com.rork.porchivo.model.MaintenanceRequest
 import com.rork.porchivo.model.SubscriptionTier
 import com.rork.porchivo.model.User
 import com.rork.porchivo.model.UserRole
@@ -35,6 +37,8 @@ class AppViewModel : ViewModel() {
     val user: StateFlow<User?> = repo.user
     val tier: StateFlow<SubscriptionTier> = repo.tier
     val orgMembership: StateFlow<OrgMembership?> = repo.orgMembership
+    val announcements: StateFlow<List<Announcement>> = repo.announcements
+    val maintenanceRequests: StateFlow<List<MaintenanceRequest>> = repo.maintenanceRequests
     val darkThemeOverride: StateFlow<Boolean?> = repo.darkThemeOverride
     val language: StateFlow<AppLanguage> = repo.language
     val authError: StateFlow<String?> = repo.authError
@@ -101,6 +105,20 @@ class AppViewModel : ViewModel() {
 
     fun refreshOrgContext() {
         viewModelScope.launch { repo.refreshOrgContext() }
+    }
+
+    suspend fun postAnnouncement(title: String, body: String): Boolean {
+        return repo.postAnnouncement(title, body)
+    }
+
+    suspend fun submitMaintenanceRequest(
+        category: String,
+        priority: String,
+        title: String,
+        description: String?,
+        location: String?,
+    ): Boolean {
+        return repo.submitMaintenanceRequest(category, priority, title, description, location)
     }
 
     suspend fun createOrgCheckout(

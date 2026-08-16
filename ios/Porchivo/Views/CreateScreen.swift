@@ -13,8 +13,11 @@ struct CreateScreen: View {
     @Environment(\.porchivo) private var c
     @State private var path = NavigationPath()
     @State private var showAnnouncement = false
+    @State private var announcementTitle = ""
     @State private var announcementText = ""
     @State private var announcementPosted = false
+    @State private var isPosting = false
+    @State private var postError: String?
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -113,32 +116,56 @@ struct CreateScreen: View {
             Text("Post a block announcement")
                 .font(.system(size: 18, weight: .bold))
                 .foregroundStyle(c.textPrimary)
+            TextField("Title", text: $announcementTitle)
+                .textFieldStyle(.roundedBorder)
             TextEditor(text: $announcementText)
                 .font(.system(size: 15))
                 .foregroundStyle(c.textPrimary)
                 .padding(8)
                 .background(c.elevated, in: .rect(cornerRadius: Radius.md))
-                .frame(minHeight: 140)
+                .frame(minHeight: 120)
             if announcementPosted {
-                Label("Posted to your block", systemImage: "checkmark.circle.fill")
+                Label("Posted to your community", systemImage: "checkmark.circle.fill")
                     .foregroundStyle(c.success)
                     .font(.system(size: 13, weight: .semibold))
             }
+            if let err = postError {
+                Text(err)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(c.danger)
+            }
             Spacer()
             PrimaryButton(title: "Post announcement", systemImage: "megaphone.fill",
-                          enabled: !announcementText.isEmpty) {
-                Haptics.success()
-                announcementPosted = true
-                announcementText = ""
-                Task { @MainActor in
-                    try? await Task.sleep(for: .seconds(1.5))
-                    showAnnouncement = false
-                    announcementPosted = false
-                }
+                          enabled: !announcementText.isEmpty && !announcementTitle.isEmpty && !isPosting) {
+                Task { await postAnnouncement() }
             }
         }
         .padding(20)
         .presentationDetents([.medium])
+    }
+
+    @MainActor
+    private func postAnnouncement() async {
+        isPosting = true
+        postError = nil
+        let success = await appState.postAnnouncement(
+            title: announcementTitle.trimmingCharacters(in: .whitespacesAndNewlines),
+            body: announcementText.trimmingCharacters(in: .whitespacesAndNewlines),
+            priority: .normal
+        )
+        isPosting = false
+        if success {
+            Haptics.success()
+            announcementPosted = true
+            announcementTitle = ""
+            announcementText = ""
+            try? await Task.sleep(for: .seconds(1.5))
+            showAnnouncement = false
+            announcementPosted = false
+        } else {
+            postError = "Failed to post announcement. Please try again."
+            Haptics.error()
+        }
     }
 }
 

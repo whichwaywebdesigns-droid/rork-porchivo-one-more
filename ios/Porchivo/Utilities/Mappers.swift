@@ -161,4 +161,42 @@ enum Mappers {
             isMine: m.senderId == currentUserId
         )
     }
+
+    // MARK: - Announcement
+
+    static func toAnnouncement(_ a: DbAnnouncement) -> Announcement {
+        Announcement(
+            id: a.id,
+            orgId: a.orgId ?? "",
+            authorId: a.authorId,
+            authorDisplayName: a.authorDisplayName,
+            title: a.title,
+            body: a.body,
+            priority: AnnouncementPriority(rawValue: a.priority ?? "normal") ?? .normal,
+            category: AnnouncementCategory(rawValue: a.category ?? "general") ?? .general,
+            isPinned: a.isPinned ?? false,
+            viewCount: a.viewCount ?? 0,
+            createdAt: parseISO(a.createdAt)
+        )
+    }
+
+    // MARK: - Maintenance
+
+    static func toMaintenanceRequest(_ r: DbMyMaintenanceRequest) -> MaintenanceRequest {
+        MaintenanceRequest(
+            id: r.id,
+            category: MaintenanceCategory(rawValue: r.category ?? "other") ?? .other,
+            priority: MaintenancePriority(rawValue: r.priority ?? "normal") ?? .normal,
+            status: MaintenanceStatus(rawValue: r.status ?? "submitted") ?? .submitted,
+            title: r.title ?? "Untitled Request",
+            description: r.description,
+            locationDetail: r.locationDetail,
+            residentVisibleNote: r.residentVisibleNote,
+            scheduledFor: r.scheduledFor.map { parseISO($0) },
+            completedAt: r.completedAt.map { parseISO($0) },
+            commentCount: r.commentCount ?? 0,
+            createdAt: parseISO(r.createdAt),
+            updatedAt: parseISO(r.updatedAt)
+        )
+    }
 }

@@ -275,3 +275,135 @@ nonisolated struct ChatMessage: Identifiable, Equatable, Sendable {
     let createdAt: Date
     let isMine: Bool
 }
+
+// MARK: - Announcement
+
+nonisolated struct Announcement: Identifiable, Equatable, Sendable {
+    let id: String
+    let orgId: String
+    let authorId: String?
+    let authorDisplayName: String?
+    let title: String
+    let body: String
+    let priority: AnnouncementPriority
+    let category: AnnouncementCategory
+    let isPinned: Bool
+    let viewCount: Int
+    let createdAt: Date
+}
+
+nonisolated enum AnnouncementPriority: String, CaseIterable, Codable {
+    case low, normal, high, urgent
+    var label: String { rawValue.capitalized }
+    var color: String {
+        switch self {
+        case .low: return "#6B7F99"
+        case .normal: return "#3A7BD5"
+        case .high: return "#E07B00"
+        case .urgent: return "#DC2626"
+        }
+    }
+}
+
+nonisolated enum AnnouncementCategory: String, CaseIterable, Codable {
+    case general, package, maintenance, safety, meeting, parking, amenity, emergency
+    var label: String { rawValue.capitalized }
+}
+
+// MARK: - Maintenance Request
+
+nonisolated struct MaintenanceRequest: Identifiable, Equatable, Sendable {
+    let id: String
+    let category: MaintenanceCategory
+    let priority: MaintenancePriority
+    let status: MaintenanceStatus
+    let title: String
+    let description: String?
+    let locationDetail: String?
+    let residentVisibleNote: String?
+    let scheduledFor: Date?
+    let completedAt: Date?
+    let commentCount: Int
+    let createdAt: Date
+    let updatedAt: Date
+}
+
+nonisolated enum MaintenanceCategory: String, CaseIterable, Codable {
+    case plumbing, electrical, hvac, structural
+    case pestControl = "pest_control"
+    case landscaping
+    case commonArea = "common_area"
+    case appliance, security, parking, elevator, amenity, other
+
+    var label: String {
+        switch self {
+        case .plumbing: "Plumbing"
+        case .electrical: "Electrical"
+        case .hvac: "HVAC"
+        case .structural: "Structural"
+        case .pestControl: "Pest Control"
+        case .landscaping: "Landscaping"
+        case .commonArea: "Common Area"
+        case .appliance: "Appliance"
+        case .security: "Security"
+        case .parking: "Parking"
+        case .elevator: "Elevator"
+        case .amenity: "Amenity"
+        case .other: "Other"
+        }
+    }
+    var sfSymbol: String {
+        switch self {
+        case .plumbing: "drop.fill"
+        case .electrical: "bolt.fill"
+        case .hvac: "thermometer"
+        case .structural: "building.2"
+        case .pestControl: "ant.fill"
+        case .landscaping: "tree.fill"
+        case .commonArea: "building.2.fill"
+        case .appliance: "plug.fill"
+        case .security: "lock.shield.fill"
+        case .parking: "car.fill"
+        case .elevator: "arrow.up.arrow.down"
+        case .amenity: "figure.pool.swim"
+        case .other: "wrench.fill"
+        }
+    }
+}
+
+nonisolated enum MaintenancePriority: String, CaseIterable, Codable {
+    case low, normal, high, emergency
+    var label: String { rawValue.capitalized }
+}
+
+nonisolated enum MaintenanceStatus: String, CaseIterable, Codable {
+    case submitted, acknowledged, scheduled
+    case inProgress = "in_progress"
+    case onHold = "on_hold"
+    case completed, cancelled
+
+    var label: String {
+        switch self {
+        case .submitted: "Submitted"
+        case .acknowledged: "Acknowledged"
+        case .scheduled: "Scheduled"
+        case .inProgress: "In Progress"
+        case .onHold: "On Hold"
+        case .completed: "Completed"
+        case .cancelled: "Cancelled"
+        }
+    }
+    
+    var isActive: Bool { self != .completed && self != .cancelled }
+}
+
+// MARK: - Maintenance Counts
+
+nonisolated struct MaintenanceCounts: Equatable, Sendable {
+    let open: Int
+    let emergency: Int
+    let inProgress: Int
+    let scheduled: Int
+    let completedToday: Int
+    let unassigned: Int
+}

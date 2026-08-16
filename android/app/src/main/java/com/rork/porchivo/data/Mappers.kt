@@ -1,11 +1,19 @@
 package com.rork.porchivo.data
 
+import com.rork.porchivo.data.dto.DbAnnouncement
+import com.rork.porchivo.data.dto.DbMyMaintenanceRequest
 import com.rork.porchivo.data.dto.DbNotification
 import com.rork.porchivo.data.dto.DbProfile
 import com.rork.porchivo.data.dto.DbShipment
+import com.rork.porchivo.model.Announcement
+import com.rork.porchivo.model.AnnouncementPriority
 import com.rork.porchivo.model.Carrier
 import com.rork.porchivo.model.DeliveryNotification
 import com.rork.porchivo.model.DeliveryStatus
+import com.rork.porchivo.model.MaintenanceCategory
+import com.rork.porchivo.model.MaintenancePriority
+import com.rork.porchivo.model.MaintenanceRequest
+import com.rork.porchivo.model.MaintenanceStatus
 import com.rork.porchivo.model.NotificationType
 import com.rork.porchivo.model.Shipment
 import com.rork.porchivo.model.ShipmentStatus
@@ -129,4 +137,36 @@ object Mappers {
         "package_picked_up" -> NotificationType.PACKAGE_PICKED_UP
         else -> NotificationType.PACKAGE_DELIVERED
     }
+
+    // ── Announcement + Maintenance mappers ────────────────────────────
+
+    fun dbAnnouncementToAnnouncement(a: DbAnnouncement): Announcement = Announcement(
+        id = a.id,
+        orgId = a.orgId ?: "",
+        authorId = a.authorId,
+        authorDisplayName = a.authorDisplayName,
+        title = a.title,
+        body = a.body,
+        priority = AnnouncementPriority.from(a.priority),
+        category = a.category ?: "general",
+        isPinned = a.isPinned ?: false,
+        viewCount = a.viewCount ?: 0,
+        createdAt = parseIsoToMillis(a.createdAt),
+    )
+
+    fun dbMyMaintenanceToRequest(r: DbMyMaintenanceRequest): MaintenanceRequest = MaintenanceRequest(
+        id = r.id,
+        category = MaintenanceCategory.from(r.category),
+        priority = MaintenancePriority.from(r.priority),
+        status = MaintenanceStatus.from(r.status),
+        title = r.title ?: "Untitled Request",
+        description = r.description,
+        locationDetail = r.locationDetail,
+        residentVisibleNote = r.residentVisibleNote,
+        scheduledFor = r.scheduledFor?.let { parseIsoToMillis(it) }?.takeIf { it != 0L },
+        completedAt = r.completedAt?.let { parseIsoToMillis(it) }?.takeIf { it != 0L },
+        commentCount = r.commentCount ?: 0,
+        createdAt = parseIsoToMillis(r.createdAt),
+        updatedAt = parseIsoToMillis(r.updatedAt),
+    )
 }

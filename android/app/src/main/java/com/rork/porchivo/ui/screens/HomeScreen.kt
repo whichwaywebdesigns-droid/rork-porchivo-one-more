@@ -21,6 +21,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.outlined.BarChart
+import androidx.compose.material.icons.outlined.Campaign
 import androidx.compose.material.icons.outlined.GppMaybe
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Paid
@@ -44,6 +45,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.rork.porchivo.model.Announcement
 import com.rork.porchivo.data.MockData
 import com.rork.porchivo.data.LoadState
 import com.rork.porchivo.ui.components.EmptyState
@@ -54,7 +56,10 @@ import com.rork.porchivo.ui.viewmodel.AppViewModel
 import com.rork.porchivo.ui.viewmodel.NotificationsViewModel
 import com.rork.porchivo.ui.viewmodel.ShipmentsViewModel
 import com.rork.porchivo.util.RiskEngine
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun HomeScreen(
@@ -69,6 +74,7 @@ fun HomeScreen(
     val myShipments by shipmentsViewModel.myShipments.collectAsStateWithLifecycle()
     val unreadCount by notificationsViewModel.unreadCount.collectAsStateWithLifecycle()
     val shipmentsLoadState by shipmentsViewModel.shipmentsLoadState.collectAsStateWithLifecycle()
+    val announcements by appViewModel.announcements.collectAsStateWithLifecycle()
 
     val riskScore = remember(myShipments) { RiskEngine.score(myShipments) }
     val theftFact = remember {
@@ -95,6 +101,10 @@ fun HomeScreen(
         }
 
         item { TheftFactCard(fact = theftFact) }
+
+        if (appViewModel.isOrgMember && announcements.isNotEmpty()) {
+            item { AnnouncementsPreview(announcements = announcements.take(3)) }
+        }
 
         item {
             PartnerUpsellBanner(onClick = { navController.navigate(Routes.CREATE) })
@@ -420,6 +430,65 @@ private fun QuickLink(
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
             )
+        }
+    }
+}
+
+@Composable
+private fun AnnouncementsPreview(announcements: List<Announcement>, modifier: Modifier = Modifier) {
+    val c = PorchivoTheme.colors
+    val dateFormat = remember { SimpleDateFormat("MMM d", Locale.getDefault()) }
+
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = c.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+    ) {
+        Column(modifier = Modifier.padding(14.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Icon(
+                    imageVector = Icons.Outlined.Campaign,
+                    contentDescription = null,
+                    tint = c.warmOrange,
+                    modifier = Modifier.size(14.dp),
+                )
+                Text(
+                    text = "ANNOUNCEMENTS",
+                    color = c.warmOrange,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.2.sp,
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            announcements.forEachIndexed { index, item ->
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = item.title,
+                        color = c.textPrimary,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 1,
+                    )
+                    Text(
+                        text = item.body,
+                        color = c.textSecondary,
+                        fontSize = 12.sp,
+                        maxLines = 2,
+                    )
+                    Text(
+                        text = dateFormat.format(Date(item.createdAt)),
+                        color = c.textMuted,
+                        fontSize = 11.sp,
+                    )
+                }
+                if (index < announcements.lastIndex) {
+                    Spacer(modifier = Modifier.height(6.dp))
+                    androidx.compose.material3.HorizontalDivider(color = c.border)
+                    Spacer(modifier = Modifier.height(6.dp))
+                }
+            }
         }
     }
 }

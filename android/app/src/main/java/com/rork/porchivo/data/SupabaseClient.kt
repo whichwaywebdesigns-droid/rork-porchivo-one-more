@@ -1,8 +1,10 @@
 package com.rork.porchivo.data
 
 import com.rork.porchivo.BuildConfig
+import com.rork.porchivo.data.dto.DbAnnouncement
 import com.rork.porchivo.data.dto.AuthSession
 import com.rork.porchivo.data.dto.AuthUser
+import com.rork.porchivo.data.dto.DbMyMaintenanceRequest
 import com.rork.porchivo.data.dto.DbNotification
 import com.rork.porchivo.data.dto.DbOrgContextRow
 import com.rork.porchivo.data.dto.DbProfile
@@ -340,6 +342,85 @@ class SupabaseClient(
         }
     } catch (e: Exception) {
         Result.failure(e)
+    }
+
+    /**
+     * Fetch published announcements for the user's org (direct table read, RLS-gated).
+     */
+    suspend fun fetchAnnouncements(orgId: String): Result<List<DbAnnouncement>> = try {
+        val response = httpClient.get("$restBase/org_announcements") {
+            authHeaders().forEach { (k, v) -> header(k, v) }
+            header("Accept", "application/json")
+            url {
+                parameters.append("org_id", "eq.$orgId")
+                parameters.append("or", "(scheduled_at.is.null,scheduled_at.lte.now())")
+                parameters.append("order", "is_pinned.desc,created_at.desc")
+                parameters.append("limit", "30")
+            }
+        }
+        if (response.status.isSuccess()) {
+            val list: List<DbAnnouncement> = response.body()
+            Result.success(list)
+        } else {
+            Result.failure(Exception("Failed to fetch announcements: ${response.status}"))
+        }
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    /** Post a new announcement (direct table insert, RLS-gated). */
+    suspend fun insertAnnouncement(body: Map<String, Any?>): Result<DbAnnouncement> =
+        insertInto("org_announcements", body)
+
+    /** Submit a maintenance request via `submit_maintenance_request` RPC. Returns the new request UUID. */
+    suspend fun submitMaintenanceRequest(
+        orgId: String,
+        category: String,
+        priority: String,
+        title: String,
+        description: String?,
+        location: String?,
+    ): Result<String> = try {
+        val response = httpClient.post("$restBase/rpc/submit_maintenance_request") {
+            authHeaders().forEach { (k, v) -> header(k, v) }
+            contentType(ContentType.Application.Json)
+            setBody(buildMap<String, Any?> {
+                put("p_org_id", orgId)
+                put("p_category", category)
+                put("p_priority", priority)
+                put("p_title", title)
+                description?.let { put("p_description", it) }
+                location?.let { put("p_location", it) }
+            })
+        }
+        if (response.status.isSuccess()) {
+            // RPC returns a UUID string directly
+            val raw: String = response.body()
+            // PostgREST may return it quoted or as a JSON string
+            val clean = raw.trim().removeSurrounding("\"")
+            Result.success(clean)
+        } else {
+            Result.failure(Exception("Failed to submit maintenance request: ${response.status}"))
+        }
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    /** Fetch the current user's maintenance requests via `get_my_maintenance_requests` RPC. */
+    suspend fun fetchMyMaintenanceRequests(orgId: String): Result<List<DbMyMaintenanceRequest>> = try {
+        val response = httpClient.post("$restBase/rpc/get_my_maintenance_requests") {
+            authHeaders().forEach { (k, v) -> header(k, v) }
+            contentType(ContentType.Application.Json)
+            setBody(mapOf("p_org_id" to orgId))
+        }
+        if (response.status.isSuccess()) {
+            val list: List<DbMyMaintenanceRequest> = response.body()
+            Result.success(list)
+        } else {
+            Result.success(emptyList())
+        }
+    } catch (e: Exception) {
+        Result.success(emptyList())
     }
 
     /**

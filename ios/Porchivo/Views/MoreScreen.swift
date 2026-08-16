@@ -104,7 +104,7 @@ struct MoreScreen: View {
                 .foregroundStyle(c.textPrimary)
 
             VStack(spacing: 0) {
-                linkRow("Announcements", "megaphone.fill", c.warmOrange) { }
+                linkRow("Announcements", "megaphone.fill", c.warmOrange) { path.append(Route.announcements) }
                 Divider().overlay(c.border).padding(.leading, 54)
                 linkRow("Calendar", "calendar.fill", c.accent) { }
                 Divider().overlay(c.border).padding(.leading, 54)

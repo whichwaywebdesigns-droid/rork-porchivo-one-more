@@ -50,6 +50,7 @@ import com.rork.porchivo.ui.screens.PorchPartnerScreen
 import com.rork.porchivo.ui.screens.PaymentsScreen
 import com.rork.porchivo.ui.screens.ProfileScreen
 import com.rork.porchivo.ui.screens.MoreScreen
+import com.rork.porchivo.ui.screens.AnnouncementsScreen
 import com.rork.porchivo.ui.screens.OrgSignupScreen
 import com.rork.porchivo.ui.screens.RequestsScreen
 import com.rork.porchivo.ui.screens.SafetyScreen
@@ -70,6 +71,7 @@ object Routes {
     const val ADD_PACKAGE = "add-package"
     const val ORG_SIGNUP = "org-signup"
     const val SAFETY = "safety"
+    const val ANNOUNCEMENTS = "announcements"
     const val PACKAGE_DETAIL = "package-detail/{id}"
     const val SHIPMENT_DETAIL = "shipment-detail/{id}"
 
@@ -182,6 +184,7 @@ fun AppNavigation() {
             composable(Routes.ADD_PACKAGE) { AddPackageScreen(navController) }
             composable(Routes.ORG_SIGNUP) { OrgSignupScreen(navController) }
             composable(Routes.SAFETY) { SafetyScreen(navController) }
+            composable(Routes.ANNOUNCEMENTS) { AnnouncementsScreen(navController) }
             composable(
                 route = Routes.PACKAGE_DETAIL,
                 arguments = listOf(navArgument("id") { type = NavType.StringType }),

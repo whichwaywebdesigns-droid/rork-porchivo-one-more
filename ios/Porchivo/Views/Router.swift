@@ -19,6 +19,7 @@ enum Route: Hashable {
     case editProfile
     case settings
     case orgSignup
+    case announcements
 
     static func == (lhs: Route, rhs: Route) -> Bool {
         switch (lhs, rhs) {
@@ -48,6 +49,7 @@ enum Route: Hashable {
         case .editProfile: hasher.combine(9)
         case .settings: hasher.combine(10)
         case .orgSignup: hasher.combine(11)
+        case .announcements: hasher.combine(12)
         }
     }
 }
@@ -70,6 +72,7 @@ struct RouteView: View {
         case .editProfile:   EditProfileScreen()
         case .settings:      SettingsScreen()
         case .orgSignup:     OrgSignupScreen()
+        case .announcements: AnnouncementsScreen()
         }
     }
 }

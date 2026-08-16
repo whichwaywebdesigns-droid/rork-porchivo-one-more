@@ -25,6 +25,10 @@ struct HomeScreen: View {
 
                     TheftFactCard(fact: MockData.theftFactOfDay)
 
+                    if appState.isOrgMember && !appState.announcements.isEmpty {
+                        AnnouncementsPreview(announcements: Array(appState.announcements.prefix(3)))
+                    }
+
                     NavigationLink(value: Route.create) {
                         partnerUpsell
                     }
@@ -231,4 +235,42 @@ private struct TheftFactCard: View {
 
 #Preview {
     HomeScreen().environment(AppState())
+}
+
+private struct AnnouncementsPreview: View {
+    @Environment(\.porchivo) private var c
+    let announcements: [Announcement]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: "megaphone.fill")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(c.warmOrange)
+                Text("ANNOUNCEMENTS")
+                    .font(.system(size: 11, weight: .bold))
+                    .tracking(1.2)
+                    .foregroundStyle(c.warmOrange)
+                Spacer()
+            }
+            ForEach(announcements) { item in
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(item.title)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(c.textPrimary)
+                        .lineLimit(1)
+                    Text(item.body)
+                        .font(.system(size: 12))
+                        .foregroundStyle(c.textSecondary)
+                        .lineLimit(2)
+                }
+                if item.id != announcements.last?.id {
+                    Divider().overlay(c.border)
+                }
+            }
+        }
+        .padding(14)
+        .background(c.surface, in: .rect(cornerRadius: Radius.lg))
+        .shadow(color: c.textPrimary.opacity(0.05), radius: 6, y: 2)
+    }
 }

@@ -49,6 +49,14 @@ final class AppState {
     var isOrgPending: Bool { orgMembership?.isPending == true }
     var isOrgAdmin: Bool { orgMembership?.isAdmin == true }
 
+    // Announcements (loaded when org member)
+    var announcements: [Announcement] = []
+    var announcementsLoadState: LoadState<Unit> = .idle
+
+    // Maintenance requests (loaded when org member)
+    var maintenanceRequests: [MaintenanceRequest] = []
+    var maintenanceLoadState: LoadState<Unit> = .idle
+
     // Local data (UserDefaults — mirrors AsyncStorage/SharedPreferences)
     var packages: [TrackedPackage] = []
 
@@ -323,6 +331,10 @@ final class AppState {
         directory = []
         orgMembership = nil
         orgLoadState = .idle
+        announcements = []
+        announcementsLoadState = .idle
+        maintenanceRequests = []
+        maintenanceLoadState = .idle
         shipmentsLoadState = .idle
         notificationsLoadState = .idle
     }
@@ -343,6 +355,10 @@ final class AppState {
         await loadShipments(userId: userId)
         await loadNotifications(userId: userId)
         await loadOrgContext(userId: userId)
+        if isOrgMember, let orgId = orgMembership?.orgId {
+            await loadAnnouncements(orgId: orgId)
+            await loadMaintenanceRequests(orgId: orgId)
+        }
         loadLocalPackages()
     }
 
@@ -692,6 +708,77 @@ final class AppState {
     func refreshOrgContext() async {
         guard let userId = currentUserId else { return }
         await loadOrgContext(userId: userId)
+        if isOrgMember, let orgId = orgMembership?.orgId {
+            await loadAnnouncements(orgId: orgId)
+            await loadMaintenanceRequests(orgId: orgId)
+        }
+    }
+
+    // MARK: - Announcements
+
+    @MainActor
+    func loadAnnouncements(orgId: String) async {
+        guard isSupabaseConfigured else { return }
+        announcementsLoadState = .loading
+        let result = await supabase.fetchAnnouncements(orgId: orgId)
+        switch result {
+        case .success(let rows):
+            announcements = rows.map { Mappers.toAnnouncement($0) }
+            announcementsLoadState = .success(Unit())
+        case .failure(let err):
+            announcementsLoadState = .error(err.localizedDescription)
+        }
+    }
+
+    @MainActor
+    func postAnnouncement(title: String, body: String, priority: AnnouncementPriority) async -> Bool {
+        guard isSupabaseConfigured, let orgId = orgMembership?.orgId, let userId = currentUserId else { return false }
+        let payload: [String: Any?] = [
+            "org_id": orgId,
+            "author_id": userId,
+            "title": title,
+            "body": body,
+            "priority": priority.rawValue,
+            "category": "general",
+            "is_pinned": false,
+        ]
+        let result = await supabase.insertAnnouncement(payload)
+        if case .success(let row) = result {
+            announcements.insert(Mappers.toAnnouncement(row), at: 0)
+            return true
+        }
+        return false
+    }
+
+    // MARK: - Maintenance
+
+    @MainActor
+    func loadMaintenanceRequests(orgId: String) async {
+        guard isSupabaseConfigured else { return }
+        maintenanceLoadState = .loading
+        let result = await supabase.fetchMyMaintenanceRequests(orgId: orgId)
+        switch result {
+        case .success(let rows):
+            maintenanceRequests = rows.map { Mappers.toMaintenanceRequest($0) }
+            maintenanceLoadState = .success(Unit())
+        case .failure(let err):
+            maintenanceLoadState = .error(err.localizedDescription)
+        }
+    }
+
+    @MainActor
+    func submitMaintenanceRequest(category: MaintenanceCategory, priority: MaintenancePriority,
+                                   title: String, description: String?, location: String?) async -> Bool {
+        guard isSupabaseConfigured, let orgId = orgMembership?.orgId else { return false }
+        let result = await supabase.submitMaintenanceRequest(
+            orgId: orgId, category: category.rawValue, priority: priority.rawValue,
+            title: title, description: description, location: location
+        )
+        if case .success = result {
+            await loadMaintenanceRequests(orgId: orgId)
+            return true
+        }
+        return false
     }
 
     // MARK: - Org checkout (B2B Stripe Checkout)
