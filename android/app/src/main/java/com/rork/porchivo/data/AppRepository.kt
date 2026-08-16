@@ -217,6 +217,69 @@ class AppRepository(context: Context) {
     }
 
     /**
+     * Request a magic-link / OTP email. Returns true if Supabase accepted the request.
+     */
+    suspend fun sendMagicLink(email: String): Boolean {
+        _authError.value = null
+        if (!isSupabaseConfigured) {
+            // Demo mode — pretend the link was sent.
+            return true
+        }
+        val result = supabase!!.sendMagicLink(email.trim())
+        return if (result.isSuccess) {
+            true
+        } else {
+            _authError.value = result.exceptionOrNull()?.message ?: "Could not send magic link."
+            false
+        }
+    }
+
+    /**
+     * Verify the 6-digit OTP from the magic-link email.
+     */
+    suspend fun verifyOtp(email: String, token: String): Boolean {
+        _authError.value = null
+        if (!isSupabaseConfigured) {
+            // Demo mode — any 6 digits signs in.
+            seedDemoUser()
+            return true
+        }
+        val result = supabase!!.verifyOtp(email.trim(), token.trim())
+        return if (result.isSuccess) {
+            val session = result.getOrNull()
+            if (session != null) {
+                _authState.value = AuthState.Authenticated(session.user?.id ?: "")
+                loadInitialData(session.user?.id ?: "")
+            }
+            true
+        } else {
+            _authError.value = result.exceptionOrNull()?.message ?: "Invalid or expired code."
+            false
+        }
+    }
+
+    /**
+     * Developer bypass — seeds the demo user and skips backend auth entirely.
+     */
+    fun developerLogin() {
+        _authError.value = null
+        seedDemoUser()
+    }
+
+    /**
+     * Seed the demo user and local data. Used in demo mode and by the developer bypass.
+     */
+    private fun seedDemoUser() {
+        _user.value = MockData.user
+        _tier.value = SubscriptionTier.FREE
+        _shipments.value = MockData.shipments
+        _notifications.value = MockData.notifications
+        _packages.value = MockData.trackedPackages
+        saveLocalPackages(_packages.value)
+        _authState.value = AuthState.Authenticated(MockData.CURRENT_USER_ID)
+    }
+
+    /**
      * Sign out — clears session and all data.
      */
     fun signOut() {

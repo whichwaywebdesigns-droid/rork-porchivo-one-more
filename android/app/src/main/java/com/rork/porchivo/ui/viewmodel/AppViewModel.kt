@@ -58,6 +58,18 @@ class AppViewModel : ViewModel() {
         viewModelScope.launch { repo.signUp(email, password) }
     }
 
+    suspend fun sendMagicLink(email: String): Boolean {
+        return repo.sendMagicLink(email)
+    }
+
+    suspend fun verifyOtp(email: String, token: String): Boolean {
+        return repo.verifyOtp(email, token)
+    }
+
+    fun developerLogin() {
+        repo.developerLogin()
+    }
+
     fun signOut() {
         repo.signOut()
     }

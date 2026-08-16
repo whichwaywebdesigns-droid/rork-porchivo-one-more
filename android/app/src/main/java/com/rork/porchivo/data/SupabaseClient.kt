@@ -27,6 +27,8 @@ import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 
 /** Response from the request_account_deletion RPC. */
 @Serializable
@@ -124,6 +126,77 @@ class SupabaseClient(
         }
     } catch (e: Exception) {
         Result.failure(e)
+    }
+
+    /**
+     * Request a magic-link / OTP email from Supabase Auth.
+     * Returns success if the request was accepted (the user must check email).
+     */
+    suspend fun sendMagicLink(email: String): Result<Unit> = try {
+        val response = httpClient.post("$authBase/otp") {
+            header(HttpHeaders.ContentType, "application/json")
+            header("apikey", anonKey)
+            setBody(
+                mapOf(
+                    "email" to email,
+                    "options" to mapOf("should_create_user" to true),
+                )
+            )
+        }
+        if (response.status.isSuccess()) {
+            Result.success(Unit)
+        } else {
+            val msg = parseErrorMessage(response)
+            Result.failure(Exception(msg ?: "Could not send magic link. Check your email and try again."))
+        }
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    /**
+     * Verify the 6-digit OTP from the magic-link email and establish a session.
+     */
+    suspend fun verifyOtp(email: String, token: String): Result<AuthSession> = try {
+        val response = httpClient.post("$authBase/token?grant_type=otp") {
+            header(HttpHeaders.ContentType, "application/json")
+            header("apikey", anonKey)
+            setBody(
+                mapOf(
+                    "email" to email,
+                    "token" to token,
+                    "type" to "magiclink",
+                )
+            )
+        }
+        if (response.status.isSuccess()) {
+            val session: AuthSession = response.body()
+            // Fetch user info
+            val userResponse = httpClient.get("$authBase/user") {
+                header("Authorization", "Bearer ${session.accessToken}")
+                header("apikey", anonKey)
+            }
+            val fullSession = if (userResponse.status.isSuccess()) {
+                val user: AuthUser = userResponse.body()
+                session.copy(user = user)
+            } else session
+            sessionStore.saveSession(fullSession)
+            Result.success(fullSession)
+        } else {
+            val msg = parseErrorMessage(response)
+            Result.failure(Exception(msg ?: "Invalid or expired code. Try again."))
+        }
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    private suspend fun parseErrorMessage(response: io.ktor.client.statement.HttpResponse): String? = try {
+        val body = response.body<String>()
+        val jsonObject = json.parseToJsonElement(body).jsonObject
+        jsonObject["message"]?.jsonPrimitive?.content
+            ?: jsonObject["error"]?.jsonPrimitive?.content
+            ?: jsonObject["msg"]?.jsonPrimitive?.content
+    } catch (_: Exception) {
+        null
     }
 
     suspend fun restoreSession(): AuthSession? {
