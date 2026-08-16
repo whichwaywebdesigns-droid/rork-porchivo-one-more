@@ -67,6 +67,22 @@ enum AppLanguage: String, CaseIterable, Identifiable {
     /// Right-to-left script.
     var isRTL: Bool { self == .ar }
 
+    /// "Hello" greeting in this language.
+    var hello: String {
+        switch self {
+        case .en: "Hello"
+        case .es: "Hola"
+        case .zh: "你好"
+        case .fr: "Bonjour"
+        case .ru: "Привет"
+        case .pt: "Olá"
+        case .ar: "مرحبا"
+        case .hi: "नमस्ते"
+        case .ja: "こんにちは"
+        case .ko: "안녕하세요"
+        }
+    }
+
     /// All supported language codes for lookup.
     static var supportedCodes: Set<String> {
         Set(allCases.map { $0.rawValue })

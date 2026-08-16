@@ -173,6 +173,10 @@ struct SettingsScreen: View {
                             Text(lang.englishName + (lang.isRTL ? " · RTL" : ""))
                                 .font(.system(size: 11))
                                 .foregroundStyle(c.textSecondary)
+                            Text("\u{201C}\(lang.hello)\u{201D}")
+                                .font(.system(size: 11, design: .serif))
+                                .italic()
+                                .foregroundStyle(c.textMuted)
                         }
                         Spacer()
                         if appState.currentLanguage == lang {

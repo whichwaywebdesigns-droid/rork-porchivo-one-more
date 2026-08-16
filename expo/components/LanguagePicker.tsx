@@ -97,6 +97,9 @@ export function LanguagePicker() {
                         {item.englishName}
                         {item.rtl ? ' · RTL' : ''}
                       </Text>
+                      <Text style={[styles.langHello, { color: Colors.slateLighter }]}>
+                        “{item.hello}”
+                      </Text>
                     </View>
                     {isActive && <Check size={18} color={Colors.primary} />}
                   </TouchableOpacity>
@@ -186,6 +189,11 @@ const styles = StyleSheet.create({
   },
   langEnglish: {
     fontSize: 12,
+  },
+  langHello: {
+    fontSize: 12,
+    fontStyle: 'italic' as const,
+    marginTop: 2,
   },
   separator: {
     height: 1,

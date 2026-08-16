@@ -747,6 +747,12 @@ private fun LanguageCard(
                                         color = c.textSecondary,
                                         fontSize = 11.sp,
                                     )
+                                    Text(
+                                        text = "\u201C${lang.hello}\u201D",
+                                        color = c.textMuted,
+                                        fontSize = 11.sp,
+                                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                                    )
                                 }
                                 if (isActive) {
                                     Icon(

@@ -6,17 +6,17 @@ import java.util.Locale
 /**
  * Supported languages in the app, mirroring the Expo/iOS/web registry.
  */
-enum class AppLanguage(val code: String, val englishName: String, val nativeName: String, val flag: String, val rtl: Boolean = false) {
-    EN("en", "English", "English", "🇺🇸"),
-    ES("es", "Spanish", "Español", "🇪🇸"),
-    ZH("zh", "Chinese", "简体中文", "🇨🇳"),
-    FR("fr", "French", "Français", "🇫🇷"),
-    RU("ru", "Russian", "Русский", "🇷🇺"),
-    PT("pt", "Portuguese", "Português", "🇧🇷"),
-    AR("ar", "Arabic", "العربية", "🇸🇦", rtl = true),
-    HI("hi", "Hindi", "हिन्दी", "🇮🇳"),
-    JA("ja", "Japanese", "日本語", "🇯🇵"),
-    KO("ko", "Korean", "한국어", "🇰🇷");
+enum class AppLanguage(val code: String, val englishName: String, val nativeName: String, val flag: String, val hello: String, val rtl: Boolean = false) {
+    EN("en", "English", "English", "🇺🇸", "Hello"),
+    ES("es", "Spanish", "Español", "🇪🇸", "Hola"),
+    ZH("zh", "Chinese", "简体中文", "🇨🇳", "你好"),
+    FR("fr", "French", "Français", "🇫🇷", "Bonjour"),
+    RU("ru", "Russian", "Русский", "🇷🇺", "Привет"),
+    PT("pt", "Portuguese", "Português", "🇧🇷", "Olá"),
+    AR("ar", "Arabic", "العربية", "🇸🇦", "مرحبا", rtl = true),
+    HI("hi", "Hindi", "हिन्दी", "🇮🇳", "नमस्ते"),
+    JA("ja", "Japanese", "日本語", "🇯🇵", "こんにちは"),
+    KO("ko", "Korean", "한국어", "🇰🇷", "안녕하세요");
 
     companion object {
         val DEFAULT: AppLanguage = EN

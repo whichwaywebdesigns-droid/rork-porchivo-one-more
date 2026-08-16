@@ -68,6 +68,9 @@ export default function LanguageSelector({ compact = false, className }: Languag
             {lang.englishName}
             {lang.rtl ? ` · ${t("settings.language.rtl")}` : ""}
           </span>
+          <span className="text-xs italic text-muted-foreground/70 truncate">
+            &ldquo;{lang.hello}&rdquo;
+          </span>
         </div>
         {isActive && <Check className="w-4 h-4 text-brand-orange flex-shrink-0" />}
       </CommandItem>

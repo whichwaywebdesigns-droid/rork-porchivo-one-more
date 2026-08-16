@@ -23,6 +23,8 @@ export interface LanguageMeta {
   rtl?: boolean;
   /** True when hand-written UI translations are bundled (always true here) */
   translated?: boolean;
+  /** "Hello" greeting in this language, shown as a preview in the picker */
+  hello: string;
 }
 
 /**
@@ -30,18 +32,18 @@ export interface LanguageMeta {
  * English and Spanish lead; additional locales follow.
  */
 export const LANGUAGES: LanguageMeta[] = [
-  { code: "en", englishName: "English", nativeName: "English", flag: "🇺🇸", translated: true },
-  { code: "es", englishName: "Spanish", nativeName: "Español", flag: "🇪🇸", translated: true },
-  { code: "zh", englishName: "Chinese (Simplified)", nativeName: "简体中文", flag: "🇨🇳", translated: true },
-  { code: "hi", englishName: "Hindi", nativeName: "हिन्दी", flag: "🇮🇳", translated: true },
-  { code: "ar", englishName: "Arabic", nativeName: "العربية", flag: "🇸🇦", rtl: true, translated: true },
-  { code: "pt", englishName: "Portuguese", nativeName: "Português", flag: "🇧🇷", translated: true },
-  { code: "fr", englishName: "French", nativeName: "Français", flag: "🇫🇷", translated: true },
-  { code: "de", englishName: "German", nativeName: "Deutsch", flag: "🇩🇪", translated: true },
-  { code: "ja", englishName: "Japanese", nativeName: "日本語", flag: "🇯🇵", translated: true },
-  { code: "ru", englishName: "Russian", nativeName: "Русский", flag: "🇷🇺", translated: true },
-  { code: "ko", englishName: "Korean", nativeName: "한국어", flag: "🇰🇷", translated: true },
-  { code: "it", englishName: "Italian", nativeName: "Italiano", flag: "🇮🇹", translated: true },
+  { code: "en", englishName: "English", nativeName: "English", flag: "🇺🇸", translated: true, hello: "Hello" },
+  { code: "es", englishName: "Spanish", nativeName: "Español", flag: "🇪🇸", translated: true, hello: "Hola" },
+  { code: "zh", englishName: "Chinese (Simplified)", nativeName: "简体中文", flag: "🇨🇳", translated: true, hello: "你好" },
+  { code: "hi", englishName: "Hindi", nativeName: "हिन्दी", flag: "🇮🇳", translated: true, hello: "नमस्ते" },
+  { code: "ar", englishName: "Arabic", nativeName: "العربية", flag: "🇸🇦", rtl: true, translated: true, hello: "مرحبا" },
+  { code: "pt", englishName: "Portuguese", nativeName: "Português", flag: "🇧🇷", translated: true, hello: "Olá" },
+  { code: "fr", englishName: "French", nativeName: "Français", flag: "🇫🇷", translated: true, hello: "Bonjour" },
+  { code: "de", englishName: "German", nativeName: "Deutsch", flag: "🇩🇪", translated: true, hello: "Hallo" },
+  { code: "ja", englishName: "Japanese", nativeName: "日本語", flag: "🇯🇵", translated: true, hello: "こんにちは" },
+  { code: "ru", englishName: "Russian", nativeName: "Русский", flag: "🇷🇺", translated: true, hello: "Привет" },
+  { code: "ko", englishName: "Korean", nativeName: "한국어", flag: "🇰🇷", translated: true, hello: "안녕하세요" },
+  { code: "it", englishName: "Italian", nativeName: "Italiano", flag: "🇮🇹", translated: true, hello: "Ciao" },
 ];
 
 /** Quick lookup map by code */

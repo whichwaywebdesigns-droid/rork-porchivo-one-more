@@ -18,19 +18,21 @@ export interface LanguageMeta {
   flag: string;
   /** Right-to-left script */
   rtl?: boolean;
+  /** "Hello" greeting in this language, shown as a preview in the picker */
+  hello: string;
 }
 
 export const LANGUAGES: LanguageMeta[] = [
-  { code: 'en', englishName: 'English', nativeName: 'English', flag: '🇺🇸' },
-  { code: 'es', englishName: 'Spanish', nativeName: 'Español', flag: '🇪🇸' },
-  { code: 'zh', englishName: 'Chinese', nativeName: '简体中文', flag: '🇨🇳' },
-  { code: 'fr', englishName: 'French', nativeName: 'Français', flag: '🇫🇷' },
-  { code: 'ru', englishName: 'Russian', nativeName: 'Русский', flag: '🇷🇺' },
-  { code: 'pt', englishName: 'Portuguese', nativeName: 'Português', flag: '🇧🇷' },
-  { code: 'ar', englishName: 'Arabic', nativeName: 'العربية', flag: '🇸🇦', rtl: true },
-  { code: 'hi', englishName: 'Hindi', nativeName: 'हिन्दी', flag: '🇮🇳' },
-  { code: 'ja', englishName: 'Japanese', nativeName: '日本語', flag: '🇯🇵' },
-  { code: 'ko', englishName: 'Korean', nativeName: '한국어', flag: '🇰🇷' },
+  { code: 'en', englishName: 'English', nativeName: 'English', flag: '🇺🇸', hello: 'Hello' },
+  { code: 'es', englishName: 'Spanish', nativeName: 'Español', flag: '🇪🇸', hello: 'Hola' },
+  { code: 'zh', englishName: 'Chinese', nativeName: '简体中文', flag: '🇨🇳', hello: '你好' },
+  { code: 'fr', englishName: 'French', nativeName: 'Français', flag: '🇫🇷', hello: 'Bonjour' },
+  { code: 'ru', englishName: 'Russian', nativeName: 'Русский', flag: '🇷🇺', hello: 'Привет' },
+  { code: 'pt', englishName: 'Portuguese', nativeName: 'Português', flag: '🇧🇷', hello: 'Olá' },
+  { code: 'ar', englishName: 'Arabic', nativeName: 'العربية', flag: '🇸🇦', rtl: true, hello: 'مرحبا' },
+  { code: 'hi', englishName: 'Hindi', nativeName: 'हिन्दी', flag: '🇮🇳', hello: 'नमस्ते' },
+  { code: 'ja', englishName: 'Japanese', nativeName: '日本語', flag: '🇯🇵', hello: 'こんにちは' },
+  { code: 'ko', englishName: 'Korean', nativeName: '한국어', flag: '🇰🇷', hello: '안녕하세요' },
 ];
 
 export const LANGUAGE_MAP: Record<string, LanguageMeta> = LANGUAGES.reduce(
