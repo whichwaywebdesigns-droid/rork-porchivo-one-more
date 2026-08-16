@@ -22,6 +22,9 @@ struct SettingsScreen: View {
                 section("Appearance") {
                     themePicker
                 }
+                section("Language") {
+                    languagePicker
+                }
                 section("Security") {
                     if appState.availableBiometry != .none {
                         toggle("Unlock with \(appState.availableBiometry.label)",
@@ -150,6 +153,49 @@ struct SettingsScreen: View {
             .labelsHidden()
         }
         .padding(.horizontal, 14).padding(.vertical, 12)
+    }
+
+    private var languagePicker: some View {
+        VStack(spacing: 0) {
+            ForEach(AppLanguage.allCases) { lang in
+                Button {
+                    Haptics.selection()
+                    appState.setLanguage(lang)
+                } label: {
+                    HStack(spacing: 12) {
+                        Text(lang.flag)
+                            .font(.system(size: 20))
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(lang.nativeName)
+                                .font(.system(size: 15,
+                                               weight: appState.currentLanguage == lang ? .bold : .medium))
+                                .foregroundStyle(appState.currentLanguage == lang ? c.accent : c.textPrimary)
+                            Text(lang.englishName + (lang.isRTL ? " · RTL" : ""))
+                                .font(.system(size: 11))
+                                .foregroundStyle(c.textSecondary)
+                        }
+                        Spacer()
+                        if appState.currentLanguage == lang {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundStyle(c.accent)
+                                .font(.system(size: 18))
+                        }
+                    }
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 11)
+                    .background(
+                        appState.currentLanguage == lang
+                            ? c.accentSoft
+                            : Color.clear
+                    )
+                }
+                .buttonStyle(.plain)
+
+                if lang != AppLanguage.allCases.last {
+                    Divider().overlay(c.border).padding(.leading, 46)
+                }
+            }
+        }
     }
 
     private func toggle(_ label: String, _ blurb: String, isOn: Binding<Bool>) -> some View {

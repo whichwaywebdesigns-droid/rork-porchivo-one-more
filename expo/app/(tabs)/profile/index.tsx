@@ -2,8 +2,9 @@ import React, { useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Switch, Linking } from 'react-native';
 import { Stack } from 'expo-router';
 import { Image } from 'expo-image';
-import { MapPin, Mail, Phone, Home, Shield, Bell, UserPlus, ChevronRight, FileText, Pencil, Send, LogOut, HelpCircle, CheckCircle, Trash2, Moon, Sun, ArrowRight, Handshake, BookOpen, Star, Building2, MailOpen } from 'lucide-react-native';
+import { MapPin, Mail, Phone, Home, Shield, Bell, UserPlus, ChevronRight, FileText, Pencil, Send, LogOut, HelpCircle, CheckCircle, Trash2, Moon, Sun, ArrowRight, Handshake, BookOpen, Star, Building2, MailOpen, Globe } from 'lucide-react-native';
 import { sendSMSInvite, shareInvite } from '@/utils/invite';
+import { LanguagePicker } from '@/components/LanguagePicker';
 import { COPY } from '@/config/copy';
 import { useColors, getColors } from '@/constants/colors';
 import { useTheme } from '@/store/ThemeContext';
@@ -264,6 +265,19 @@ export default function ProfileScreen() {
               thumbColor={Colors.white}
               accessibilityLabel="Toggle dark mode"
             />
+          </View>
+
+          <View style={[styles.infoRowDivider, { backgroundColor: Colors.borderLight }]} />
+
+          {/* Language picker */}
+          <View style={styles.settingRow}>
+            <View style={styles.settingLeft}>
+              <Globe size={18} color={Colors.primary} />
+              <Text style={[styles.settingText, { color: Colors.slate }]}>Language</Text>
+            </View>
+          </View>
+          <View style={{ paddingHorizontal: 14, paddingBottom: 14 }}>
+            <LanguagePicker />
           </View>
 
           <View style={[styles.infoRowDivider, { backgroundColor: Colors.borderLight }]} />

@@ -49,13 +49,21 @@ export default function LanguageSelector({ compact = false, className }: Languag
         // Include searchable tokens so users can type English or native name or code.
         value={`${lang.englishName} ${lang.nativeName} ${lang.code}`}
         onSelect={() => handleSelect(lang.code)}
-        className="flex items-center gap-3 py-2.5 cursor-pointer"
+        className={cn(
+          "flex items-center gap-3 py-2.5 cursor-pointer transition-colors",
+          isActive && "bg-brand-orange/10",
+        )}
       >
         <span className="text-lg leading-none" aria-hidden>
           {lang.flag}
         </span>
         <div className="flex flex-col min-w-0 flex-1">
-          <span className="text-sm font-medium text-foreground truncate">{lang.nativeName}</span>
+          <span className={cn(
+            "text-sm truncate",
+            isActive ? "font-bold text-brand-orange" : "font-medium text-foreground",
+          )}>
+            {lang.nativeName}
+          </span>
           <span className="text-xs text-muted-foreground truncate">
             {lang.englishName}
             {lang.rtl ? ` · ${t("settings.language.rtl")}` : ""}

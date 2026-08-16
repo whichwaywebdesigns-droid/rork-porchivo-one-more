@@ -30,6 +30,7 @@ import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.ExitToApp
 import androidx.compose.material.icons.outlined.Handshake
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Phone
 import androidx.compose.material.icons.outlined.Refresh
@@ -39,6 +40,11 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.TextButton
@@ -64,6 +70,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.rork.porchivo.config.AppConfig
+import com.rork.porchivo.data.AppLanguage
 import com.rork.porchivo.model.UserRole
 import com.rork.porchivo.ui.navigation.Routes
 import com.rork.porchivo.ui.theme.PorchivoTheme
@@ -82,6 +89,7 @@ fun ProfileScreen(
     val user by appViewModel.user.collectAsStateWithLifecycle()
     val orgMembership by appViewModel.orgMembership.collectAsStateWithLifecycle()
     val darkOverride by appViewModel.darkThemeOverride.collectAsStateWithLifecycle()
+    val currentLanguage by appViewModel.language.collectAsStateWithLifecycle()
 
     val isDark = darkOverride ?: androidx.compose.foundation.isSystemInDarkTheme()
 
@@ -354,6 +362,10 @@ fun ProfileScreen(
                 }
             }
         }
+
+        // Language picker
+        SectionTitle("LANGUAGE")
+        LanguageCard(appViewModel = appViewModel, currentLanguage = currentLanguage)
 
         // Contact info
         SectionTitle("CONTACT INFO")
@@ -650,6 +662,111 @@ private fun SettingRow(
             tint = c.textMuted,
             modifier = Modifier.size(18.dp),
         )
+    }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun LanguageCard(
+    appViewModel: AppViewModel,
+    currentLanguage: AppLanguage,
+    modifier: Modifier = Modifier,
+) {
+    val c = PorchivoTheme.colors
+    var expanded by remember { mutableStateOf(false) }
+
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = c.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+    ) {
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { expanded = it },
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .menuAnchor()
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Language,
+                    contentDescription = null,
+                    tint = c.accent,
+                    modifier = Modifier.size(18.dp),
+                )
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = currentLanguage.nativeName,
+                        color = c.textPrimary,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    Text(
+                        text = currentLanguage.englishName,
+                        color = c.textSecondary,
+                        fontSize = 12.sp,
+                    )
+                }
+                Text(
+                    text = currentLanguage.flag,
+                    fontSize = 20.sp,
+                )
+                ExposedDropdownMenuDefaults.TrailingIcon(
+                    expanded = expanded,
+                )
+            }
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.background(c.surface),
+            ) {
+                AppLanguage.entries.forEach { lang ->
+                    val isActive = lang == currentLanguage
+                    DropdownMenuItem(
+                        text = {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                Text(text = lang.flag, fontSize = 18.sp)
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = lang.nativeName,
+                                        color = if (isActive) c.accent else c.textPrimary,
+                                        fontSize = 14.sp,
+                                        fontWeight = if (isActive) FontWeight.Bold else FontWeight.Medium,
+                                    )
+                                    Text(
+                                        text = lang.englishName + if (lang.rtl) " · RTL" else "",
+                                        color = c.textSecondary,
+                                        fontSize = 11.sp,
+                                    )
+                                }
+                                if (isActive) {
+                                    Icon(
+                                        imageVector = Icons.Filled.CheckCircle,
+                                        contentDescription = "Selected",
+                                        tint = c.accent,
+                                        modifier = Modifier.size(18.dp),
+                                    )
+                                }
+                            }
+                        },
+                        onClick = {
+                            appViewModel.setLanguage(lang)
+                            expanded = false
+                        },
+                        modifier = if (isActive) Modifier.background(c.accent.copy(alpha = 0.08f)) else Modifier,
+                    )
+                }
+            }
+        }
     }
 }
 
