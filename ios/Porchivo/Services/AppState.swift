@@ -226,6 +226,15 @@ final class AppState {
         }
     }
 
+    /// One-tap developer bypass. Seeds the demo user and skips auth backend calls.
+    /// Only exposed as a subtle link under the magic link button for internal testing.
+    @MainActor
+    func developerLogin() {
+        authError = nil
+        seedDemoUser()
+        flagBiometricEnrollment()
+    }
+
     /// Verifies the 6-digit OTP code from the magic link email. On success,
     /// establishes a session and flags for biometric enrollment.
     @MainActor

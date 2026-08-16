@@ -2,9 +2,9 @@
 //  LoginScreen.swift
 //  Porchivo
 //
-//  Magic link authentication — email → 6-digit OTP code → verified.
-//  No passwords. On success, RootView routes to biometric enrollment
-//  (if available) then onboarding or the main TabView.
+//  Magic link authentication with the Porchivo welcome-porch hero illustration.
+//  Email → 6-digit OTP code → verified. No passwords. A developer login link
+//  sits under the magic link button for internal testing bypass.
 //
 
 import SwiftUI
@@ -12,6 +12,7 @@ import SwiftUI
 struct LoginScreen: View {
     @Environment(AppState.self) private var appState
     @Environment(\.porchivo) private var c
+    @Environment(\.colorScheme) private var colorScheme
 
     @State private var email = ""
     @State private var otpCode = ""
@@ -32,23 +33,19 @@ struct LoginScreen: View {
 
     var body: some View {
         ZStack {
-            c.background.ignoresSafeArea()
+            // Hero illustration fills the background. In dark mode we dim it
+            // slightly so the white porch remains readable without clashing.
+            Image("LoginHero")
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .ignoresSafeArea()
+                .overlay(colorScheme == .dark ? Color.black.opacity(0.28) : Color.clear)
+
+            // Scrollable controls overlay the bottom half of the illustration.
             ScrollView {
-                VStack(spacing: 28) {
-                    Spacer().frame(height: 52)
-                    brandBlock
-                    switch phase {
-                    case .email:
-                        emailPhase
-                    case .code:
-                        codePhase
-                    }
-                    if let err = appState.authError {
-                        errorBanner(err)
-                    }
-                    if appState.isSupabaseConfigured == false {
-                        demoHint
-                    }
+                VStack(spacing: 0) {
+                    Spacer().frame(height: 420)
+                    controlsCard
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 32)
@@ -58,18 +55,33 @@ struct LoginScreen: View {
         .onAppear { focusedField = .email }
     }
 
-    // MARK: - Brand
+    // MARK: - Bottom controls card
 
-    private var brandBlock: some View {
-        VStack(spacing: 12) {
-            BrandLogoWithBox(logoSize: 64)
-            Text("Porchivo")
-                .font(.system(size: 28, weight: .black))
-                .foregroundStyle(c.textPrimary)
-            Text(phase == .email ? "Sign in or create account" : "Enter your code")
-                .font(.system(size: 15, weight: .medium))
-                .foregroundStyle(c.textSecondary)
+    private var controlsCard: some View {
+        VStack(spacing: 20) {
+            switch phase {
+            case .email:
+                emailPhase
+            case .code:
+                codePhase
+            }
+            if let err = appState.authError {
+                errorBanner(err)
+            }
+            if appState.isSupabaseConfigured == false {
+                demoHint
+            }
         }
+        .padding(24)
+        .background(
+            .ultraThinMaterial,
+            in: .rect(cornerRadius: Radius.xl)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: Radius.xl)
+                .stroke(Color.white.opacity(0.35), lineWidth: 1)
+        )
+        .shadow(color: Color.black.opacity(0.12), radius: 24, x: 0, y: 12)
     }
 
     // MARK: - Email phase
@@ -87,19 +99,20 @@ struct LoginScreen: View {
             if linkSent {
                 Text("Check your email for a 6-digit code.")
                     .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(c.textMuted)
+                    .foregroundStyle(c.textSecondary)
                     .multilineTextAlignment(.center)
             }
+            developerLoginLink
         }
     }
 
     private var emailField: some View {
         HStack(spacing: 10) {
             Image(systemName: "envelope.fill")
-                .foregroundStyle(c.textMuted)
-            TextField("you@example.com", text: $email)
+                .foregroundStyle(Color(hex: 0x8B5E3C))
+            TextField("Enter your email", text: $email)
                 .font(.system(size: 16))
-                .foregroundStyle(c.textPrimary)
+                .foregroundStyle(Color(hex: 0x3D2B1F))
                 .keyboardType(.emailAddress)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
@@ -109,8 +122,11 @@ struct LoginScreen: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 14)
-        .background(c.surface, in: .rect(cornerRadius: Radius.md))
-        .overlay(RoundedRectangle(cornerRadius: Radius.md).stroke(c.border, lineWidth: 1))
+        .background(Color(hex: 0xF5E6D3), in: .rect(cornerRadius: Radius.md))
+        .overlay(
+            RoundedRectangle(cornerRadius: Radius.md)
+                .stroke(Color(hex: 0xD4A574), lineWidth: 1)
+        )
     }
 
     // MARK: - Code phase
@@ -190,6 +206,25 @@ struct LoginScreen: View {
         .onTapGesture {
             focusedField = .otp
         }
+    }
+
+    // MARK: - Developer bypass
+
+    private var developerLoginLink: some View {
+        Button {
+            Haptics.selection()
+            isSubmitting = true
+            Task { @MainActor in
+                appState.developerLogin()
+                isSubmitting = false
+            }
+        } label: {
+            Text("Developer login")
+                .font(.system(size: 13, weight: .medium))
+                .foregroundStyle(c.textSecondary)
+                .underline()
+        }
+        .disabled(isSubmitting)
     }
 
     // MARK: - Error + demo
