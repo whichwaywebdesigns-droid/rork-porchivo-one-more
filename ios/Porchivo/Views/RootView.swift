@@ -33,6 +33,8 @@ struct RootView: View {
                 }
             }
         }
+        .opacity(appState.languageManager.languageTransitioning ? 0 : 1)
+        .animation(.easeInOut(duration: 0.2), value: appState.languageManager.languageTransitioning)
         .porchivoTheme(systemScheme)
         .onChange(of: scenePhase) { _, newPhase in
             switch newPhase {

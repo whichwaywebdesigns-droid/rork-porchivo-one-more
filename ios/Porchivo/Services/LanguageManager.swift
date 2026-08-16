@@ -90,6 +90,10 @@ final class LanguageManager {
     /// True if the language was auto-detected from the system (not manually chosen).
     private(set) var fromSystem: Bool = false
 
+    /// True while a language-switch transition (fade) is in progress.
+    /// Drives the opacity animation in RootView so text swaps feel smooth.
+    var languageTransitioning: Bool = false
+
     /// Shared singleton.
     static let shared = LanguageManager()
 
@@ -107,14 +111,28 @@ final class LanguageManager {
     /// Whether the current language is RTL.
     var isRTL: Bool { current.isRTL }
 
-    /// Change the language and persist the choice.
-    /// Once called, the system-detection flag is cleared so we never
-    /// override the user's manual preference on future launches.
+    /// Change the language with a smooth fade transition.
+    /// The caller's view should observe `languageTransitioning` and apply
+    /// an opacity animation.
     func setLanguage(_ language: AppLanguage) {
-        current = language
-        fromSystem = false
-        defaults.set(language.rawValue, forKey: Self.languageKey)
-        defaults.set(true, forKey: Self.initializedKey)
+        guard !languageTransitioning else { return }
+        languageTransitioning = true
+
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            // Hold the fade-out state so SwiftUI animates opacity to 0.
+            try? await Task.sleep(for: .milliseconds(220))
+
+            // Swap the language while invisible.
+            self.current = language
+            self.fromSystem = false
+            self.defaults.set(language.rawValue, forKey: Self.languageKey)
+            self.defaults.set(true, forKey: Self.initializedKey)
+
+            // Brief pause then release the transition flag so opacity fades back in.
+            try? await Task.sleep(for: .milliseconds(60))
+            self.languageTransitioning = false
+        }
     }
 
     /// Convenience — change language by raw code string.

@@ -170,6 +170,14 @@
   }
 }
 
+/* ── Language transition ─────────────────────────────────────────────────── */
+/* Smooth opacity transition when switching languages.
+   The `changeLanguageWithTransition()` function in i18n/index.ts toggles
+   `#root` opacity between 0 and 1. */
+#root {
+  transition: opacity 0.2s ease;
+}
+
 /* ── Invisible scrollbars (matches mobile apps) ──────────────────────────── */
 ::-webkit-scrollbar {
   width: 0;

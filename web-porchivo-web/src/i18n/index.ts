@@ -46,5 +46,35 @@ i18n.on("languageChanged", (lng) => {
 // Initial application on load.
 applyDocumentLanguage(i18n.language || DEFAULT_LANGUAGE);
 
+/**
+ * Change the language with a smooth global fade-out → swap → fade-in transition.
+ *
+ * The root `#root` element has a CSS `transition: opacity 0.2s ease` in
+ * `index.css`. This function drives that transition by:
+ * 1. Fading the entire app to opacity 0 (~200ms)
+ * 2. Swapping the i18next language while invisible
+ * 3. Fading back to opacity 1 (~250ms)
+ *
+ * If the root element can't be found, falls back to an instant switch.
+ */
+export async function changeLanguageWithTransition(code: string): Promise<void> {
+  const root = document.getElementById("root");
+  if (!root) {
+    await i18n.changeLanguage(code);
+    return;
+  }
+
+  // Phase 1 — fade out.
+  root.style.opacity = "0";
+  await new Promise((resolve) => setTimeout(resolve, 200));
+
+  // Phase 2 — swap language while invisible.
+  await i18n.changeLanguage(code);
+  await new Promise((resolve) => setTimeout(resolve, 60));
+
+  // Phase 3 — fade back in.
+  root.style.opacity = "1";
+}
+
 export { SUPPORTED_LANGUAGE_CODES };
 export default i18n;

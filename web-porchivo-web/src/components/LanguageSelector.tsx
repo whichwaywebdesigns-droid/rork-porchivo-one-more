@@ -14,6 +14,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { LANGUAGES, getLanguageMeta, type LanguageMeta } from "@/i18n/languages";
+import { changeLanguageWithTransition } from "@/i18n";
 
 interface LanguageSelectorProps {
   /** Render compact (icon-only trigger) — useful inside the header */
@@ -33,11 +34,11 @@ export default function LanguageSelector({ compact = false, className }: Languag
   const current: LanguageMeta = getLanguageMeta(i18n.language);
 
   const handleSelect = useCallback(
-    (code: string) => {
-      void i18n.changeLanguage(code);
+    async (code: string) => {
+      await changeLanguageWithTransition(code);
       setOpen(false);
     },
-    [i18n],
+    [],
   );
 
   const renderItem = (lang: LanguageMeta) => {

@@ -11,6 +11,9 @@ import com.rork.porchivo.data.dto.RiskScoreResponse
 import com.rork.porchivo.model.SubscriptionTier
 import com.rork.porchivo.model.User
 import com.rork.porchivo.model.UserRole
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.SharingStarted
@@ -33,6 +36,10 @@ class AppViewModel : ViewModel() {
     val darkThemeOverride: StateFlow<Boolean?> = repo.darkThemeOverride
     val language: StateFlow<AppLanguage> = repo.language
     val authError: StateFlow<String?> = repo.authError
+
+    // ── Language transition (fade) ─────────────────────────────────────
+    private val _languageTransitioning = MutableStateFlow(false)
+    val languageTransitioning: StateFlow<Boolean> = _languageTransitioning.asStateFlow()
     val isOnboarded: Boolean get() = repo.isOnboarded
     val isOrgMember: Boolean get() = repo.isOrgMember
     val isOrgAdmin: Boolean get() = repo.isOrgAdmin
@@ -63,9 +70,30 @@ class AppViewModel : ViewModel() {
 
     fun setDarkTheme(dark: Boolean) = repo.setDarkTheme(dark)
 
-    fun setLanguage(language: AppLanguage) = repo.setLanguage(language)
+    fun setLanguage(language: AppLanguage) {
+        if (_languageTransitioning.value) return
+        _languageTransitioning.value = true
 
-    fun setLanguage(code: String) = repo.setLanguage(code)
+        viewModelScope.launch {
+            delay(220)
+            repo.setLanguage(language)
+            delay(60)
+            _languageTransitioning.value = false
+        }
+    }
+
+    fun setLanguage(code: String) {
+        if (_languageTransitioning.value) return
+        AppLanguage.fromCode(code) ?: return
+        _languageTransitioning.value = true
+
+        viewModelScope.launch {
+            delay(220)
+            repo.setLanguage(code)
+            delay(60)
+            _languageTransitioning.value = false
+        }
+    }
 
     fun upgradeTier(tier: SubscriptionTier) = repo.upgradeTier(tier)
 

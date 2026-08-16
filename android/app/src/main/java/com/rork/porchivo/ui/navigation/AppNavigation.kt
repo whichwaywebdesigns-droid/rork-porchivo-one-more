@@ -1,7 +1,10 @@
 package com.rork.porchivo.ui.navigation
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.draw.alpha
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.CreditCard
@@ -86,8 +89,16 @@ fun AppNavigation() {
     val navController = rememberNavController()
     val appViewModel: AppViewModel = viewModel()
     val orgMembership by appViewModel.orgMembership.collectAsStateWithLifecycle()
+    val languageTransitioning by appViewModel.languageTransitioning.collectAsStateWithLifecycle()
     val c = PorchivoTheme.colors
     val isOrgMember = orgMembership?.isActive == true
+
+    // Smooth alpha fade when switching languages.
+    val contentAlpha by animateFloatAsState(
+        targetValue = if (languageTransitioning) 0f else 1f,
+        animationSpec = tween(durationMillis = 200),
+        label = "languageFade",
+    )
 
     val tabs = if (isOrgMember) {
         listOf(
@@ -156,7 +167,9 @@ fun AppNavigation() {
         NavHost(
             navController = navController,
             startDestination = Routes.HOME,
-            modifier = Modifier.padding(innerPadding),
+            modifier = Modifier
+                .padding(innerPadding)
+                .alpha(contentAlpha),
         ) {
             composable(Routes.HOME) { HomeScreen(navController) }
             composable(Routes.PACKAGES) { PackagesScreen(navController) }
