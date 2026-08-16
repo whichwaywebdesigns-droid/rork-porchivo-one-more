@@ -32,14 +32,14 @@ export default function HeroImageRotator({
   }, [index, images.length, interval, durations]);
 
   return (
-    <div className="relative w-full aspect-square overflow-hidden rounded-[2.5rem]">
+    <div className="relative w-full aspect-[4/3] overflow-hidden rounded-[2.5rem] bg-white">
       {images.map((image, i) => (
         <img
           key={image.src}
           src={image.src}
           alt={image.alt}
           className={cn(
-            "absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-in-out",
+            "absolute inset-0 w-full h-full object-contain transition-opacity duration-700 ease-in-out",
             i === index ? "opacity-100" : "opacity-0"
           )}
           loading={i === 0 ? "eager" : "lazy"}

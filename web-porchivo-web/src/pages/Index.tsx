@@ -71,10 +71,8 @@ export default function IndexPage() {
       <section className="pt-20 pb-24 px-4 sm:px-6 border-b border-brand-navy-500/40 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-brand-orange/8 via-transparent to-transparent pointer-events-none" />
         <div className="max-w-5xl mx-auto relative text-center">
-          {/* Hero image: premium gradient glow + soft edges */}
-          <div className="relative mx-auto mb-8 max-w-md">
-            <div className="absolute inset-0 bg-gradient-to-br from-amber-400/30 via-orange-500/20 to-blue-500/20 blur-3xl rounded-[2.5rem] scale-110" />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent rounded-[2.5rem]" />
+          {/* Hero image */}
+          <div className="relative mx-auto mb-8 max-w-md rounded-[2.5rem] shadow-2xl shadow-amber-900/20 border border-white/10">
             <HeroImageRotator
               images={[
                 {
@@ -96,7 +94,6 @@ export default function IndexPage() {
               ]}
               durations={[4500, 4500, 4500, 9000]}
             />
-            <div className="absolute inset-x-0 -bottom-1 h-24 bg-gradient-to-t from-slate-950 to-transparent rounded-b-[2.5rem]" />
           </div>
 
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-orange/10 border border-brand-orange/20 text-brand-orange text-sm font-medium mb-6">
