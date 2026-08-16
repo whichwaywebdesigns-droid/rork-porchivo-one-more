@@ -10,7 +10,7 @@
  *   - Profile > "Create Your Community" (for free-tier users)
  *   - Join Community > "Claim" tab
  */
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -54,6 +54,31 @@ WebBrowser.maybeCompleteAuthSession();
 
 const SUCCESS_REDIRECT = 'porchivo://org-signup/success';
 const CANCEL_REDIRECT = 'porchivo://org-signup/cancelled';
+
+/**
+ * Parse session_id and org_id from the Stripe redirect URL.
+ * Format: porchivo://org-signup/success?session_id={CHECKOUT_SESSION_ID}&org_id={orgId}
+ * Falls back to the cached values from the checkout response if parsing fails.
+ */
+function parseRedirectUrl(url: string | undefined | null): { sessionId: string | null; orgId: string | null } {
+  if (!url) return { sessionId: null, orgId: null };
+  try {
+    const parsed = new URL(url);
+    const sessionId = parsed.searchParams.get('session_id');
+    const orgId = parsed.searchParams.get('org_id');
+    return { sessionId, orgId };
+  } catch {
+    // URL constructor may fail on some platforms for custom schemes;
+    // fall back to manual parsing
+    const qIndex = url.indexOf('?');
+    if (qIndex === -1) return { sessionId: null, orgId: null };
+    const params = new URLSearchParams(url.slice(qIndex + 1));
+    return {
+      sessionId: params.get('session_id'),
+      orgId: params.get('org_id'),
+    };
+  }
+}
 
 // ─── Plan definitions (must match edge function + pricing page) ───────────────
 
@@ -182,6 +207,10 @@ export default function OrgSignupScreen() {
   const [orgId, setOrgId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Refs mirroring sessionId/orgId for the deep link listener (avoids stale closures)
+  const sessionIdRef = useRef<string | null>(null);
+  const orgIdRef = useRef<string | null>(null);
+
   // Success state
   const [inviteCode, setInviteCode] = useState<string | null>(null);
   const [createdOrgName, setCreatedOrgName] = useState<string>('');
@@ -202,6 +231,9 @@ export default function OrgSignupScreen() {
   React.useEffect(() => {
     animateIn();
   }, [step, animateIn]);
+
+  // ── Auto-navigation timer ref (cleared on unmount) ──────────────────────
+  const autoNavTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ── Validate details step ──────────────────────────────────────────────────
   const detailsValid = orgName.trim().length > 0 && address.trim().length > 0 && city.trim().length > 0 && stateField.length === 2 && zip.length >= 5;
@@ -239,9 +271,12 @@ export default function OrgSignupScreen() {
       setCheckoutUrl(data.checkoutUrl);
       setSessionId(data.sessionId);
       setOrgId(data.orgId);
+      sessionIdRef.current = data.sessionId;
+      orgIdRef.current = data.orgId;
       setCreatedOrgName(orgName.trim());
 
-      // Open Stripe Checkout in in-app browser
+      // Open Stripe Checkout in in-app browser — openAuthSessionAsync
+      // intercepts the porchivo:// redirect callback automatically.
       const browserResult = await WebBrowser.openAuthSessionAsync(
         data.checkoutUrl,
         SUCCESS_REDIRECT,
@@ -249,9 +284,20 @@ export default function OrgSignupScreen() {
       );
 
       if (browserResult.type === 'success') {
-        // Stripe redirected back — verify the payment
+        // Extract session_id and org_id from the redirect URL query params.
+        // These are appended by Stripe on the success_url redirect and are
+        // more authoritative than the cached values from the checkout response.
+        const { sessionId: urlSid, orgId: urlOid } = parseRedirectUrl(
+          'url' in browserResult ? (browserResult as { url?: string }).url : null,
+        );
+        const finalSid = urlSid ?? data.sessionId;
+        const finalOid = urlOid ?? data.orgId;
+
+        log('[OrgSignup] Stripe redirect callback received', { finalSid, finalOid });
+
+        // Verify the payment via confirm-org-signup edge function
         setStep('confirming');
-        await handleConfirmSignup(data.sessionId, data.orgId);
+        await handleConfirmSignup(finalSid, finalOid);
       } else {
         // User dismissed the browser before completing
         setStep('cancelled');
@@ -287,6 +333,12 @@ export default function OrgSignupScreen() {
         // Refresh org context so the tab layout switches to community tier
         await refreshOrgContext();
         setStep('success');
+        // Auto-navigate to the community dashboard after a brief delay
+        // so the user can see their invite code before being redirected.
+        autoNavTimerRef.current = setTimeout(() => {
+          log('[OrgSignup] Auto-navigating to community dashboard after 200');
+          router.replace('/(tabs)/(home)' as any);
+        }, 4000);
       } else {
         throw new Error(data?.error ?? 'Payment verification failed');
       }
@@ -305,6 +357,35 @@ export default function OrgSignupScreen() {
       void handleConfirmSignup(sessionId, orgId);
     }
   }, [sessionId, orgId, handleConfirmSignup]);
+
+  // ── Deep link listener (safety net for cases where ─────────────────────────
+  // openAuthSessionAsync doesn't intercept the redirect, e.g. on Android
+  // when the browser fully leaves the app and returns via intent).
+  useEffect(() => {
+    const handleDeepLink = ({ url }: { url: string }) => {
+      log('[OrgSignup] Deep link received:', url);
+      if (url.startsWith(SUCCESS_REDIRECT)) {
+        const { sessionId: dlSid, orgId: dlOid } = parseRedirectUrl(url);
+        if (dlSid && dlOid && (dlSid !== sessionIdRef.current || dlOid !== orgIdRef.current)) {
+          sessionIdRef.current = dlSid;
+          orgIdRef.current = dlOid;
+          setStep('confirming');
+          void handleConfirmSignup(dlSid, dlOid);
+        }
+      } else if (url.startsWith(CANCEL_REDIRECT)) {
+        setStep('cancelled');
+      }
+    };
+
+    const sub = Linking.addEventListener('url', handleDeepLink);
+    return () => {
+      sub.remove();
+      if (autoNavTimerRef.current) {
+        clearTimeout(autoNavTimerRef.current);
+        autoNavTimerRef.current = null;
+      }
+    };
+  }, [handleConfirmSignup]);
 
   // ── Copy invite code ───────────────────────────────────────────────────────
   const handleCopyCode = useCallback(() => {
@@ -686,9 +767,19 @@ export default function OrgSignupScreen() {
           </View>
         </View>
 
+        <Text style={[styles.autoNavHint, { color: Colors.slateLighter }]}>
+          Redirecting to your dashboard in a moment…
+        </Text>
+
         <TouchableOpacity
           style={[styles.primaryBtn, { backgroundColor: Colors.primary, marginTop: 24 }]}
-          onPress={() => router.replace('/(tabs)/(home)' as any)}
+          onPress={() => {
+            if (autoNavTimerRef.current) {
+              clearTimeout(autoNavTimerRef.current);
+              autoNavTimerRef.current = null;
+            }
+            router.replace('/(tabs)/(home)' as any);
+          }}
           activeOpacity={0.85}
         >
           <Text style={styles.primaryBtnText}>Go to Community Dashboard</Text>
@@ -1080,5 +1171,13 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+
+  // Auto-nav hint text
+  autoNavHint: {
+    fontSize: 13,
+    fontStyle: 'italic' as const,
+    marginTop: 16,
+    textAlign: 'center',
   },
 });
