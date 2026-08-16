@@ -85,8 +85,16 @@ export default function IndexPage() {
                   src: "/images/hero-porchivo-clean.png",
                   alt: "After Porchivo — the same family protected by neighbor-powered delivery security",
                 },
+                {
+                  src: "/images/hero-hoa-mailroom-before.png",
+                  alt: "Before Porchivo — an overwhelmed HOA manager in a chaotic, cluttered mailroom",
+                },
+                {
+                  src: "/images/hero-hoa-mailroom-after.jpg",
+                  alt: "After Porchivo — an organized HOA mailroom with clear package, communication, and maintenance workflows",
+                },
               ]}
-              interval={5000}
+              durations={[4500, 4500, 4500, 9000]}
             />
             <div className="absolute inset-x-0 -bottom-1 h-24 bg-gradient-to-t from-slate-950 to-transparent rounded-b-[2.5rem]" />
           </div>
@@ -96,8 +104,7 @@ export default function IndexPage() {
             {BRAND.shortTagline}
           </div>
           <h1 className="text-4xl sm:text-6xl font-bold text-brand-text-primary leading-tight mb-4">
-            Porch pirate protection starts with knowing your porch risk{" "}
-            <span className="text-brand-orange">before every delivery</span>
+            Making sure your HOA's mailroom doesn't get messy - every delivery organized, visible, and moving smoothly for their cherished residents
           </h1>
           <p className="text-lg sm:text-xl font-medium text-brand-text-secondary max-w-2xl mx-auto mb-6">
             From blocks to buildings — superior package and property tracking for homeowners, homeowner associations, and HOA package management.

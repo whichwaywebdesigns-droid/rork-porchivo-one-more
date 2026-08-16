@@ -9,20 +9,27 @@ interface RotatorImage {
 interface HeroImageRotatorProps {
   images: RotatorImage[];
   interval?: number;
+  durations?: number[];
 }
 
-export default function HeroImageRotator({ images, interval = 5000 }: HeroImageRotatorProps) {
+export default function HeroImageRotator({
+  images,
+  interval = 5000,
+  durations,
+}: HeroImageRotatorProps) {
   const [index, setIndex] = useState<number>(0);
 
   useEffect(() => {
     if (images.length <= 1) return;
 
-    const timer = setInterval(() => {
-      setIndex((prev) => (prev + 1) % images.length);
-    }, interval);
+    const duration = durations?.[index] ?? interval;
 
-    return () => clearInterval(timer);
-  }, [images.length, interval]);
+    const timer = setTimeout(() => {
+      setIndex((prev) => (prev + 1) % images.length);
+    }, duration);
+
+    return () => clearTimeout(timer);
+  }, [index, images.length, interval, durations]);
 
   return (
     <div className="relative w-full aspect-square overflow-hidden rounded-[2.5rem]">
