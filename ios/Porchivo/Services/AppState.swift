@@ -208,13 +208,22 @@ final class AppState {
 
     /// Sends a magic link email with a 6-digit OTP code. Returns `true` if
     /// Supabase accepted the request — the user then enters the code in-app.
+    /// On failure, sets `authError` with the real Supabase error message.
     @MainActor
     func sendMagicLink(email: String) async -> Bool {
+        authError = nil
         if !isSupabaseConfigured {
             // Demo mode — pretend the link was sent.
             return true
         }
-        return await supabase.sendMagicLink(email.trimmingCharacters(in: .whitespaces))
+        let result = await supabase.sendMagicLink(email.trimmingCharacters(in: .whitespaces))
+        switch result {
+        case .success:
+            return true
+        case .failure(let err):
+            authError = err.localizedDescription
+            return false
+        }
     }
 
     /// Verifies the 6-digit OTP code from the magic link email. On success,

@@ -239,7 +239,11 @@ struct LoginScreen: View {
                 }
                 focusedField = .otp
             } else {
-                appState.authError = "Could not send magic link. Check your email and try again."
+                // authError is already set by AppState with the real Supabase error.
+                // Only set a fallback if AppState didn't populate one.
+                if appState.authError == nil {
+                    appState.authError = "Could not send magic link. Check your email and try again."
+                }
             }
         }
     }
@@ -265,7 +269,7 @@ struct LoginScreen: View {
         isSubmitting = true
         defer { isSubmitting = false }
         let ok = await appState.sendMagicLink(email: email)
-        if !ok {
+        if !ok && appState.authError == nil {
             appState.authError = "Could not resend code. Try again."
         }
     }

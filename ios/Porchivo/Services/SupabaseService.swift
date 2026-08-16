@@ -468,8 +468,8 @@ actor SupabaseService {
 
     /// Sends a magic link email to the given address. The email contains a
     /// 6-digit OTP code the user enters in-app — no deep link required.
-    /// Returns `true` if Supabase accepted the request.
-    func sendMagicLink(_ email: String) async -> Bool {
+    /// Returns the real error message from Supabase on failure.
+    func sendMagicLink(_ email: String) async -> Result<Void, Error> {
         var req = URLRequest(url: baseURL.appendingPathComponent("auth/v1/otp"))
         req.httpMethod = "POST"
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -479,11 +479,18 @@ actor SupabaseService {
             "options": ["should_create_user": true],
         ])
         do {
-            let (_, resp) = try await session.data(for: req)
-            guard let http = resp as? HTTPURLResponse else { return false }
-            return (200..<300).contains(http.statusCode)
+            let (data, resp) = try await session.data(for: req)
+            guard let http = resp as? HTTPURLResponse else {
+                return .failure(URLError(.badServerResponse))
+            }
+            guard (200..<300).contains(http.statusCode) else {
+                let msg = errorMessage(from: data) ?? "Request failed (\(http.statusCode))."
+                return .failure(NSError(domain: "SupabaseAuth", code: http.statusCode,
+                                         userInfo: [NSLocalizedDescriptionKey: msg]))
+            }
+            return .success(())
         } catch {
-            return false
+            return .failure(error)
         }
     }
 
