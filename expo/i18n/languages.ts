@@ -5,6 +5,8 @@
  * Mirrors the web platform's language list.
  */
 
+import { getLocales } from 'expo-localization';
+
 export interface LanguageMeta {
   /** BCP-47 language code */
   code: string;
@@ -47,4 +49,27 @@ export function getLanguageMeta(code: string): LanguageMeta {
 
 export function isRTL(code: string): boolean {
   return getLanguageMeta(code)?.rtl ?? false;
+}
+
+/**
+ * Detect the device's system language and match it to a supported language.
+ * Uses expo-localization's getLocales() which returns the user's preferred
+ * languages in priority order. Falls back to DEFAULT_LANGUAGE if none match.
+ *
+ * Called once on first launch (when no saved preference exists) to set the
+ * app's default language to match the device.
+ */
+export function detectSystemLanguage(): string {
+  try {
+    const locales = getLocales();
+    for (const locale of locales) {
+      const code = locale.languageCode;
+      if (code && LANGUAGE_MAP[code]) {
+        return code;
+      }
+    }
+  } catch {
+    // expo-localization may not be available in all environments
+  }
+  return DEFAULT_LANGUAGE;
 }

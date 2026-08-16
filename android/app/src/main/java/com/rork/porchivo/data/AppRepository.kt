@@ -58,6 +58,7 @@ sealed class AuthState {
 class AppRepository(context: Context) {
 
     private val sessionStore = SessionStore(context)
+    val languageManager = LanguageManager(context)
     private val supabase: SupabaseClient? = if (BuildConfig.SUPABASE_URL.isNotBlank()) {
         SupabaseClient(
             supabaseUrl = BuildConfig.SUPABASE_URL.trimEnd('/'),
@@ -102,6 +103,10 @@ class AppRepository(context: Context) {
     private val _authError = MutableStateFlow<String?>(null)
     val authError: StateFlow<String?> = _authError.asStateFlow()
 
+    // ── Language preference ────────────────────────────────────────────
+    private val _language = MutableStateFlow(AppLanguage.DEFAULT)
+    val language: StateFlow<AppLanguage> = _language.asStateFlow()
+
     // ── Org membership (Free vs Community tier) ────────────────────────
     private val _orgMembership = MutableStateFlow<OrgMembership?>(null)
     val orgMembership: StateFlow<OrgMembership?> = _orgMembership.asStateFlow()
@@ -114,6 +119,13 @@ class AppRepository(context: Context) {
     private val packagesJson = kotlinx.serialization.json.Json {
         ignoreUnknownKeys = true
         encodeDefaults = true
+    }
+
+    init {
+        // Resolve language on instantiation — auto-detects system language
+        // on first launch, restores saved preference on subsequent launches.
+        val (lang, _) = languageManager.loadOrDetect()
+        _language.value = lang
     }
 
     // ── Initialization / Session restore ────────────────────────────────
@@ -483,6 +495,16 @@ class AppRepository(context: Context) {
 
     fun setDarkTheme(dark: Boolean) {
         _darkThemeOverride.value = dark
+    }
+
+    fun setLanguage(language: AppLanguage) {
+        languageManager.setLanguage(language)
+        _language.value = language
+    }
+
+    fun setLanguage(code: String) {
+        languageManager.setLanguage(code)
+        AppLanguage.fromCode(code)?.let { _language.value = it }
     }
 
     // ── Org membership (Free vs Community tier) ────────────────────────

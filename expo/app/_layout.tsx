@@ -32,6 +32,7 @@ import { OrganizationProvider } from "@/store/OrganizationContext";
 import { FieldGuideProvider } from "@/store/FieldGuideContext";
 import { TrustEngineProvider } from "@/store/TrustEngineContext";
 import { ThemeProvider } from "@/providers/ThemeProvider";
+import { LanguageRootProvider } from "@/i18n/LanguageProvider";
 import { ToastProvider } from "@/providers/ToastProvider";
 import { BackgroundErrorProvider } from "@/store/BackgroundErrorContext";
 import { BackgroundErrorBanner } from "@/components/BackgroundErrorBanner";
@@ -295,6 +296,7 @@ export default function RootLayout() {
       <QueryClientProvider client={queryClient}>
         <GestureHandlerRootView style={{ flex: 1 }}>
           <ThemeProvider>
+          <LanguageRootProvider>
           <ToastProvider>
           <AppProvider>
             <PaywallProvider>
@@ -336,6 +338,7 @@ export default function RootLayout() {
             </PaywallProvider>
           </AppProvider>
           </ToastProvider>
+          </LanguageRootProvider>
           </ThemeProvider>
         </GestureHandlerRootView>
       </QueryClientProvider>

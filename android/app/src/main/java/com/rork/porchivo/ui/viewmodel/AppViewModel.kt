@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.rork.porchivo.data.AppRepositoryHolder
 import com.rork.porchivo.data.AuthState
 import com.rork.porchivo.data.LoadState
+import com.rork.porchivo.data.AppLanguage
 import com.rork.porchivo.data.dto.OrgMembership
 import com.rork.porchivo.data.dto.RiskScoreResponse
 import com.rork.porchivo.model.SubscriptionTier
@@ -30,6 +31,7 @@ class AppViewModel : ViewModel() {
     val tier: StateFlow<SubscriptionTier> = repo.tier
     val orgMembership: StateFlow<OrgMembership?> = repo.orgMembership
     val darkThemeOverride: StateFlow<Boolean?> = repo.darkThemeOverride
+    val language: StateFlow<AppLanguage> = repo.language
     val authError: StateFlow<String?> = repo.authError
     val isOnboarded: Boolean get() = repo.isOnboarded
     val isOrgMember: Boolean get() = repo.isOrgMember
@@ -60,6 +62,10 @@ class AppViewModel : ViewModel() {
     }
 
     fun setDarkTheme(dark: Boolean) = repo.setDarkTheme(dark)
+
+    fun setLanguage(language: AppLanguage) = repo.setLanguage(language)
+
+    fun setLanguage(code: String) = repo.setLanguage(code)
 
     fun upgradeTier(tier: SubscriptionTier) = repo.upgradeTier(tier)
 

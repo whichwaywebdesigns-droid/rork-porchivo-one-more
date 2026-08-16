@@ -55,6 +55,9 @@ final class AppState {
     // Theme
     var darkThemeOverride: Bool? = nil
 
+    // Language — auto-detects system language on first launch, restores saved pref on subsequent launches.
+    var languageManager: LanguageManager = LanguageManager.shared
+
     // Backend readiness
     var isSupabaseConfigured: Bool = false
 
@@ -100,6 +103,9 @@ final class AppState {
         availableBiometry = BiometricAuthService.availableType()
         biometricUnlockEnabled = UserDefaults.standard.bool(forKey: biometricPrefKey)
         biometricEnrollmentDeclined = UserDefaults.standard.bool(forKey: biometricDeclinedKey)
+        // Language is loaded in LanguageManager.init() — nothing to do here,
+        // but we reference it so the @Observable state is live.
+        _ = languageManager
     }
 
     // MARK: - Session restore
@@ -692,6 +698,15 @@ final class AppState {
 
     func setDarkTheme(_ dark: Bool) { darkThemeOverride = dark }
     func upgradeTier(_ newTier: SubscriptionTier) { tier = newTier }
+
+    // MARK: - Language
+
+    func setLanguage(_ language: AppLanguage) {
+        languageManager.setLanguage(language)
+    }
+
+    var currentLanguage: AppLanguage { languageManager.current }
+    var isLanguageRTL: Bool { languageManager.isRTL }
 
     // MARK: - Foreground re-lock (scene phase)
 
