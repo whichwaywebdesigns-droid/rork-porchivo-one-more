@@ -178,6 +178,18 @@
   transition: opacity 0.2s ease;
 }
 
+/* ── Scroll snap ───────────────────────────────────────────────────────── */
+/* Vertical mandatory snapping on the document scroll container. Each <section>
+   inside <main> aligns perfectly to the top edge. scroll-padding-top offsets
+   the fixed 68px header so sections snap below it, not behind it. */
+html {
+  scroll-snap-type: y mandatory;
+  scroll-padding-top: 68px;
+}
+main#main-content > section {
+  scroll-snap-align: start;
+}
+
 /* ── Auto-hiding overlay scrollbars ─────────────────────────────────────── */
 /* Thin rounded bar that fades in while scrolling and fades out ~600ms after
    the user stops. Uses a `scrolling` class on <html> toggled by a scroll
