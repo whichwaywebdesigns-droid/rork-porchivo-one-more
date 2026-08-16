@@ -32,7 +32,7 @@ export default function HeroImageRotator({
   }, [index, images.length, interval, durations]);
 
   return (
-    <div className="relative w-full aspect-[4/3] overflow-hidden rounded-[2.5rem] bg-white">
+    <div className="relative w-full aspect-[4/3] overflow-hidden rounded-[2.5rem] bg-background">
       {images.map((image, i) => (
         <img
           key={image.src}
