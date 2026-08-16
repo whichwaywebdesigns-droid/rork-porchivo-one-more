@@ -75,8 +75,8 @@ export default function IndexPage() {
             <div className="absolute inset-0 bg-gradient-to-br from-amber-400/30 via-orange-500/20 to-blue-500/20 blur-3xl rounded-[2.5rem] scale-110" />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent rounded-[2.5rem]" />
             <img
-              src="/images/hero-porchivo-cardboard.png"
-              alt="Porchivo cardboard box: When porch pirates lurk, neighbors go to work."
+              src="/images/hero-porchivo-clean.png"
+              alt="Porchivo hero illustration — friendly home and neighbor network"
               className="relative rounded-[2.5rem] shadow-2xl shadow-amber-900/20 border border-white/10"
               loading="eager"
             />
