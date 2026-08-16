@@ -727,6 +727,106 @@ actor SupabaseService {
         }
     }
 
+    // MARK: Edge Functions
+
+    /// Invokes a Supabase Edge Function by name. POSTs to
+    /// `{baseURL}/functions/v1/{name}` with auth headers + JSON body.
+    /// Returns the raw response data on success.
+    func invokeEdgeFunction(_ name: String, body: [String: Any]) async -> Result<Data, Error> {
+        var req = URLRequest(url: baseURL.appendingPathComponent("functions/v1/\(name)"))
+        req.httpMethod = "POST"
+        for (k, v) in authHeaders(includeBearer: true) { req.setValue(v, forHTTPHeaderField: k) }
+        req.httpBody = try? JSONSerialization.data(withJSONObject: body)
+        do {
+            let (data, resp) = try await session.data(for: req)
+            guard let http = resp as? HTTPURLResponse else {
+                return .failure(URLError(.badServerResponse))
+            }
+            guard (200..<300).contains(http.statusCode) else {
+                let msg = errorMessage(from: data) ?? "Function \(name) failed (\(http.statusCode))."
+                return .failure(NSError(domain: "EdgeFunction", code: http.statusCode,
+                                         userInfo: [NSLocalizedDescriptionKey: msg]))
+            }
+            return .success(data)
+        } catch {
+            return .failure(error)
+        }
+    }
+
+    // MARK: Org checkout (B2B Stripe Checkout)
+
+    nonisolated struct OrgCheckoutResponse: Decodable, Sendable {
+        let checkoutUrl: String
+        let sessionId: String
+        let orgId: String
+    }
+
+    nonisolated struct OrgConfirmResponse: Decodable, Sendable {
+        let success: Bool?
+        let error: String?
+        let org: OrgConfirmOrg?
+    }
+
+    nonisolated struct OrgConfirmOrg: Decodable, Sendable {
+        let id: String?
+        let name: String?
+        let inviteCode: String?
+        let planTier: String?
+    }
+
+    /// Calls `create-org-checkout` edge function to create a pending org + Stripe Checkout session.
+    /// Returns the checkout URL, session ID, and org ID.
+    func createOrgCheckout(
+        name: String, type: String, address: String, city: String, state: String,
+        zip: String, totalUnits: Int?, planTier: String, billingCycle: String,
+        returnUrl: String
+    ) async -> Result<OrgCheckoutResponse, Error> {
+        let body: [String: Any] = [
+            "name": name,
+            "type": type,
+            "address": address,
+            "city": city,
+            "state": state,
+            "zip": zip,
+            "totalUnits": totalUnits ?? NSNull(),
+            "planTier": planTier,
+            "billingCycle": billingCycle,
+            "returnUrl": returnUrl,
+        ]
+        let result = await invokeEdgeFunction("create-org-checkout", body: body)
+        switch result {
+        case .success(let data):
+            do {
+                let decoded = try decoder.decode(OrgCheckoutResponse.self, from: data)
+                return .success(decoded)
+            } catch {
+                return .failure(error)
+            }
+        case .failure(let err):
+            return .failure(err)
+        }
+    }
+
+    /// Calls `confirm-org-signup` edge function to verify payment and activate the org.
+    func confirmOrgSignup(sessionId: String, orgId: String) async -> Result<OrgConfirmResponse, Error> {
+        let body: [String: Any] = [
+            "sessionId": sessionId,
+            "orgId": orgId,
+        ]
+        let result = await invokeEdgeFunction("confirm-org-signup", body: body)
+        switch result {
+        case .success(let data):
+            do {
+                let decoded = try decoder.decode(OrgConfirmResponse.self, from: data)
+                return .success(decoded)
+            } catch {
+                return .failure(error)
+            }
+        case .failure(let err):
+            return .failure(err)
+        }
+    }
+
     // MARK: Account deletion (graceful — 30-day deactivation)
 
     struct DeletionResult: Decodable, Sendable {

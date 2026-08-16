@@ -694,6 +694,24 @@ final class AppState {
         await loadOrgContext(userId: userId)
     }
 
+    // MARK: - Org checkout (B2B Stripe Checkout)
+
+    func createOrgCheckout(
+        name: String, type: String, address: String, city: String, state: String,
+        zip: String, totalUnits: Int?, planTier: String, billingCycle: String,
+        returnUrl: String
+    ) async -> Result<SupabaseService.OrgCheckoutResponse, Error> {
+        await supabase.createOrgCheckout(
+            name: name, type: type, address: address, city: city, state: state,
+            zip: zip, totalUnits: totalUnits, planTier: planTier,
+            billingCycle: billingCycle, returnUrl: returnUrl
+        )
+    }
+
+    func confirmOrgSignup(sessionId: String, orgId: String) async -> Result<SupabaseService.OrgConfirmResponse, Error> {
+        await supabase.confirmOrgSignup(sessionId: sessionId, orgId: orgId)
+    }
+
     // MARK: - Theme
 
     func setDarkTheme(_ dark: Bool) { darkThemeOverride = dark }

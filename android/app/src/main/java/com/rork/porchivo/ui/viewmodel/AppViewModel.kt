@@ -7,6 +7,8 @@ import com.rork.porchivo.data.AuthState
 import com.rork.porchivo.data.LoadState
 import com.rork.porchivo.data.AppLanguage
 import com.rork.porchivo.data.dto.OrgMembership
+import com.rork.porchivo.data.dto.OrgCheckoutResponse
+import com.rork.porchivo.data.dto.OrgConfirmResponse
 import com.rork.porchivo.data.dto.RiskScoreResponse
 import com.rork.porchivo.model.SubscriptionTier
 import com.rork.porchivo.model.User
@@ -99,6 +101,27 @@ class AppViewModel : ViewModel() {
 
     fun refreshOrgContext() {
         viewModelScope.launch { repo.refreshOrgContext() }
+    }
+
+    suspend fun createOrgCheckout(
+        name: String,
+        type: String,
+        address: String,
+        city: String,
+        state: String,
+        zip: String,
+        totalUnits: Int?,
+        planTier: String,
+        billingCycle: String,
+        returnUrl: String,
+    ): Result<OrgCheckoutResponse> {
+        return repo.createOrgCheckout(
+            name, type, address, city, state, zip, totalUnits, planTier, billingCycle, returnUrl,
+        )
+    }
+
+    suspend fun confirmOrgSignup(sessionId: String, orgId: String): Result<OrgConfirmResponse> {
+        return repo.confirmOrgSignup(sessionId, orgId)
     }
 
     fun markOnboardingComplete() {

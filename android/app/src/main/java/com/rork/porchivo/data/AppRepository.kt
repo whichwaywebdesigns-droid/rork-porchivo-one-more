@@ -7,8 +7,10 @@ import com.rork.porchivo.data.dto.DbNotification
 import com.rork.porchivo.data.dto.DbOrgContextRow
 import com.rork.porchivo.data.dto.DbProfile
 import com.rork.porchivo.data.dto.DbShipment
-import com.rork.porchivo.data.dto.RiskScoreResponse
+import com.rork.porchivo.data.dto.OrgCheckoutResponse
+import com.rork.porchivo.data.dto.OrgConfirmResponse
 import com.rork.porchivo.data.dto.OrgMembership
+import com.rork.porchivo.data.dto.RiskScoreResponse
 import com.rork.porchivo.model.Carrier
 import com.rork.porchivo.model.DeliveryNotification
 import com.rork.porchivo.model.DeliveryStatus
@@ -113,6 +115,18 @@ class AppRepository(context: Context) {
 
     val isOrgMember: Boolean get() = _orgMembership.value?.isActive == true
     val isOrgAdmin: Boolean get() = _orgMembership.value?.isAdmin == true
+
+    // ── Org signup deep link redirect ─────────────────────────────────
+    private val _orgSignupRedirectUrl = MutableStateFlow<String?>(null)
+    val orgSignupRedirectUrl: StateFlow<String?> = _orgSignupRedirectUrl.asStateFlow()
+
+    fun setOrgSignupRedirect(url: String) {
+        _orgSignupRedirectUrl.value = url
+    }
+
+    fun clearOrgSignupRedirect() {
+        _orgSignupRedirectUrl.value = null
+    }
 
     // Local storage for tracked packages (SharedPreferences — mirrors Expo AsyncStorage)
     private val packagesPrefs = context.getSharedPreferences("porchivo_packages", Context.MODE_PRIVATE)
@@ -489,6 +503,60 @@ class AppRepository(context: Context) {
             // Network/edge function failure — use demo score so onboarding continues
             RiskScoreResponse(zip = zip.take(5), score = 34, level = "LOW", cached = false)
         }
+    }
+
+    // ── Org checkout (B2B Stripe Checkout) ───────────────────────────
+
+    /**
+     * Calls `create-org-checkout` edge function to create a pending org + Stripe Checkout session.
+     * Returns the checkout URL, session ID, and org ID.
+     */
+    suspend fun createOrgCheckout(
+        name: String,
+        type: String,
+        address: String,
+        city: String,
+        state: String,
+        zip: String,
+        totalUnits: Int?,
+        planTier: String,
+        billingCycle: String,
+        returnUrl: String,
+    ): Result<OrgCheckoutResponse> {
+        val client = supabase ?: return Result.failure(Exception("Backend not configured"))
+        val body = buildMap {
+            put("name", name)
+            put("type", type)
+            put("address", address)
+            put("city", city)
+            put("state", state)
+            put("zip", zip)
+            if (totalUnits != null) put("totalUnits", totalUnits)
+            put("planTier", planTier)
+            put("billingCycle", billingCycle)
+            put("returnUrl", returnUrl)
+        }
+        return client.invokeFunction(
+            "create-org-checkout",
+            body,
+            OrgCheckoutResponse.serializer(),
+        )
+    }
+
+    /**
+     * Calls `confirm-org-signup` edge function to verify payment and activate the org.
+     */
+    suspend fun confirmOrgSignup(sessionId: String, orgId: String): Result<OrgConfirmResponse> {
+        val client = supabase ?: return Result.failure(Exception("Backend not configured"))
+        val body = mapOf(
+            "sessionId" to sessionId,
+            "orgId" to orgId,
+        )
+        return client.invokeFunction(
+            "confirm-org-signup",
+            body,
+            OrgConfirmResponse.serializer(),
+        )
     }
 
     // ── Theme ───────────────────────────────────────────────────────────
