@@ -98,6 +98,17 @@ BEGIN
   -- Profile row — must come after all child rows that FK to profiles
   DELETE FROM public.profiles WHERE id = v_user_id;
 
+  -- Purge Storage objects (avatars + delivery-photos) for this user.
+  -- Runs as SECURITY DEFINER (bypasses Storage RLS). Path pattern: <uid>/<file>.
+  -- Wrapped in exception handler so storage failure doesn't abort the deletion.
+  BEGIN
+    DELETE FROM storage.objects
+    WHERE bucket_id IN ('avatars', 'delivery-photos')
+      AND (storage.foldername(name))[1] = v_user_id::text;
+  EXCEPTION WHEN OTHERS THEN
+    NULL;
+  END;
+
   -- Finally, delete the auth user. SECURITY DEFINER gives us access to auth schema.
   -- This invalidates all active sessions for this user immediately.
   DELETE FROM auth.users WHERE id = v_user_id;

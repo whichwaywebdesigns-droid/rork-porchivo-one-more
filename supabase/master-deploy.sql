@@ -8598,10 +8598,11 @@ CREATE POLICY "Users delete own avatar"
 -- Account deletion stored procedure (used internally by purge_deleted_accounts)
 -- Run in Supabase SQL Editor AFTER migration.sql.
 --
--- Clients call supabase.rpc('request_account_deletion') for graceful deactivation.
+-- Replaces the fragile client-side cascade in AppContext.deleteAccount.
+-- The client calls  supabase.rpc('request_account_deletion')  for graceful deactivation.
 -- This procedure is called internally by purge_deleted_accounts() after the 30-day grace period.
--- All deletes happen inside one transaction — either
--- everything is removed or nothing is, preventing partial-delete corruption.
+-- All deletes happen inside one transaction — either everything is removed or nothing is,
+-- preventing partial-delete corruption.
 --
 -- The function runs as SECURITY DEFINER (elevated privileges) so it can:
 --   • Delete from tables with strict RLS
@@ -8693,6 +8694,17 @@ BEGIN
 
   -- Profile row — must come after all child rows that FK to profiles
   DELETE FROM public.profiles WHERE id = v_user_id;
+
+  -- Purge Storage objects (avatars + delivery-photos) for this user.
+  -- Runs as SECURITY DEFINER (bypasses Storage RLS). Path pattern: <uid>/<file>.
+  -- Wrapped in exception handler so storage failure doesn't abort the deletion.
+  BEGIN
+    DELETE FROM storage.objects
+    WHERE bucket_id IN ('avatars', 'delivery-photos')
+      AND (storage.foldername(name))[1] = v_user_id::text;
+  EXCEPTION WHEN OTHERS THEN
+    NULL;
+  END;
 
   -- Finally, delete the auth user. SECURITY DEFINER gives us access to auth schema.
   -- This invalidates all active sessions for this user immediately.

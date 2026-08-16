@@ -184,6 +184,16 @@ BEGIN
       WHERE homeowner_id = v_user.id OR partner_id = v_user.id;
 
       DELETE FROM public.profiles WHERE id = v_user.id;
+
+      -- Purge Storage objects (avatars + delivery-photos) for this user.
+      BEGIN
+        DELETE FROM storage.objects
+        WHERE bucket_id IN ('avatars', 'delivery-photos')
+          AND (storage.foldername(name))[1] = v_user.id::text;
+      EXCEPTION WHEN OTHERS THEN
+        v_errors := array_append(v_errors, format('User %s storage cleanup: %s', v_user.id, SQLERRM));
+      END;
+
       DELETE FROM auth.users WHERE id = v_user.id;
 
       v_count := v_count + 1;
