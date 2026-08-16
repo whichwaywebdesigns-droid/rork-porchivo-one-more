@@ -4,6 +4,7 @@ import PageLayout from "@/components/PageLayout";
 import SEOHead from "@/components/SEOHead";
 import BreadcrumbNav from "@/components/BreadcrumbNav";
 import AppStoreBadges from "@/components/AppStoreBadges";
+import ShareButton from "@/components/ShareButton";
 import { getPageSEO } from "@/config/seo";
 import { buildWebPageSchema, buildBreadcrumbSchema, buildMobileAppSchema } from "@/config/schema";
 import { BRAND } from "@/config/brand";
@@ -64,6 +65,9 @@ export default function DownloadPage() {
             </p>
             <AppStoreBadges orientation="row" size="lg" />
             <p className="text-sm text-brand-text-muted mt-5">Free download · No credit card required</p>
+            <div className="mt-5">
+              <ShareButton label="Invite Friends" />
+            </div>
           </div>
         </div>
       </section>

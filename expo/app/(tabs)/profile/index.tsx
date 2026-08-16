@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Switch, Li
 import { Stack } from 'expo-router';
 import { Image } from 'expo-image';
 import { MapPin, Mail, Phone, Home, Shield, Bell, UserPlus, ChevronRight, FileText, Pencil, Send, LogOut, HelpCircle, CheckCircle, Trash2, Moon, Sun, ArrowRight, Handshake, BookOpen, Star, Building2, MailOpen } from 'lucide-react-native';
-import { sendSMSInvite } from '@/utils/invite';
+import { sendSMSInvite, shareInvite } from '@/utils/invite';
 import { COPY } from '@/config/copy';
 import { useColors, getColors } from '@/constants/colors';
 import { useTheme } from '@/store/ThemeContext';
@@ -45,9 +45,9 @@ export default function ProfileScreen() {
   const handleInvite = React.useCallback(async () => {
     if (!user || inviting) return;
     setInviting(true);
-    log('[Profile] Sending invite');
+    log('[Profile] Opening share sheet');
     try {
-      await sendSMSInvite(user.name, user.id);
+      await shareInvite(user.name, user.id);
     } finally {
       setInviting(false);
     }
@@ -278,10 +278,20 @@ export default function ProfileScreen() {
 
           <View style={styles.infoRowDivider} />
 
+          <TouchableOpacity
+              style={[styles.inviteBtn, { backgroundColor: Colors.primary }]}
+              onPress={handleInvite}
+              disabled={inviting}
+              activeOpacity={0.85}
+              testID="invite-friends-btn"
+            >
+              <UserPlus size={16} color="#fff" />
+              <Text style={styles.inviteBtnText}>{inviting ? 'Opening...' : 'Invite Friends'}</Text>
+            </TouchableOpacity>
           <TouchableOpacity style={styles.settingRow} onPress={handleInvite} disabled={inviting}>
             <View style={styles.settingLeft}>
               <UserPlus size={18} color={Colors.primary} />
-              <Text style={[styles.settingText, { color: Colors.slate }]}>{inviting ? 'Sending...' : 'Invite Neighbors'}</Text>
+              <Text style={[styles.settingText, { color: Colors.slate }]}>{inviting ? 'Opening...' : 'Invite Neighbors'}</Text>
             </View>
             <Send size={16} color={Colors.primary} />
           </TouchableOpacity>
@@ -705,5 +715,19 @@ const styles = StyleSheet.create({
     fontWeight: '600' as const,
     color: Colors.primary,
     textAlign: 'center' as const,
+  },
+  inviteBtn: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    gap: 8,
+    paddingVertical: 12,
+    borderRadius: 12,
+    marginBottom: 8,
+  },
+  inviteBtnText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '700' as const,
   },
 });

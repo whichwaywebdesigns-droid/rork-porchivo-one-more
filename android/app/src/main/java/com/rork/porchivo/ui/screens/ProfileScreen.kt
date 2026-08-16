@@ -33,6 +33,7 @@ import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Phone
 import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -368,6 +369,67 @@ fun ProfileScreen(
                 InfoRow(icon = Icons.Outlined.Email, label = user?.email ?: "")
                 HorizontalDivider(color = c.border)
                 InfoRow(icon = Icons.Outlined.Phone, label = user?.phone ?: "")
+            }
+        }
+
+        // Invite friends
+        SectionTitle("SPREAD THE WORD")
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = c.surface),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        ) {
+            val inviteText = remember(user?.name) {
+                val firstName = user?.name?.split(" ")?.firstOrNull() ?: ""
+                val url = "https://porchivo.com/download"
+                if (firstName.isBlank()) {
+                    "Check out Porchivo — it tracks your packages, warns you about porch theft risk, and connects you with neighbors who can hold deliveries. Free on iOS and Android: $url"
+                } else {
+                    "$firstName invited you to join Porchivo — a neighborhood network that protects packages from porch pirates. When neighbors team up, thieves lose. Get Porchivo free: $url"
+                }
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        val sendIntent = Intent().apply {
+                            action = Intent.ACTION_SEND
+                            type = "text/plain"
+                            putExtra(Intent.EXTRA_TEXT, inviteText)
+                            putExtra(Intent.EXTRA_TITLE, "Invite friends to Porchivo")
+                        }
+                        context.startActivity(Intent.createChooser(sendIntent, "Invite Friends"))
+                    }
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Share,
+                    contentDescription = null,
+                    tint = c.accent,
+                    modifier = Modifier.size(18.dp),
+                )
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Invite Friends",
+                        color = c.textPrimary,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    Text(
+                        text = "Share Porchivo with your neighbors",
+                        color = c.textSecondary,
+                        fontSize = 12.sp,
+                    )
+                }
+                Icon(
+                    imageVector = Icons.Filled.ChevronRight,
+                    contentDescription = null,
+                    tint = c.textMuted,
+                    modifier = Modifier.size(18.dp),
+                )
             }
         }
 

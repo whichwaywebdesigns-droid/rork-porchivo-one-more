@@ -185,9 +185,38 @@ struct ProfileScreen: View {
 
     // MARK: - Links section
 
+    private var inviteMessage: String {
+        let fullName = appState.user?.name ?? ""
+        let firstName = fullName.split(separator: " ").first.map(String.init) ?? ""
+        let url = "https://porchivo.com/download"
+        if firstName.isEmpty {
+            return "Check out Porchivo — it tracks your packages, warns you about porch theft risk, and connects you with neighbors who can hold deliveries. Free on iOS and Android: \(url)"
+        }
+        return "\(firstName) invited you to join Porchivo — a neighborhood network that protects packages from porch pirates. When neighbors team up, thieves lose. Get Porchivo free: \(url)"
+    }
+
     private var linksSection: some View {
         VStack(spacing: 0) {
             linkRow("Settings", "gearshape.fill", c.textMuted) { path.append(Route.settings) }
+            divider
+            ShareLink(item: inviteMessage) {
+                HStack(spacing: 12) {
+                    Image(systemName: "person.2.badge.gearshape.fill")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundStyle(c.accent)
+                        .frame(width: 28)
+                    Text("Invite Friends")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(c.textPrimary)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(c.textMuted)
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 14)
+            }
+            .buttonStyle(.plain)
             divider
             linkRow("Resident Directory", "person.3.fill", c.accent) { path.append(Route.residentDirectory) }
             divider
