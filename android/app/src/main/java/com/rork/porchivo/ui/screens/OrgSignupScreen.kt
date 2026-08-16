@@ -63,10 +63,10 @@ fun OrgSignupScreen(
         "property_mgmt" to "Property Management",
     )
     val plans = listOf(
-        Triple("starter", "Starter", 49),
-        Triple("community", "Community", 99),
-        Triple("professional", "Professional", 179),
-        Triple("enterprise", "Enterprise", 299),
+        Triple("starter", "Starter", 79),
+        Triple("community", "Community", 199),
+        Triple("professional", "Professional", 399),
+        Triple("enterprise", "Enterprise", 599),
     )
 
     Column(
@@ -199,7 +199,7 @@ fun OrgSignupScreen(
                             .padding(horizontal = 14.dp, vertical = 8.dp)
                     ) {
                         Text(
-                            "Annual (Save 15%)",
+                            "Annual (Save 20%)",
                             color = if (isAnnual) c.onAccent else c.textSecondary,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.SemiBold,

@@ -32,8 +32,12 @@ export const [DriversProvider, useDrivers] = createContextHook(() => {
         return parsed;
       }
       log('[Drivers] No stored drivers, using mock data');
-      await AsyncStorage.setItem(DRIVERS_STORAGE_KEY, JSON.stringify(mockDrivers));
-      return mockDrivers;
+      if (__DEV__) {
+        await AsyncStorage.setItem(DRIVERS_STORAGE_KEY, JSON.stringify(mockDrivers));
+        return mockDrivers;
+      }
+      log('[Drivers] No stored drivers, returning empty list');
+      return [];
     },
   });
 

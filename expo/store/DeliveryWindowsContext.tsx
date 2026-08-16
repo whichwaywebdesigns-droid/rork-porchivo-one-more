@@ -21,9 +21,13 @@ export const [DeliveryWindowsProvider, useDeliveryWindows] = createContextHook((
         log('[DeliveryWindows] Loaded from storage');
         return JSON.parse(stored) as DeliveryWindow[];
       }
-      log('[DeliveryWindows] Using mock data');
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(mockDeliveryWindows));
-      return mockDeliveryWindows;
+      if (__DEV__) {
+        log('[DeliveryWindows] DEV: Using mock data');
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(mockDeliveryWindows));
+        return mockDeliveryWindows;
+      }
+      log('[DeliveryWindows] No stored windows, returning empty list');
+      return [];
     },
   });
 

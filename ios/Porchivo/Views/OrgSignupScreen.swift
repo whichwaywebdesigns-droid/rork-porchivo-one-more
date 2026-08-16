@@ -31,10 +31,10 @@ struct OrgSignupScreen: View {
 
     private let orgTypes = [("hoa", "HOA"), ("condo", "Condo Association"), ("apartment", "Apartment Complex"), ("property_mgmt", "Property Management")]
     private let plans: [(id: String, name: String, monthly: Int, blurb: String)] = [
-        ("starter", "Starter", 49, "Up to 25 units"),
-        ("community", "Community", 99, "Up to 100 units"),
-        ("professional", "Professional", 179, "Up to 500 units"),
-        ("enterprise", "Enterprise", 299, "500+ units — contact us"),
+        ("starter", "Starter", 79, "Up to 50 units"),
+        ("community", "Community", 199, "Up to 200 units"),
+        ("professional", "Professional", 399, "Up to 500 units"),
+        ("enterprise", "Enterprise", 599, "Up to 2,000 units"),
     ]
 
     var body: some View {
@@ -142,7 +142,7 @@ struct OrgSignupScreen: View {
                     .padding(.horizontal, 14)
                     .padding(.vertical, 8)
                     .background(!isAnnual ? c.accent : c.elevated, in: .capsule)
-                Text("Annual (Save 15%)")
+                Text("Annual (Save 20%)")
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(isAnnual ? c.onAccent : c.textSecondary)
                     .padding(.horizontal, 14)

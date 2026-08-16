@@ -26,7 +26,7 @@ function isThisWeek(dateStr: string): boolean {
 
 export const [NeighborhoodProvider, useNeighborhood] = createContextHook(() => {
   const { user } = useApp();
-  const [events, setEvents] = useState<NeighborhoodEvent[]>(mockNeighborhoodEvents);
+  const [events, setEvents] = useState<NeighborhoodEvent[]>(__DEV__ ? mockNeighborhoodEvents : []);
   const [filter, setFilter] = useState<FeedFilter>('today');
   const [selectedEvent, setSelectedEvent] = useState<NeighborhoodEvent | null>(null);
 
