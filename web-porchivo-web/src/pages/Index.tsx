@@ -4,6 +4,7 @@ import PageLayout from "@/components/PageLayout";
 import SEOHead from "@/components/SEOHead";
 import AppStoreBadges from "@/components/AppStoreBadges";
 import FAQSection from "@/components/FAQSection";
+import HeroImageRotator from "@/components/HeroImageRotator";
 import { getPageSEO } from "@/config/seo";
 import {
   buildWebPageSchema,
@@ -74,11 +75,18 @@ export default function IndexPage() {
           <div className="relative mx-auto mb-8 max-w-md">
             <div className="absolute inset-0 bg-gradient-to-br from-amber-400/30 via-orange-500/20 to-blue-500/20 blur-3xl rounded-[2.5rem] scale-110" />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent rounded-[2.5rem]" />
-            <img
-              src="/images/hero-porchivo-clean.png"
-              alt="Porchivo hero illustration — friendly home and neighbor network"
-              className="relative rounded-[2.5rem] shadow-2xl shadow-amber-900/20 border border-white/10"
-              loading="eager"
+            <HeroImageRotator
+              images={[
+                {
+                  src: "/images/hero-porchivo-before.png",
+                  alt: "Before Porchivo — a family upset after packages were stolen from their porch",
+                },
+                {
+                  src: "/images/hero-porchivo-clean.png",
+                  alt: "After Porchivo — the same family protected by neighbor-powered delivery security",
+                },
+              ]}
+              interval={5000}
             />
             <div className="absolute inset-x-0 -bottom-1 h-24 bg-gradient-to-t from-slate-950 to-transparent rounded-b-[2.5rem]" />
           </div>
