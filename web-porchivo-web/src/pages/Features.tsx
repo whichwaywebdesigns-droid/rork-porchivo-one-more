@@ -115,33 +115,33 @@ const FEATURES_DETAILED = [
     id: "family-plan",
     icon: "Home",
     accent: "amber",
-    name: "Family Plan",
-    tagline: "Household-wide protection for up to 5 members.",
-    description: "The Family Plan covers an entire household. Up to 5 members each get their own Porchivo account with full Premium access. $23.99/month or $15.00/month billed annually ($179.99/year). 7-day free trial on annual.",
+    name: "Community Coverage",
+    tagline: "HOAs and property managers can unlock community features for all residents.",
+    description: "When your HOA or property manager subscribes to Porchivo, every resident in your community gets full access at no cost. Community plans start at $79/month for up to 50 units, with tiers scaling to 2,000+ units. Residents never pay — access is provided by your community.",
     facts: [
-      "Up to 5 household members",
-      "Each member gets full Premium access",
-      "$23.99/mo or $15.00/mo annually ($179.99/yr)",
-      "7-day free trial on annual plan",
-      "Save 37% vs monthly billing",
+      "Community plans from $79/mo (Starter) to $599/mo (Enterprise)",
+      "Residents always join for free via invite code",
+      "Unlimited package tracking for all community members",
+      "Announcements, maintenance requests, and amenity reservations",
+      "Annual billing saves 20%",
     ],
-    isPremium: true,
+    isPremium: false,
   },
   {
     id: "hoa-enterprise",
     icon: "Building",
     accent: "slate",
-    name: "HOA & Community Plan",
-    tagline: "One subscription. An entire neighborhood covered.",
-    description: "The HOA Enterprise Plan covers up to 250 households under a single Porchivo subscription. All residents get full Premium access. $350/month or $3,000/year. 14-day free trial on annual.",
+    name: "HOA & Property Management Plans",
+    tagline: "Tiered plans for communities of every size.",
+    description: "Porchivo offers four B2B tiers: Starter ($79/mo, 50 units), Community ($199/mo, 200 units), Professional ($399/mo, 500 units), and Enterprise ($599/mo, 2,000 units). All plans include package tracking, theft alerts, and community features for every resident. Professional and Enterprise tiers include multi-community dashboards, vendor management, custom branding, API access, and dedicated support.",
     facts: [
-      "Up to 250 households",
-      "All residents get full Premium access",
-      "$350/mo or $3,000/yr (save 29%)",
-      "14-day free trial on annual plan",
-      "Single billing and administration",
+      "Starter: $79/mo for up to 50 units",
+      "Community: $199/mo for up to 200 units — most popular",
+      "Professional: $399/mo for up to 500 units, 3 communities",
+      "Enterprise: $599/mo for up to 2,000 units, unlimited communities",
+      "Annual billing saves 20% · $1/unit/mo overage above tier limit",
     ],
-    isPremium: true,
+    isPremium: false,
   },
 ];
 
@@ -236,13 +236,13 @@ export default function FeaturesPage() {
                   <MapPin className="w-5 h-5 text-blue-400" />
                 </div>
                 <span className="px-2.5 py-0.5 rounded-full bg-brand-orange/10 text-brand-orange text-xs font-semibold border border-brand-orange/20">
-                  Premium
+                  Carrier Tools
                 </span>
               </div>
               <h2 className="text-2xl font-bold text-brand-text-primary mb-2">Porchivo Delivery Insights</h2>
               <p className="text-sm font-medium text-blue-400 mb-4">Carrier tools that put you in control of every drop-off.</p>
               <p className="text-brand-text-secondary leading-relaxed mb-10 max-w-3xl">
-                Porchivo surfaces the native delivery controls already built into UPS and Amazon so you can steer packages before they ever reach your porch. Available on Premium plans and above, this feature brings scattered carrier settings into one dashboard instead of leaving them buried in separate apps.
+                Porchivo surfaces the native delivery controls already built into UPS and Amazon so you can steer packages before they ever reach your porch. This feature brings scattered carrier settings into one dashboard instead of leaving them buried in separate apps.
               </p>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -305,7 +305,7 @@ export default function FeaturesPage() {
       <section className="py-20 px-4 sm:px-6 bg-brand-navy-900/40 border-t border-brand-navy-500/40">
         <div className="max-w-2xl mx-auto text-center">
           <h2 className="text-3xl font-bold text-brand-text-primary mb-4">Ready to score your first delivery?</h2>
-          <p className="text-brand-text-secondary mb-8">Free download. Track 1 package at no cost. Upgrade whenever you're ready.</p>
+          <p className="text-brand-text-secondary mb-8">Free download. Track packages at no cost. Your HOA can unlock community features for everyone.</p>
           <Link to="/download" className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-brand-orange hover:bg-brand-orange text-brand-text-primary font-bold transition-all hover:scale-[1.02]">
             Download Porchivo
             <ArrowRight className="w-4 h-4" />

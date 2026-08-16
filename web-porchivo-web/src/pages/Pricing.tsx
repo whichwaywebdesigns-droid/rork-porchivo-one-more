@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Check, ArrowRight } from "lucide-react";
+import { Check, ArrowRight, Building2, Users, Zap, Shield } from "lucide-react";
 import PageLayout from "@/components/PageLayout";
 import SEOHead from "@/components/SEOHead";
 import BreadcrumbNav from "@/components/BreadcrumbNav";
@@ -12,76 +12,145 @@ import { FAQS, getFAQsByCategory } from "@/content/faqs";
 const seo = getPageSEO("pricing");
 const pricingFAQs = getFAQsByCategory("pricing");
 
-const PLANS = [
+interface B2BPlan {
+  name: string;
+  tagline: string;
+  monthly: string;
+  annual: string;
+  annualPerMonth: string;
+  maxUnits: string;
+  setupFee: string;
+  features: string[];
+  highlight: boolean;
+  badge: string | null;
+  cta: string;
+  ctaHref: string;
+}
+
+const B2B_PLANS: B2BPlan[] = [
   {
-    name: "Free",
-    price: "$0",
-    period: "",
-    description: "Track 1 package. No time limit, no commitment.",
-    cta: "Download free",
-    ctaHref: "/download",
+    name: "Starter",
+    tagline: "Small HOAs and condo associations getting started with community communication.",
+    monthly: "$79",
+    annual: "$756",
+    annualPerMonth: "$63",
+    maxUnits: "Up to 50 units",
+    setupFee: "No setup fee",
+    features: [
+      "Community announcements",
+      "5GB document library",
+      "Maintenance requests",
+      "Package tracking (all residents)",
+      "Porch Partner network access",
+      "Email support",
+    ],
     highlight: false,
     badge: null,
-    features: [
-      { text: "Track 1 package", included: true },
-      { text: "10-minute tracking refresh", included: true },
-      { text: "Neighborhood theft alerts", included: true },
-      { text: "Porch risk score (limited)", included: true },
-      { text: "Theft Shield alerts", included: false },
-      { text: "90-second live tracking", included: false },
-      { text: "Priority risk scoring", included: false },
-    ],
+    cta: "Get started",
+    ctaHref: "/download",
   },
   {
-    name: "Premium",
-    price: "$8.33",
-    period: "/mo, billed annually",
-    altPrice: "$13.99/mo billed monthly",
-    description: "Unlimited tracking, Theft Shield, and full risk intelligence.",
-    cta: "Start 7-day free trial",
-    ctaHref: "/download",
+    name: "Community",
+    tagline: "The most popular plan for mid-size HOAs with active boards and amenity management needs.",
+    monthly: "$199",
+    annual: "$1,908",
+    annualPerMonth: "$159",
+    maxUnits: "Up to 200 units",
+    setupFee: "No setup fee",
+    features: [
+      "Everything in Starter, plus:",
+      "HOA dues collection & payments",
+      "Payment history & receipts",
+      "Ledger exports",
+      "Amenity reservations",
+      "Board member roles & permissions",
+      "Priority email support",
+    ],
     highlight: true,
-    badge: "Most popular · Save 40%",
-    features: [
-      { text: "Unlimited package tracking", included: true },
-      { text: "90-second live tracking refresh", included: true },
-      { text: "Full porch risk score", included: true },
-      { text: "Theft Shield push alerts", included: true },
-      { text: "Full neighborhood alerts", included: true },
-      { text: "Delivery window analysis", included: true },
-      { text: "Priority risk scoring", included: true },
-    ],
+    badge: "Most popular",
+    cta: "Get started",
+    ctaHref: "/download",
   },
   {
-    name: "Family",
-    price: "$15.00",
-    period: "/mo, billed annually",
-    altPrice: "$23.99/mo billed monthly",
-    description: "Up to 5 household members, all with full Premium access. Family Sharing enabled.",
-    cta: "Start 7-day free trial",
-    ctaHref: "/download",
-    highlight: false,
-    badge: "Up to 5 members · Family Sharing",
+    name: "Professional",
+    tagline: "Multi-community property managers who need vendor management and custom branding.",
+    monthly: "$399",
+    annual: "$3,828",
+    annualPerMonth: "$319",
+    maxUnits: "Up to 500 units, 3 communities",
+    setupFee: "$500 one-time onboarding",
     features: [
-      { text: "5 household member accounts", included: true },
-      { text: "All Premium features", included: true },
-      { text: "Shared neighborhood data", included: true },
-      { text: "UPS & Amazon hidden services access", included: true },
-      { text: "One billing — Apple Family Sharing", included: true },
+      "Everything in Community, plus:",
+      "Multi-community dashboard",
+      "Advanced maintenance workflows",
+      "Vendor assignment & tracking",
+      "Custom branding",
+      "Resident directory",
+      "Phone + email support",
     ],
+    highlight: false,
+    badge: "Multi-community",
+    cta: "Get started",
+    ctaHref: "/download",
+  },
+  {
+    name: "Property Manager",
+    tagline: "Large-scale property management companies with white-label and API requirements.",
+    monthly: "$599",
+    annual: "$5,748",
+    annualPerMonth: "$479",
+    maxUnits: "Up to 2,000 units, unlimited communities",
+    setupFee: "$1,500 one-time onboarding",
+    features: [
+      "Everything in Professional, plus:",
+      "Unlimited communities",
+      "White-label options",
+      "API access",
+      "Dedicated account manager",
+      "Custom onboarding & data migration",
+      "SLA-backed support",
+    ],
+    highlight: false,
+    badge: "Enterprise",
+    cta: "Contact sales",
+    ctaHref: "/download",
   },
 ];
 
-const RISK_FACTORS = [
-  { factor: "3+ theft alerts on block", impact: "+28", severity: "high" },
-  { factor: "1–2 theft alerts on block", impact: "+14", severity: "medium" },
-  { factor: "Zero active alerts", impact: "−6", severity: "low" },
-  { factor: "Delivery after 4pm", impact: "+14", severity: "medium" },
-  { factor: "Delivery before 4pm", impact: "−4", severity: "low" },
-  { factor: "High delivery traffic on block", impact: "+12", severity: "medium" },
-  { factor: "Trusted driver assigned", impact: "−8", severity: "low" },
-  { factor: "Drop instructions added", impact: "−4", severity: "low" },
+const FREE_FEATURES = [
+  "Package tracking with real-time porch risk score",
+  "Neighborhood theft alerts (geo-filtered to your block)",
+  "Porch Partner network — earn $3–$25 per hold",
+  "Community features unlocked when your HOA joins",
+  "No credit card required, no time limit",
 ];
+
+const COMPARISON_ROWS = [
+  { feature: "Max units", starter: "50", community: "200", professional: "500", enterprise: "2,000" },
+  { feature: "Communities", starter: "1", community: "1", professional: "3", enterprise: "Unlimited" },
+  { feature: "Announcements", starter: true, community: true, professional: true, enterprise: true },
+  { feature: "Maintenance requests", starter: true, community: true, professional: true, enterprise: true },
+  { feature: "Package tracking", starter: true, community: true, professional: true, enterprise: true },
+  { feature: "Porch Partner network", starter: true, community: true, professional: true, enterprise: true },
+  { feature: "HOA dues collection", starter: false, community: true, professional: true, enterprise: true },
+  { feature: "Amenity reservations", starter: false, community: true, professional: true, enterprise: true },
+  { feature: "Board member roles", starter: false, community: true, professional: true, enterprise: true },
+  { feature: "Multi-community dashboard", starter: false, community: false, professional: true, enterprise: true },
+  { feature: "Vendor management", starter: false, community: false, professional: true, enterprise: true },
+  { feature: "Custom branding", starter: false, community: false, professional: true, enterprise: true },
+  { feature: "White-label options", starter: false, community: false, professional: false, enterprise: true },
+  { feature: "API access", starter: false, community: false, professional: false, enterprise: true },
+  { feature: "Dedicated account manager", starter: false, community: false, professional: false, enterprise: true },
+  { feature: "SLA-backed support", starter: false, community: false, professional: false, enterprise: true },
+  { feature: "Onboarding fee", starter: "—", community: "—", professional: "$500", enterprise: "$1,500" },
+];
+
+const PLAN_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+  Starter: Building2,
+  Community: Users,
+  Professional: Zap,
+  "Property Manager": Shield,
+};
 
 export default function PricingPage() {
   const schemas = [
@@ -106,141 +175,196 @@ export default function PricingPage() {
       <section className="pt-16 pb-20 px-4 sm:px-6 text-center border-b border-brand-navy-500/40">
         <div className="max-w-3xl mx-auto">
           <BreadcrumbNav items={[{ label: "Home", href: "/" }, { label: "Pricing", href: "/pricing" }]} />
-          <h1 className="mt-8 text-4xl sm:text-5xl font-bold text-brand-text-primary mb-4">
-            Plans for every household
+          <div className="mt-8 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-orange/10 border border-brand-orange/20 text-brand-orange text-xs font-semibold mb-5">
+            Residents always free
+          </div>
+          <h1 className="text-4xl sm:text-5xl font-bold text-brand-text-primary mb-4">
+            Pricing for communities
           </h1>
           <p className="text-xl text-brand-text-secondary">
-            Start free, no time limit. Upgrade for unlimited tracking, Theft Shield, and full risk intelligence.
+            HOAs and property managers subscribe to unlock community features for all residents. Residents never pay — they join your community for free.
           </p>
         </div>
       </section>
 
-      {/* Plans */}
-      <section className="py-16 px-4 sm:px-6">
-        <div className="max-w-5xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {PLANS.map((plan) => (
-              <div
-                key={plan.name}
-                className={`rounded-2xl border p-7 flex flex-col ${
-                  plan.highlight
-                    ? "border-brand-orange/50 bg-gradient-to-b from-amber-500/5 to-transparent"
-                    : "border-brand-navy-500/40 bg-brand-navy-900"
-                }`}
-              >
-                {plan.badge && (
-                  <div className="inline-flex self-start mb-4 px-2.5 py-1 rounded-full bg-brand-orange/15 text-brand-orange text-xs font-semibold">
-                    {plan.badge}
-                  </div>
-                )}
-                <div className="text-brand-text-secondary text-sm font-medium mb-1">{plan.name}</div>
-                <div className="flex items-baseline gap-1 mb-1">
-                  <span className="text-4xl font-bold text-brand-text-primary">{plan.price}</span>
-                  <span className="text-brand-text-muted text-sm">{plan.period}</span>
-                </div>
-                {plan.altPrice && (
-                  <div className="text-xs text-brand-text-muted mb-3">{plan.altPrice}</div>
-                )}
-                <p className="text-sm text-brand-text-secondary mb-6">{plan.description}</p>
-
-                <ul className="space-y-2.5 mb-8 flex-1">
-                  {plan.features.map((f) => (
-                    <li key={f.text} className="flex items-start gap-2.5 text-sm">
-                      {f.included ? (
-                        <Check className="w-4 h-4 text-brand-orange flex-shrink-0 mt-0.5" />
-                      ) : (
-                        <span className="w-4 h-4 flex-shrink-0 mt-0.5 flex items-center justify-center">
-                          <span className="w-3 h-px bg-brand-navy-700" />
-                        </span>
-                      )}
-                      <span className={f.included ? "text-brand-text-secondary" : "text-brand-text-muted"}>{f.text}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <Link
-                  to={plan.ctaHref}
-                  className={`block text-center py-3 rounded-xl text-sm font-semibold transition-all ${
-                    plan.highlight
-                      ? "bg-brand-orange hover:bg-brand-orange text-brand-text-primary hover:scale-[1.02]"
-                      : "border border-brand-navy-500/50 hover:border-brand-navy-500 text-brand-text-secondary hover:text-brand-text-primary"
-                  }`}
-                >
-                  {plan.cta}
-                </Link>
+      {/* Residents banner */}
+      <section className="py-12 px-4 sm:px-6 bg-brand-navy-900/40 border-b border-brand-navy-500/40">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-2xl font-bold text-brand-text-primary mb-3">Residents are always free</h2>
+          <p className="text-brand-text-secondary mb-6 max-w-2xl mx-auto">
+            Every resident in your community gets full access to Porchivo at no cost — package tracking, theft alerts, and Porch Partner features. Your subscription unlocks it all for them.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-w-2xl mx-auto">
+            {FREE_FEATURES.map((f) => (
+              <div key={f} className="flex items-start gap-2 text-left bg-brand-navy-900/60 border border-brand-navy-500/40 rounded-lg px-3 py-2.5">
+                <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                <span className="text-xs text-brand-text-secondary">{f}</span>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* HOA Enterprise */}
-      <section className="py-12 px-4 sm:px-6">
-        <div className="max-w-5xl mx-auto">
-          <div className="rounded-2xl border border-brand-navy-500/50 bg-brand-navy-900 p-8 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-            <div>
-              <div className="inline-flex px-2.5 py-1 rounded-full bg-brand-navy-700 text-brand-text-secondary text-xs font-semibold mb-3">
-                HOA &amp; Enterprise — Up to 250 households
-              </div>
-              <h2 className="text-2xl font-bold text-brand-text-primary mb-3">Protect an entire community</h2>
-              <p className="text-brand-text-secondary text-sm leading-relaxed">
-                One Porchivo subscription covers up to 250 households. All residents get full Premium access — unified billing, denser neighborhood alert data, and community-wide risk intelligence.
-              </p>
-            </div>
-            <div className="space-y-3">
-              {[
-                { label: "Monthly", price: "$350/mo", sub: "up to 250 households" },
-                { label: "Annual", price: "$3,000/yr", sub: "$250/mo — save 29% · 14-day trial" },
-              ].map((row) => (
-                <div key={row.label} className="flex items-center justify-between p-4 rounded-xl bg-brand-navy-700/50">
-                  <div>
-                    <div className="text-sm font-medium text-brand-text-primary">{row.label}</div>
-                    <div className="text-xs text-brand-text-muted">{row.sub}</div>
+      {/* B2B Plans */}
+      <section className="py-16 px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+            {B2B_PLANS.map((plan) => {
+              const Icon = PLAN_ICONS[plan.name] ?? Building2;
+              return (
+                <div
+                  key={plan.name}
+                  className={`rounded-2xl border p-6 flex flex-col ${
+                    plan.highlight
+                      ? "border-brand-orange/50 bg-gradient-to-b from-brand-orange/5 to-transparent"
+                      : "border-brand-navy-500/40 bg-brand-navy-900"
+                  }`}
+                >
+                  {plan.badge && (
+                    <div className="inline-flex self-start mb-3 px-2.5 py-0.5 rounded-full bg-brand-orange/15 text-brand-orange text-xs font-semibold">
+                      {plan.badge}
+                    </div>
+                  )}
+                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center mb-3 ${plan.highlight ? "bg-brand-orange/10" : "bg-brand-navy-700/50"}`}>
+                    <Icon className={`w-4 h-4 ${plan.highlight ? "text-brand-orange" : "text-brand-text-muted"}`} />
                   </div>
-                  <div className="text-lg font-bold text-brand-orange">{row.price}</div>
+                  <div className="text-brand-text-primary text-base font-bold mb-1">{plan.name}</div>
+                  <div className="text-xs text-brand-text-muted mb-4">{plan.maxUnits}</div>
+
+                  <div className="flex items-baseline gap-1 mb-1">
+                    <span className="text-3xl font-bold text-brand-text-primary">{plan.monthly}</span>
+                    <span className="text-brand-text-muted text-xs">/mo</span>
+                  </div>
+                  <div className="text-xs text-brand-text-muted mb-1">
+                    or {plan.annual}/yr ({plan.annualPerMonth}/mo) — save 20%
+                  </div>
+                  <div className="text-xs text-brand-text-muted mb-5">{plan.setupFee}</div>
+
+                  <ul className="space-y-2 mb-6 flex-1">
+                    {plan.features.map((f, i) => (
+                      <li key={i} className="flex items-start gap-2 text-xs">
+                        {f.includes("Everything in") ? (
+                          <span className="font-semibold text-brand-text-secondary w-full pb-1 border-b border-brand-navy-700/50 mb-1">{f}</span>
+                        ) : (
+                          <>
+                            <Check className="w-3.5 h-3.5 text-brand-orange flex-shrink-0 mt-0.5" />
+                            <span className="text-brand-text-secondary">{f}</span>
+                          </>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Link
+                    to={plan.ctaHref}
+                    className={`block text-center py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                      plan.highlight
+                        ? "bg-brand-orange hover:bg-brand-orange text-brand-text-primary hover:scale-[1.02]"
+                        : "border border-brand-navy-500/50 hover:border-brand-navy-500 text-brand-text-secondary hover:text-brand-text-primary"
+                    }`}
+                  >
+                    {plan.cta}
+                  </Link>
                 </div>
-              ))}
-              <Link
-                to="/download"
-                className="flex items-center justify-center gap-2 py-3 rounded-xl bg-brand-orange hover:bg-brand-orange text-brand-text-primary font-semibold text-sm transition-colors"
-              >
-                Get started
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
+              );
+            })}
           </div>
+
+          <p className="text-center text-sm text-brand-text-muted mt-8">
+            Need more than 2,000 units? <a href="mailto:support@porchivo.com" className="text-brand-orange hover:underline">Contact us</a> for a custom quote.
+          </p>
         </div>
       </section>
 
-      {/* Risk score reference table */}
-      <section className="py-16 px-4 sm:px-6 bg-brand-navy-900/40 border-t border-brand-navy-500/40">
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-2xl font-bold text-brand-text-primary mb-2">How the risk score is calculated</h2>
-          <p className="text-brand-text-secondary text-sm mb-8">
-            The porch risk score (0–100) is calculated from 10 weighted factors. Higher scores mean higher theft probability.
+      {/* Overage note */}
+      <section className="py-8 px-4 sm:px-6 border-y border-brand-navy-500/40">
+        <div className="max-w-3xl mx-auto text-center">
+          <p className="text-sm text-brand-text-secondary">
+            <span className="font-semibold text-brand-text-primary">Overage:</span> Exceed your tier's unit limit by a small margin and pay just <span className="text-brand-orange font-semibold">$1.00 per additional unit per month</span>. No need to jump to a higher tier until you're ready.
           </p>
+        </div>
+      </section>
+
+      {/* Comparison table */}
+      <section className="py-16 px-4 sm:px-6">
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-2xl font-bold text-brand-text-primary text-center mb-2">Compare plans</h2>
+          <p className="text-brand-text-secondary text-center text-sm mb-8">Full feature breakdown across all tiers</p>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-brand-navy-500/40">
-                  <th className="text-left py-3 text-brand-text-muted font-medium">Factor</th>
-                  <th className="text-right py-3 text-brand-text-muted font-medium">Score impact</th>
+                  <th className="text-left py-3 pr-4 text-brand-text-muted font-medium">Feature</th>
+                  <th className="text-center py-3 px-2 text-brand-text-secondary font-semibold">Starter</th>
+                  <th className="text-center py-3 px-2 text-brand-orange font-semibold">Community</th>
+                  <th className="text-center py-3 px-2 text-brand-text-secondary font-semibold">Professional</th>
+                  <th className="text-center py-3 px-2 text-brand-text-secondary font-semibold">Enterprise</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60">
-                {RISK_FACTORS.map((r) => (
-                  <tr key={r.factor}>
-                    <td className="py-3 text-brand-text-secondary">{r.factor}</td>
-                    <td className={`py-3 text-right font-semibold ${
-                      r.severity === "high" ? "text-red-400" :
-                      r.severity === "medium" ? "text-brand-orange" : "text-emerald-400"
-                    }`}>{r.impact}</td>
+                {COMPARISON_ROWS.map((row) => (
+                  <tr key={row.feature}>
+                    <td className="py-2.5 pr-4 text-brand-text-secondary font-medium">{row.feature}</td>
+                    {(["starter", "community", "professional", "enterprise"] as const).map((tier) => (
+                      <td key={tier} className="py-2.5 text-center">
+                        {typeof row[tier] === "boolean" ? (
+                          row[tier] ? (
+                            <Check className="w-4 h-4 text-brand-orange inline-block" />
+                          ) : (
+                            <span className="w-4 h-px bg-brand-navy-700 inline-block" />
+                          )
+                        ) : (
+                          <span className="text-brand-text-muted text-xs">{row[tier]}</span>
+                        )}
+                      </td>
+                    ))}
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          <p className="text-xs text-brand-text-muted mt-4">Base score: 30 · High risk: ≥65 · Medium: 35–64 · Low: &lt;35</p>
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section className="py-16 px-4 sm:px-6 bg-brand-navy-900/40 border-t border-brand-navy-500/40">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-2xl font-bold text-brand-text-primary text-center mb-8">How it works</h2>
+          <div className="space-y-6">
+            <div className="flex items-start gap-4">
+              <div className="w-8 h-8 rounded-full bg-brand-orange text-brand-text-primary text-sm font-bold flex items-center justify-center flex-shrink-0">1</div>
+              <div>
+                <h3 className="text-brand-text-primary font-semibold mb-1">Sign up your community</h3>
+                <p className="text-sm text-brand-text-secondary">An HOA board member or property manager creates the community, selects a plan, and completes payment via Stripe Checkout.</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4">
+              <div className="w-8 h-8 rounded-full bg-brand-orange text-brand-text-primary text-sm font-bold flex items-center justify-center flex-shrink-0">2</div>
+              <div>
+                <h3 className="text-brand-text-primary font-semibold mb-1">Share your invite code</h3>
+                <p className="text-sm text-brand-text-secondary">Residents download the free Porchivo app and join your community using the invite code. No payment required from them — ever.</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4">
+              <div className="w-8 h-8 rounded-full bg-brand-orange text-brand-text-primary text-sm font-bold flex items-center justify-center flex-shrink-0">3</div>
+              <div>
+                <h3 className="text-brand-text-primary font-semibold mb-1">Residents get full access</h3>
+                <p className="text-sm text-brand-text-secondary">Everyone in your community gets package tracking, theft alerts, announcements, maintenance requests, and all community features unlocked.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-16 px-4 sm:px-6 text-center">
+        <div className="max-w-xl mx-auto">
+          <h2 className="text-2xl font-bold text-brand-text-primary mb-3">Ready to protect your community?</h2>
+          <p className="text-brand-text-secondary text-sm mb-6">Download the app, create your community, and invite residents in minutes.</p>
+          <Link to="/download" className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-brand-orange hover:bg-brand-orange text-brand-text-primary font-bold transition-all hover:scale-[1.02]">
+            Get started
+            <ArrowRight className="w-4 h-4" />
+          </Link>
         </div>
       </section>
 

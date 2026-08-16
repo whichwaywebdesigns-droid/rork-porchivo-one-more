@@ -14,18 +14,16 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // SECTION 1 — PRICING & SUBSCRIPTIONS
 //
-// ⚠️  IMPORTANT: These are DISPLAY labels only. The actual price charged
-//     to users is set in the App Store (Apple) and Play Store (Google).
-//     To change the real price, log into App Store Connect / Google Play
-//     and update it there. Then update the matching label here so the
-//     paywall screen shows the correct amount.
+// ⚠️  LEGACY — NO IAP ACTIVE
+//     Porchivo has moved to a B2B community subscription model. Residents
+//     are always free — no in-app purchases, no paywall, no upgrade screen.
+//     HOAs and property managers subscribe via Stripe Checkout (see the
+//     create-org-checkout edge function and org-signup screen for live pricing).
 //
-// HOW TO CHANGE PRICES:
-//   1. Update the price label strings below (e.g. '$6.99')
-//   2. Log into App Store Connect → My Apps → Porchivo → In-App Purchases
-//      and change the price there too
-//   3. Do the same in Google Play Console if you have Android
-//   4. Save this file — the paywall screen will automatically use the new text
+//     These constants are retained for import compatibility with tiers.ts
+//     and onboardingExperiments.ts, but are NOT used for any billing.
+//     The PaywallContext has been neutralized — guardPremiumAccess() always
+//     grants access. Do not surface these prices to users.
 // ─────────────────────────────────────────────────────────────────────────────
 export const PRICING = {
 
@@ -274,8 +272,9 @@ export const SOCIAL_PROOF = {
 // ─────────────────────────────────────────────────────────────────────────────
 // SECTION 9 — FAMILY PLAN
 //
-// Household plan covering up to 5 members. Priced above individual premium
-// to reflect household value. Revised upward with partner + invoicing features.
+// ⚠️  LEGACY — No IAP active. Residents are always free. Community features
+//     are unlocked by HOA/property manager B2B subscriptions via Stripe.
+//     This constant is retained for import compatibility only.
 // ─────────────────────────────────────────────────────────────────────────────
 export const FAMILY_PLAN = {
   maxMembers: 5,
@@ -328,53 +327,39 @@ export const PAYWALL_ROUTING = {
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SECTION 10 — ENTERPRISE / HOA PLAN (with Trust Engine)
+// SECTION 10 — ENTERPRISE / HOA PLAN
 //
-// Built for Homeowners Associations and property managers.
-// Covers an entire community (up to 250 households) under one subscription.
+// ⚠️  B2B pricing is now defined in the create-org-checkout edge function
+//     and the org-signup screen. The values below are LEGACY and retained
+//     for import compatibility with tiers.ts only. They are NOT used for
+//     billing. For current B2B pricing, see:
+//     - supabase/functions/create-org-checkout/index.ts (PLANS constant)
+//     - expo/app/org-signup.tsx (PLANS constant)
 //
-// SCENARIO B PRICING (July 2026):
-//   The WhichWay Trust Engine is now bundled into Enterprise — it transforms
-//   the tier from "a package tracker for your HOA" into "a package tracker
-//   PLUS SOC 2 readiness and a public Trust Center." This is the difference
-//   between a nice-to-have and a procurement-required tool.
-//
-//   Enterprise raised from $2,000/yr → $3,000/yr (33% increase).
-//   The $1,000 increase is justified by compliance value — HOAs pay $10K–$50K
-//   for compliance consultants annually; $3K is a rounding error.
-//
-//   Trust Engine is NOT available in Free, Premium, or Family tiers.
-//   Access is by Enterprise upgrade only.
-//
-// Revenue math (for reference):
-//    60 HOAs × $3,000/yr = $180,000/yr  (Scenario B Year 2 target)
-//   100 HOAs × $3,000/yr = $300,000/yr
-//   100 HOAs × $350/mo  = $420,000/yr (full monthly)
-//
-// ⚠️  Set actual prices in App Store Connect / Google Play, then update labels here.
+// Current B2B tiers (source of truth = edge function):
+//   Starter:      $79/mo  |  $756/yr   |  50 units
+//   Community:    $199/mo |  $1,908/yr |  200 units
+//   Professional: $399/mo |  $3,828/yr |  500 units
+//   Enterprise:   $599/mo |  $5,748/yr |  2,000 units
 // ─────────────────────────────────────────────────────────────────────────────
 export const ENTERPRISE_PLAN = {
-  // Max households covered under one HOA subscription
+  // Max households covered under one community subscription
   maxHouseholds: 250,
 
   monthly: {
-    // $350/mo per HOA — covers full community up to 250 homes + Trust Engine
-    // Raised from $250 to reflect Trust Engine inclusion (Scenario B)
-    // ⚠️  Update App Store Connect to match: $350
-    displayPrice: '$350',
-    perMonthLabel: '$350/mo',
+    // Legacy — not used for billing. See edge function for live pricing.
+    displayPrice: '$599',
+    perMonthLabel: '$599/mo',
     productId: 'enterprise_monthly',
   },
 
   annual: {
-    // $3,000/yr = $250/mo  →  Save 29% vs monthly
-    // Raised from $2,000 to reflect Trust Engine inclusion (Scenario B)
-    // ⚠️  Update App Store Connect to match: $3,000
-    displayPrice: '$3,000',
-    perMonthLabel: '$250/mo',
+    // Legacy — not used for billing. See edge function for live pricing.
+    displayPrice: '$5,748',
+    perMonthLabel: '$479/mo',
     productId: 'enterprise_annual',
-    trialDays: 14,
-    savingsLabel: 'Save 29%',
+    trialDays: 0,
+    savingsLabel: 'Save 20%',
   },
 } as const;
 

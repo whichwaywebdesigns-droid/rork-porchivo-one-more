@@ -64,6 +64,7 @@ interface PlanDef {
   monthlyPrice: number;
   annualPrice: number;
   maxUnits: number | null;
+  setupFee?: number;
   features: string[];
   popular?: boolean;
 }
@@ -73,8 +74,8 @@ const PLANS: PlanDef[] = [
     id: 'starter',
     name: 'Starter',
     tagline: 'Up to 50 units',
-    monthlyPrice: 49,
-    annualPrice: 499,
+    monthlyPrice: 79,
+    annualPrice: 756,
     maxUnits: 50,
     features: [
       'Community announcements',
@@ -89,8 +90,8 @@ const PLANS: PlanDef[] = [
     id: 'community',
     name: 'Community',
     tagline: 'Up to 200 units',
-    monthlyPrice: 99,
-    annualPrice: 999,
+    monthlyPrice: 199,
+    annualPrice: 1908,
     maxUnits: 200,
     features: [
       'Everything in Starter, plus:',
@@ -107,9 +108,10 @@ const PLANS: PlanDef[] = [
     id: 'professional',
     name: 'Professional',
     tagline: 'Up to 500 units, 3 communities',
-    monthlyPrice: 179,
-    annualPrice: 1799,
+    monthlyPrice: 399,
+    annualPrice: 3828,
     maxUnits: 500,
+    setupFee: 500,
     features: [
       'Everything in Community, plus:',
       'Multi-community dashboard',
@@ -118,15 +120,17 @@ const PLANS: PlanDef[] = [
       'Custom branding',
       'Resident directory',
       'Phone + email support',
+      '$500 one-time onboarding',
     ],
   },
   {
     id: 'enterprise',
     name: 'Property Manager',
-    tagline: 'Unlimited units & communities',
-    monthlyPrice: 299,
-    annualPrice: 2990,
-    maxUnits: null,
+    tagline: 'Up to 2,000 units & communities',
+    monthlyPrice: 599,
+    annualPrice: 5748,
+    maxUnits: 2000,
+    setupFee: 1500,
     features: [
       'Everything in Professional, plus:',
       'Unlimited communities',
@@ -135,6 +139,7 @@ const PLANS: PlanDef[] = [
       'Dedicated account manager',
       'Custom onboarding',
       'SLA-backed support',
+      '$1,500 one-time onboarding',
     ],
   },
 ];
@@ -501,7 +506,7 @@ export default function OrgSignupScreen() {
               Annual
             </Text>
             <View style={[styles.saveBadge, { backgroundColor: billingCycle === 'annual' ? 'rgba(255,255,255,0.25)' : Colors.successLight }]}>
-              <Text style={[styles.saveBadgeText, { color: billingCycle === 'annual' ? '#fff' : Colors.success }]}>Save 15%</Text>
+              <Text style={[styles.saveBadgeText, { color: billingCycle === 'annual' ? '#fff' : Colors.success }]}>Save 20%</Text>
             </View>
           </TouchableOpacity>
         </View>

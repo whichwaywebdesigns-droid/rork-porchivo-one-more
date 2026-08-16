@@ -1,18 +1,82 @@
-# Stripe Setup Guide — Porchivo Partner Verification & Payouts
+# Stripe Setup Guide — Porchivo B2B Community Subscriptions
 
-This guide walks through deploying all four edge functions and configuring the required Stripe secrets in your Supabase project.
+This guide covers the B2B community subscription flow (HOA board members / property managers signing up and paying via Stripe Checkout) and the Porch Partner verification + payout system.
 
 ---
 
-## Prerequisites
+## Overview
+
+Porchivo uses Stripe for two separate payment flows:
+
+1. **B2B Community Subscriptions** — HOAs and property managers subscribe to a community plan ($79–$599/mo). Residents never pay. Billing is via Stripe Checkout (subscription mode) with webhook-validated activation.
+2. **Porch Partner Payouts** — Verified neighbors earn $3–$25 per package hold. Payouts via Stripe Connect (Express accounts). Identity verification via Stripe Identity.
+
+There are **no in-app purchases** anywhere in the app. Residents are always free.
+
+---
+
+## B2B Community Plans
+
+### Current Pricing
+
+| Plan | Monthly | Annual (20% off) | Max Units | Setup Fee |
+|------|---------|-------------------|-----------|-----------|
+| Starter | $79 | $756/yr ($63/mo) | 50 | — |
+| Community | $199 | $1,908/yr ($159/mo) | 200 | — |
+| Professional | $399 | $3,828/yr ($319/mo) | 500 | $500 |
+| Enterprise | $599 | $5,748/yr ($479/mo) | 2,000 | $1,500 |
+
+- **Overage**: $1.00 per additional unit per month above the tier limit
+- **Residents**: Always free — they join via invite code, no payment required
+- Communities larger than 2,000 units: contact support@porchivo.com for custom quote
+
+### B2B Flow (3-step signup in the app)
+
+1. **Org details**: HOA board member / property manager enters community name, type, address, and total units
+2. **Plan selection**: Choose Starter / Community / Professional / Enterprise + monthly or annual billing
+3. **Stripe Checkout**: In-app browser opens Stripe Checkout → payment → redirect back to app → webhook validation → org activated → invite code generated
+
+### Edge Functions (B2B)
+
+```bash
+supabase functions deploy create-org-checkout
+supabase functions deploy confirm-org-signup
+supabase functions deploy create-billing-portal
+```
+
+All three functions:
+- Validate JWT via `userClient.auth.getUser()` — reject unauthenticated requests
+- Deploy with default `verify_jwt = true` (do NOT pass `--no-verify-jwt`)
+- Are rate-limited via `_shared/rateLimit.ts`
+
+### Stripe Secrets
+
+```bash
+# Your Stripe platform SECRET key (sk_live_... or sk_test_...)
+supabase secrets set STRIPE_SECRET_KEY=sk_live_xxxxxxxxxxxxxxxxxxxx
+```
+
+Supabase auto-injects: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`.
+
+### How it works
+
+1. `create-org-checkout` creates the org with `subscription_status = 'pending'`, creates a Stripe Customer, then creates a Stripe Checkout Session (subscription mode) with inline `price_data` — no pre-created Stripe products needed.
+2. User completes payment in the Stripe Checkout in-app browser.
+3. Stripe redirects back to `porchivo://org-signup/success?session_id={CHECKOUT_SESSION_ID}&org_id={orgId}`
+4. `confirm-org-signup` retrieves the session, checks `payment_status === 'paid'`, activates the org, and creates the admin membership (`hoa_admin`, `active`).
+5. `create-billing-portal` generates a Stripe Billing Portal URL for plan management, cancellation, and invoice history.
+
+---
+
+## Porch Partner Verification & Payouts
+
+### Prerequisites
 
 - Supabase CLI installed: `npm install -g supabase`
 - Stripe account with a platform (not connected account) key
 - Supabase project linked: `supabase link --project-ref <YOUR_PROJECT_REF>`
 
----
-
-## 1. Apply the Database Migration
+### 1. Apply the Database Migration
 
 Run this **after** `migration.sql` in your Supabase SQL Editor:
 
@@ -25,9 +89,7 @@ Or via CLI:
 supabase db push
 ```
 
----
-
-## 2. Deploy All Five Edge Functions
+### 2. Deploy Edge Functions (Partner flow)
 
 ```bash
 supabase functions deploy initiate-verification
@@ -37,33 +99,20 @@ supabase functions deploy create-assignment
 supabase functions deploy partner-payout
 ```
 
----
-
-## 3. Set Required Secrets
-
-### Stripe Keys
-
-Get these from your [Stripe Dashboard → Developers → API keys](https://dashboard.stripe.com/apikeys).
+### 3. Set Required Secrets
 
 ```bash
-# Your Stripe platform SECRET key (sk_live_... or sk_test_...)
+# Stripe platform SECRET key
 supabase secrets set STRIPE_SECRET_KEY=sk_live_xxxxxxxxxxxxxxxxxxxx
 
-# Identity webhook secret (see section 4 below)
+# Identity webhook secret (see section 5 below)
 supabase secrets set STRIPE_IDENTITY_WEBHOOK_SECRET=whsec_xxxxxxxxxxxxxxxxxxxx
 
-# Connect webhook secret (see section 5 below)
+# Connect webhook secret (see section 6 below)
 supabase secrets set STRIPE_CONNECT_WEBHOOK_SECRET=whsec_xxxxxxxxxxxxxxxxxxxx
 ```
 
-### Supabase auto-injects these (no manual action needed):
-- `SUPABASE_URL`
-- `SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY`
-
----
-
-## 4. Register the Identity Webhook
+### 4. Register the Identity Webhook
 
 In [Stripe Dashboard → Developers → Webhooks](https://dashboard.stripe.com/webhooks):
 
@@ -81,9 +130,7 @@ In [Stripe Dashboard → Developers → Webhooks](https://dashboard.stripe.com/w
    supabase secrets set STRIPE_IDENTITY_WEBHOOK_SECRET=whsec_xxxxxx
    ```
 
----
-
-## 5. Register the Connect Webhook (for payout status updates)
+### 5. Register the Connect Webhook
 
 Create a **second** webhook endpoint:
 
@@ -91,7 +138,6 @@ Create a **second** webhook endpoint:
    ```
    https://<YOUR_PROJECT_REF>.supabase.co/functions/v1/verification-webhook
    ```
-   *(You can reuse the same function or create a dedicated `connect-webhook` function)*
 2. **Events to listen for:**
    - `account.updated` — fires when Stripe finishes reviewing a Connect account
    - `transfer.paid` — fires when a payout lands in the partner's bank
@@ -100,17 +146,13 @@ Create a **second** webhook endpoint:
    supabase secrets set STRIPE_CONNECT_WEBHOOK_SECRET=whsec_xxxxxx
    ```
 
----
-
-## 6. Enable Stripe Identity in Dashboard
+### 6. Enable Stripe Identity
 
 1. Go to [Stripe Dashboard → Identity](https://dashboard.stripe.com/identity)
 2. Enable **Identity Verification**
 3. Set **Return URL** allowed pattern: `porchivo://partner-verify/*`
 
----
-
-## 7. Enable Stripe Connect
+### 7. Enable Stripe Connect
 
 1. Go to [Stripe Dashboard → Connect](https://dashboard.stripe.com/connect/accounts/overview)
 2. Click **Get started with Connect**
@@ -120,45 +162,7 @@ Create a **second** webhook endpoint:
    porchivo://partner-verify/connect-return
    ```
 
----
-
-## 8. Verify Deployment
-
-Test each function with curl (replace tokens as needed):
-
-```bash
-# Initiate identity verification
-curl -X POST \
-  https://<PROJECT_REF>.supabase.co/functions/v1/initiate-verification \
-  -H "Authorization: Bearer <USER_JWT>" \
-  -H "Content-Type: application/json" \
-  -d '{"returnUrl":"porchivo://partner-verify/callback"}'
-
-# Create Stripe Connect account
-curl -X POST \
-  https://<PROJECT_REF>.supabase.co/functions/v1/create-connect-account \
-  -H "Authorization: Bearer <USER_JWT>" \
-  -H "Content-Type: application/json" \
-  -d '{}'
-
-# Create assignment (homeowner)
-curl -X POST \
-  https://<PROJECT_REF>.supabase.co/functions/v1/create-assignment \
-  -H "Authorization: Bearer <HOMEOWNER_JWT>" \
-  -H "Content-Type: application/json" \
-  -d '{"connectionId":"<UUID>","partnerId":"<UUID>","agreedRateCents":1000}'
-
-# Trigger payout (homeowner after completion)
-curl -X POST \
-  https://<PROJECT_REF>.supabase.co/functions/v1/partner-payout \
-  -H "Authorization: Bearer <HOMEOWNER_JWT>" \
-  -H "Content-Type: application/json" \
-  -d '{"assignmentId":"<UUID>"}'
-```
-
----
-
-## 9. Full Flow Summary
+### 8. Partner Flow Summary
 
 ```
 Partner flow:
@@ -189,248 +193,7 @@ Homeowner flow:
 
 - [Stripe Identity Docs](https://stripe.com/docs/identity)
 - [Stripe Connect Express Docs](https://stripe.com/docs/connect/express-accounts)
-- [Stripe Billing Docs](https://stripe.com/docs/billing)
+- [Stripe Checkout Docs](https://stripe.com/docs/payments/checkout)
+- [Stripe Billing Portal Docs](https://stripe.com/docs/billing/subscriptions/customer-portal)
 - [Supabase Edge Functions Docs](https://supabase.com/docs/guides/functions)
 - [Supabase Secrets Management](https://supabase.com/docs/guides/functions/secrets)
-
----
-
-## Subscription Products (mirrors RevenueCat / App Store pricing)
-
-These Stripe products mirror the in-app pricing defined in `expo/config/app.ts`
-1:1. Each price's `lookup_key` matches the RevenueCat product ID exactly, so a
-single identifier maps a plan across Stripe, RevenueCat, App Store Connect, and
-Google Play.
-
-> ⚠️  **Scope:** mobile subscriptions bill through RevenueCat + App Store /
-> Play Store (Apple requires this for in-app digital goods). These Stripe
-> products are for **web-based subscriptions and future invoicing only**.
-> Keep prices in sync in all three places when anything changes.
-
-Run in **test mode first** (default with your `sk_test_` key), then re-run
-against live mode.
-
-### 1. Create the 3 products
-
-```bash
-stripe products create --name "Porchivo Premium" \
-  --description "Individual premium: unlimited packages, Theft Shield, 90s refresh" \
-  -d "metadata[tier]=premium"
-
-stripe products create --name "Porchivo Family" \
-  --description "Household plan for up to 5 members" \
-  -d "metadata[tier]=family"
-
-stripe products create --name "Porchivo Enterprise / HOA" \
-  --description "Community plan covering up to 250 households" \
-  -d "metadata[tier]=enterprise"
-```
-
-Each command returns a `prod_...` ID — substitute them below.
-
-### 2. Create the prices (lookup keys = RevenueCat product IDs)
-
-**Premium** (`prod_PREMIUM`):
-
-```bash
-# Monthly — $13.99/mo, no trial (hard paywall strategy)
-stripe prices create \
-  --product prod_PREMIUM \
-  --currency usd \
-  --unit-amount 1399 \
-  -d "recurring[interval]=month" \
-  --lookup-key premium_monthly
-
-# Annual — $99.99/yr (7-day trial, featured plan)
-stripe prices create \
-  --product prod_PREMIUM \
-  --currency usd \
-  --unit-amount 9999 \
-  -d "recurring[interval]=year" \
-  --lookup-key premium_annual
-
-# Lifetime — $500 one-time (hidden from main paywall)
-stripe prices create \
-  --product prod_PREMIUM \
-  --currency usd \
-  --unit-amount 50000 \
-  --lookup-key porchivo_lifetime
-```
-
-**Family** (`prod_FAMILY`):
-
-```bash
-# Monthly — $23.99/mo, no trial
-stripe prices create \
-  --product prod_FAMILY \
-  --currency usd \
-  --unit-amount 2399 \
-  -d "recurring[interval]=month" \
-  --lookup-key com.porchivo.premium.family
-
-# Annual — $179.99/yr (7-day trial)
-stripe prices create \
-  --product prod_FAMILY \
-  --currency usd \
-  --unit-amount 17999 \
-  -d "recurring[interval]=year" \
-  --lookup-key family_annual
-```
-
-**Enterprise / HOA** (`prod_ENTERPRISE`):
-
-```bash
-# Monthly — $250/mo
-stripe prices create \
-  --product prod_ENTERPRISE \
-  --currency usd \
-  --unit-amount 25000 \
-  -d "recurring[interval]=month" \
-  --lookup-key enterprise_monthly
-
-# Annual — $2,000/yr (14-day trial)
-stripe prices create \
-  --product prod_ENTERPRISE \
-  --currency usd \
-  --unit-amount 200000 \
-  -d "recurring[interval]=year" \
-  --lookup-key enterprise_annual
-```
-
-### 3. Trials
-
-Stripe trials are set at checkout/subscription time, not on the price object.
-When creating a Checkout Session or Subscription, pass:
-
-```bash
-# premium_annual & family_annual → 7-day trial
--d "subscription_data[trial_period_days]=7"
-
-# enterprise_annual → 14-day trial
--d "subscription_data[trial_period_days]=14"
-```
-
-Monthly plans get **no trial** (hard paywall strategy — trials on monthly
-train users to expect free; push them to annual instead).
-
-### 4. Win-back promo
-
-The $7.99/mo × 3 months win-back offer is configured in the **RevenueCat
-dashboard** (display-only in the app). For a Stripe equivalent, use a coupon:
-
-```bash
-stripe coupons create \
-  --name "Win-back 40% off" \
-  --percent-off 43 \
-  --duration repeating \
-  --duration-in-months 3
-```
-
-### 5. Pricing reference table
-
-| Plan | Interval | Price | Lookup key | Trial |
-|------|----------|-------|------------|-------|
-| Premium | Monthly | $13.99 | `premium_monthly` | — |
-| Premium | Annual | $99.99 | `premium_annual` | 7 days |
-| Premium | One-time | $500 | `porchivo_lifetime` | — |
-| Family (5 members) | Monthly | $23.99 | `com.porchivo.premium.family` | — |
-| Family (5 members) | Annual | $179.99 | `family_annual` | 7 days |
-| Enterprise / HOA (250 homes) | Monthly | $250 | `enterprise_monthly` | — |
-| Enterprise / HOA (250 homes) | Annual | $2,000 | `enterprise_annual` | 14 days |
-
-> Source of truth for display pricing: `expo/config/app.ts` (`PRICING`,
-> `FAMILY_PLAN`, `ENTERPRISE_PLAN`). If prices change there, update Stripe,
-> RevenueCat, App Store Connect, and Google Play to match.
-
----
-
-## Subscription Webhooks (`customer.subscription.*`)
-
-Register a **third** webhook endpoint dedicated to subscription lifecycle
-events so the backend stays in sync with web-based Stripe subscriptions.
-
-> ⚠️  **Scope reminder:** these events only fire for subscriptions billed
-> through **Stripe** (web checkout / invoicing). Mobile subscription state
-> comes from **RevenueCat webhooks**, not Stripe. Never let a Stripe event
-> downgrade a user who is entitled via RevenueCat — always merge entitlements
-> from both sources.
-
-### 1. Register the endpoint
-
-In [Stripe Dashboard → Developers → Webhooks](https://dashboard.stripe.com/webhooks):
-
-1. Click **Add endpoint**
-2. **Endpoint URL:**
-   ```
-   https://<YOUR_PROJECT_REF>.supabase.co/functions/v1/subscription-webhook
-   ```
-   *(Create a dedicated `subscription-webhook` edge function — keep it separate
-   from `verification-webhook` so signing secrets and concerns don't mix.)*
-3. **Events to listen for:**
-   - `customer.subscription.created` — new subscription started (or trial began)
-   - `customer.subscription.updated` — plan change, renewal, trial → active,
-     cancel-at-period-end toggled, past_due, etc.
-   - `customer.subscription.deleted` — subscription fully canceled → revoke access
-   - `customer.subscription.trial_will_end` — fires **3 days before** trial ends
-     (good hook for a "trial ending" push/email)
-   - `customer.subscription.paused` / `customer.subscription.resumed` — only if
-     you enable pause collection
-4. Copy the **Signing secret** and set it:
-   ```bash
-   supabase secrets set STRIPE_SUBSCRIPTION_WEBHOOK_SECRET=whsec_xxxxxx
-   ```
-
-Or via CLI:
-
-```bash
-stripe webhook_endpoints create \
-  --url "https://<YOUR_PROJECT_REF>.supabase.co/functions/v1/subscription-webhook" \
-  -d "enabled_events[]=customer.subscription.created" \
-  -d "enabled_events[]=customer.subscription.updated" \
-  -d "enabled_events[]=customer.subscription.deleted" \
-  -d "enabled_events[]=customer.subscription.trial_will_end"
-```
-
-### 2. Handler logic per event
-
-| Event | What to do |
-|-------|-----------|
-| `customer.subscription.created` | Look up the user by `customer` ID (or `metadata[user_id]` you set at checkout), read the price's `lookup_key` (e.g. `premium_annual`), grant the matching tier. Status `trialing` counts as entitled. |
-| `customer.subscription.updated` | Re-read `status` + `items.data[0].price.lookup_key` and upsert the user's tier. Handle `cancel_at_period_end=true` by keeping access until `current_period_end` (do NOT revoke early). `past_due` → grace period, `unpaid` → revoke. |
-| `customer.subscription.deleted` | Revoke the Stripe-granted tier (but re-check RevenueCat entitlement before downgrading the account overall). |
-| `customer.subscription.trial_will_end` | Send the "your trial ends in 3 days" notification — pairs with the day-7 paywall strategy. |
-
-### 3. Handler requirements (non-negotiable)
-
-- **Verify the signature** with `STRIPE_SUBSCRIPTION_WEBHOOK_SECRET` using
-  `stripe.webhooks.constructEventAsync()` — reject anything unsigned.
-- **Return 200 fast** — do the minimum DB write, never call slow third parties
-  inline. Stripe retries non-2xx responses for up to 3 days.
-- **Be idempotent** — Stripe can deliver the same event twice. Store processed
-  `event.id`s (or upsert by `subscription.id`) so replays are harmless.
-- **Don't trust event ordering** — `updated` can arrive before `created`.
-  Always write the *latest* state from the event payload rather than applying
-  deltas; when in doubt, fetch the subscription fresh from the API.
-- **Map by `lookup_key`, never by `price_...` ID** — lookup keys are stable
-  across test/live mode and match your RevenueCat product IDs (see the pricing
-  reference table above).
-
-### 4. Local testing
-
-```bash
-# Forward events to the deployed function
-stripe listen --forward-to \
-  https://<YOUR_PROJECT_REF>.supabase.co/functions/v1/subscription-webhook
-
-# Fire test events
-stripe trigger customer.subscription.created
-stripe trigger customer.subscription.updated
-stripe trigger customer.subscription.deleted
-stripe trigger customer.subscription.trial_will_end
-```
-
-### 5. Secret reference (updated)
-
-| Secret | Where to get it |
-|--------|----------------|
-| `STRIPE_SUBSCRIPTION_WEBHOOK_SECRET` | Stripe Dashboard → Webhooks → subscription endpoint signing secret |

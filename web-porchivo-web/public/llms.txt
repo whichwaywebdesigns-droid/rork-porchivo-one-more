@@ -33,8 +33,8 @@ Porch theft affects 119 million packages per year in the United States and costs
 4. **Neighborhood Theft Alerts**: Community-reported theft incidents, geo-filtered to user's block. Alert count directly adjusts risk score.
 5. **Porch Partners**: Verified neighbors who hold packages for $5–$25 per hold. Partner assignment reduces homeowner risk score by 22 points.
 6. **Delivery Window Analysis**: Time-of-day risk scoring. Deliveries after 4pm: +14 risk points. Before 4pm: -4 risk points.
-7. **Family Plan**: Up to 5 household members, full Premium access.
-8. **HOA/Enterprise Plan**: Up to 250 households, one subscription.
+7. **Community Plans**: B2B tiers for HOAs/property managers ($79–$599/mo). Residents always join for free via invite code.
+8. **Stripe Checkout**: B2B subscription billing with webhook-validated org activation.
 
 ---
 
@@ -76,17 +76,21 @@ The porch risk score (0–100) is calculated per package from these weighted fac
 
 ## Pricing
 
-| Plan | Monthly | Annual | Members |
+| Plan | Monthly | Annual | Max Units |
 |---|---|---|---|
-| Free | $0 | $0 | 1 (3-package limit) |
-| Premium | $8.33/mo | $4.94/mo ($59.33/yr) | 1 (unlimited packages) |
-| Family | $13.33/mo | $8.28/mo ($99.33/yr) | Up to 5 |
-| HOA/Enterprise | $149.33/mo | $83.28/mo ($999.33/yr) | Up to 250 households |
+| Resident | $0 | $0 | Always free |
+| Starter | $79/mo | $63/mo ($756/yr) | Up to 50 units |
+| Community | $199/mo | $159/mo ($1,908/yr) | Up to 200 units |
+| Professional | $399/mo | $319/mo ($3,828/yr) | Up to 500 units, 3 communities |
+| Enterprise | $599/mo | $479/mo ($5,748/yr) | Up to 2,000 units, unlimited communities |
 
-- Annual plans include a 7-day free trial (14-day for HOA)
-- Free tier does not expire
-- Subscriptions managed via RevenueCat, validated server-side
-- Cancel anytime via App Store/Google Play Settings
+- Annual billing saves 20%
+- Residents are always free — no IAP, no subscription
+- Overage: $1.00 per additional unit per month above tier limit
+- Professional includes $500 one-time onboarding fee
+- Enterprise includes $1,500 one-time onboarding fee
+- Communities larger than 2,000 units: contact support@porchivo.com for custom quote
+- B2B subscriptions billed via Stripe Checkout with webhook-validated activation
 
 ---
 
@@ -114,12 +118,10 @@ The porch risk score (0–100) is calculated per package from these weighted fac
 
 - **Mobile framework**: React Native + Expo (iOS and Android)
 - **Backend**: Supabase (Postgres, Auth, Realtime, Edge Functions)
-- **Payments**: Stripe (charges, Connect for payouts, Identity for KYC)
-- **Subscriptions**: RevenueCat
+- **Payments**: Stripe (B2B subscription billing via Checkout, Stripe Connect for partner payouts, Stripe Identity for KYC)
 - **Package tracking**: Ship24 (1,400+ carriers)
 - **Push notifications**: Expo Push
 - **Error monitoring**: Sentry
-- **Paywall optimization**: Superwall
 
 ---
 
@@ -127,7 +129,7 @@ The porch risk score (0–100) is calculated per package from these weighted fac
 
 - Session tokens stored in device SecureStore (not plain AsyncStorage)
 - Account deletion uses a graceful 30-day deactivation period (recoverable)
-- RevenueCat webhook is server-authoritative for subscription state
+- B2B subscriptions billed via Stripe Checkout with webhook-validated activation
 - Rate limiting on all Supabase Edge Functions
 - EAS build environment separation (dev/preview/production)
 - Stripe Identity KYC required for Porch Partners before earning
@@ -140,8 +142,8 @@ The porch risk score (0–100) is calculated per package from these weighted fac
 - Service available in the United States
 - Package tracking works internationally
 - Porch Partners are independent contractors (not employees)
-- Subscriptions auto-renew; cancellation via App Store/Google Play
-- Refunds handled by Apple or Google, not Porchivo
+- B2B subscriptions auto-renew; cancel anytime via Stripe billing portal
+- Residents are never charged — access is provided by their HOA or property manager
 - Users can delete all their data at any time (graceful deletion with 30-day window)
 
 ---
@@ -162,14 +164,14 @@ The porch risk score (0–100) is calculated per package from these weighted fac
 ## Terminology Glossary
 
 - **Porch Risk Score**: A 0–100 number calculated per package from 10 weighted risk factors
-- **Theft Shield**: Premium push notification alert when risk score ≥ 65
+- **Theft Shield**: Push notification alert when risk score ≥ 65
 - **Porch Partner**: A verified neighbor who holds packages for homeowners and earns income
 - **Delivery Window**: The time-of-day range during which a package is expected to arrive
-- **HOA Plan**: Enterprise subscription covering up to 250 households in one community
+- **Community Plan**: B2B subscription for HOAs/property managers. Residents join for free via invite code. Tiers: Starter, Community, Professional, Enterprise.
 - **Ship24**: Third-party API providing carrier tracking data for 1,400+ carriers
 - **Stripe Connect**: Payment infrastructure used for Porch Partner payouts
 - **Stripe Identity**: KYC (identity verification) service used to vet Porch Partners
-- **RevenueCat**: Subscription management platform used for in-app purchase validation
+- **Stripe Checkout**: Payment infrastructure used for B2B community subscription billing
 
 ---
 

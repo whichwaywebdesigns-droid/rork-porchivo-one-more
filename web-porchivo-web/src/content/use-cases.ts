@@ -35,7 +35,7 @@ export const USE_CASES: UseCase[] = [
       "Delivery window analysis (before vs after 4pm)",
       "Neighborhood theft alert map",
     ],
-    recommendedPlan: "Premium Annual ($4.94/mo)",
+    recommendedPlan: "Community Plan ($199/mo — residents free)",
     icon: "Home",
   },
   {
@@ -54,7 +54,7 @@ export const USE_CASES: UseCase[] = [
       "Building-level neighborhood alert history",
       "90-second tracking refresh (Premium)",
     ],
-    recommendedPlan: "Premium Monthly ($8.33/mo) or Annual",
+    recommendedPlan: "Community Plan ($199/mo — residents free)",
     icon: "Building",
   },
   {
@@ -94,7 +94,7 @@ export const USE_CASES: UseCase[] = [
       "Single billing and administration",
       "14-day free trial on annual plan",
     ],
-    recommendedPlan: "HOA Annual ($3,000/yr — save 29%)",
+    recommendedPlan: "Enterprise Plan ($599/mo — residents free)",
     icon: "Users",
   },
   {
@@ -114,7 +114,7 @@ export const USE_CASES: UseCase[] = [
       "7-day free trial on annual plan",
       "One renewal for the whole household",
     ],
-    recommendedPlan: "Family Annual ($15.00/mo — $179.99/yr)",
+    recommendedPlan: "Community Plan ($199/mo — residents free)",
     icon: "Heart",
   },
 ];

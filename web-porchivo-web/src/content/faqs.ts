@@ -65,35 +65,35 @@ export const FAQS: FAQ[] = [
     id: "is-porchivo-free",
     question: "Is Porchivo free to use?",
     answer:
-      "Yes — Porchivo has a free tier with no time limit. Free accounts can track 1 package at a time with 10-minute refresh intervals and access to neighborhood alerts. Premium plans add unlimited package tracking, 90-second refresh, Theft Shield alerts, and priority risk scoring. The free tier does not expire.",
+      "Yes — Porchivo is always free for residents. You can track packages, receive neighborhood theft alerts, and access all community features at no cost. If your HOA or property manager has subscribed to a Porchivo community plan, all features are unlocked for you. There are no in-app purchases or subscription prompts for residents — ever.",
     category: "pricing",
   },
   {
     id: "what-does-premium-include",
-    question: "What does Porchivo Premium include?",
+    question: "How does my community unlock Porchivo features?",
     answer:
-      "Porchivo Premium includes: unlimited package tracking, 90-second live tracking refresh, Theft Shield push alerts when risk exceeds 65/100, priority risk scoring, access to the full neighborhood alert history, UPS & Amazon hidden services (intercept, live tracking, access points, and A-to-Z claim filing), and early access to new features. Premium is $13.99/month or $8.33/month billed annually ($99.99/year). Annual plans include a 7-day free trial.",
+      "An HOA board member or property manager signs up through the app, selects a community plan (Starter at $79/mo, Community at $199/mo, Professional at $399/mo, or Enterprise at $599/mo), and completes payment via Stripe Checkout. Once active, they receive an invite code to share with residents. Residents download the free app, enter the code, and get full access — no payment required from them.",
     category: "pricing",
   },
   {
     id: "can-i-cancel-anytime",
-    question: "Can I cancel my Porchivo subscription at any time?",
+    question: "Can I cancel my community subscription at any time?",
     answer:
-      "Yes. Subscriptions can be cancelled at any time through your iPhone Settings (iOS) or Google Play subscription manager (Android). Cancellations take effect at the end of the current billing period — you retain Premium access until then. Porchivo does not charge cancellation fees. Refunds are handled by the App Store (Apple) or Google Play.",
+      "Yes. Community subscriptions can be cancelled at any time through the Stripe billing portal, accessible from the Manage Subscription screen in the app. Cancellations take effect at the end of the current billing period — residents retain full access until then. There are no cancellation fees.",
     category: "pricing",
   },
   {
     id: "what-is-the-family-plan",
-    question: "What is the Family Plan?",
+    question: "What community plans are available?",
     answer:
-      "The Family Plan covers up to 5 household members under one subscription. Each member gets their own Porchivo account with full Premium access — unlimited tracking, Theft Shield, and UPS & Amazon hidden services. Family Sharing is enabled so members can be added through Apple Family Sharing. The Family Plan is $23.99/month or $15.00/month billed annually ($179.99/year). A 7-day free trial is available on the annual plan.",
+      "Porchivo offers four B2B community plans: Starter ($79/mo, up to 50 units), Community ($199/mo, up to 200 units — most popular), Professional ($399/mo, up to 500 units across 3 communities), and Enterprise ($599/mo, up to 2,000 units with unlimited communities). Annual billing saves 20%. Professional includes a $500 one-time onboarding fee; Enterprise includes $1,500. Overage above the tier limit is $1 per additional unit per month.",
     category: "pricing",
   },
   {
     id: "is-there-an-hoa-plan",
     question: "Is there a plan for HOAs or property managers?",
     answer:
-      "Yes. The Porchivo Enterprise/HOA Plan covers entire communities under one subscription — up to 250 households. All residents get full Premium access. The plan is $350/month or $3,000/year (save 29%). A 14-day free trial is available on the annual plan. Contact support@porchivo.com for onboarding assistance for communities larger than 250 households.",
+      "Yes — all Porchivo community plans are designed for HOAs and property managers. Plans start at $79/mo (Starter) and scale up to $599/mo (Enterprise, covering 2,000 units). Residents always join for free using an invite code. Contact support@porchivo.com for communities larger than 2,000 units — custom pricing is available.",
     category: "pricing",
   },
 

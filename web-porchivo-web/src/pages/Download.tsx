@@ -12,19 +12,11 @@ import { BRAND } from "@/config/brand";
 const seo = getPageSEO("download");
 
 const FREE_INCLUDES = [
-  "Track 1 package simultaneously",
-  "Porch risk score for every delivery",
-  "Neighborhood theft alerts",
-  "10-minute live tracking refresh",
-  "Porch Partner access",
-];
-
-const PREMIUM_ADDS = [
-  "Unlimited package tracking",
-  "90-second live refresh",
-  "Theft Shield push alerts",
-  "Priority risk scoring",
-  "Full neighborhood alert history",
+  "Package tracking with real-time porch risk score",
+  "Neighborhood theft alerts (geo-filtered to your block)",
+  "Porch Partner network — earn $3–$25 per hold",
+  "Community features unlocked when your HOA joins",
+  "No credit card required, no time limit",
 ];
 
 export default function DownloadPage() {
@@ -72,21 +64,21 @@ export default function DownloadPage() {
         </div>
       </section>
 
-      {/* Free vs Premium */}
+      {/* Free vs Community */}
       <section className="py-20 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl font-bold text-brand-text-primary text-center mb-12">
-            Start free. Upgrade when you need more.
+            Residents are always free. Communities subscribe.
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-brand-navy-900 border border-brand-navy-500/40 rounded-2xl p-7">
-              <div className="text-sm font-medium text-brand-text-muted mb-1">Free tier</div>
+              <div className="text-sm font-medium text-brand-text-muted mb-1">Residents</div>
               <div className="text-3xl font-bold text-brand-text-primary mb-1">$0</div>
-              <div className="text-sm text-brand-text-muted mb-6">No time limit. Always free.</div>
+              <div className="text-sm text-brand-text-muted mb-6">Always free. No credit card, no time limit.</div>
               <ul className="space-y-3">
                 {FREE_INCLUDES.map((f) => (
                   <li key={f} className="flex items-start gap-2.5 text-sm text-brand-text-secondary">
-                    <Check className="w-4 h-4 text-brand-text-muted flex-shrink-0 mt-0.5" />
+                    <Check className="w-4 h-4 text-brand-orange flex-shrink-0 mt-0.5" />
                     {f}
                   </li>
                 ))}
@@ -95,19 +87,25 @@ export default function DownloadPage() {
 
             <div className="bg-gradient-to-b from-brand-orange/8 to-transparent border border-brand-orange/30 rounded-2xl p-7">
               <div className="inline-flex px-2.5 py-0.5 rounded-full bg-brand-orange/15 text-brand-orange text-xs font-semibold mb-3">
-                Best value — save 40%
+                For HOAs & Property Managers
               </div>
-              <div className="text-sm font-medium text-brand-text-secondary mb-1">Premium Annual</div>
+              <div className="text-sm font-medium text-brand-text-secondary mb-1">Community Plans</div>
               <div className="flex items-baseline gap-1 mb-1">
-                <span className="text-3xl font-bold text-brand-text-primary">$8.33</span>
-                <span className="text-brand-text-muted text-sm">/mo, billed annually</span>
+                <span className="text-3xl font-bold text-brand-text-primary">$79</span>
+                <span className="text-brand-text-muted text-sm">/mo starting</span>
               </div>
-              <div className="text-sm text-brand-text-muted mb-6">7-day free trial · $99.99/yr · Cancel anytime</div>
+              <div className="text-sm text-brand-text-muted mb-6">From Starter (50 units) to Enterprise (2,000 units). Annual saves 20%.</div>
               <div className="text-xs font-semibold text-brand-text-muted uppercase tracking-wider mb-3">
-                Everything in Free, plus:
+                Your subscription unlocks:
               </div>
               <ul className="space-y-3">
-                {PREMIUM_ADDS.map((f) => (
+                {[
+                  "Full access for every resident — at no cost to them",
+                  "Community announcements & maintenance requests",
+                  "HOA dues collection & payments",
+                  "Amenity reservations & board roles",
+                  "White-label & API access (Enterprise)",
+                ].map((f) => (
                   <li key={f} className="flex items-start gap-2.5 text-sm text-brand-text-secondary">
                     <Check className="w-4 h-4 text-brand-orange flex-shrink-0 mt-0.5" />
                     {f}
@@ -122,7 +120,7 @@ export default function DownloadPage() {
               to="/pricing"
               className="inline-flex items-center gap-1.5 text-sm text-brand-text-muted hover:text-brand-text-secondary transition-colors"
             >
-              View all plans including Family and HOA
+              Compare all community plans
               <ChevronRight className="w-4 h-4" />
             </Link>
           </div>

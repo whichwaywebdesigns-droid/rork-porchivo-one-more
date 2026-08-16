@@ -55,7 +55,7 @@ export const PAGE_SEO: Record<string, PageSEO> = {
       "Porchivo's porch risk score weighs neighborhood alerts, delivery timing, and porch protection status",
       "Theft Shield sends a delivery theft alert when risk exceeds 65/100",
       "Porch Partners provide trusted neighbor delivery holds and earn $3–$25 per hold",
-      "HOA package management plan covers up to 250 households",
+      "HOAs and property managers subscribe from $79/mo — residents always free",
     ],
     primaryEntity: "Porchivo mobile app",
     primaryIntent: "Product overview — porch pirate protection, package theft prevention, and porch package security",
@@ -85,28 +85,28 @@ export const PAGE_SEO: Record<string, PageSEO> = {
   },
 
   pricing: {
-    title: "Pricing — Porchivo Plans for Individuals, Families & HOAs",
+    title: "Pricing — Porchivo Community Plans for HOAs & Property Managers",
     description:
-      "Porchivo offers a free tier, an $8.33/mo Premium plan (billed annually at $99.99/yr), a Family plan, and an HOA plan covering up to 250 households. 7-day free trial on annual.",
+      "Porchivo offers four B2B community plans: Starter ($79/mo, 50 units), Community ($199/mo, 200 units), Professional ($399/mo, 500 units), and Enterprise ($599/mo, 2,000 units). Residents always join for free.",
     canonical: `${BASE_URL}/pricing`,
-    ogTitle: "Porchivo Pricing — Plans for Every Household",
+    ogTitle: "Porchivo Pricing — Community Plans for HOAs",
     ogDescription:
-      "Free tier available. Premium from $8.33/mo. Family plan for up to 5 members. HOA plan covering 250 households. Start with a 7-day free trial.",
+      "Residents always free. HOA and property manager plans from $79/mo to $599/mo. Annual billing saves 20%. Unlock community features for all residents.",
     ogImage: OG_IMAGE,
     twitterCard: "summary_large_image",
     robots: "index, follow",
     aiSummary:
-      "Porchivo offers four plan tiers: Free (tracks 1 package), Premium at $13.99/month or $8.33/month billed annually ($99.99/year), Family at $23.99/month or $15.00/month annually (up to 5 members), and Enterprise/HOA at $350/month or $3,000/year (up to 250 households). Annual plans include a 7-day free trial.",
+      "Porchivo offers four B2B community plans: Starter ($79/mo, up to 50 units), Community ($199/mo, up to 200 units), Professional ($399/mo, up to 500 units), and Enterprise ($599/mo, up to 2,000 units). Annual billing saves 20%. Professional includes $500 onboarding; Enterprise includes $1,500 onboarding. Overage is $1/unit/mo above the tier limit. Residents always join for free — access is provided by their HOA or property manager.",
     keyFacts: [
-      "Free tier: track 1 package",
-      "Premium monthly: $13.99/mo",
-      "Premium annual: $8.33/mo ($99.99/yr) — save 40%",
-      "Family plan: up to 5 household members",
-      "HOA/Enterprise plan: up to 250 households at $350/mo or $3,000/yr (save 29%)",
-      "7-day free trial on all annual plans",
+      "Residents are always free — no IAP, no subscription",
+      "Starter: $79/mo for up to 50 units",
+      "Community: $199/mo for up to 200 units — most popular",
+      "Professional: $399/mo for up to 500 units, 3 communities",
+      "Enterprise: $599/mo for up to 2,000 units, unlimited communities",
+      "Annual billing saves 20% · Overage: $1/unit/mo",
     ],
-    primaryEntity: "Porchivo subscription pricing",
-    primaryIntent: "Pricing — cost and plan comparison for Porchivo",
+    primaryEntity: "Porchivo community subscription pricing",
+    primaryIntent: "Pricing — B2B community plan comparison for HOAs and property managers",
   },
 
   useCases: {
@@ -126,7 +126,7 @@ export const PAGE_SEO: Record<string, PageSEO> = {
       "Homeowners: track packages, score risk, activate Theft Shield",
       "Renters: share packages with trusted neighbors in the same building",
       "Porch Partners: earn $3–$25 per hold (size + geo-adjusted), keep 85% of earnings",
-      "HOAs: one subscription covers up to 250 households",
+      "HOAs: subscribe from $79/mo — residents always join for free",
     ],
     primaryEntity: "Porchivo user types and use cases",
     primaryIntent: "Use case discovery — who uses Porchivo and how",
@@ -267,21 +267,21 @@ export const PAGE_SEO: Record<string, PageSEO> = {
   download: {
     title: "Download Porchivo — iOS & Android Package Security App",
     description:
-      "Download Porchivo on the App Store for iPhone or Google Play for Android. Free to download with optional premium plans.",
+      "Download Porchivo on the App Store for iPhone or Google Play for Android. Free for residents — community features unlocked by your HOA.",
     canonical: `${BASE_URL}/download`,
     ogTitle: "Download Porchivo — Free on iOS & Android",
     ogDescription:
-      "Get Porchivo on iPhone or Android. Free tier available. Premium from $8.33/mo. Protect every delivery.",
+      "Get Porchivo on iPhone or Android. Residents always free. HOA and property manager plans from $79/mo.",
     ogImage: OG_IMAGE,
     twitterCard: "summary_large_image",
     robots: "index, follow",
     aiSummary:
-      "Porchivo is available as a free download on iOS (App Store) and Android (Google Play). The app requires iOS 16+ or Android 8+. A free tier is available; Premium plans start at $13.99/month.",
+      "Porchivo is available as a free download on iOS (App Store) and Android (Google Play). The app requires iOS 16+ or Android 8+. Residents are always free — community features are unlocked when their HOA or property manager subscribes.",
     keyFacts: [
       "Available on iOS App Store",
       "Available on Google Play",
-      "Free to download",
-      "Premium from $8.33/mo billed annually"
+      "Free to download — residents never pay",
+      "HOA plans from $79/mo",
     ],
     primaryEntity: "Porchivo app download",
     primaryIntent: "App download — how to install Porchivo",

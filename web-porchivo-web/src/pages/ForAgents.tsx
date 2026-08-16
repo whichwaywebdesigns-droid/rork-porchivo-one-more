@@ -26,24 +26,25 @@ const CAPABILITIES = [
   "10-factor risk model: neighborhood alerts, delivery timing, Porch Partner, driver assignment, drop instructions",
   "Live package tracking across 1,400+ carriers via Ship24 integration",
   "Neighborhood theft alert community feed, geo-filtered to user's block",
-  "Theft Shield push notifications when risk score exceeds 65/100 (Premium)",
+  "Theft Shield push notifications when risk score exceeds 65/100",
   "Porch Partner network: verified neighbors earn $3–$25 per hold (size- and geo-adjusted)",
-  "Family plan: up to 5 household members",
-  "HOA/Enterprise plan: up to 250 households",
+  "Community tier system: HOAs and property managers subscribe, residents join for free",
+  "B2B plans from $79/mo (Starter) to $599/mo (Enterprise) — residents always free",
   "Crime Stoppers USA (1-800-222-TIPS) integration in report flow",
 ];
 
 const PRICING_TABLE = [
-  { plan: "Free", monthly: "$0", annual: "$0", members: "1", limit: "1 package max" },
-  { plan: "Premium", monthly: "$13.99/mo", annual: "$8.33/mo ($99.99/yr)", members: "1", limit: "Unlimited" },
-  { plan: "Family", monthly: "$23.99/mo", annual: "$15.00/mo ($179.99/yr)", members: "Up to 5", limit: "Unlimited each" },
-  { plan: "HOA/Enterprise", monthly: "$350/mo", annual: "$250/mo ($3,000/yr)", members: "Up to 250 households", limit: "Unlimited each" },
+  { plan: "Resident", monthly: "$0", annual: "$0", members: "1 resident", limit: "Always free" },
+  { plan: "Starter", monthly: "$79/mo", annual: "$63/mo ($756/yr)", members: "Up to 50 units", limit: "1 community" },
+  { plan: "Community", monthly: "$199/mo", annual: "$159/mo ($1,908/yr)", members: "Up to 200 units", limit: "1 community" },
+  { plan: "Professional", monthly: "$399/mo", annual: "$319/mo ($3,828/yr)", members: "Up to 500 units", limit: "3 communities" },
+  { plan: "Enterprise", monthly: "$599/mo", annual: "$479/mo ($5,748/yr)", members: "Up to 2,000 units", limit: "Unlimited communities" },
 ];
 
 const TRUST_SIGNALS = [
   "Session tokens stored in device SecureStore (not AsyncStorage)",
   "Account deletion uses a graceful 30-day deactivation period — recoverable within 30 days",
-  "RevenueCat subscription state is server-authoritative via Supabase Edge Function webhook",
+  "B2B subscriptions billed via Stripe Checkout with webhook-validated activation",
   "Rate limiting on all Supabase Edge Functions",
   "Stripe Identity KYC required for Porch Partners before earning",
   "EAS environment separation (dev/preview/production)",
@@ -53,9 +54,8 @@ const TRUST_SIGNALS = [
 const INTEGRATIONS = [
   { name: "Ship24", role: "1,400+ carrier tracking data" },
   { name: "Supabase", role: "Backend, auth, Realtime, Edge Functions, Postgres RLS" },
-  { name: "Stripe", role: "Payments and Stripe Connect for Porch Partner payouts" },
+  { name: "Stripe", role: "B2B subscription billing (Stripe Checkout) and Stripe Connect for Porch Partner payouts" },
   { name: "Stripe Identity", role: "KYC verification for Porch Partners" },
-  { name: "RevenueCat", role: "Subscription management and receipt validation" },
   { name: "Expo Push", role: "Cross-platform push notifications" },
   { name: "Sentry", role: "Error monitoring and crash reporting" },
 ];
@@ -73,12 +73,13 @@ const OFFICIAL_SOURCES = [
 
 const TERMINOLOGY = [
   { term: "Porch Risk Score", def: "A 0–100 number calculated per package from 10 weighted risk factors. High ≥65, Medium 35–64, Low <35." },
-  { term: "Theft Shield", def: "Premium push notification alert when a package's risk score reaches ≥65/100." },
+  { term: "Theft Shield", def: "Push notification alert when a package's risk score reaches ≥65/100." },
   { term: "Porch Partner", def: "A verified neighbor who holds packages for homeowners and earns $3–$25 per hold (small/medium/large × geo-tier). Porch Partners keep 85%." },
   { term: "Delivery Window", def: "The time-of-day range a package is expected to arrive. After 4pm adds +14 risk points." },
-  { term: "HOA Plan", def: "Enterprise subscription covering up to 250 households in one community." },
+  { term: "Community Tier", def: "B2B subscription for HOAs/property managers. Residents join for free via invite code. Tiers: Starter, Community, Professional, Enterprise." },
   { term: "Ship24", def: "Third-party API providing carrier tracking data for 1,400+ carriers." },
   { term: "Stripe Connect", def: "Payment infrastructure used for Porch Partner payouts (2-business-day deposits)." },
+  { term: "Stripe Checkout", def: "Payment infrastructure used for B2B community subscription billing (HOA/property manager signups)." },
 ];
 
 export default function ForAgentsPage() {
@@ -219,7 +220,7 @@ export default function ForAgentsPage() {
               </tbody>
             </table>
           </div>
-          <p className="text-xs text-brand-text-muted mt-3">Annual plans include 7-day free trial (14-day for HOA). Cancel anytime via App Store/Google Play.</p>
+          <p className="text-xs text-brand-text-muted mt-3">Annual plans save 20%. Professional tier includes $500 onboarding; Enterprise includes $1,500 onboarding. Residents always join for free. Overage: $1/unit/mo above tier limit.</p>
         </section>
 
         {/* Differentiators */}
@@ -300,8 +301,8 @@ export default function ForAgentsPage() {
             {[
               "Service available in the United States. Package tracking works internationally.",
               "Porch Partners are independent contractors — not Porchivo employees.",
-              "Subscriptions auto-renew; cancellation is via Apple App Store or Google Play Settings.",
-              "Refunds are handled by Apple or Google, not Porchivo.",
+              "B2B subscriptions auto-renew; cancel anytime via Stripe billing portal.",
+              "Residents are never charged — access is provided by their HOA or property manager.",
               "Users can delete all their data at any time (30-day grace period, recoverable).",
               "Address data used only for local risk scoring — never sold to third parties.",
               "Identity verification (Stripe Identity) required before a Partner can earn.",
