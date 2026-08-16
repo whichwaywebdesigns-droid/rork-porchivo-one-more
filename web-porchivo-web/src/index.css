@@ -178,14 +178,19 @@
   transition: opacity 0.2s ease;
 }
 
-/* ── Thin overlay scrollbars (modern shadow style) ─────────────────────────── */
-/* Auto-hides when idle, thin rounded bar that looks like a page shadow.
-   Works across WebKit (Chrome/Safari/Edge) and Firefox. */
+/* ── Auto-hiding overlay scrollbars ─────────────────────────────────────── */
+/* Thin rounded bar that fades in while scrolling and fades out ~600ms after
+   the user stops. Uses a `scrolling` class on <html> toggled by a scroll
+   listener in scrollbar-auto-hide.ts. Works across WebKit and Firefox. */
 
-/* Firefox */
-* {
+/* Firefox — toggle scrollbar-color via the scrolling class (no transition
+   support, but the swap is instant and the WebKit thumb carries the fade). */
+html {
   scrollbar-width: thin;
-  scrollbar-color: hsl(var(--foreground) / 0.18) transparent;
+  scrollbar-color: transparent transparent;
+}
+html.scrolling {
+  scrollbar-color: hsl(var(--foreground) / 0.2) transparent;
 }
 
 /* WebKit (Chrome / Safari / Edge) */
@@ -197,13 +202,18 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--foreground) / 0.15);
+  background: transparent;
   border-radius: 999px;
   border: 2px solid transparent;
   background-clip: padding-box;
+  transition: background 0.3s ease;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--foreground) / 0.28);
+html.scrolling::-webkit-scrollbar-thumb {
+  background: hsl(var(--foreground) / 0.2);
+  background-clip: padding-box;
+}
+html.scrolling::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--foreground) / 0.35);
   background-clip: padding-box;
 }
 ::-webkit-scrollbar-corner {
