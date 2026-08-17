@@ -67,6 +67,22 @@ function getTimeGreeting(): string {
   return 'Good night,';
 }
 
+/**
+ * Static logo block — kept at module level so its reference is stable across
+ * re-renders. Defining it inside LoginScreen would create a new component
+ * type on every keystroke, causing React to unmount/remount the Image and
+ * flicker the logo.
+ */
+function LogoBlock() {
+  return (
+    <View style={styles.logoBlock}>
+      <Image source={require('@/assets/images/icon.png')} style={styles.logoImage} />
+      <Text style={styles.logoTitle}>Porchivo</Text>
+      <Text style={styles.logoTagline}>When porch pirates lurk, neighbors go to work.</Text>
+    </View>
+  );
+}
+
 export default function LoginScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -592,14 +608,6 @@ export default function LoginScreen() {
     setPendingAutoSubmit(false);
     void handleDevAutoSignIn();
   }, [pendingAutoSubmit, identifier, password, handleDevAutoSignIn]);
-
-  const LogoBlock = () => (
-    <View style={styles.logoBlock}>
-      <Image source={require('@/assets/images/icon.png')} style={styles.logoImage} />
-      <Text style={styles.logoTitle}>Porchivo</Text>
-      <Text style={styles.logoTagline}>When porch pirates lurk, neighbors go to work.</Text>
-    </View>
-  );
 
   const renderHeader = () => (
     <View style={styles.authHeader}>
