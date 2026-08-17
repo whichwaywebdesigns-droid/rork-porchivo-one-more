@@ -131,7 +131,18 @@ fun LoginScreen(
                     }
                 },
                 onVerifyOtp = {
-                    scope.launch { appViewModel.verifyOtp(email, otpCode) }
+                    scope.launch {
+                        val ok = appViewModel.verifyOtp(email, otpCode)
+                        if (!ok) {
+                            val err = appViewModel.authError.value ?: ""
+                            val isCodeError = err.contains("invalid", ignoreCase = true) ||
+                                err.contains("expired", ignoreCase = true) ||
+                                err.contains("code", ignoreCase = true)
+                            if (!isCodeError) {
+                                appViewModel.setShowAuthFail(true)
+                            }
+                        }
+                    }
                 },
                 onDeveloperLogin = { appViewModel.developerLogin() },
             )

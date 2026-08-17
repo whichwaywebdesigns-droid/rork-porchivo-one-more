@@ -23,6 +23,7 @@ const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const Settings = lazy(() => import("./pages/Settings"));
 const EmailPreview = lazy(() => import("./pages/EmailPreview"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const AuthFail = lazy(() => import("./pages/AuthFail"));
 
 const queryClient = new QueryClient();
 
@@ -66,6 +67,7 @@ const App = () => (
               <Route path="/terms" element={<TermsOfService />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/email-preview" element={<EmailPreview />} />
+              <Route path="/auth-fail" element={<AuthFail />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>

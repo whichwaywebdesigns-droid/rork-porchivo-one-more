@@ -46,6 +46,14 @@ class AppViewModel : ViewModel() {
     // ── Language transition (fade) ─────────────────────────────────────
     private val _languageTransitioning = MutableStateFlow(false)
     val languageTransitioning: StateFlow<Boolean> = _languageTransitioning.asStateFlow()
+
+    // ── Auth fail (oops) screen ────────────────────────────────────────
+    private val _showAuthFail = MutableStateFlow(false)
+    val showAuthFail: StateFlow<Boolean> = _showAuthFail.asStateFlow()
+
+    fun setShowAuthFail(value: Boolean) {
+        _showAuthFail.value = value
+    }
     val isOnboarded: Boolean get() = repo.isOnboarded
     val isOrgMember: Boolean get() = repo.isOrgMember
     val isOrgAdmin: Boolean get() = repo.isOrgAdmin

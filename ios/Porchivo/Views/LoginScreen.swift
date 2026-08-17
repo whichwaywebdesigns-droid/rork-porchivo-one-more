@@ -19,6 +19,7 @@ struct LoginScreen: View {
     @State private var phase: AuthPhase = .email
     @State private var isSubmitting = false
     @State private var linkSent = false
+    @State private var showAuthFail = false
     @FocusState private var focusedField: FocusField?
 
     enum AuthPhase {
@@ -32,6 +33,22 @@ struct LoginScreen: View {
     }
 
     var body: some View {
+        if showAuthFail {
+            AuthFailScreen(
+                onBack: {
+                    showAuthFail = false
+                    phase = .email
+                    otpCode = ""
+                    appState.authError = nil
+                },
+                onCreateAccount: {
+                    showAuthFail = false
+                    phase = .email
+                    otpCode = ""
+                    appState.authError = nil
+                }
+            )
+        } else {
         ZStack {
             // Hero illustration fills the background. In dark mode we dim it
             // slightly so the white porch remains readable without clashing.
@@ -53,6 +70,7 @@ struct LoginScreen: View {
             .scrollDismissesKeyboard(.interactively)
         }
         .onAppear { focusedField = .email }
+        }
     }
 
     // MARK: - Bottom controls card
@@ -294,6 +312,15 @@ struct LoginScreen: View {
             let ok = await appState.verifyOtp(email: emailCopy, token: codeCopy)
             if ok {
                 Haptics.success()
+            } else {
+                // If the error suggests the user doesn't have an account,
+                // show the oops screen instead of an inline error.
+                let err = appState.authError ?? ""
+                if err.lowercased().contains("invalid") || err.lowercased().contains("expired") || err.lowercased().contains("code") {
+                    // Wrong/expired code — keep inline error
+                } else {
+                    showAuthFail = true
+                }
             }
             // On success, RootView picks up authState change automatically.
             // On failure, authError is set by AppState.

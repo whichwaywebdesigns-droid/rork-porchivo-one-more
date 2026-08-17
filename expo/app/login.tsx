@@ -348,6 +348,11 @@ export default function LoginScreen() {
 
       if (error) {
         void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        if (authMode === 'signin' && /signups? not allowed|user not found|not registered/i.test(error.message)) {
+          setIsSubmitting(false);
+          router.push('/auth-fail' as any);
+          return;
+        }
         Alert.alert('Could not send link', getSupabaseErrorMessage(error.message));
         setIsSubmitting(false);
         return;
@@ -421,6 +426,12 @@ export default function LoginScreen() {
         });
 
         if (error) {
+          void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+          if (authMode === 'signin' && /invalid login credentials/i.test(error.message)) {
+            setIsSubmitting(false);
+            router.push('/auth-fail' as any);
+            return;
+          }
           Alert.alert('Sign In Failed', getSupabaseErrorMessage(error.message));
           setIsSubmitting(false);
           return;

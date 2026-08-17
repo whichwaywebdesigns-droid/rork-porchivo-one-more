@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.rork.porchivo.data.AuthState
+import com.rork.porchivo.ui.screens.AuthFailScreen
 import com.rork.porchivo.ui.screens.LoginScreen
 import com.rork.porchivo.ui.screens.OnboardingFlowScreen
 import com.rork.porchivo.ui.theme.PorchivoTheme
@@ -28,6 +29,7 @@ import com.rork.porchivo.ui.viewmodel.AppViewModel
 fun RootNavigation() {
     val appViewModel: AppViewModel = viewModel()
     val authState by appViewModel.authState.collectAsStateWithLifecycle()
+    val showAuthFail by appViewModel.showAuthFail.collectAsStateWithLifecycle()
     val c = PorchivoTheme.colors
 
     when (authState) {
@@ -42,10 +44,21 @@ fun RootNavigation() {
 
         is AuthState.Unauthenticated,
         is AuthState.Error -> {
-            LoginScreen(
-                onAuthSuccess = { /* Navigation switches automatically via state */ },
-                appViewModel = appViewModel,
-            )
+            if (showAuthFail) {
+                AuthFailScreen(
+                    onBack = {
+                        appViewModel.setShowAuthFail(false)
+                    },
+                    onCreateAccount = {
+                        appViewModel.setShowAuthFail(false)
+                    },
+                )
+            } else {
+                LoginScreen(
+                    onAuthSuccess = { /* Navigation switches automatically via state */ },
+                    appViewModel = appViewModel,
+                )
+            }
         }
 
         is AuthState.Authenticated -> {

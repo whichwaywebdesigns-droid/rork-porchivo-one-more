@@ -113,7 +113,8 @@ function RootLayoutNav() {
     currentSegment === "notifications-permission" ||
     currentSegment === "delivery-alerts" ||
     currentSegment === "safe-dropoff" ||
-    currentSegment === "reset-password";
+    currentSegment === "reset-password" ||
+    currentSegment === "auth-fail";
   const reviewPrompt = useReviewPrompt(isOnboarded, inWelcome);
 
   // P-17: Fallback so the native splash never lingers on a slow network —
@@ -159,7 +160,8 @@ function RootLayoutNav() {
       currentSegment === "notifications-permission" ||
       currentSegment === "delivery-alerts" ||
       currentSegment === "safe-dropoff" ||
-      currentSegment === "reset-password";
+      currentSegment === "reset-password" ||
+      currentSegment === "auth-fail";
 
     let target: string | null = null;
 
