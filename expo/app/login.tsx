@@ -526,6 +526,19 @@ export default function LoginScreen() {
     if (screenState !== 'auth') switchToAuth('signin');
   }, [getQaCredentials, screenState, switchToAuth]);
 
+  /**
+   * Dev auto sign-in — single-edge-function-then-single-signIn flow.
+   *
+   * Previous flow did signInWithPassword → signUp → dev-confirm-user →
+   * signInWithPassword (retry), which was 3+ rapid Supabase Auth calls and
+   * tripped the server-side rate limit ("too many attempts").
+   *
+   * New flow:
+   *   1. Call dev-confirm-user edge function (admin API, not rate-limited) —
+   *      creates user if needed, confirms email, sets password.
+   *   2. Call signInWithPassword exactly once.
+   *   3. If a rate-limit error still slips through, retry with backoff.
+   */
   const handleDevAutoSignIn = useCallback(async () => {
     if (isDevAutoSigningIn || isSubmitting) return;
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -544,53 +557,54 @@ export default function LoginScreen() {
         return;
       }
 
-      let result = await supabase.auth.signInWithPassword({ email, password: pw });
+      // ── Step 1: Ensure QA account exists + confirmed + password set ───────
+      // Uses the Admin API server-side, so it's not subject to Auth rate limits.
+      const { error: ensureError } = await supabase.functions.invoke('dev-confirm-user', {
+        body: JSON.stringify({ email, password: pw }),
+      });
 
-      if (result.error && /invalid login credentials/i.test(result.error.message)) {
-        const signUpResult = await supabase.auth.signUp({
-          email,
-          password: pw,
-          options: { data: { name: 'QA Tester', full_name: 'QA Tester' } },
-        });
-
-        if (signUpResult.error) {
-          Alert.alert('Dev Sign In Failed', getSupabaseErrorMessage(signUpResult.error.message));
-          return;
-        }
-
-        if (signUpResult.data.user && !signUpResult.data.session) {
-          const { error: confirmError } = await supabase.functions.invoke('dev-confirm-user', {
-            body: JSON.stringify({ email }),
-          });
-
-          if (confirmError) {
-            Alert.alert(
-              'Email Confirmation Required',
-              'The QA account was created but Supabase requires email confirmation, and the auto-confirm edge function is not deployed.\n\nTo fix: deploy the function with\n  supabase functions deploy dev-confirm-user --no-verify-jwt\n\nOr manually confirm the user in Supabase Dashboard → Authentication → Users.'
-            );
-            return;
-          }
-
-          const retryResult = await supabase.auth.signInWithPassword({ email, password: pw });
-          if (retryResult.error) {
-            Alert.alert('Dev Sign In Failed', getSupabaseErrorMessage(retryResult.error.message));
-            return;
-          }
-          result = { data: retryResult.data as any, error: null };
-        } else {
-          result = { data: signUpResult.data as any, error: null };
-        }
-      } else if (result.error) {
-        Alert.alert('Dev Sign In Failed', getSupabaseErrorMessage(result.error.message));
+      if (ensureError) {
+        Alert.alert(
+          'Dev Setup Failed',
+          'The dev-confirm-user edge function could not prepare the QA account.\n\nMake sure it is deployed:\n  supabase functions deploy dev-confirm-user --no-verify-jwt'
+        );
         return;
       }
 
-      if (result.data?.user) {
-        void recordConsent(result.data.user.id).catch(() => {});
+      // ── Step 2: Single signInWithPassword (with retry on rate limit) ──────
+      let signInResult: { data: any; error: any } | null = null;
+      const maxRetries = 4;
+      const backoffMs = [0, 2000, 5000, 10000]; // 0s, 2s, 5s, 10s
+
+      for (let attempt = 0; attempt < maxRetries; attempt++) {
+        if (attempt > 0) {
+          // Brief delay so UI shows "Signing in…" during backoff wait
+          await new Promise((r) => setTimeout(r, backoffMs[attempt]));
+        }
+
+        signInResult = await supabase.auth.signInWithPassword({ email, password: pw });
+
+        if (!signInResult.error) break;
+
+        const errMsg = signInResult.error.message ?? '';
+        const isRateLimit = /rate limit|too many|over_request/i.test(errMsg);
+        if (!isRateLimit) break; // non-retryable error, stop
+
+        // Rate-limited — will retry with backoff if attempts remain
+        console.warn(`[dev-signin] Rate limited on attempt ${attempt + 1}/${maxRetries}, retrying in ${backoffMs[attempt + 1] ?? 0}ms`);
+      }
+
+      if (signInResult?.error) {
+        Alert.alert('Dev Sign In Failed', getSupabaseErrorMessage(signInResult.error.message));
+        return;
+      }
+
+      if (signInResult?.data?.user) {
+        void recordConsent(signInResult.data.user.id).catch(() => {});
         await persistReturningUser('QA Tester', email);
         let alreadyOnboarded = false;
         try {
-          const { data: profileRow } = await supabase.from('profiles').select('is_onboarded').eq('id', result.data.user!.id).single();
+          const { data: profileRow } = await supabase.from('profiles').select('is_onboarded').eq('id', signInResult.data.user.id).single();
           alreadyOnboarded = !!profileRow?.is_onboarded;
         } catch {}
 

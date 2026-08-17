@@ -2,15 +2,16 @@
 //
 // dev-confirm-user — DEV ONLY edge function.
 //
-// Auto-confirms the email of a freshly-registered QA test account so the
-// developer can sign in without leaving the preview environment (where the
-// magic-link / confirmation email redirect can't be opened).
+// Ensures a QA test account exists, is email-confirmed, and has the correct
+// password — all via the Admin API — so the client only needs a single
+// signInWithPassword call (avoiding Supabase Auth rate limits from multiple
+// rapid auth calls).
 //
 // Security:
 //   - Only operates on emails matching the QA test pattern (@porchivo.dev).
-//   - Requires a valid Supabase anon-key auth header (rate-limited per IP).
-//   - Uses the service role key server-side to flip email_confirmed_at.
-//   - Returns a minimal { confirmed: true } on success.
+//   - Requires a valid Supabase anon-key auth header.
+//   - Uses the service role key server-side for all admin operations.
+//   - Returns { ready: true } on success.
 //   - Never returns tokens, user IDs, or internal user data.
 //
 // Deploy: supabase functions deploy dev-confirm-user --no-verify-jwt
@@ -43,14 +44,14 @@ serve(async (req: Request) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
 
-    // ── 1. Require a valid anon-key header (light gate, not full auth) ───────
+    // ── 1. Require a valid anon-key header (light gate) ─────────────────────
     const apiKey = req.headers.get('apikey') ?? '';
     if (!apiKey || apiKey !== supabaseAnonKey) {
       return json({ error: 'Unauthorized' }, 401);
     }
 
     // ── 2. Parse + validate body ────────────────────────────────────────────
-    let body: { email?: string };
+    let body: { email?: string; password?: string };
     try {
       body = await req.json();
     } catch {
@@ -62,24 +63,27 @@ serve(async (req: Request) => {
       return json({ error: 'A valid email is required' }, 400);
     }
 
+    const password = body.password;
+    if (!password || password.length < 8) {
+      return json({ error: 'A valid password (min 8 chars) is required' }, 400);
+    }
+
     // ── 3. Restrict to QA test emails only ───────────────────────────────────
-    // Only allow @porchivo.dev addresses — this function must never confirm
-    // a real user's email.
     const ALLOWED_DOMAIN = 'porchivo.dev';
     const domain = email.split('@')[1];
     if (domain !== ALLOWED_DOMAIN) {
       return json(
-        { error: `This endpoint only confirms @${ALLOWED_DOMAIN} test accounts` },
+        { error: `This endpoint only operates on @${ALLOWED_DOMAIN} test accounts` },
         403,
       );
     }
 
-    // ── 4. Use the Admin API to confirm the user's email ─────────────────────
+    // ── 4. Admin client (not subject to Auth rate limits) ─────────────────────
     const adminClient = createClient(supabaseUrl, supabaseServiceKey, {
       auth: { autoRefreshToken: false, persistSession: false },
     });
 
-    // List users matching the email, then update the matching one.
+    // ── 5. Find existing user by email ───────────────────────────────────────
     const { data: listData, error: listError } = await adminClient.auth.admin.listUsers({
       page: 1,
       perPage: 1000,
@@ -94,29 +98,45 @@ serve(async (req: Request) => {
       (u: any) => (u.email ?? '').toLowerCase() === email,
     );
 
+    // ── 6a. User not found → create with confirmed email + password ──────────
     if (!targetUser) {
-      // User doesn't exist yet — nothing to confirm. Return success so the
-      // client flow can proceed (it will have created the user first).
-      return json({ confirmed: false, reason: 'user_not_found' });
+      const { error: createError } = await adminClient.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: { name: 'QA Tester', full_name: 'QA Tester' },
+      });
+
+      if (createError) {
+        console.error('[dev-confirm-user] createUser error:', createError.message);
+        return json({ error: 'Could not create QA user' }, 500);
+      }
+
+      console.log(`[dev-confirm-user] Created + confirmed QA account: ${email}`);
+      return json({ ready: true, created: true });
     }
 
-    if (targetUser.email_confirmed_at) {
-      // Already confirmed — no-op.
-      return json({ confirmed: true, already: true });
+    // ── 6b. User exists → ensure confirmed + password matches ─────────────────
+    const updates: { email_confirm?: boolean; password?: string } = {};
+
+    if (!targetUser.email_confirmed_at) {
+      updates.email_confirm = true;
     }
+    // Always set the password to ensure it matches what the client expects.
+    updates.password = password;
 
     const { error: updateError } = await adminClient.auth.admin.updateUserById(
       targetUser.id,
-      { email_confirm: true },
+      updates,
     );
 
     if (updateError) {
       console.error('[dev-confirm-user] updateUserById error:', updateError.message);
-      return json({ error: 'Could not confirm user' }, 500);
+      return json({ error: 'Could not update QA user' }, 500);
     }
 
-    console.log(`[dev-confirm-user] Confirmed email for QA account: ${email}`);
-    return json({ confirmed: true });
+    console.log(`[dev-confirm-user] Ensured QA account ready: ${email}`);
+    return json({ ready: true, already: true });
   } catch (e) {
     const msg = e instanceof Error ? e.message : 'Internal server error';
     console.error('[dev-confirm-user] Unhandled error:', msg);
