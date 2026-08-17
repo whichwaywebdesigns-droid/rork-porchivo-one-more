@@ -334,11 +334,21 @@ class AppRepository(context: Context) {
         }
     }
 
+    // ── Reviewer test credentials ──────────────────────────────────────
+    // Static OTP bypass for Play Store / App Store reviewers.
+    // Reviewer enters this email → gets OTP prompt → enters 123456 → logged in.
+    private val testReviewerEmail = "reviewer@porchivo.com"
+    private val testReviewerOtp = "123456"
+
     /**
      * Request a magic-link / OTP email. Returns true if Supabase accepted the request.
      */
     suspend fun sendMagicLink(email: String): Boolean {
         _authError.value = null
+        // Reviewer test bypass — skip Supabase, pretend the link was sent.
+        if (email.trim().equals(testReviewerEmail, ignoreCase = true)) {
+            return true
+        }
         if (!isSupabaseConfigured) {
             // Demo mode — pretend the link was sent.
             return true
@@ -357,6 +367,11 @@ class AppRepository(context: Context) {
      */
     suspend fun verifyOtp(email: String, token: String): Boolean {
         _authError.value = null
+        // Reviewer test bypass — static OTP for Play Store / App Store review.
+        if (email.trim().equals(testReviewerEmail, ignoreCase = true) && token.trim() == testReviewerOtp) {
+            seedDemoUser()
+            return true
+        }
         if (!isSupabaseConfigured) {
             // Demo mode — any 6 digits signs in.
             seedDemoUser()
