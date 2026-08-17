@@ -277,7 +277,7 @@ export default function LoginScreen() {
   const validateMagicLink = useCallback((): boolean => {
     const errs: typeof errors = {};
     if (!identifier.trim()) errs.identifier = 'Email is required';
-    else if (!validateEmail(identifier)) errs.identifier = 'Enter a valid email address';
+    else if (!validateEmail(identifier.trim())) errs.identifier = 'Enter a valid email address';
     if (authMode === 'signup' && !name.trim()) errs.name = 'Full name is required';
     if (authMode === 'signup' && !acceptedTerms) errs.terms = 'You must accept the Terms of Service and Privacy Policy';
     setErrors(errs);
@@ -287,7 +287,7 @@ export default function LoginScreen() {
   const validatePassword = useCallback((): boolean => {
     const errs: typeof errors = {};
     if (!identifier.trim()) errs.identifier = 'Email is required';
-    else if (!validateEmail(identifier)) errs.identifier = 'Enter a valid email address';
+    else if (!validateEmail(identifier.trim())) errs.identifier = 'Enter a valid email address';
     if (!password.trim()) errs.password = 'Password is required';
     else if (password.length < 8) errs.password = 'Password must be at least 8 characters';
     if (authMode === 'signup' && !name.trim()) errs.name = 'Full name is required';

@@ -223,8 +223,10 @@ private fun EmailPhase(
     val fieldColors = OutlinedTextFieldDefaults.colors(
         focusedBorderColor = borderColor,
         unfocusedBorderColor = borderColor,
+        errorBorderColor = borderColor,
         focusedContainerColor = Color(0xFFF5E6D3),
         unfocusedContainerColor = Color(0xFFF5E6D3),
+        errorContainerColor = Color(0xFFF5E6D3),
         focusedTextColor = Color(0xFF3D2B1F),
         unfocusedTextColor = Color(0xFF3D2B1F),
         cursorColor = Color(0xFF8B5E3C),
