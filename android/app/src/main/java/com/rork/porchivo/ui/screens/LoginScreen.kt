@@ -210,11 +210,19 @@ private fun EmailPhase(
     onDeveloperLogin: () -> Unit,
 ) {
     val c = PorchivoTheme.colors
-    val isValidEmail = email.trim().contains("@") && email.trim().contains(".")
+    val trimmedEmail = email.trim()
+    val isValidEmail = trimmedEmail.length >= 5 &&
+        android.util.Patterns.EMAIL_ADDRESS.matcher(trimmedEmail).matches()
+    val emailErrorMessage = if (trimmedEmail.isNotEmpty() && !isValidEmail) {
+        "Enter a valid email address"
+    } else {
+        null
+    }
 
+    val borderColor = if (emailErrorMessage != null) c.danger else Color(0xFFD4A574)
     val fieldColors = OutlinedTextFieldDefaults.colors(
-        focusedBorderColor = Color(0xFFD4A574),
-        unfocusedBorderColor = Color(0xFFD4A574),
+        focusedBorderColor = borderColor,
+        unfocusedBorderColor = borderColor,
         focusedContainerColor = Color(0xFFF5E6D3),
         unfocusedContainerColor = Color(0xFFF5E6D3),
         focusedTextColor = Color(0xFF3D2B1F),
@@ -233,6 +241,17 @@ private fun EmailPhase(
                 tint = Color(0xFF8B5E3C),
                 modifier = Modifier.width(20.dp),
             )
+        },
+        isError = emailErrorMessage != null,
+        supportingText = {
+            if (emailErrorMessage != null) {
+                Text(
+                    text = emailErrorMessage!!,
+                    color = c.danger,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                )
+            }
         },
         colors = fieldColors,
         shape = RoundedCornerShape(12.dp),

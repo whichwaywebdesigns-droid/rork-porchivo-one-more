@@ -125,26 +125,37 @@ struct LoginScreen: View {
     }
 
     private var emailField: some View {
-        HStack(spacing: 10) {
-            Image(systemName: "envelope.fill")
-                .foregroundStyle(Color(hex: 0x8B5E3C))
-            TextField("Enter your email", text: $email)
-                .font(.system(size: 16))
-                .foregroundStyle(Color(hex: 0x3D2B1F))
-                .keyboardType(.emailAddress)
-                .textInputAutocapitalization(.never)
-                .autocorrectionDisabled()
-                .focused($focusedField, equals: .email)
-                .submitLabel(.go)
-                .onSubmit { sendLink() }
+        VStack(spacing: 6) {
+            HStack(spacing: 10) {
+                Image(systemName: "envelope.fill")
+                    .foregroundStyle(Color(hex: 0x8B5E3C))
+                TextField("Enter your email", text: $email)
+                    .font(.system(size: 16))
+                    .foregroundStyle(Color(hex: 0x3D2B1F))
+                    .keyboardType(.emailAddress)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .focused($focusedField, equals: .email)
+                    .submitLabel(.go)
+                    .onSubmit { sendLink() }
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 14)
+            .background(Color(hex: 0xF5E6D3), in: .rect(cornerRadius: Radius.md))
+            .overlay(
+                RoundedRectangle(cornerRadius: Radius.md)
+                    .stroke(emailErrorMessage != nil ? c.danger : Color(hex: 0xD4A574), lineWidth: emailErrorMessage != nil ? 1.5 : 1)
+            )
+
+            if let msg = emailErrorMessage {
+                Text(msg)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(c.danger)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+            }
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 14)
-        .background(Color(hex: 0xF5E6D3), in: .rect(cornerRadius: Radius.md))
-        .overlay(
-            RoundedRectangle(cornerRadius: Radius.md)
-                .stroke(Color(hex: 0xD4A574), lineWidth: 1)
-        )
+        .animation(.easeInOut(duration: 0.2), value: emailErrorMessage)
     }
 
     // MARK: - Code phase
@@ -269,7 +280,19 @@ struct LoginScreen: View {
 
     private var isValidEmail: Bool {
         let trimmed = email.trimmingCharacters(in: .whitespaces)
-        return trimmed.contains("@") && trimmed.contains(".")
+        guard trimmed.count >= 5 else { return false }
+        // Basic RFC-like check: local@domain.tld with no spaces
+        let pattern = #/^[^\s@]+@[^\s@]+\.[^\s@]+$/#
+        return trimmed.wholeMatch(of: pattern) != nil
+    }
+
+    /// Real-time validation error shown below the email field.
+    /// Only displayed when the user has typed something — empty field shows no error.
+    private var emailErrorMessage: String? {
+        let trimmed = email.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty else { return nil }
+        guard isValidEmail else { return "Enter a valid email address" }
+        return nil
     }
 
     private var otpComplete: Bool {

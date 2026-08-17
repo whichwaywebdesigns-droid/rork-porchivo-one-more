@@ -787,7 +787,12 @@ export default function LoginScreen() {
             identifier,
             (t) => {
               setIdentifier(t);
-              if (errors.identifier) setErrors((p) => ({ ...p, identifier: undefined }));
+              // Real-time email validation: show error as user types if invalid
+              if (t.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t.trim())) {
+                setErrors((p) => ({ ...p, identifier: 'Enter a valid email address' }));
+              } else {
+                setErrors((p) => ({ ...p, identifier: undefined }));
+              }
             },
             'you@example.com',
             {
