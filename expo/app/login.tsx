@@ -484,8 +484,8 @@ export default function LoginScreen() {
   }, []);
 
   const getQaCredentials = useCallback((): { email: string; password: string } => ({
-    email: process.env.EXPO_PUBLIC_QA_EMAIL ?? '',
-    password: process.env.EXPO_PUBLIC_QA_PASSWORD ?? '',
+    email: process.env.EXPO_PUBLIC_QA_EMAIL ?? 'qa@porchivo.dev',
+    password: process.env.EXPO_PUBLIC_QA_PASSWORD ?? 'PorchivoQA2025!',
   }), []);
 
   const handleDevTestLogin = useCallback(() => {
