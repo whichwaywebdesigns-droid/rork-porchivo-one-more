@@ -104,6 +104,12 @@ final class AppState {
     private let encoder = JSONEncoder()
     private let decoder = JSONDecoder()
 
+    // Offline action queue
+    var isOnline = true
+    var pendingActions: [PendingAction] = []
+    private let pendingActionStore = PendingActionStore()
+    private let networkMonitor = NetworkMonitor()
+
     init() {
         isSupabaseConfigured = supabase.isConfiguredSync
         encoder.dateEncodingStrategy = .iso8601
@@ -111,9 +117,95 @@ final class AppState {
         availableBiometry = BiometricAuthService.availableType()
         biometricUnlockEnabled = UserDefaults.standard.bool(forKey: biometricPrefKey)
         biometricEnrollmentDeclined = UserDefaults.standard.bool(forKey: biometricDeclinedKey)
-        // Language is loaded in LanguageManager.init() — nothing to do here,
-        // but we reference it so the @Observable state is live.
         _ = languageManager
+        // Start network monitoring and load pending actions from disk.
+        networkMonitor.onStatusChange = { [weak self] online in
+            guard let self else { return }
+            self.isOnline = online
+            if online && !self.pendingActions.isEmpty {
+                Task { await self.processPendingActions() }
+            }
+        }
+        networkMonitor.start()
+        pendingActions = pendingActionStore.loadActions()
+    }
+
+    // MARK: - Offline action queue
+
+    private func enqueueAction(
+        type: String,
+        target: String,
+        payload: [String: Any?],
+        filter: [String: String]? = nil,
+        refreshKey: String? = nil
+    ) {
+        let serializable: [String: Any] = payload.mapValues { $0 ?? NSNull() }
+        let payloadData = try? JSONSerialization.data(withJSONObject: serializable)
+        let action = PendingAction(
+            id: "action_\(Int(Date().timeIntervalSince1970))_\(UUID().uuidString)",
+            type: type,
+            target: target,
+            payload: payloadData ?? Data(),
+            filter: filter,
+            refreshKey: refreshKey,
+            timestamp: Date()
+        )
+        pendingActions.append(action)
+        pendingActionStore.saveActions(pendingActions)
+    }
+
+    func processPendingActions() async {
+        guard isSupabaseConfigured, !pendingActions.isEmpty else { return }
+        var remaining: [PendingAction] = []
+        for action in pendingActions {
+            let ok = await supabase.replayQueuedAction(
+                type: action.type,
+                target: action.target,
+                payload: action.payload,
+                filter: action.filter
+            )
+            if ok {
+                if let key = action.refreshKey {
+                    await refreshData(key)
+                }
+            } else {
+                var updated = action
+                updated.retryCount += 1
+                if updated.retryCount < updated.maxRetries {
+                    remaining.append(updated)
+                }
+            }
+        }
+        pendingActions = remaining
+        pendingActionStore.saveActions(remaining)
+    }
+
+    private func clearPendingActions() {
+        pendingActions = []
+        pendingActionStore.clear()
+    }
+
+    private func refreshData(_ key: String) async {
+        let userId: String
+        if case .authenticated(let id) = authState {
+            userId = id
+        } else {
+            return
+        }
+        switch key {
+        case "shipments": await loadShipments(userId: userId)
+        case "notifications": await loadNotifications(userId: userId)
+        case "announcements":
+            if let orgId = orgMembership?.orgId {
+                await loadAnnouncements(orgId: orgId)
+            }
+        case "maintenance":
+            if let orgId = orgMembership?.orgId {
+                await loadMaintenanceRequests(orgId: orgId)
+            }
+        case "profile": await loadProfile(userId: userId)
+        default: break
+        }
     }
 
     // MARK: - Session restore
@@ -336,6 +428,7 @@ final class AppState {
     @MainActor
     func signOut() async {
         await supabase.signOut()
+        clearPendingActions()
         biometricUnlockEnabled = false
         UserDefaults.standard.set(false, forKey: biometricPrefKey)
         biometricEnrollmentDeclined = false
@@ -474,6 +567,19 @@ final class AppState {
             "has_location_consent": hasLocationConsent,
             "is_onboarded": true,
         ]
+        if !isOnline {
+            enqueueAction(
+                type: "update", target: "profiles",
+                payload: updates, filter: ["id": userId], refreshKey: "profile"
+            )
+            user?.name = name
+            user?.phone = phone
+            user?.address = address
+            user?.role = role
+            user?.hasLocationConsent = hasLocationConsent
+            user?.isOnboarded = true
+            return
+        }
         let result = await supabase.updateProfile(userId: userId, updates)
         if case .success(let db) = result {
             user = Mappers.toUser(db)
@@ -566,6 +672,13 @@ final class AppState {
             "tracking_number": trackingNumber?.takeIf { !$0.isEmpty },
             "delivery_status": "pending",
         ]
+        if !isOnline {
+            enqueueAction(
+                type: "insert", target: "shipments",
+                payload: body, refreshKey: "shipments"
+            )
+            return true
+        }
         let result = await supabase.insertShipment(body)
         if case .success(let row) = result {
             shipments.insert(Mappers.toShipment(row), at: 0)
@@ -580,6 +693,14 @@ final class AppState {
             shipments = shipments.map { $0.id == id ? $0 : $0 } // noop demo
             return false
         }
+        if !isOnline {
+            enqueueAction(
+                type: "update", target: "shipments",
+                payload: ["status": "completed", "delivery_status": "delivered_to_homeowner"],
+                filter: ["id": id], refreshKey: "shipments"
+            )
+            return true
+        }
         let result = await supabase.updateShipment(id: id, ["status": "completed", "delivery_status": "delivered_to_homeowner"])
         if case .success(let row) = result {
             shipments = shipments.map { $0.id == id ? Mappers.toShipment(row) : $0 }
@@ -591,6 +712,13 @@ final class AppState {
     @MainActor
     func acceptShipment(id: String) async -> Bool {
         guard isSupabaseConfigured else { return false }
+        if !isOnline {
+            enqueueAction(
+                type: "rpc", target: "accept_shipment",
+                payload: ["p_shipment_id": id], refreshKey: "shipments"
+            )
+            return true
+        }
         let result = await supabase.acceptShipment(id: id)
         if case .success = result {
             if let u = user {
@@ -661,6 +789,14 @@ final class AppState {
             notifications = notifications.map { $0.id == id ? DeliveryNotification(id: $0.id, shipmentId: $0.shipmentId, type: $0.type, title: $0.title, message: $0.message, read: true, createdAt: $0.createdAt) : $0 }
             return
         }
+        if !isOnline {
+            enqueueAction(
+                type: "update", target: "notifications",
+                payload: ["read": true], filter: ["id": id], refreshKey: "notifications"
+            )
+            notifications = notifications.map { $0.id == id ? DeliveryNotification(id: $0.id, shipmentId: $0.shipmentId, type: $0.type, title: $0.title, message: $0.message, read: true, createdAt: $0.createdAt) : $0 }
+            return
+        }
         let result = await supabase.markNotificationRead(id: id)
         if case .success = result {
             notifications = notifications.map { $0.id == id ? DeliveryNotification(id: $0.id, shipmentId: $0.shipmentId, type: $0.type, title: $0.title, message: $0.message, read: true, createdAt: $0.createdAt) : $0 }
@@ -671,6 +807,15 @@ final class AppState {
     func markAllNotificationsRead() async {
         guard let userId = currentUserId else { return }
         guard isSupabaseConfigured else {
+            notifications = notifications.map { DeliveryNotification(id: $0.id, shipmentId: $0.shipmentId, type: $0.type, title: $0.title, message: $0.message, read: true, createdAt: $0.createdAt) }
+            return
+        }
+        if !isOnline {
+            enqueueAction(
+                type: "update", target: "notifications",
+                payload: ["read": true],
+                filter: ["recipient_id": userId, "read": "false"], refreshKey: "notifications"
+            )
             notifications = notifications.map { DeliveryNotification(id: $0.id, shipmentId: $0.shipmentId, type: $0.type, title: $0.title, message: $0.message, read: true, createdAt: $0.createdAt) }
             return
         }
@@ -760,6 +905,13 @@ final class AppState {
             "category": "general",
             "is_pinned": false,
         ]
+        if !isOnline {
+            enqueueAction(
+                type: "insert", target: "org_announcements",
+                payload: payload, refreshKey: "announcements"
+            )
+            return true
+        }
         let result = await supabase.insertAnnouncement(payload)
         if case .success(let row) = result {
             announcements.insert(Mappers.toAnnouncement(row), at: 0)
@@ -788,6 +940,21 @@ final class AppState {
     func submitMaintenanceRequest(category: MaintenanceCategory, priority: MaintenancePriority,
                                    title: String, description: String?, location: String?) async -> Bool {
         guard isSupabaseConfigured, let orgId = orgMembership?.orgId else { return false }
+        if !isOnline {
+            enqueueAction(
+                type: "rpc", target: "submit_maintenance_request",
+                payload: [
+                    "p_org_id": orgId,
+                    "p_category": category.rawValue,
+                    "p_priority": priority.rawValue,
+                    "p_title": title,
+                    "p_description": description,
+                    "p_location": location,
+                ],
+                refreshKey: "maintenance"
+            )
+            return true
+        }
         let result = await supabase.submitMaintenanceRequest(
             orgId: orgId, category: category.rawValue, priority: priority.rawValue,
             title: title, description: description, location: location

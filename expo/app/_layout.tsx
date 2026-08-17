@@ -34,6 +34,8 @@ import { TrustEngineProvider } from "@/store/TrustEngineContext";
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import { LanguageRootProvider } from "@/i18n/LanguageProvider";
 import { ToastProvider } from "@/providers/ToastProvider";
+import { OfflineQueueProvider } from "@/store/OfflineQueueContext";
+import { OfflineBanner } from "@/components/OfflineBanner";
 import { BackgroundErrorProvider } from "@/store/BackgroundErrorContext";
 import { BackgroundErrorBanner } from "@/components/BackgroundErrorBanner";
 import { useTheme } from "@/hooks/useTheme";
@@ -286,6 +288,7 @@ function RootLayoutNav() {
     <ConsentGate />
     {/* Non-intrusive banner for background process failures (Ship24 polling, etc.) */}
     <BackgroundErrorBanner />
+    <OfflineBanner />
     </View>
   );
 }
@@ -298,6 +301,7 @@ export default function RootLayout() {
           <ThemeProvider>
           <LanguageRootProvider>
           <ToastProvider>
+          <OfflineQueueProvider>
           <AppProvider>
             <PaywallProvider>
             <NotificationsProvider>
@@ -337,6 +341,7 @@ export default function RootLayout() {
             </NotificationsProvider>
             </PaywallProvider>
           </AppProvider>
+          </OfflineQueueProvider>
           </ToastProvider>
           </LanguageRootProvider>
           </ThemeProvider>

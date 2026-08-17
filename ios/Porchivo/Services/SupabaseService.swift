@@ -1010,6 +1010,82 @@ actor SupabaseService {
         }
     }
 
+    // MARK: - Offline queue replay
+
+    /// Replay a queued action against Supabase REST. Used by the offline
+    /// action queue when connectivity is restored. Returns true on HTTP success.
+    func replayQueuedAction(
+        type: String,
+        target: String,
+        payload: Data,
+        filter: [String: String]?
+    ) async -> Bool {
+        do {
+            switch type {
+            case "insert":
+                let url = baseURL.appendingPathComponent("rest/v1/\(target)")
+                var req = URLRequest(url: url)
+                req.httpMethod = "POST"
+                for (k, v) in authHeaders(includeBearer: true) {
+                    req.setValue(v, forHTTPHeaderField: k)
+                }
+                req.setValue("return=minimal", forHTTPHeaderField: "Prefer")
+                req.httpBody = payload
+                let (_, response) = try await session.data(for: req)
+                if let http = response as? HTTPURLResponse {
+                    return http.statusCode < 400
+                }
+                return false
+
+            case "update":
+                var urlString = baseURL.absoluteString
+                if urlString.hasSuffix("/") { urlString.removeLast() }
+                urlString += "/rest/v1/\(target)"
+                if let filter {
+                    var parts: [String] = []
+                    for (key, value) in filter {
+                        parts.append("\(key)=eq.\(value)")
+                    }
+                    if !parts.isEmpty {
+                        urlString += "?" + parts.joined(separator: "&")
+                    }
+                }
+                guard let url = URL(string: urlString) else { return false }
+                var req = URLRequest(url: url)
+                req.httpMethod = "PATCH"
+                for (k, v) in authHeaders(includeBearer: true) {
+                    req.setValue(v, forHTTPHeaderField: k)
+                }
+                req.setValue("return=minimal", forHTTPHeaderField: "Prefer")
+                req.httpBody = payload
+                let (_, response) = try await session.data(for: req)
+                if let http = response as? HTTPURLResponse {
+                    return http.statusCode < 400
+                }
+                return false
+
+            case "rpc":
+                let url = baseURL.appendingPathComponent("rest/v1/rpc/\(target)")
+                var req = URLRequest(url: url)
+                req.httpMethod = "POST"
+                for (k, v) in authHeaders(includeBearer: true) {
+                    req.setValue(v, forHTTPHeaderField: k)
+                }
+                req.httpBody = payload
+                let (_, response) = try await session.data(for: req)
+                if let http = response as? HTTPURLResponse {
+                    return http.statusCode < 400
+                }
+                return false
+
+            default:
+                return false
+            }
+        } catch {
+            return false
+        }
+    }
+
     private func errorMessage(from data: Data) -> String? {
         guard let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return nil }
         if let msg = obj["message"] as? String { return msg }

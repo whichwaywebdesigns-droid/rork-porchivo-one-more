@@ -9,6 +9,7 @@ import { supabase } from '@/lib/supabase';
 import { useApp } from '@/store/AppContext';
 import { useBackgroundError } from '@/store/BackgroundErrorContext';
 import { useNotifications } from '@/store/NotificationsContext';
+import { useOfflineQueue } from '@/store/OfflineQueueContext';
 import { playDeliveryChime, playPickupChime } from '@/lib/sounds';
 import { maybeRequestReview } from '@/lib/storeReview';
 import { shouldSendNotification } from '@/lib/notificationPreferences';
@@ -36,6 +37,7 @@ export const [ShipmentsProvider, useShipments] = createContextHook(() => {
   const { session, user, capabilities } = useApp();
   const { reportError, resolveError } = useBackgroundError();
   const { createNotification } = useNotifications();
+  const { isOnline, enqueue } = useOfflineQueue();
   const shipmentPollIntervalMs = capabilities.fastPolling ? PREMIUM_POLL_INTERVAL_MS : FREE_POLL_INTERVAL_MS;
   const queryClient = useQueryClient();
 
@@ -122,12 +124,30 @@ export const [ShipmentsProvider, useShipments] = createContextHook(() => {
   });
 
   const addShipment = useCallback((shipment: Omit<Shipment, 'id' | 'createdAt' | 'updatedAt'>) => {
+    if (!isOnline) {
+      enqueue({
+        type: "insert",
+        target: "shipments",
+        payload: shipmentToDbInsert(shipment) as Record<string, unknown>,
+        queryKeysToInvalidate: [["shipments"]],
+      });
+      return;
+    }
     log('[ShipmentsContext] Adding shipment');
     addShipmentMutation.mutate(shipment);
-  }, [addShipmentMutation]);
+  }, [isOnline, enqueue, addShipmentMutation]);
 
   const acceptShipment = useCallback(async (shipmentId: string) => {
     if (!user) return;
+    if (!isOnline) {
+      enqueue({
+        type: "rpc",
+        target: "accept_shipment",
+        payload: { p_shipment_id: shipmentId },
+        queryKeysToInvalidate: [["shipments"]],
+      });
+      return;
+    }
     log('[ShipmentsContext] Accepting shipment via RPC:', shipmentId);
     // Use the security-definer accept_shipment() RPC from hardened-rls.sql.
     // Direct UPDATE is blocked — the hardened policy only allows partners to
@@ -140,9 +160,26 @@ export const [ShipmentsProvider, useShipments] = createContextHook(() => {
     }
     void queryClient.invalidateQueries({ queryKey: ['shipments'] });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, queryClient]);
+  }, [user, isOnline, enqueue, queryClient]);
 
   const completeShipment = useCallback(async (shipmentId: string, completionPhotoUrl?: string | null) => {
+    if (!isOnline) {
+      const offlineUpdates: Record<string, unknown> = {
+        status: 'completed',
+        delivery_status: 'delivered_to_homeowner',
+      };
+      if (completionPhotoUrl) {
+        offlineUpdates.completion_photo_url = completionPhotoUrl;
+      }
+      enqueue({
+        type: "update",
+        target: "shipments",
+        payload: offlineUpdates,
+        filter: { id: shipmentId },
+        queryKeysToInvalidate: [["shipments"]],
+      });
+      return;
+    }
     log('[ShipmentsContext] Completing shipment:', shipmentId, completionPhotoUrl ? 'with photo' : 'no photo');
     const updates: Partial<DbShipment> = {
       status: 'completed',
@@ -184,9 +221,19 @@ export const [ShipmentsProvider, useShipments] = createContextHook(() => {
 
     void playPickupChime().catch(e => log('[ShipmentsContext] Pickup chime error:', e));
     void maybeRequestReview();
-  }, [updateShipmentMutation, createNotification]);
+  }, [isOnline, enqueue, updateShipmentMutation, createNotification]);
 
   const cancelShipment = useCallback((shipmentId: string) => {
+    if (!isOnline) {
+      enqueue({
+        type: "update",
+        target: "shipments",
+        payload: { status: 'cancelled' },
+        filter: { id: shipmentId },
+        queryKeysToInvalidate: [["shipments"]],
+      });
+      return;
+    }
     log('[ShipmentsContext] Cancelling shipment:', shipmentId);
     updateShipmentMutation.mutate({
       id: shipmentId,
@@ -194,7 +241,7 @@ export const [ShipmentsProvider, useShipments] = createContextHook(() => {
         status: 'cancelled',
       },
     });
-  }, [updateShipmentMutation]);
+  }, [isOnline, enqueue, updateShipmentMutation]);
 
   const _simulateDelivery = useCallback((shipmentId: string) => {
     log('[ShipmentsContext] Simulating delivery for shipment:', shipmentId);

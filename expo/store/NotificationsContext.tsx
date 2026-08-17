@@ -14,10 +14,12 @@ import {
 } from '@/lib/notifications';
 import { router } from 'expo-router';
 import { useApp } from '@/store/AppContext';
+import { useOfflineQueue } from '@/store/OfflineQueueContext';
 import { log } from "../lib/logger";
 
 export const [NotificationsProvider, useNotifications] = createContextHook(() => {
   const { session, user, isOnboarded } = useApp();
+  const { isOnline, enqueue } = useOfflineQueue();
   const queryClient = useQueryClient();
   const [expoPushToken, setExpoPushToken] = useState<string | null>(null);
   const notificationListenerRef = useRef<ReturnType<typeof addNotificationReceivedListener> | null>(null);
@@ -136,6 +138,16 @@ export const [NotificationsProvider, useNotifications] = createContextHook(() =>
   }, [queryClient]);
 
   const markNotificationRead = useCallback((notificationId: string) => {
+    if (!isOnline) {
+      enqueue({
+        type: "update",
+        target: "notifications",
+        payload: { read: true },
+        filter: { id: notificationId },
+        queryKeysToInvalidate: [["notifications"]],
+      });
+      return;
+    }
     log('[NotificationsContext] Marking notification read:', notificationId);
     void supabase
       .from('notifications')
@@ -145,10 +157,20 @@ export const [NotificationsProvider, useNotifications] = createContextHook(() =>
         if (error) log('[NotificationsContext] Mark read error:', error.message);
         else void queryClient.invalidateQueries({ queryKey: ['notifications'] });
       });
-  }, [queryClient]);
+  }, [isOnline, enqueue, queryClient]);
 
   const markAllNotificationsRead = useCallback(() => {
     if (!session?.user?.id) return;
+    if (!isOnline) {
+      enqueue({
+        type: "update",
+        target: "notifications",
+        payload: { read: true },
+        filter: { recipient_id: session.user.id, read: false },
+        queryKeysToInvalidate: [["notifications"]],
+      });
+      return;
+    }
     log('[NotificationsContext] Marking all notifications read');
     void supabase
       .from('notifications')
@@ -159,7 +181,7 @@ export const [NotificationsProvider, useNotifications] = createContextHook(() =>
         if (error) log('[NotificationsContext] Mark all read error:', error.message);
         else void queryClient.invalidateQueries({ queryKey: ['notifications'] });
       });
-  }, [session?.user?.id, queryClient]);
+  }, [session?.user?.id, isOnline, enqueue, queryClient]);
 
   const myNotifications = useMemo(() =>
     notificationsRef.current.filter(n => n.recipientId === user?.id).sort((a, b) =>

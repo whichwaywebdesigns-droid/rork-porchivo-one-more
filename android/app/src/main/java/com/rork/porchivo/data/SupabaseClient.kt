@@ -544,6 +544,55 @@ class SupabaseClient(
         Result.failure(e)
     }
 
+    // ── Offline queue replay ───────────────────────────────────────────
+
+    /**
+     * Replay a queued action against Supabase REST. Used by the offline
+     * action queue when connectivity is restored. Returns true on HTTP success.
+     */
+    suspend fun replayQueuedAction(
+        type: String,
+        target: String,
+        payload: String,
+        filter: Map<String, String>? = null,
+    ): Boolean {
+        return try {
+            when (type) {
+                "insert" -> {
+                    val response = httpClient.post("$restBase/$target") {
+                        authHeaders().forEach { (k, v) -> header(k, v) }
+                        contentType(ContentType.Application.Json)
+                        header("Prefer", "return=minimal")
+                        setBody(payload)
+                    }
+                    response.status.isSuccess()
+                }
+                "update" -> {
+                    val query = filter?.entries?.joinToString("&") { "${it.key}=eq.${it.value}" } ?: ""
+                    val url = if (query.isNotEmpty()) "$restBase/$target?$query" else "$restBase/$target"
+                    val response = httpClient.patch(url) {
+                        authHeaders().forEach { (k, v) -> header(k, v) }
+                        contentType(ContentType.Application.Json)
+                        header("Prefer", "return=minimal")
+                        setBody(payload)
+                    }
+                    response.status.isSuccess()
+                }
+                "rpc" -> {
+                    val response = httpClient.post("$restBase/rpc/$target") {
+                        authHeaders().forEach { (k, v) -> header(k, v) }
+                        contentType(ContentType.Application.Json)
+                        setBody(payload)
+                    }
+                    response.status.isSuccess()
+                }
+                else -> false
+            }
+        } catch (e: Exception) {
+            false
+        }
+    }
+
     fun close() {
         httpClient.close()
     }

@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import createContextHook from '@nkzw/create-context-hook';
 import { supabase } from '@/lib/supabase';
 import { useApp } from '@/store/AppContext';
+import { useOfflineQueue } from '@/store/OfflineQueueContext';
 import { log, warn } from '@/lib/logger';
 import {
   Organization,
@@ -120,6 +121,7 @@ function announcementRow(row: Record<string, unknown>): OrgAnnouncement {
 
 export const [OrganizationProvider, useOrganization] = createContextHook(() => {
   const { session } = useApp();
+  const { isOnline, enqueue } = useOfflineQueue();
   const queryClient = useQueryClient();
   const userId = session?.user?.id ?? null;
 
@@ -940,6 +942,106 @@ export const [OrganizationProvider, useOrganization] = createContextHook(() => {
     },
   });
 
+  // ── Offline-aware wrappers for key mutations ────────────────────────────
+  const postAnnouncementWithOffline = useCallback(async (
+    params: {
+      title: string;
+      body: string;
+      priority?: AnnouncementPriority;
+      category?: AnnouncementCategory;
+      isPinned?: boolean;
+      scheduledAt?: string | null;
+      expiresAt?: string | null;
+      authorDisplayName?: string | null;
+      bodyVariations?: string[] | null;
+      variationMode?: VariationMode | null;
+    },
+  ) => {
+    if (!isOnline && activeOrg?.id && userId) {
+      const hasVariations = params.bodyVariations && params.bodyVariations.length > 0;
+      enqueue({
+        type: "insert",
+        target: "org_announcements",
+        payload: {
+          org_id: activeOrg.id,
+          author_id: userId,
+          author_display_name: params.authorDisplayName ?? null,
+          title: params.title.trim(),
+          body: params.body.trim(),
+          priority: params.priority ?? 'normal',
+          category: params.category ?? 'general',
+          is_pinned: params.isPinned ?? false,
+          scheduled_at: params.scheduledAt ?? null,
+          expires_at: params.expiresAt ?? null,
+          body_variations: hasVariations ? params.bodyVariations : null,
+          variation_mode: hasVariations ? (params.variationMode ?? 'daily') : null,
+        },
+        queryKeysToInvalidate: [["org-announcements"], ["announcements"]],
+      });
+      return;
+    }
+    return postAnnouncementMutation.mutateAsync(params);
+  }, [isOnline, enqueue, activeOrg?.id, userId, postAnnouncementMutation]);
+
+  const submitMaintenanceWithOffline = useCallback(async (
+    params: {
+      category: string;
+      priority: string;
+      title: string;
+      description?: string | null;
+      location?: string | null;
+      preferredTime?: string | null;
+      allowEntry?: boolean;
+      unitId?: string | null;
+    },
+  ) => {
+    if (!isOnline && activeOrg?.id) {
+      enqueue({
+        type: "rpc",
+        target: "submit_maintenance_request",
+        payload: {
+          p_org_id: activeOrg.id,
+          p_category: params.category,
+          p_priority: params.priority,
+          p_title: params.title,
+          p_description: params.description ?? null,
+          p_location: params.location ?? null,
+          p_preferred: params.preferredTime ?? null,
+          p_allow_entry: params.allowEntry ?? false,
+          p_unit_id: params.unitId ?? null,
+        },
+        queryKeysToInvalidate: [["maintenance-queue"], ["maintenance-counts"], ["my-maintenance"]],
+      });
+      return;
+    }
+    return submitMaintenanceMutation.mutateAsync(params);
+  }, [isOnline, enqueue, activeOrg?.id, submitMaintenanceMutation]);
+
+  const updateMaintenanceStatusWithOffline = useCallback(async (
+    params: {
+      requestId: string;
+      status: string;
+      note?: string | null;
+      resolution?: string | null;
+    },
+  ) => {
+    if (!isOnline) {
+      enqueue({
+        type: "rpc",
+        target: "update_maintenance_status",
+        payload: {
+          p_request_id: params.requestId,
+          p_status: params.status,
+          p_note: params.note ?? null,
+          p_resolution: params.resolution ?? null,
+        },
+        queryKeysToInvalidate: [["maintenance-queue"], ["maintenance-counts"], ["my-maintenance"]],
+      });
+      return;
+    }
+    return updateMaintenanceStatusMutation.mutateAsync(params);
+  }, [isOnline, enqueue, updateMaintenanceStatusMutation]);
+
   return useMemo(
     () => ({
       // State
@@ -965,7 +1067,7 @@ export const [OrganizationProvider, useOrganization] = createContextHook(() => {
       isRequestingMembership: requestMembershipMutation.isPending,
       createOrg: createOrgMutation.mutateAsync,
       isCreatingOrg: createOrgMutation.isPending,
-      postAnnouncement: postAnnouncementMutation.mutateAsync,
+      postAnnouncement: postAnnouncementWithOffline,
       isPostingAnnouncement: postAnnouncementMutation.isPending,
       approveMembership: approveMembershipMutation.mutateAsync,
       isApprovingMembership: approveMembershipMutation.isPending,
@@ -1002,9 +1104,9 @@ export const [OrganizationProvider, useOrganization] = createContextHook(() => {
       regenerateInviteCode: regenerateInviteCodeMutation.mutateAsync,
       isRegeneratingInviteCode: regenerateInviteCodeMutation.isPending,
       // Maintenance
-      submitMaintenance: submitMaintenanceMutation.mutateAsync,
+      submitMaintenance: submitMaintenanceWithOffline,
       isSubmittingMaintenance: submitMaintenanceMutation.isPending,
-      updateMaintenanceStatus: updateMaintenanceStatusMutation.mutateAsync,
+      updateMaintenanceStatus: updateMaintenanceStatusWithOffline,
       isUpdatingMaintenanceStatus: updateMaintenanceStatusMutation.isPending,
       // Calendar
       createCalendarEvent: createCalendarEventMutation.mutateAsync,
@@ -1036,7 +1138,7 @@ export const [OrganizationProvider, useOrganization] = createContextHook(() => {
       requestMembershipMutation.isPending,
       createOrgMutation.mutateAsync,
       createOrgMutation.isPending,
-      postAnnouncementMutation.mutateAsync,
+      postAnnouncementWithOffline,
       postAnnouncementMutation.isPending,
       approveMembershipMutation.mutateAsync,
       approveMembershipMutation.isPending,
@@ -1070,9 +1172,9 @@ export const [OrganizationProvider, useOrganization] = createContextHook(() => {
       inviteMemberByEmailMutation.isPending,
       regenerateInviteCodeMutation.mutateAsync,
       regenerateInviteCodeMutation.isPending,
-      submitMaintenanceMutation.mutateAsync,
+      submitMaintenanceWithOffline,
       submitMaintenanceMutation.isPending,
-      updateMaintenanceStatusMutation.mutateAsync,
+      updateMaintenanceStatusWithOffline,
       updateMaintenanceStatusMutation.isPending,
       createCalendarEventMutation.mutateAsync,
       createCalendarEventMutation.isPending,

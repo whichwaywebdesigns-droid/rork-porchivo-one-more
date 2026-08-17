@@ -7,6 +7,7 @@ import { User, UserRole } from '@/types';
 import { DbProfile, DbUserEntitlement, SubscriptionStatus } from '@/types/database';
 import { dbProfileToUser } from '@/lib/mappers';
 import { supabase } from '@/lib/supabase';
+import { useOfflineQueue } from '@/store/OfflineQueueContext';
 import { recordConsent as recordConsentRow, fetchLatestConsentVersion } from '@/lib/consent';
 import { LEGAL_VERSION } from '@/constants/legal';
 import { Session } from '@supabase/supabase-js';
@@ -59,6 +60,7 @@ function ensureRevenueCatConfigured(): Promise<void> {
 
 export const [AppProvider, useApp] = createContextHook(() => {
   const queryClient = useQueryClient();
+  const { isOnline, enqueue, clearQueue } = useOfflineQueue();
   const [session, setSession] = useState<Session | null>(null);
   const [authLoading, setAuthLoading] = useState<boolean>(true);
   const [user, setUser] = useState<User | null>(null);
@@ -293,6 +295,19 @@ export const [AppProvider, useApp] = createContextHook(() => {
       is_onboarded: true,
     };
 
+    if (!isOnline) {
+      enqueue({
+        type: "update",
+        target: "profiles",
+        payload: profileUpdates as Record<string, unknown>,
+        filter: { id: supabaseUser.id },
+        queryKeysToInvalidate: [["profile"]],
+      });
+      setIsOnboarded(true);
+      await AsyncStorage.setItem(STORAGE_KEYS.onboarded, 'true');
+      return;
+    }
+
     const { data, error } = await supabase
       .from('profiles')
       .update(profileUpdates)
@@ -312,7 +327,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
     await AsyncStorage.setItem(STORAGE_KEYS.onboarded, 'true');
     queryClient.setQueryData(['profile', supabaseUser.id], dbProfile);
     log('[AppContext] Onboarding complete');
-  }, [session, queryClient]);
+  }, [session, isOnline, enqueue, queryClient]);
 
   const updateUser = useCallback((updates: Partial<User>) => {
     if (!user) return;
@@ -328,15 +343,35 @@ export const [AppProvider, useApp] = createContextHook(() => {
     if (updates.expoPushToken !== undefined) dbUpdates.expo_push_token = updates.expoPushToken;
 
     setUser({ ...user, ...updates });
+    if (!isOnline && session?.user?.id) {
+      enqueue({
+        type: "update",
+        target: "profiles",
+        payload: dbUpdates as Record<string, unknown>,
+        filter: { id: session.user.id },
+        queryKeysToInvalidate: [["profile"]],
+      });
+      return;
+    }
     saveProfileMutation.mutate(dbUpdates);
-  }, [user, saveProfileMutation]);
+  }, [user, isOnline, enqueue, session, saveProfileMutation]);
 
   const updateRole = useCallback((role: UserRole) => {
     log('[AppContext] Updating role');
     if (!user) return;
     setUser({ ...user, role });
+    if (!isOnline && session?.user?.id) {
+      enqueue({
+        type: "update",
+        target: "profiles",
+        payload: { role } as Record<string, unknown>,
+        filter: { id: session.user.id },
+        queryKeysToInvalidate: [["profile"]],
+      });
+      return;
+    }
     saveProfileMutation.mutate({ role });
-  }, [user, saveProfileMutation]);
+  }, [user, isOnline, enqueue, session, saveProfileMutation]);
 
   const setLocationConsent = useCallback((consent: boolean, precise?: boolean) => {
     if (!user) return;
@@ -490,6 +525,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
     log('[AppContext] Signing out...');
     try {
       void logoutRevenueCat();
+      clearQueue();
       // scope: 'global' revokes all sessions across all devices, not just this one
       await supabase.auth.signOut({ scope: 'global' });
       await AsyncStorage.removeItem(STORAGE_KEYS.onboarded);
@@ -502,7 +538,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
       log('[AppContext] Sign out error');
       throw err;
     }
-  }, [queryClient]);
+  }, [queryClient, clearQueue]);
 
   const deleteAccount = useCallback(async () => {
     if (!session?.user?.id) throw new Error('Not authenticated');

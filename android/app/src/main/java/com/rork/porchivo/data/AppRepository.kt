@@ -28,6 +28,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.util.UUID
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
 
 /**
  * Loading state for async data operations.
@@ -139,6 +146,17 @@ class AppRepository(context: Context) {
         _orgSignupRedirectUrl.value = null
     }
 
+    // ── Offline action queue ───────────────────────────────────────────
+    private val _isOnline = MutableStateFlow(true)
+    val isOnline: StateFlow<Boolean> = _isOnline.asStateFlow()
+
+    private val _pendingActions = MutableStateFlow<List<PendingAction>>(emptyList())
+    val pendingActions: StateFlow<List<PendingAction>> = _pendingActions.asStateFlow()
+
+    private val pendingActionStore = PendingActionStore(context)
+    private val networkMonitor = NetworkMonitor(context)
+    private val queueScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
     // Local storage for tracked packages (SharedPreferences — mirrors Expo AsyncStorage)
     private val packagesPrefs = context.getSharedPreferences("porchivo_packages", Context.MODE_PRIVATE)
     private val packagesJson = kotlinx.serialization.json.Json {
@@ -151,6 +169,106 @@ class AppRepository(context: Context) {
         // on first launch, restores saved preference on subsequent launches.
         val (lang, _) = languageManager.loadOrDetect()
         _language.value = lang
+        // Start network monitoring and load any pending actions from disk.
+        networkMonitor.start()
+        _pendingActions.value = pendingActionStore.loadActions()
+        // Watch for connectivity changes — auto-sync when connection restores.
+        queueScope.launch {
+            var wasOffline = false
+            networkMonitor.isOnline.collect { online ->
+                _isOnline.value = online
+                if (!online) wasOffline = true
+                if (online && wasOffline && _pendingActions.value.isNotEmpty()) {
+                    wasOffline = false
+                    processPendingActions()
+                }
+            }
+        }
+    }
+
+    // ── Offline action queue helpers ───────────────────────────────────
+
+    /** Convert a Map<String, Any?> to a JSON string for queue persistence. */
+    private fun Map<String, Any?>.toJsonString(): String {
+        val jsonObject = buildJsonObject {
+            this@toJsonString.forEach { (key, value) ->
+                when (value) {
+                    null -> put(key, JsonNull)
+                    is Boolean -> put(key, JsonPrimitive(value))
+                    is Number -> put(key, JsonPrimitive(value))
+                    is String -> put(key, JsonPrimitive(value))
+                    else -> put(key, JsonPrimitive(value.toString()))
+                }
+            }
+        }
+        return jsonObject.toString()
+    }
+
+    private fun enqueueAction(
+        type: String,
+        target: String,
+        payload: String,
+        filter: Map<String, String>? = null,
+        refreshKey: String? = null,
+    ) {
+        val action = PendingAction(
+            id = "action_${System.currentTimeMillis()}_${UUID.randomUUID()}",
+            type = type,
+            target = target,
+            payload = payload,
+            filter = filter,
+            refreshKey = refreshKey,
+            timestamp = System.currentTimeMillis(),
+        )
+        val updated = _pendingActions.value + action
+        _pendingActions.value = updated
+        pendingActionStore.saveActions(updated)
+    }
+
+    /** Replay all queued actions against Supabase. Called automatically when connectivity restores. */
+    suspend fun processPendingActions() {
+        val client = supabase ?: return
+        val actions = _pendingActions.value
+        if (actions.isEmpty()) return
+
+        val remaining = mutableListOf<PendingAction>()
+        for (action in actions) {
+            val ok = client.replayQueuedAction(
+                type = action.type,
+                target = action.target,
+                payload = action.payload,
+                filter = action.filter,
+            )
+            if (ok) {
+                action.refreshKey?.let { refreshData(it) }
+            } else {
+                val updated = action.copy(retryCount = action.retryCount + 1)
+                if (updated.retryCount < updated.maxRetries) {
+                    remaining.add(updated)
+                }
+            }
+        }
+        _pendingActions.value = remaining
+        pendingActionStore.saveActions(remaining)
+    }
+
+    /** Clear all pending actions — called on sign-out so queued ops from the
+     *  previous user's session are not replayed under a new account. */
+    private fun clearPendingActions() {
+        _pendingActions.value = emptyList()
+        pendingActionStore.clear()
+    }
+
+    /** Re-fetch data after a successful replay so StateFlows reflect the change. */
+    private suspend fun refreshData(key: String) {
+        val userId = (_authState.value as? AuthState.Authenticated)?.userId ?: return
+        when (key) {
+            "shipments" -> loadShipments(userId)
+            "notifications" -> loadNotifications(userId)
+            "announcements" -> _orgMembership.value?.orgId?.let { loadAnnouncements(it) }
+            "maintenance" -> _orgMembership.value?.orgId?.let { loadMaintenanceRequests(it) }
+            "profile" -> loadProfile(userId)
+        }
     }
 
     // ── Initialization / Session restore ────────────────────────────────
@@ -284,6 +402,7 @@ class AppRepository(context: Context) {
      */
     fun signOut() {
         supabase?.signOut()
+        clearPendingActions()
         _authState.value = AuthState.Unauthenticated
         _user.value = null
         _tier.value = SubscriptionTier.FREE
@@ -382,6 +501,16 @@ class AppRepository(context: Context) {
             "has_location_consent" to hasLocationConsent,
             "is_onboarded" to true,
         )
+        if (!_isOnline.value) {
+            enqueueAction(
+                type = "update",
+                target = "profiles",
+                payload = updates.toJsonString(),
+                filter = mapOf("id" to userId),
+                refreshKey = "profile",
+            )
+            return
+        }
         val result = client.updateProfile(userId, updates)
         if (result.isSuccess) {
             val dbProfile = result.getOrNull()
@@ -438,6 +567,15 @@ class AppRepository(context: Context) {
             "tracking_number" to trackingNumber?.takeIf { it.isNotBlank() },
             "delivery_status" to "pending",
         )
+        if (!_isOnline.value) {
+            enqueueAction(
+                type = "insert",
+                target = "shipments",
+                payload = body.toJsonString(),
+                refreshKey = "shipments",
+            )
+            return true
+        }
         val result = client.insertShipment(body)
         return if (result.isSuccess) {
             val dbShipment = result.getOrNull()
@@ -451,6 +589,16 @@ class AppRepository(context: Context) {
 
     suspend fun completeShipment(id: String): Boolean {
         val client = supabase ?: return false
+        if (!_isOnline.value) {
+            enqueueAction(
+                type = "update",
+                target = "shipments",
+                payload = mapOf("status" to "completed", "delivery_status" to "delivered_to_homeowner").toJsonString(),
+                filter = mapOf("id" to id),
+                refreshKey = "shipments",
+            )
+            return true
+        }
         val result = client.updateShipment(id, mapOf(
             "status" to "completed",
             "delivery_status" to "delivered_to_homeowner",
@@ -469,6 +617,15 @@ class AppRepository(context: Context) {
 
     suspend fun acceptShipment(id: String): Boolean {
         val client = supabase ?: return false
+        if (!_isOnline.value) {
+            enqueueAction(
+                type = "rpc",
+                target = "accept_shipment",
+                payload = mapOf("p_shipment_id" to id).toJsonString(),
+                refreshKey = "shipments",
+            )
+            return true
+        }
         val result = client.acceptShipment(id)
         return if (result.isSuccess) {
             val currentUser = _user.value
@@ -537,6 +694,16 @@ class AppRepository(context: Context) {
 
     suspend fun markNotificationRead(id: String) {
         val client = supabase ?: return
+        if (!_isOnline.value) {
+            enqueueAction(
+                type = "update",
+                target = "notifications",
+                payload = mapOf("read" to true).toJsonString(),
+                filter = mapOf("id" to id),
+                refreshKey = "notifications",
+            )
+            return
+        }
         val result = client.markNotificationRead(id)
         if (result.isSuccess) {
             _notifications.value = _notifications.value.map {
@@ -548,6 +715,16 @@ class AppRepository(context: Context) {
     suspend fun markAllNotificationsRead() {
         val client = supabase ?: return
         val userId = (authState.value as? AuthState.Authenticated)?.userId ?: return
+        if (!_isOnline.value) {
+            enqueueAction(
+                type = "update",
+                target = "notifications",
+                payload = mapOf("read" to true).toJsonString(),
+                filter = mapOf("recipient_id" to userId, "read" to "false"),
+                refreshKey = "notifications",
+            )
+            return
+        }
         val result = client.markAllNotificationsRead(userId)
         if (result.isSuccess) {
             _notifications.value = _notifications.value.map { it.copy(read = true) }
@@ -714,6 +891,15 @@ class AppRepository(context: Context) {
             put("category", "general")
             put("is_pinned", false)
         }
+        if (!_isOnline.value) {
+            enqueueAction(
+                type = "insert",
+                target = "org_announcements",
+                payload = payload.toJsonString(),
+                refreshKey = "announcements",
+            )
+            return true
+        }
         val result = client.insertAnnouncement(payload)
         return if (result.isSuccess) {
             result.getOrNull()?.let { Mappers.dbAnnouncementToAnnouncement(it) }?.let { item ->
@@ -743,6 +929,22 @@ class AppRepository(context: Context) {
     ): Boolean {
         val client = supabase ?: return false
         val orgId = _orgMembership.value?.orgId ?: return false
+        if (!_isOnline.value) {
+            enqueueAction(
+                type = "rpc",
+                target = "submit_maintenance_request",
+                payload = mapOf(
+                    "p_org_id" to orgId,
+                    "p_category" to category,
+                    "p_priority" to priority,
+                    "p_title" to title,
+                    "p_description" to description,
+                    "p_location" to location,
+                ).toJsonString(),
+                refreshKey = "maintenance",
+            )
+            return true
+        }
         val result = client.submitMaintenanceRequest(
             orgId = orgId,
             category = category,
