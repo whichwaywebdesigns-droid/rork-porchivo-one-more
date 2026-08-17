@@ -71,6 +71,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.rork.porchivo.config.AppConfig
 import com.rork.porchivo.data.AppLanguage
+import com.rork.porchivo.model.SubscriptionTier
 import com.rork.porchivo.model.UserRole
 import com.rork.porchivo.ui.navigation.Routes
 import com.rork.porchivo.ui.theme.PorchivoTheme
@@ -90,6 +91,7 @@ fun ProfileScreen(
     val orgMembership by appViewModel.orgMembership.collectAsStateWithLifecycle()
     val darkOverride by appViewModel.darkThemeOverride.collectAsStateWithLifecycle()
     val currentLanguage by appViewModel.language.collectAsStateWithLifecycle()
+    val tier by appViewModel.tier.collectAsStateWithLifecycle()
 
     val isDark = darkOverride ?: androidx.compose.foundation.isSystemInDarkTheme()
 
@@ -171,6 +173,59 @@ fun ProfileScreen(
                         color = c.accent,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
+                    )
+                }
+            }
+        }
+
+        // Upgrade to Premium (only for free tier)
+        if (tier == SubscriptionTier.FREE) {
+            SectionTitle("UPGRADE")
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = c.surface),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { navController.navigate(Routes.UPGRADE) }
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .background(c.goldSoft, CircleShape),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.WorkspacePremium,
+                            contentDescription = null,
+                            tint = c.gold,
+                            modifier = Modifier.size(20.dp),
+                        )
+                    }
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Upgrade to Premium",
+                            color = c.textPrimary,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                        )
+                        Text(
+                            text = "Unlimited packages, Theft Shield, 90-second refresh",
+                            color = c.textSecondary,
+                            fontSize = 12.sp,
+                        )
+                    }
+                    Icon(
+                        imageVector = Icons.Filled.ChevronRight,
+                        contentDescription = null,
+                        tint = c.textMuted,
+                        modifier = Modifier.size(18.dp),
                     )
                 }
             }
