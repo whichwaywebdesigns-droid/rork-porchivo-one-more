@@ -544,6 +544,28 @@ class SupabaseClient(
         Result.failure(e)
     }
 
+    /**
+     * Invoke a Supabase Edge Function by name without deserializing the response.
+     * Used for fire-and-forget calls like dev-confirm-user where only success/failure matters.
+     */
+    suspend fun invokeFunctionRaw(
+        name: String,
+        body: Map<String, Any?>,
+    ): Result<Unit> = try {
+        val response = httpClient.post("$supabaseUrl/functions/v1/$name") {
+            authHeaders().forEach { (k, v) -> header(k, v) }
+            contentType(ContentType.Application.Json)
+            setBody(body)
+        }
+        if (response.status.isSuccess()) {
+            Result.success(Unit)
+        } else {
+            Result.failure(Exception("Function $name failed: ${response.status}"))
+        }
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
     // ── Offline queue replay ───────────────────────────────────────────
 
     /**

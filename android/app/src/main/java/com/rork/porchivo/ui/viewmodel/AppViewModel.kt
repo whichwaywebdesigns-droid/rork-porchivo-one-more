@@ -74,7 +74,7 @@ class AppViewModel : ViewModel() {
         return repo.verifyOtp(email, token)
     }
 
-    fun developerLogin() {
+    suspend fun developerLogin() {
         repo.developerLogin()
     }
 

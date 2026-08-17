@@ -24,6 +24,7 @@ import com.rork.porchivo.model.SubscriptionTier
 import com.rork.porchivo.model.TrackedPackage
 import com.rork.porchivo.model.User
 import com.rork.porchivo.model.UserRole
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -392,11 +393,56 @@ class AppRepository(context: Context) {
     }
 
     /**
-     * Developer bypass — seeds the demo user and skips backend auth entirely.
+     * Developer sign-in via the dev-confirm-user edge function + single
+     * signInWithPassword. Avoids Supabase Auth rate limits by doing all
+     * account setup (create / confirm / set password) server-side via the
+     * Admin API, then making exactly one auth call from the client.
+     * Falls back to local demo mode if Supabase isn't configured.
      */
-    fun developerLogin() {
+    suspend fun developerLogin() {
         _authError.value = null
-        seedDemoUser()
+        if (!isSupabaseConfigured) {
+            seedDemoUser()
+            return
+        }
+
+        val qaEmail = "qa@porchivo.dev"
+        val qaPassword = "PorchivoQA2025!"
+        val client = supabase!!
+
+        // ── Step 1: Ensure QA account exists + confirmed + password set ─────
+        val ensureResult = client.invokeFunctionRaw(
+            "dev-confirm-user",
+            mapOf("email" to qaEmail, "password" to qaPassword),
+        )
+        if (ensureResult.isFailure) {
+            _authError.value = "Dev setup failed: ${ensureResult.exceptionOrNull()?.message ?: "unknown"}. Make sure dev-confirm-user is deployed."
+            return
+        }
+
+        // ── Step 2: Single signInWithPassword with retry on rate limit ────
+        val backoffMs = longArrayOf(0, 2000, 5000, 10000)
+        for (attempt in 0..3) {
+            if (attempt > 0) {
+                delay(backoffMs[attempt])
+            }
+            val result = client.signInWithEmail(qaEmail, qaPassword)
+            if (result.isSuccess) {
+                val session = result.getOrNull()
+                if (session != null) {
+                    _authState.value = AuthState.Authenticated(session.user?.id ?: "")
+                    loadInitialData(session.user?.id ?: "")
+                }
+                return
+            }
+            val errMsg = result.exceptionOrNull()?.message?.lowercase() ?: ""
+            val isRateLimit = errMsg.contains("rate limit") || errMsg.contains("too many") || errMsg.contains("over_request")
+            if (!isRateLimit || attempt == 3) {
+                _authError.value = result.exceptionOrNull()?.message ?: "Sign-in failed"
+                return
+            }
+            // Rate-limited — retry with backoff on next iteration
+        }
     }
 
     /**

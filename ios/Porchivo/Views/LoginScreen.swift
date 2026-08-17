@@ -244,7 +244,7 @@ struct LoginScreen: View {
             Haptics.selection()
             isSubmitting = true
             Task { @MainActor in
-                appState.developerLogin()
+                await appState.developerLogin()
                 isSubmitting = false
             }
         } label: {

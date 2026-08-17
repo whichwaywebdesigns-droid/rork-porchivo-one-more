@@ -318,13 +318,60 @@ final class AppState {
         }
     }
 
-    /// One-tap developer bypass. Seeds the demo user and skips auth backend calls.
-    /// Only exposed as a subtle link under the magic link button for internal testing.
+    /// Developer sign-in via the dev-confirm-user edge function + single
+    /// signInWithPassword. Avoids Supabase Auth rate limits by doing all
+    /// account setup (create / confirm / set password) server-side via the
+    /// Admin API, then making exactly one auth call from the client.
+    /// Falls back to local demo mode if Supabase isn't configured.
     @MainActor
-    func developerLogin() {
+    func developerLogin() async {
         authError = nil
-        seedDemoUser()
-        flagBiometricEnrollment()
+
+        guard isSupabaseConfigured else {
+            seedDemoUser()
+            flagBiometricEnrollment()
+            return
+        }
+
+        let qaEmail = "qa@porchivo.dev"
+        let qaPassword = "PorchivoQA2025!"
+
+        // ── Step 1: Ensure QA account exists + confirmed + password set ─────
+        // Uses the Admin API server-side, not subject to Auth rate limits.
+        let ensureResult = await supabase.invokeEdgeFunction(
+            "dev-confirm-user",
+            body: ["email": qaEmail, "password": qaPassword]
+        )
+        if case .failure(let err) = ensureResult {
+            authError = "Dev setup failed: \(err.localizedDescription). Make sure dev-confirm-user is deployed."
+            Haptics.error()
+            return
+        }
+
+        // ── Step 2: Single signInWithPassword with retry on rate limit ────
+        let backoffSeconds: [Double] = [0, 2, 5, 10]
+        for attempt in 0..<4 {
+            if attempt > 0 {
+                try? await Task.sleep(for: .seconds(backoffSeconds[attempt]))
+            }
+            let result = await supabase.signInWithEmail(qaEmail, qaPassword)
+            switch result {
+            case .success(let session):
+                authState = .authenticated(session.user?.id ?? "")
+                await loadInitialData(userId: session.user?.id ?? "")
+                flagBiometricEnrollment()
+                return
+            case .failure(let err):
+                let msg = err.localizedDescription.lowercased()
+                let isRateLimit = msg.contains("rate limit") || msg.contains("too many") || msg.contains("over_request")
+                if !isRateLimit || attempt == 3 {
+                    authError = err.localizedDescription
+                    Haptics.error()
+                    return
+                }
+                // Rate-limited — retry with backoff on next iteration
+            }
+        }
     }
 
     /// Verifies the 6-digit OTP code from the magic link email. On success,

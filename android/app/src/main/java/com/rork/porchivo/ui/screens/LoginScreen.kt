@@ -144,7 +144,11 @@ fun LoginScreen(
                         }
                     }
                 },
-                onDeveloperLogin = { appViewModel.developerLogin() },
+                onDeveloperLogin = {
+                    scope.launch {
+                        appViewModel.developerLogin()
+                    }
+                },
             )
         }
     }
