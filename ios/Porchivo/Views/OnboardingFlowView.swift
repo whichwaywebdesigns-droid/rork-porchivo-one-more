@@ -14,6 +14,7 @@
 
 import SwiftUI
 import UserNotifications
+import Combine
 
 struct OnboardingFlowView: View {
     @Environment(AppState.self) private var appState
@@ -68,12 +69,31 @@ struct OnboardingFlowView: View {
     private var welcomeStep: some View {
         VStack(spacing: 20) {
             Spacer()
-            Image("BuiltOnTrust")
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(maxHeight: 280)
-                .clipShape(.rect(cornerRadius: Radius.lg))
-                .accessibilityLabel("Built on trust: verified, private, local neighbors keep each other accountable.")
+            
+            // Auto-advancing image carousel (4 slides)
+            ZStack {
+                ForEach(0..<viewModel.welcomeSlideCount, id: \.self) { i in
+                    Image(viewModel.welcomeSlideNames[i])
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .clipShape(.rect(cornerRadius: Radius.lg))
+                        .opacity(i == viewModel.welcomeSlideIndex ? 1 : 0)
+                        .accessibilityLabel("Porchivo onboarding illustration")
+                        .accessibilityHidden(i != viewModel.welcomeSlideIndex)
+                }
+            }
+            .frame(maxHeight: 300)
+            
+            // Dot indicators
+            HStack(spacing: 8) {
+                ForEach(0..<viewModel.welcomeSlideCount, id: \.self) { i in
+                    Capsule()
+                        .fill(i == viewModel.welcomeSlideIndex ? c.accent : c.elevated)
+                        .frame(width: i == viewModel.welcomeSlideIndex ? 24 : 8, height: 8)
+                        .animation(.spring(duration: 0.3), value: viewModel.welcomeSlideIndex)
+                }
+            }
+            
             VStack(spacing: 10) {
                 Text("Your porch, protected.")
                     .font(.system(size: 30, weight: .heavy))
@@ -93,6 +113,11 @@ struct OnboardingFlowView: View {
             PrimaryButton(title: "Get started", systemImage: "arrow.right") {
                 Haptics.light()
                 viewModel.advance()
+            }
+        }
+        .onReceive(Timer.publish(every: 3.5, on: .main, in: .common).autoconnect()) { _ in
+            if viewModel.step == 0 {
+                viewModel.advanceWelcomeSlide()
             }
         }
     }

@@ -12,11 +12,14 @@ import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import kotlinx.coroutines.delay
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -162,9 +165,25 @@ fun OnboardingFlowScreen(
 
 // ─── Step 0: Welcome ──────────────────────────────────────────────────────────
 
+private val welcomeSlideDrawables = intArrayOf(
+    R.drawable.onboarding_slide_1,
+    R.drawable.onboarding_slide_2,
+    R.drawable.onboarding_slide_3,
+    R.drawable.onboarding_slide_4,
+)
+
 @Composable
 private fun WelcomeStep(c: com.rork.porchivo.ui.theme.PorchivoColors, onContinue: () -> Unit) {
-    val context = LocalContext.current
+    var slideIndex by remember { mutableIntStateOf(0) }
+    val slideCount = welcomeSlideDrawables.size
+
+    // Auto-advance the carousel every 3.5 seconds
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(3500L)
+            slideIndex = (slideIndex + 1) % slideCount
+        }
+    }
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -173,15 +192,53 @@ private fun WelcomeStep(c: com.rork.porchivo.ui.theme.PorchivoColors, onContinue
     ) {
         Spacer(modifier = Modifier.weight(0.5f))
 
-        // Hero illustration: built on trust
-        Image(
-            painter = painterResource(id = R.drawable.onboarding_built_on_trust),
-            contentDescription = "Built on trust: verified, private, local neighbors keep each other accountable.",
+        // Auto-advancing image carousel (4 slides, crossfade)
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(280.dp),
-            contentScale = ContentScale.Fit,
-        )
+            contentAlignment = Alignment.Center,
+        ) {
+            welcomeSlideDrawables.forEachIndexed { i, drawableRes ->
+                androidx.compose.animation.AnimatedContent(
+                    targetState = i == slideIndex,
+                    transitionSpec = {
+                        fadeIn(tween(400)) togetherWith fadeOut(tween(400))
+                    },
+                    label = "slide_$i",
+                    modifier = Modifier.fillMaxSize(),
+                ) { isVisible ->
+                    if (isVisible) {
+                        Image(
+                            painter = painterResource(id = drawableRes),
+                            contentDescription = "Porchivo onboarding illustration",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Fit,
+                        )
+                    } else {
+                        Box(modifier = Modifier.fillMaxSize())
+                    }
+                }
+            }
+        }
+
+        // Dot indicators
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(top = 12.dp),
+        ) {
+            for (i in 0 until slideCount) {
+                Box(
+                    modifier = Modifier
+                        .height(8.dp)
+                        .width(if (i == slideIndex) 24.dp else 8.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(if (i == slideIndex) c.accent else c.elevated)
+                        .animateContentSize(animationSpec = tween(300)),
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 

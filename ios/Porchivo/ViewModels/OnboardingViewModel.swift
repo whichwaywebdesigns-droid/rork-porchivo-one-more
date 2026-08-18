@@ -18,6 +18,16 @@ final class OnboardingViewModel {
     var notifStatus: UNAuthorizationStatus = .notDetermined
     var provisionalGranted = false
     var isCompleting = false
+    var welcomeSlideIndex = 0
+    
+    let welcomeSlideNames = ["OnboardingSlide1", "OnboardingSlide2", "OnboardingSlide3", "OnboardingSlide4"]
+    let welcomeSlideCount = 4
+    
+    func advanceWelcomeSlide() {
+        withAnimation(.easeInOut(duration: 0.4)) {
+            welcomeSlideIndex = (welcomeSlideIndex + 1) % welcomeSlideCount
+        }
+    }
 
     let totalSteps = 9
 
