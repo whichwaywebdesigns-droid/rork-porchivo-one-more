@@ -3,9 +3,9 @@ import SEOHead from "@/components/SEOHead";
 import BreadcrumbNav from "@/components/BreadcrumbNav";
 import { BRAND } from "@/config/brand";
 
-const EFFECTIVE_DATE = "August 14, 2026";
-const LAST_UPDATED = "August 14, 2026";
-const POLICY_VERSION = "2.0";
+const EFFECTIVE_DATE = "August 18, 2026";
+const LAST_UPDATED = "August 18, 2026";
+const POLICY_VERSION = "2.1";
 const COMPANY = "WhichWay Web Labs LLC";
 
 interface RevisionEntry {
@@ -15,6 +15,12 @@ interface RevisionEntry {
 }
 
 const REVISION_HISTORY: RevisionEntry[] = [
+  {
+    version: "2.1",
+    date: "August 18, 2026",
+    summary:
+      "Clarified location practices: property address is provided manually; precise device GPS is collected only when a user explicitly grants location permission for a specific feature; neighbors and partners see block-level or approximate location, never your exact address unless you choose to share it.",
+  },
   {
     version: "2.0",
     date: "August 14, 2026",
@@ -195,12 +201,26 @@ export default function PrivacyPolicyPage() {
               precise location tracking
             </Bullet>
           </ul>
+
+          <SubHeading>d. Location Information</SubHeading>
+          <p>
+            Your primary location in Porchivo is the <strong>property address</strong> you enter during onboarding or
+            profile setup (for example, your street address or unit number). This address is used to match you with
+            your community, calculate neighborhood-level risk scores, and connect you with nearby porch partners.
+          </p>
           <p className="mt-3">
-            We do not collect your precise GPS location unless you explicitly grant location permission for a specific
-            feature that requires it.
+            We do <strong>not</strong> collect your precise device GPS coordinates unless you explicitly grant location
+            permission for a specific in-app feature that requires it (such as partner drop-off navigation or
+            map-based neighborhood alerts). When location permission is granted, it is used only for that feature and
+            is not stored or shared beyond what is necessary to provide the service.
+          </p>
+          <p className="mt-3">
+            By default, other users — including neighbors and porch partners — see only your block-level or
+            approximate location. They do not see your exact street address or precise GPS coordinates unless you
+            explicitly choose to share that information for a specific delivery or request.
           </p>
 
-          <SubHeading>d. Information From Your Community</SubHeading>
+          <SubHeading>e. Information From Your Community</SubHeading>
           <p>
             Because Porchivo is a community platform, some information about you may be provided by your HOA or
             property management company when they set up your community account. This may include your name, unit
