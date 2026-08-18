@@ -131,6 +131,13 @@ function RootLayoutNav() {
 
     const currentSegment = segments[0] as string;
 
+    // Guard: wait for the navigator to resolve the initial route before
+    // running any redirect logic. On the very first render the segment
+    // can be an empty string (navigator hasn't mounted yet), so inWelcome
+    // would be false and we'd yank the user straight to onboarding-setup —
+    // skipping the splash screen entirely.
+    if (!currentSegment) return;
+
     // Tracking onboarding screens manage their own navigation via the step
     // manager (tracking-onboarding.tsx → goHome()). They must NOT be yanked
     // by the layout redirect when the user signs up mid-flow at Step 2 —
