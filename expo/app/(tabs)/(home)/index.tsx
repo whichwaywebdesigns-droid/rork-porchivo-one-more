@@ -10,6 +10,7 @@ import { palette, radius, space } from '@/constants/theme';
 import { useColors, AppColors } from '@/constants/colors';
 import EmptyState from '@/components/ui/EmptyState';
 import { useApp } from '@/store/AppContext';
+import { useOrganization } from '@/store/OrganizationContext';
 import { useShipments } from '@/store/ShipmentsContext';
 import { useNotifications } from '@/store/NotificationsContext';
 import ShipmentCard from '@/components/ShipmentCard';
@@ -36,9 +37,18 @@ export default function HomeScreen() {
   const queryClient = useQueryClient();
   const colors = useColors();
   const { user, isHomeowner, isPartner, session } = useApp();
+  const { isOrgMember, isLoading: isOrgLoading } = useOrganization();
   const { myShipments, nearbyShipments, acceptShipment } = useShipments();
   const { unreadNotificationCount } = useNotifications();
   const [refreshing, setRefreshing] = useState(false);
+
+  // Free-tier users don't have a Home tab in the tab bar; redirect them to
+  // Deliveries so any stale route to (home) doesn't land on a hidden tab.
+  useEffect(() => {
+    if (!isOrgLoading && !isOrgMember) {
+      router.replace('/(tabs)/packages' as any);
+    }
+  }, [isOrgLoading, isOrgMember, router]);
 
   // P-3: app-maturity gating. Counted on each home mount so first-time users
   // see a calm screen instead of 6 stacked marketing sections.

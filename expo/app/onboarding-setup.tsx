@@ -15,6 +15,7 @@ import * as Haptics from 'expo-haptics';
 import { useColors } from '@/constants/colors';
 import { useApp } from '@/store/AppContext';
 import { useAnalytics } from '@/store/AnalyticsContext';
+import { useOrganization } from '@/store/OrganizationContext';
 import {
   useOnboardingFlow,
   porchivoRoleToUserRole,
@@ -32,6 +33,7 @@ export default function OnboardingSetupScreen() {
   const Colors = useColors();
   const { track } = useAnalytics();
   const { completeOnboarding } = useApp();
+  const { isOrgMember } = useOrganization();
   const { role, setup, updateSetup, markCompleted } = useOnboardingFlow();
 
   const [building, setBuilding] = useState<string>(setup.buildingName);
@@ -88,7 +90,10 @@ export default function OnboardingSetupScreen() {
     track('onboarding_completed', { role, skipped: !building.trim() && !unit.trim() });
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     // Skip paywall — HOA-provisioned model, no IAP.
-    router.replace('/(tabs)/(home)' as any);
+    // Route tier-aware: community users land on Home, free-tier users land on
+    // Deliveries, because the (home) tab is hidden for free-tier users.
+    const destination = isOrgMember ? '/(tabs)/(home)' : '/(tabs)/packages';
+    router.replace(destination as any);
   };
 
   const fieldStyle = (key: 'building' | 'unit') => [
