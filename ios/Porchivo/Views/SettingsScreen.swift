@@ -2,7 +2,7 @@
 //  SettingsScreen.swift
 //  Porchivo
 //
-//  Settings — theme override, location & precise-location consent toggles,
+//  Settings — theme override, location & address-sharing consent toggles,
 //  notification prefs, legal links, delete account. All persisted to
 //  profiles via SupabaseService and reflected in AppState.
 //
@@ -49,8 +49,8 @@ struct SettingsScreen: View {
                                 set: { v in Task { await appState.setLocationConsent(v) } }
                             ))
                     Divider().overlay(c.border).padding(.leading, 14)
-                    toggle("Share precise location",
-                            "Required for partner drop-off navigation. Off by default.",
+                    toggle("Share address with partners",
+                            "Lets porch partners find your home for drop-offs. Off by default.",
                             isOn: Binding(
                                 get: { appState.user?.hasPreciseLocationConsent ?? false },
                                 set: { v in Task { await appState.setPreciseLocationConsent(v) } }
