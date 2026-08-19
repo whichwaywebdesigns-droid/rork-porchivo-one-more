@@ -527,15 +527,34 @@ final class AppState {
     @MainActor
     private func loadInitialData(userId: String) async {
         loadCachedOrgContext(userId: userId)
-        await loadProfile(userId: userId)
-        await loadShipments(userId: userId)
-        await loadNotifications(userId: userId)
-        await loadOrgContext(userId: userId)
-        if isOrgMember, let orgId = orgMembership?.orgId {
-            await loadAnnouncements(orgId: orgId)
-            await loadMaintenanceRequests(orgId: orgId)
+        let cachedOrgId = orgMembership?.orgId
+
+        // Prefetch community feed content immediately if cached org data is available.
+        // Runs in parallel with profile, shipments, notifications, and org context refresh.
+        async let communityPrefetch = prefetchCommunityFeed(orgId: cachedOrgId)
+        async let profileTask = loadProfile(userId: userId)
+        async let shipmentsTask = loadShipments(userId: userId)
+        async let notificationsTask = loadNotifications(userId: userId)
+        async let orgTask = loadOrgContext(userId: userId)
+        _ = await (profileTask, shipmentsTask, notificationsTask, orgTask)
+
+        // Wait for community feed prefetch to complete
+        _ = await communityPrefetch
+
+        // If org membership changed after network refresh, re-fetch feed with new orgId
+        if let networkOrgId = orgMembership?.orgId, networkOrgId != cachedOrgId {
+            await prefetchCommunityFeed(orgId: networkOrgId)
         }
+
         loadLocalPackages()
+    }
+
+    /// Prefetch announcements and maintenance requests in parallel.
+    private func prefetchCommunityFeed(orgId: String?) async {
+        guard let orgId else { return }
+        async let announcements = loadAnnouncements(orgId: orgId)
+        async let maintenance = loadMaintenanceRequests(orgId: orgId)
+        _ = await (announcements, maintenance)
     }
 
     // MARK: - Profile

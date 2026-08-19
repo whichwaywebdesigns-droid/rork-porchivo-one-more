@@ -24,6 +24,8 @@ import com.rork.porchivo.model.SubscriptionTier
 import com.rork.porchivo.model.TrackedPackage
 import com.rork.porchivo.model.User
 import com.rork.porchivo.model.UserRole
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -519,18 +521,39 @@ class AppRepository(context: Context) {
         } catch (e: Exception) { /* corrupt cache — ignore */ }
     }
 
-    private suspend fun loadInitialData(userId: String) {
+    private suspend fun loadInitialData(userId: String) = coroutineScope {
         loadCachedOrgContext(userId)
-        loadProfile(userId)
-        loadShipments(userId)
-        loadNotifications(userId)
-        loadOrgContext()
-        if (isOrgMember) {
-            _orgMembership.value?.orgId?.let { orgId ->
-                loadAnnouncements(orgId)
-                loadMaintenanceRequests(orgId)
+        val cachedOrgId = _orgMembership.value?.orgId
+
+        // Prefetch community feed content immediately if cached org data is available.
+        // Runs in parallel with profile, shipments, notifications, and org context refresh.
+        val communityJob = async {
+            if (cachedOrgId != null) {
+                val annJob = async { loadAnnouncements(cachedOrgId) }
+                val maintJob = async { loadMaintenanceRequests(cachedOrgId) }
+                annJob.await()
+                maintJob.await()
             }
         }
+
+        // Load other initial data + org context refresh in parallel
+        val profileJob = async { loadProfile(userId) }
+        val shipmentsJob = async { loadShipments(userId) }
+        val notificationsJob = async { loadNotifications(userId) }
+        val orgJob = async { loadOrgContext() }
+        profileJob.await()
+        shipmentsJob.await()
+        notificationsJob.await()
+        orgJob.await()
+        communityJob.await()
+
+        // If org membership changed after network refresh, re-fetch feed with new orgId
+        val networkOrgId = _orgMembership.value?.orgId
+        if (networkOrgId != null && networkOrgId != cachedOrgId) {
+            loadAnnouncements(networkOrgId)
+            loadMaintenanceRequests(networkOrgId)
+        }
+
         loadLocalPackages()
     }
 
