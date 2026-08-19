@@ -53,13 +53,16 @@ class MainActivity : ComponentActivity() {
 
     /**
      * Checks if the intent contains a porchivo:// deep link and passes it
-     * to the repository so the OrgSignupScreen can react to the redirect.
+     * to the repository so the relevant screen can react to the redirect.
+     * Currently handles Stripe org signup redirects and Supabase
+     * password-reset / magic-link redirects.
      */
     private fun handleDeepLink(intent: Intent?, repository: com.rork.porchivo.data.AppRepository) {
         val data = intent?.data ?: return
         val url = data.toString()
-        if (url.startsWith("porchivo://org-signup/")) {
-            repository.setOrgSignupRedirect(url)
+        when {
+            url.startsWith("porchivo://org-signup/") -> repository.setOrgSignupRedirect(url)
+            url.startsWith("porchivo://reset-password") -> repository.setResetPasswordRedirect(url)
         }
     }
 }

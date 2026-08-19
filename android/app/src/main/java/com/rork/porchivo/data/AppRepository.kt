@@ -149,6 +149,18 @@ class AppRepository(context: Context) {
         _orgSignupRedirectUrl.value = null
     }
 
+    // ── Reset password / magic link deep link redirect ─────────────────
+    private val _resetPasswordRedirectUrl = MutableStateFlow<String?>(null)
+    val resetPasswordRedirectUrl: StateFlow<String?> = _resetPasswordRedirectUrl.asStateFlow()
+
+    fun setResetPasswordRedirect(url: String) {
+        _resetPasswordRedirectUrl.value = url
+    }
+
+    fun clearResetPasswordRedirect() {
+        _resetPasswordRedirectUrl.value = null
+    }
+
     // ── Offline action queue ───────────────────────────────────────────
     private val _isOnline = MutableStateFlow(true)
     val isOnline: StateFlow<Boolean> = _isOnline.asStateFlow()

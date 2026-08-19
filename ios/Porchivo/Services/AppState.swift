@@ -83,6 +83,10 @@ final class AppState {
     // Push notifications — deep-link shipment id set when the user taps a push.
     var pendingDeepLinkShipmentId: String? = nil
 
+    // Universal/deep link URL set when the app is opened via a custom URL scheme
+    // such as porchivo://reset-password or porchivo://org-signup/success.
+    var pendingDeepLink: URL? = nil
+
     // Foreground re-lock — when biometric unlock is enabled, the app re-locks
     // after being backgrounded for longer than `relockInterval`. This prevents
     // someone from picking up a device that was briefly set down and seeing

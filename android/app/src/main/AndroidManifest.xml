@@ -29,6 +29,13 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="porchivo" android:host="org-signup" />
             </intent-filter>
+            <!-- Deep link for Supabase password reset / magic link (porchivo://reset-password) -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="porchivo" android:host="reset-password" />
+            </intent-filter>
         </activity>
     </application>
 

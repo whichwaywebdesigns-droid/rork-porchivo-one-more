@@ -56,6 +56,19 @@ final class PorchivoAppDelegate: NSObject, UIApplicationDelegate, UNUserNotifica
         completionHandler()
     }
 
+    func application(
+        _ app: UIApplication,
+        open url: URL,
+        options: [UIApplication.OpenURLOptionsKey: Any] = [:]
+    ) -> Bool {
+        guard url.scheme == "porchivo" else { return false }
+        os_log("Received deep link: %{public}@", log: .default, type: .info, url.absoluteString)
+        Task { @MainActor in
+            appState?.pendingDeepLink = url
+        }
+        return true
+    }
+
     private func registerForRemoteNotificationsIfNeeded() {
         guard appState != nil else { return }
         UIApplication.shared.registerForRemoteNotifications()
