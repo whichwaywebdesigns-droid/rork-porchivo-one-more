@@ -44,6 +44,7 @@ const STORAGE_KEYS = {
   referralCreditUntil: 'porchivo_referral_credit_until',
   chimeId: 'porchivo_chime_id',
   theftShieldEnabled: 'porchivo_theft_shield',
+  orgCache: 'porchivo_org_cache',
 } as const;
 
 let rcConfigPromise: Promise<void> | null = null;
@@ -529,6 +530,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
       // scope: 'global' revokes all sessions across all devices, not just this one
       await supabase.auth.signOut({ scope: 'global' });
       await AsyncStorage.removeItem(STORAGE_KEYS.onboarded);
+      void AsyncStorage.removeItem(STORAGE_KEYS.orgCache);
       setUser(null);
       setIsOnboarded(false);
       setIsPremium(false);
@@ -560,6 +562,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
       void logoutRevenueCat();
       await supabase.auth.signOut();
       await AsyncStorage.removeItem(STORAGE_KEYS.onboarded);
+      void AsyncStorage.removeItem(STORAGE_KEYS.orgCache);
       setUser(null);
       setIsOnboarded(false);
       setIsPremium(false);

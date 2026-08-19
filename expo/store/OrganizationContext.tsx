@@ -1,10 +1,11 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import createContextHook from '@nkzw/create-context-hook';
 import { supabase } from '@/lib/supabase';
 import { useApp } from '@/store/AppContext';
 import { useOfflineQueue } from '@/store/OfflineQueueContext';
 import { log, warn } from '@/lib/logger';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   Organization,
   OrgMembership,
@@ -117,6 +118,18 @@ function announcementRow(row: Record<string, unknown>): OrgAnnouncement {
   };
 }
 
+// ─── Local cache for instant tier resolution ─────────────────────────────────
+// Persisted to AsyncStorage so isOrgMember is available before the network
+// fetch completes on subsequent launches. The network query still runs and
+// updates the data; the cache just prevents the loading-skeleton flash.
+const ORG_CACHE_KEY = 'porchivo_org_cache';
+
+interface OrgCachePayload {
+  userId: string;
+  memberships: OrgMembership[];
+  cachedAt: number;
+}
+
 // ─── Context ──────────────────────────────────────────────────────────────────
 
 export const [OrganizationProvider, useOrganization] = createContextHook(() => {
@@ -124,6 +137,31 @@ export const [OrganizationProvider, useOrganization] = createContextHook(() => {
   const { isOnline, enqueue } = useOfflineQueue();
   const queryClient = useQueryClient();
   const userId = session?.user?.id ?? null;
+
+  // ── Cached memberships (AsyncStorage) ─────────────────────────────────────
+  // Loaded synchronously enough (a few ms) to render the correct tier before
+  // the RPC fetch resolves. Falls back to null on first-ever launch.
+  const [cachedMemberships, setCachedMemberships] = useState<OrgMembership[] | null>(null);
+
+  useEffect(() => {
+    if (!userId) {
+      setCachedMemberships(null);
+      void AsyncStorage.removeItem(ORG_CACHE_KEY);
+      return;
+    }
+    void AsyncStorage.getItem(ORG_CACHE_KEY).then((raw) => {
+      if (!raw) return;
+      try {
+        const payload = JSON.parse(raw) as OrgCachePayload;
+        if (payload.userId === userId) {
+          setCachedMemberships(payload.memberships);
+          log('[OrgContext] Restored cached memberships for user', userId.slice(0, 8));
+        }
+      } catch {
+        // Corrupt cache — ignore, query will fetch fresh.
+      }
+    });
+  }, [userId]);
 
   // ── Membership context query (RPC) ────────────────────────────────────────
   const membershipQuery = useQuery({
@@ -143,15 +181,32 @@ export const [OrganizationProvider, useOrganization] = createContextHook(() => {
     staleTime: 1000 * 60 * 5,
   });
 
+  // Persist fresh membership data to AsyncStorage for next launch.
+  useEffect(() => {
+    if (userId && membershipQuery.data) {
+      const payload: OrgCachePayload = {
+        userId,
+        memberships: membershipQuery.data,
+        cachedAt: Date.now(),
+      };
+      void AsyncStorage.setItem(ORG_CACHE_KEY, JSON.stringify(payload));
+    }
+  }, [userId, membershipQuery.data]);
+
+  // Use cached data as fallback when the query hasn't resolved yet.
+  const memberships = useMemo(
+    () => membershipQuery.data ?? cachedMemberships ?? [],
+    [membershipQuery.data, cachedMemberships],
+  );
+
   // ── Active membership (first active, or first pending) ────────────────────
   const activeMembership = useMemo<OrgMembership | null>(() => {
-    const memberships = membershipQuery.data ?? [];
     return (
       memberships.find((m) => m.status === 'active') ??
       memberships.find((m) => m.status === 'pending') ??
       null
     );
-  }, [membershipQuery.data]);
+  }, [memberships]);
 
   const activeOrg: Organization | null = activeMembership?.org ?? null;
   const orgRole: OrgRole | null = activeMembership?.role ?? null;
@@ -1045,11 +1100,13 @@ export const [OrganizationProvider, useOrganization] = createContextHook(() => {
   return useMemo(
     () => ({
       // State
-      isLoading: membershipQuery.isLoading,
+      // isLoading is false once cached data is available, even if the network
+      // query is still fetching. This prevents the skeleton flash on launch.
+      isLoading: membershipQuery.isLoading && cachedMemberships === null,
       activeMembership,
       activeOrg,
       orgRole,
-      allMemberships: membershipQuery.data ?? [],
+      allMemberships: memberships,
       announcements: announcementsQuery.data ?? [],
       packageLog: packageLogQuery.data ?? [],
       isAnnouncementsLoading: announcementsQuery.isLoading,
@@ -1119,7 +1176,8 @@ export const [OrganizationProvider, useOrganization] = createContextHook(() => {
     }),
     [
       membershipQuery.isLoading,
-      membershipQuery.data,
+      cachedMemberships,
+      memberships,
       activeMembership,
       activeOrg,
       orgRole,
