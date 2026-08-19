@@ -514,6 +514,7 @@ export const [ShipmentsProvider, useShipments] = createContextHook(() => {
     nearbyShipments,
     activeShipments,
     completedShipments,
+    isLoading: shipmentsQuery.isLoading,
     addShipment,
     acceptShipment,
     completeShipment,
@@ -526,6 +527,7 @@ export const [ShipmentsProvider, useShipments] = createContextHook(() => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [
     shipmentsQuery.data,
+    shipmentsQuery.isLoading,
     myShipments,
     nearbyShipments,
     activeShipments,

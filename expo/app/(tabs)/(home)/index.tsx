@@ -14,6 +14,7 @@ import { useOrganization } from '@/store/OrganizationContext';
 import { useShipments } from '@/store/ShipmentsContext';
 import { useNotifications } from '@/store/NotificationsContext';
 import ShipmentCard from '@/components/ShipmentCard';
+import { HomeDashboardSkeleton } from '@/components/SkeletonLoader';
 import DailyPackageTheftFact from '@/components/DailyPackageTheftFact';
 import OnboardingWalkthrough from '@/components/OnboardingTooltip';
 import ActivationChecklist from '@/components/ActivationChecklist';
@@ -38,7 +39,7 @@ export default function HomeScreen() {
   const colors = useColors();
   const { user, isHomeowner, isPartner, session } = useApp();
   const { isOrgMember, isLoading: isOrgLoading } = useOrganization();
-  const { myShipments, nearbyShipments, acceptShipment } = useShipments();
+  const { myShipments, nearbyShipments, acceptShipment, isLoading: isShipmentsLoading } = useShipments();
   const { unreadNotificationCount } = useNotifications();
   const [refreshing, setRefreshing] = useState(false);
 
@@ -282,6 +283,33 @@ export default function HomeScreen() {
   // ready. The root layout redirect handles navigation to Deliveries.
   if (!isOrgLoading && !isOrgMember) {
     return <View style={[styles.container, { backgroundColor: colors.background }]} />;
+  }
+
+  // Skeleton: shown while org context resolves or the first shipment query
+  // loads with no cached data. Subsequent refetches use RefreshControl instead
+  // so the skeleton doesn't flash on pull-to-refresh.
+  const showSkeleton = isOrgLoading || (isShipmentsLoading && data.length === 0);
+  if (showSkeleton) {
+    return (
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <Stack.Screen
+          options={{
+            title: 'Porchivo',
+            headerLargeTitle: true,
+            headerLargeTitleStyle: { fontSize: 26, fontWeight: '900' as const, color: colors.slate },
+            headerStyle: { backgroundColor: colors.background },
+            headerTintColor: colors.slate,
+            headerShadowVisible: false,
+          }}
+        />
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.listContent}
+        >
+          <HomeDashboardSkeleton />
+        </ScrollView>
+      </View>
+    );
   }
 
   return (
