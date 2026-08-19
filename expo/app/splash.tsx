@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -19,6 +19,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useApp } from '@/store/AppContext';
+import { useOrganization } from '@/store/OrganizationContext';
 
 const SPLASH_CARD = require('@/assets/images/splash-cardboard-full.png');
 const HAS_SEEN_SLIDES_KEY = 'porchivo_pre_auth_slides_seen';
@@ -33,7 +34,17 @@ export default function SplashScreen(): React.ReactElement {
   const router = useRouter();
   const { width, height } = useWindowDimensions();
   const { session, isOnboarded } = useApp();
+  const { isOrgMember } = useOrganization();
   const [hasSeenSlides, setHasSeenSlides] = useState<boolean | null>(null);
+
+  // Ref so the Reanimated callback (captured at effect-run time) reads the
+  // latest org-membership value when the animation finishes 2.4s later —
+  // without adding isOrgMember to the effect deps (which would restart the
+  // animation every time org context resolves).
+  const isOrgMemberRef = useRef<boolean>(isOrgMember);
+  useEffect(() => {
+    isOrgMemberRef.current = isOrgMember;
+  }, [isOrgMember]);
 
   useEffect(() => {
     AsyncStorage.getItem(HAS_SEEN_SLIDES_KEY).then((value) => {
@@ -51,19 +62,29 @@ export default function SplashScreen(): React.ReactElement {
   const truckBounce = useSharedValue<number>(0);
 
   const navigateNext = () => {
+    const safeReplace = (path: string) => {
+      try {
+        router.replace(path as any);
+      } catch {
+        // Navigator not ready — root layout redirect will handle it.
+      }
+    };
+
     if (session) {
       if (isOnboarded) {
-        router.replace('/(tabs)/(home)' as any);
+        // Tier-aware: community members go to Home, free-tier to Deliveries.
+        const dest = isOrgMemberRef.current ? '/(tabs)/(home)' : '/(tabs)/packages';
+        safeReplace(dest);
       } else {
-        router.replace('/onboarding-setup' as any);
+        safeReplace('/onboarding-setup');
       }
       return;
     }
 
     if (hasSeenSlides) {
-      router.replace('/tracking-onboarding' as any);
+      safeReplace('/tracking-onboarding');
     } else {
-      router.replace('/onboarding' as any);
+      safeReplace('/onboarding');
     }
   };
 

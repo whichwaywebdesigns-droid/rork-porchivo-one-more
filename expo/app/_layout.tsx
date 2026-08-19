@@ -193,13 +193,29 @@ function RootLayoutNav() {
       target = "/welcome";
     }
 
+    let navTimer: ReturnType<typeof setTimeout> | null = null;
+
     if (target && target !== lastTarget.current) {
       lastTarget.current = target;
       log("[Layout] Navigating to:", target);
-      router.replace(target as any);
+      // Defer to the next event loop tick to avoid crashing during React's
+      // reconnectPassiveEffects phase (HMR in dev) when the navigator
+      // isn't ready. setTimeout(0) fires after the current synchronous
+      // effect cycle, by which time the navigator is guaranteed ready.
+      navTimer = setTimeout(() => {
+        try {
+          router.replace(target as any);
+        } catch {
+          lastTarget.current = null;
+        }
+      }, 0);
     } else if (!target) {
       lastTarget.current = null;
     }
+
+    return () => {
+      if (navTimer) clearTimeout(navTimer);
+    };
   }, [isOnboarded, isLoading, session, segments, router, hasSeenSlides, isOrgMember, isOrgLoading]);
 
   return (

@@ -42,21 +42,6 @@ export default function HomeScreen() {
   const { unreadNotificationCount } = useNotifications();
   const [refreshing, setRefreshing] = useState(false);
 
-  // Free-tier users don't have a Home tab in the tab bar; redirect them to
-  // Deliveries so any stale route to (home) doesn't land on a hidden tab.
-  useEffect(() => {
-    if (!isOrgLoading && !isOrgMember) {
-      // Safety net: if a free-tier user lands on the hidden Home tab (e.g.,
-      // root layout fired before org context resolved), redirect to Deliveries.
-      // Wrapped in try-catch because router.replace() can throw during React's
-      // reconnectPassiveEffects phase when the navigator isn't ready yet.
-      try {
-        router.replace('/(tabs)/packages' as any);
-      } catch {
-        // Navigator not ready — root layout guard will handle the redirect.
-      }
-    }
-  }, [isOrgLoading, isOrgMember, router]);
 
   // P-3: app-maturity gating. Counted on each home mount so first-time users
   // see a calm screen instead of 6 stacked marketing sections.
@@ -290,6 +275,14 @@ export default function HomeScreen() {
   ), [isPartnerView, router]);
 
   const [_walkthroughDone, setWalkthroughDone] = useState(false);
+
+  // Free-tier users don't have a Home tab. We render nothing instead of
+  // calling router.replace() — that crashes during React's
+  // reconnectPassiveEffects phase (HMR in dev) when the navigator isn't
+  // ready. The root layout redirect handles navigation to Deliveries.
+  if (!isOrgLoading && !isOrgMember) {
+    return <View style={[styles.container, { backgroundColor: colors.background }]} />;
+  }
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
