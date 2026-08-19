@@ -8,14 +8,12 @@ const rawUrl = (process.env.EXPO_PUBLIC_SUPABASE_URL ?? '').trim().replace(/^['"
 // M-1: migrated from EXPO_PUBLIC_SUPABASE_ANON_KEY to the new publishable-key
 // var name. Supabase is phasing out legacy JWT-format API keys in favor of
 // sb_publishable_... keys. We read the new var first and fall back to the
-// legacy var name so a stale .env / EAS secret doesn't break the app during
-// the transition. Once all environments set EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
-// the fallback can be removed.
-const supabasePublishableKey = (
-  process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
-  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ??
-  ''
-).trim().replace(/^['"]|['"]$/g, '');
+// legacy anon key only if it is NOT a JWT-format key (eyJ...) — legacy JWT
+// keys are disabled on this project and would produce a 401 "Legacy API
+// keys are disabled" error.
+const rawPublishable = (process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? '').trim().replace(/^['"]|['"]$/g, '');
+const rawAnon = (process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? '').trim().replace(/^['"]|['"]$/g, '');
+const supabasePublishableKey = rawPublishable || (rawAnon && !rawAnon.startsWith('eyJ') ? rawAnon : '');
 const supabaseUrl = rawUrl && !/^https?:\/\//i.test(rawUrl) ? `https://${rawUrl}` : rawUrl;
 
 if (!supabaseUrl || !supabasePublishableKey) {

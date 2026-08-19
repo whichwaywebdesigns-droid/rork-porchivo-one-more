@@ -29,7 +29,7 @@ import { log } from '@/lib/logger';
 export default function ResetPasswordScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const params = useLocalSearchParams<{ access_token?: string; expires_at?: string; refresh_token?: string; token_type?: string; type?: string }>();
+  const params = useLocalSearchParams<{ access_token?: string; expires_at?: string; refresh_token?: string; token_type?: string; type?: string; code?: string }>();
 
   const [password, setPassword] = useState<string>('');
   const [confirm, setConfirm] = useState<string>('');
@@ -48,10 +48,28 @@ export default function ResetPasswordScreen() {
     ]).start();
   }, []);
 
-  // If Supabase forwarded recovery params, exchange them for a session so
-  // updateUser() works. This runs once on mount.
+  // Exchange PKCE code or implicit-flow tokens for a session.
+  // With flowType: 'pkce', the redirect URL includes a `code` parameter.
+  // With the legacy implicit flow, it includes access_token/refresh_token.
+  // For magiclink type, redirect to the main app after session is established.
   useEffect(() => {
     async function establishSession() {
+      // PKCE flow — exchange the authorization code for a session
+      if (params.code) {
+        try {
+          const { error: exchangeErr } = await supabase.auth.exchangeCodeForSession(params.code);
+          if (exchangeErr) {
+            log('[ResetPassword] PKCE exchange error:', exchangeErr.message);
+          } else if (params.type === 'magiclink') {
+            // Magic link sign-in — go straight to the app
+            router.replace('/(tabs)' as any);
+          }
+        } catch (e) {
+          log('[ResetPassword] PKCE exchange exception:', e);
+        }
+        return;
+      }
+      // Legacy implicit flow — set session from access/refresh tokens
       if (!params.access_token || !params.refresh_token) return;
       try {
         const { error: sessionErr } = await supabase.auth.setSession({
@@ -60,13 +78,15 @@ export default function ResetPasswordScreen() {
         });
         if (sessionErr) {
           log('[ResetPassword] setSession error:', sessionErr.message);
+        } else if (params.type === 'magiclink') {
+          router.replace('/(tabs)' as any);
         }
       } catch (e) {
         log('[ResetPassword] setSession exception:', e);
       }
     }
     void establishSession();
-  }, [params.access_token, params.refresh_token]);
+  }, [params.code, params.access_token, params.refresh_token, params.type, router]);
 
   const validate = useCallback((): boolean => {
     if (password.length < 8) {

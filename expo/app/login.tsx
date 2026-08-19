@@ -303,6 +303,7 @@ export default function LoginScreen() {
     if (error.includes('Password should be at least')) return 'Password must be at least 8 characters.';
     if (error.includes('rate limit')) return 'Too many attempts. Please wait a moment and try again.';
     if (error.includes('Signups not allowed')) return 'Sign ups are currently disabled. Please contact support.';
+    if (error.includes('Legacy API') || error.includes('legacy_api')) return 'Authentication service configuration issue. Please contact support@porchivo.com.';
     return 'Something went wrong. Please try again.';
   };
 
@@ -337,7 +338,9 @@ export default function LoginScreen() {
         return;
       }
 
-      const redirectTo = 'porchivo://reset-password';
+      const redirectTo = Platform.OS === 'web' && typeof window !== 'undefined'
+        ? `${window.location.origin}/reset-password`
+        : 'porchivo://reset-password';
       const { error } = await supabase.auth.signInWithOtp({
         email: identifier.trim(),
         options: {
@@ -489,8 +492,11 @@ export default function LoginScreen() {
           text: 'Send Reset Link',
           onPress: async () => {
             try {
+              const redirectTo = Platform.OS === 'web' && typeof window !== 'undefined'
+                ? `${window.location.origin}/reset-password`
+                : 'porchivo://reset-password';
               const { error } = await supabase.auth.resetPasswordForEmail(identifier.trim(), {
-                redirectTo: 'porchivo://reset-password',
+                redirectTo,
               });
               if (error) Alert.alert('Error', getSupabaseErrorMessage(error.message));
               else Alert.alert('Email Sent', 'Check your inbox for a password reset link.');
