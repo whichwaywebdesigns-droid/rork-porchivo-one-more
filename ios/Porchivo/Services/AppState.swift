@@ -99,6 +99,7 @@ final class AppState {
 
     private let supabase = SupabaseService.shared
     private let packagesKey = "porchivo_tracked_packages"
+    private let orgCacheKeyPrefix = "porchivo_org_cache_"
     private let biometricPrefKey = "porchivo_biometric_unlock_enabled"
     private let biometricDeclinedKey = "porchivo_biometric_enrollment_declined"
     private let encoder = JSONEncoder()
@@ -474,8 +475,12 @@ final class AppState {
 
     @MainActor
     func signOut() async {
+        let userId = currentUserId
         await supabase.signOut()
         clearPendingActions()
+        if let userId {
+            UserDefaults.standard.removeObject(forKey: orgCacheKeyPrefix + userId)
+        }
         biometricUnlockEnabled = false
         UserDefaults.standard.set(false, forKey: biometricPrefKey)
         biometricEnrollmentDeclined = false
@@ -507,8 +512,21 @@ final class AppState {
         authState = .authenticated(MockData.currentUserID)
     }
 
+    /// Loads cached org membership from UserDefaults so the correct tier
+    /// (Free vs Community) renders instantly on launch without waiting for
+    /// the network fetch. The RPC fetch still runs and updates if the data
+    /// has changed.
+    func loadCachedOrgContext(userId: String) {
+        let key = orgCacheKeyPrefix + userId
+        guard let data = UserDefaults.standard.data(forKey: key),
+              let cached = try? decoder.decode(OrgMembership.self, from: data) else { return }
+        orgMembership = cached
+        orgLoadState = .success(Unit())
+    }
+
     @MainActor
     private func loadInitialData(userId: String) async {
+        loadCachedOrgContext(userId: userId)
         await loadProfile(userId: userId)
         await loadShipments(userId: userId)
         await loadNotifications(userId: userId)
@@ -890,7 +908,11 @@ final class AppState {
     @MainActor
     func loadOrgContext(userId: String) async {
         guard isSupabaseConfigured else { return }
-        orgLoadState = .loading
+        // Skip the loading indicator when we have cached data — the network
+        // fetch updates silently without a flash.
+        if orgMembership == nil {
+            orgLoadState = .loading
+        }
         let result = await supabase.fetchOrgContext()
         switch result {
         case .success(let rows):
@@ -904,8 +926,14 @@ final class AppState {
                     status: row.status,
                     inviteCode: nil
                 )
+                // Persist to UserDefaults for instant tier resolution on next launch
+                if let data = try? encoder.encode(orgMembership) {
+                    UserDefaults.standard.set(data, forKey: orgCacheKeyPrefix + userId)
+                }
             } else {
                 orgMembership = nil
+                // Clear stale cache so a removed member doesn't see Community tier
+                UserDefaults.standard.removeObject(forKey: orgCacheKeyPrefix + userId)
             }
             orgLoadState = .success(Unit())
         case .failure:

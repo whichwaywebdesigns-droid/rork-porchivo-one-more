@@ -249,7 +249,7 @@ nonisolated struct DbOrgContextRow: Codable, Sendable {
 }
 
 /// Lightweight org membership for AppState.
-nonisolated struct OrgMembership: Equatable, Sendable {
+nonisolated struct OrgMembership: Codable, Equatable, Sendable {
     let orgId: String
     let orgName: String
     let role: String

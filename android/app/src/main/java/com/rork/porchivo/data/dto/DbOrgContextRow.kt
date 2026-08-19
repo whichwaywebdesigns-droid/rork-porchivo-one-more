@@ -24,6 +24,7 @@ data class DbOrgContextRow(
 /**
  * Lightweight org membership for AppRepository.
  */
+@Serializable
 data class OrgMembership(
     val orgId: String,
     val orgName: String,

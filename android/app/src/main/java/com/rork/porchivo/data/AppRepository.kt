@@ -160,6 +160,9 @@ class AppRepository(context: Context) {
 
     // Local storage for tracked packages (SharedPreferences — mirrors Expo AsyncStorage)
     private val packagesPrefs = context.getSharedPreferences("porchivo_packages", Context.MODE_PRIVATE)
+
+    // Local storage for org membership cache (SharedPreferences — instant tier resolution on launch)
+    private val orgPrefs = context.getSharedPreferences("porchivo_org", Context.MODE_PRIVATE)
     private val packagesJson = kotlinx.serialization.json.Json {
         ignoreUnknownKeys = true
         encodeDefaults = true
@@ -462,8 +465,13 @@ class AppRepository(context: Context) {
      * Sign out — clears session and all data.
      */
     fun signOut() {
+        val userId = (authState.value as? AuthState.Authenticated)?.userId
         supabase?.signOut()
         clearPendingActions()
+        // Clear org cache so a different user doesn't see stale tier
+        if (userId != null) {
+            orgPrefs.edit().remove("org_cache_$userId").apply()
+        }
         _authState.value = AuthState.Unauthenticated
         _user.value = null
         _tier.value = SubscriptionTier.FREE
@@ -499,7 +507,20 @@ class AppRepository(context: Context) {
     /**
      * Load all initial data after authentication.
      */
+    /// Loads cached org membership from SharedPreferences so the correct tier
+    /// (Free vs Community) renders instantly on launch without waiting for
+    /// the network fetch. The RPC fetch still runs and updates if the data
+    /// has changed.
+    private fun loadCachedOrgContext(userId: String) {
+        val raw = orgPrefs.getString("org_cache_$userId", null) ?: return
+        try {
+            val cached = packagesJson.decodeFromString<OrgMembership>(raw)
+            _orgMembership.value = cached
+        } catch (e: Exception) { /* corrupt cache — ignore */ }
+    }
+
     private suspend fun loadInitialData(userId: String) {
+        loadCachedOrgContext(userId)
         loadProfile(userId)
         loadShipments(userId)
         loadNotifications(userId)
@@ -904,16 +925,28 @@ class AppRepository(context: Context) {
             val rows = result.getOrNull() ?: emptyList()
             val active = rows.firstOrNull { it.status == "active" }
                 ?: rows.firstOrNull { it.status == "pending" }
+            val userId = (authState.value as? AuthState.Authenticated)?.userId
             if (active != null && active.orgId != null) {
-                _orgMembership.value = OrgMembership(
+                val membership = OrgMembership(
                     orgId = active.orgId,
                     orgName = active.orgName ?: "Your Community",
                     role = active.role ?: "resident",
                     status = active.status ?: "pending",
                     inviteCode = null,
                 )
+                _orgMembership.value = membership
+                // Persist to SharedPreferences for instant tier resolution on next launch
+                if (userId != null) {
+                    orgPrefs.edit()
+                        .putString("org_cache_$userId", packagesJson.encodeToString(membership))
+                        .apply()
+                }
             } else {
                 _orgMembership.value = null
+                // Clear stale cache so a removed member doesn't see Community tier
+                if (userId != null) {
+                    orgPrefs.edit().remove("org_cache_$userId").apply()
+                }
             }
         }
     }
