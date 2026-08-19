@@ -46,7 +46,15 @@ export default function HomeScreen() {
   // Deliveries so any stale route to (home) doesn't land on a hidden tab.
   useEffect(() => {
     if (!isOrgLoading && !isOrgMember) {
-      router.replace('/(tabs)/packages' as any);
+      // Safety net: if a free-tier user lands on the hidden Home tab (e.g.,
+      // root layout fired before org context resolved), redirect to Deliveries.
+      // Wrapped in try-catch because router.replace() can throw during React's
+      // reconnectPassiveEffects phase when the navigator isn't ready yet.
+      try {
+        router.replace('/(tabs)/packages' as any);
+      } catch {
+        // Navigator not ready — root layout guard will handle the redirect.
+      }
     }
   }, [isOrgLoading, isOrgMember, router]);
 

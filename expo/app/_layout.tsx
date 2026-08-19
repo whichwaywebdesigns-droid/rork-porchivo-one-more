@@ -28,7 +28,7 @@ import { useReviewPrompt } from "@/hooks/useReviewPrompt";
 import { ReviewPromptSheet } from "@/components/ReviewPromptSheet";
 import { ExperimentsProvider } from "@/store/ExperimentsContext";
 import { ProfileExtensionProvider } from "@/store/ProfileExtensionContext";
-import { OrganizationProvider } from "@/store/OrganizationContext";
+import { OrganizationProvider, useOrganization } from "@/store/OrganizationContext";
 import { FieldGuideProvider } from "@/store/FieldGuideContext";
 import { TrustEngineProvider } from "@/store/TrustEngineContext";
 import { ThemeProvider } from "@/providers/ThemeProvider";
@@ -73,6 +73,7 @@ const queryClient = new QueryClient();
 
 function RootLayoutNav() {
   const { isOnboarded, isLoading, session } = useApp();
+  const { isOrgMember, isLoading: isOrgLoading } = useOrganization();
   const Colors = useColors();
   const { isDark } = useTheme();
   const router = useRouter();
@@ -129,6 +130,11 @@ function RootLayoutNav() {
   useEffect(() => {
     if (isLoading || isOnboarded === null || hasSeenSlides === null) return;
 
+    // Wait for org context to resolve before redirecting — we need isOrgMember
+    // to pick the correct initial tab. Only matters when there's a session
+    // (the org query is disabled without a userId, so isOrgLoading is false).
+    if (session && isOrgLoading) return;
+
     const currentSegment = segments[0] as string;
 
     // Guard: wait for the navigator to resolve the initial route before
@@ -178,7 +184,11 @@ function RootLayoutNav() {
     } else if (isOnboarded && session && inWelcome && !inTrackingOnboarding) {
       // Onboarded user inside the OLD pre-auth/welcome chain -> send home.
       // Tracking onboarding screens are excluded — the step manager exits itself.
-      target = "/(tabs)/(home)";
+      // Tier-aware: community members go to Home tab, free-tier users to
+      // Deliveries. Without this, free-tier users land on the hidden Home tab
+      // and the HomeScreen safety redirect fires — which can crash during
+      // React reconnection (navigator not yet ready).
+      target = isOrgMember ? "/(tabs)/(home)" : "/(tabs)/packages";
     } else if (isOnboarded && !session && !inWelcome) {
       target = "/welcome";
     }
@@ -190,7 +200,7 @@ function RootLayoutNav() {
     } else if (!target) {
       lastTarget.current = null;
     }
-  }, [isOnboarded, isLoading, session, segments, router, hasSeenSlides]);
+  }, [isOnboarded, isLoading, session, segments, router, hasSeenSlides, isOrgMember, isOrgLoading]);
 
   return (
     <View style={{ flex: 1 }}>
