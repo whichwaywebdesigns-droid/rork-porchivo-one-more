@@ -336,7 +336,7 @@ struct OnboardingFlowView: View {
                 Text("Theft Shield flagged tomorrow's 1:40 PM delivery as high-risk.")
                     .font(.system(size: 19, weight: .heavy))
                     .foregroundStyle(c.textPrimary)
-                Text("Alerts are the only way to know the moment it lands. Don't let it sit.")
+                Text("Enable alerts to be notified the moment it arrives.")
                     .font(.system(size: 14))
                     .foregroundStyle(c.textSecondary)
             }
@@ -349,12 +349,9 @@ struct OnboardingFlowView: View {
                 PrimaryButton(title: "Turn on alerts", systemImage: "bell.fill") {
                     Task { await viewModel.requestFullAuth(in: appState) }
                 }
-                Button("Not now") {
-                    Haptics.selection()
-                    viewModel.advance() // → re-opt-in step
-                }
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(c.textSecondary)
+                // No custom "Not now" bypass — the only path presents Apple's
+                // system authorization sheet. The user can deny there, and
+                // requestFullAuth routes to the re-opt-in step if denied.
             }
         }
     }
@@ -373,7 +370,7 @@ struct OnboardingFlowView: View {
                     .font(.system(size: 22, weight: .heavy))
                     .foregroundStyle(c.textPrimary)
                     .multilineTextAlignment(.center)
-                Text("And your alerts were off. It sat unattended for 47 minutes. Turn alerts on so the next one doesn't.")
+                Text("And your alerts were off. Enable alerts so you're notified for the next one.")
                     .font(.system(size: 14))
                     .foregroundStyle(c.textSecondary)
                     .multilineTextAlignment(.center)

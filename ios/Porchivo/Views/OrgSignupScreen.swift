@@ -185,6 +185,20 @@ struct OrgSignupScreen: View {
                 .font(.system(size: 20, weight: .black))
                 .foregroundStyle(c.textPrimary)
 
+            // B2B disclaimer — clarifies this is an organization-level service,
+            // not a consumer in-app subscription (Apple Guideline 3.1.3(e)).
+            HStack(spacing: 10) {
+                Image(systemName: "building.2.fill")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundStyle(c.accent)
+                Text("Plans are billed to your organization for community-wide access. Residents always use Porchivo free.")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(c.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(12)
+            .background(c.elevated, in: .rect(cornerRadius: Radius.md))
+
             HStack {
                 Button(action: { Haptics.selection(); isAnnual = false }) {
                     Text("Monthly")

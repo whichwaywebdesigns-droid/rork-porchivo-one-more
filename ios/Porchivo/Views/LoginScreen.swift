@@ -120,7 +120,9 @@ struct LoginScreen: View {
                     .foregroundStyle(c.textSecondary)
                     .multilineTextAlignment(.center)
             }
+            #if DEBUG
             developerLoginLink
+            #endif
         }
     }
 

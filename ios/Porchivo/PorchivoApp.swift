@@ -24,7 +24,6 @@ struct PorchivoApp: App {
                 .tint(.porchivoAccent)
                 .privacyShield()
         .task {
-                    RevenueCatService.shared.configure()
                     await appState.restoreSession()
                 }
                 .onAppear {

@@ -979,7 +979,12 @@ actor SupabaseService {
         }
     }
 
-    // MARK: Account deletion (graceful — 30-day deactivation)
+    // MARK: Account deletion (graceful — 30-day deactivation then permanent purge)
+    // The client calls `request_account_deletion` RPC which stamps `deletion_requested_at`
+    // and bans the user immediately. A scheduled `purge_deleted_accounts` RPC
+    // permanently deletes `auth.users`, all profile data, and Storage objects
+    // (avatars + delivery-photos) after the 30-day grace period. See
+    // supabase/graceful-deletion-migration.sql and storage-cleanup-on-deletion-migration.sql.
 
     struct DeletionResult: Decodable, Sendable {
         let success: Bool
