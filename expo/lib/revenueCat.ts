@@ -40,8 +40,10 @@ function getRCApiKey(): string {
   if (__DEV__ || appEnv !== 'production' || Platform.OS === 'web') {
     return process.env.EXPO_PUBLIC_REVENUECAT_TEST_API_KEY ?? '';
   }
+  // No IAP on iOS — only Android keeps RevenueCat. iOS returns '' which
+  // skips configuration entirely (see configureRevenueCat).
   return Platform.select({
-    ios: process.env.EXPO_PUBLIC_REVENUECAT_IOS_API_KEY ?? '',
+    ios: '',
     android: process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY ?? '',
     default: process.env.EXPO_PUBLIC_REVENUECAT_TEST_API_KEY ?? '',
   }) as string;
