@@ -15,8 +15,11 @@ import com.rork.porchivo.ui.theme.AppTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Keep the splash theme (with the centered splash image) until the first
+        // frame is ready, then switch to the main app theme for a clean handoff.
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        setTheme(R.style.Theme_RorkApp)
 
         val repository = AppRepositoryHolder.get()
 

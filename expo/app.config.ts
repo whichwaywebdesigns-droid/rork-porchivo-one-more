@@ -13,7 +13,7 @@ export default (): { expo: ExpoConfig } => ({
     splash: {
       image: "./assets/images/splash-box.png",
       resizeMode: "cover",
-      backgroundColor: "#FFFFFF",
+      backgroundColor: "#CACBCB",
     },
     ios: {
       supportsTablet: false,
