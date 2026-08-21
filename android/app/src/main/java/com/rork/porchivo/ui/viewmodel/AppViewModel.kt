@@ -42,6 +42,7 @@ class AppViewModel : ViewModel() {
     val darkThemeOverride: StateFlow<Boolean?> = repo.darkThemeOverride
     val language: StateFlow<AppLanguage> = repo.language
     val authError: StateFlow<String?> = repo.authError
+    val isReadyToShowUI: StateFlow<Boolean> = repo.isReadyToShowUI
 
     // ── Language transition (fade) ─────────────────────────────────────
     private val _languageTransitioning = MutableStateFlow(false)

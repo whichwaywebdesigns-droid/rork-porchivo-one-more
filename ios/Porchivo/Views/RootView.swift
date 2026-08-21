@@ -13,25 +13,39 @@ struct RootView: View {
     @Environment(\.colorScheme) private var systemScheme
     @Environment(\.scenePhase) private var scenePhase
 
+    private var showSplashOverlay: Bool {
+        appState.authState == .loading ||
+            (appState.isAuthenticated && !appState.isReadyToShowUI)
+    }
+
     var body: some View {
-        Group {
-            switch appState.authState {
-            case .loading:
-                SplashView()
-            case .unauthenticated, .error:
-                LoginScreen()
-            case .locked:
-                UnlockScreen()
-            case .authenticated(let userId):
-                if appState.needsBiometricEnrollment {
-                    BiometricEnrollmentScreen()
-                } else if appState.isOnboarded || !appState.isSupabaseConfigured {
-                    MainTabView()
-                } else {
-                    OnboardingFlowView()
-                        .id(userId)
+        ZStack {
+            Group {
+                switch appState.authState {
+                case .loading:
+                    EmptyView()
+                case .unauthenticated, .error:
+                    LoginScreen()
+                case .locked:
+                    UnlockScreen()
+                case .authenticated(let userId):
+                    if appState.needsBiometricEnrollment {
+                        BiometricEnrollmentScreen()
+                    } else if appState.isOnboarded || !appState.isSupabaseConfigured {
+                        MainTabView()
+                    } else {
+                        OnboardingFlowView()
+                            .id(userId)
+                    }
                 }
             }
+
+            SplashView()
+                .opacity(showSplashOverlay ? 1 : 0)
+                .animation(.easeOut(duration: 0.45), value: showSplashOverlay)
+                .allowsHitTesting(showSplashOverlay)
+                .ignoresSafeArea()
+                .zIndex(1)
         }
         .opacity(appState.languageManager.languageTransitioning ? 0 : 1)
         .animation(.easeInOut(duration: 0.2), value: appState.languageManager.languageTransitioning)
@@ -52,19 +66,14 @@ struct RootView: View {
 }
 
 private struct SplashView: View {
-    @Environment(\.porchivo) private var c
     var body: some View {
         ZStack {
-            c.background.ignoresSafeArea()
-            VStack(spacing: 16) {
-                BrandLogoWithBox(logoSize: 80)
-                Text("Porchivo")
-                    .font(.system(size: 28, weight: .black))
-                    .foregroundStyle(c.textPrimary)
-                ProgressView()
-                    .controlSize(.large)
-                    .tint(c.accent)
-            }
+            Color("SplashBackground")
+                .ignoresSafeArea()
+            Image("SplashImage")
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .ignoresSafeArea()
         }
     }
 }

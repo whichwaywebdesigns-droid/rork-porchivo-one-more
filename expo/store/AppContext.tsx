@@ -72,6 +72,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
   const [referralCreditUntil, setReferralCreditUntil] = useState<number | null>(null);
   const [chimeId, setChimeId] = useState<string>('default');
   const [theftShieldEnabled, setTheftShieldEnabled] = useState<boolean>(false);
+  const [isReadyToShowUI, setIsReadyToShowUI] = useState<boolean>(false);
 
   useEffect(() => {
     log('[AppContext] Setting up Supabase auth listener...');
@@ -84,6 +85,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
       log('[AppContext] Auth state changed:', _event, newSession ? 'session exists' : 'no session');
       setSession(newSession);
+      setIsReadyToShowUI(false);
       if (_event === 'SIGNED_OUT') {
         log('[AppContext] User signed out, clearing state');
         setUser(null);
@@ -194,6 +196,20 @@ export const [AppProvider, useApp] = createContextHook(() => {
     },
     enabled: !!session?.user?.id,
   });
+
+  // Drive the splash fade-out: keep the overlay visible until auth is resolved
+  // and the profile query has finished its initial load for signed-in users.
+  useEffect(() => {
+    if (authLoading) {
+      setIsReadyToShowUI(false);
+      return;
+    }
+    if (!session?.user?.id) {
+      setIsReadyToShowUI(true);
+      return;
+    }
+    setIsReadyToShowUI(!profileQuery.isLoading);
+  }, [authLoading, session?.user?.id, profileQuery.isLoading]);
 
   useEffect(() => {
     if (profileQuery.data) {
@@ -628,6 +644,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
     user,
     isOnboarded,
     isLoading: (!!session?.user?.id && profileQuery.isLoading) || authLoading,
+    isReadyToShowUI,
     isHomeowner,
     isPartner,
     isPremium,
@@ -678,6 +695,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
     session,
     user,
     isOnboarded,
+    isReadyToShowUI,
     profileQuery.isLoading,
     authLoading,
     isHomeowner,

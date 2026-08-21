@@ -35,6 +35,7 @@ struct OrgSignupScreen: View {
     @State private var checkoutOrgId: String?
     @State private var inviteCode: String?
     @State private var createdOrgName = ""
+    @State private var webAuthSession: ASWebAuthSessionWrapper?
 
     private let orgTypes: [(id: String, label: String)] = [
         ("hoa", "HOA"),
@@ -439,12 +440,16 @@ struct OrgSignupScreen: View {
             checkoutSessionId = response.sessionId
             checkoutOrgId = response.orgId
 
-            // Open Stripe Checkout via ASWebAuthenticationSession
+            // Open Stripe Checkout via ASWebAuthenticationSession. Keep a strong
+            // reference in @State so the wrapper is not deallocated while the
+            // sheet is still visible; release it once the callback fires.
             let session = ASWebAuthSessionWrapper(
                 url: URL(string: response.checkoutUrl)!,
                 callbackScheme: "porchivo"
             ) { callbackURL, error in
                 Task { @MainActor in
+                    // Release the retained wrapper once the callback fires.
+                    webAuthSession = nil
                     if let error {
                         errorMessage = error.localizedDescription
                         step = .cancelled
@@ -469,6 +474,7 @@ struct OrgSignupScreen: View {
                     }
                 }
             }
+            webAuthSession = session
             session.start()
 
         case .failure(let error):

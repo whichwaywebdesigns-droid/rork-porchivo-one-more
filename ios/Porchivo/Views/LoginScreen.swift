@@ -93,7 +93,7 @@ struct LoginScreen: View {
             if let err = appState.authError {
                 errorBanner(err)
             }
-            if appState.isSupabaseConfigured == false {
+            if appState.isDemoMode {
                 demoHint
             }
         }

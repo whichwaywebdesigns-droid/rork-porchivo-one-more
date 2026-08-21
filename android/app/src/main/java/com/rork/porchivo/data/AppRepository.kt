@@ -119,6 +119,12 @@ class AppRepository(context: Context) {
     private val _authError = MutableStateFlow<String?>(null)
     val authError: StateFlow<String?> = _authError.asStateFlow()
 
+    // Controls the splash-screen fade-out. Stays true until the authenticated
+    // home dashboard has finished its initial data load so the user never sees
+    // an empty dashboard behind a disappearing splash.
+    private val _isReadyToShowUI = MutableStateFlow(false)
+    val isReadyToShowUI: StateFlow<Boolean> = _isReadyToShowUI.asStateFlow()
+
     // ── Language preference ────────────────────────────────────────────
     private val _language = MutableStateFlow(AppLanguage.DEFAULT)
     val language: StateFlow<AppLanguage> = _language.asStateFlow()
@@ -320,6 +326,7 @@ class AppRepository(context: Context) {
             val session = result.getOrNull()
             if (session != null) {
                 _authState.value = AuthState.Authenticated(session.user?.id ?: "")
+                _isReadyToShowUI.value = false
                 loadInitialData(session.user?.id ?: "")
             }
             true
@@ -343,6 +350,7 @@ class AppRepository(context: Context) {
             val session = result.getOrNull()
             if (session != null && session.user != null) {
                 _authState.value = AuthState.Authenticated(session.user?.id ?: "")
+                _isReadyToShowUI.value = false
                 loadInitialData(session.user?.id ?: "")
             }
             true

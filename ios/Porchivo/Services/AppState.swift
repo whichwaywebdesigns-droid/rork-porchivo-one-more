@@ -69,6 +69,22 @@ final class AppState {
     // Backend readiness
     var isSupabaseConfigured: Bool = false
 
+    // Demo mode is only available in DEBUG builds. It seeds a mock user and
+    // accepts any credentials when the backend is not configured. Release
+    // builds must never expose this path to App Store reviewers.
+    var isDemoMode: Bool {
+        #if DEBUG
+        return !isSupabaseConfigured
+        #else
+        return false
+        #endif
+    }
+
+    // Controls the splash-screen fade-out. Stays true until the authenticated
+    // home dashboard has finished its initial data load so the user never sees
+    // an empty dashboard behind a disappearing splash.
+    var isReadyToShowUI: Bool = false
+
     // Biometrics — when true and a session is restorable, app cold-starts into
     // `.locked` and requires a Face ID / Touch ID prompt before loading data.
     var biometricUnlockEnabled: Bool = false
@@ -218,6 +234,7 @@ final class AppState {
     @MainActor
     func restoreSession() async {
         authState = .loading
+        isReadyToShowUI = false
         if !isSupabaseConfigured {
             // Demo mode — no backend. Drop straight into login; on auth we seed mock.
             authState = .unauthenticated
@@ -258,6 +275,7 @@ final class AppState {
     func unlockSession() async {
         guard case .locked(let userId) = authState else { return }
         authState = .authenticated(userId)
+        isReadyToShowUI = false
         await loadInitialData(userId: userId)
     }
 
@@ -457,7 +475,7 @@ final class AppState {
     @MainActor
     func signUp(email: String, password: String) async -> Bool {
         authError = nil
-        if !isSupabaseConfigured {
+        if isDemoMode {
             seedDemoUser()
             return true
         }
@@ -530,6 +548,7 @@ final class AppState {
 
     @MainActor
     private func loadInitialData(userId: String) async {
+        isReadyToShowUI = false
         loadCachedOrgContext(userId: userId)
         let cachedOrgId = orgMembership?.orgId
 
@@ -551,6 +570,7 @@ final class AppState {
         }
 
         loadLocalPackages()
+        isReadyToShowUI = true
     }
 
     /// Prefetch announcements and maintenance requests in parallel.

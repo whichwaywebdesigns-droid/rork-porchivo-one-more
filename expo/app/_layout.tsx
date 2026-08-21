@@ -36,6 +36,7 @@ import { LanguageRootProvider } from "@/i18n/LanguageProvider";
 import { ToastProvider } from "@/providers/ToastProvider";
 import { OfflineQueueProvider } from "@/store/OfflineQueueContext";
 import { OfflineBanner } from "@/components/OfflineBanner";
+import { SplashOverlay } from "@/components/SplashOverlay";
 import { BackgroundErrorProvider } from "@/store/BackgroundErrorContext";
 import { BackgroundErrorBanner } from "@/components/BackgroundErrorBanner";
 import { useTheme } from "@/hooks/useTheme";
@@ -72,7 +73,7 @@ void initSuperwall();
 const queryClient = new QueryClient();
 
 function RootLayoutNav() {
-  const { isOnboarded, isLoading, session } = useApp();
+  const { isOnboarded, isLoading, isReadyToShowUI, session } = useApp();
   const { isOrgMember, isLoading: isOrgLoading } = useOrganization();
   const Colors = useColors();
   const { isDark } = useTheme();
@@ -81,6 +82,11 @@ function RootLayoutNav() {
   const lastTarget = useRef<string | null>(null);
   const mountedAtRef = useRef<number>(Date.now());
   const [hasSeenSlides, setHasSeenSlides] = useState<boolean | null>(null);
+  const showSplashOverlay =
+    isLoading ||
+    isOnboarded === null ||
+    hasSeenSlides === null ||
+    (!!session && (isOrgLoading || !isReadyToShowUI));
 
   useEffect(() => {
     AsyncStorage.getItem("porchivo_pre_auth_slides_seen").then((value) => {
@@ -314,6 +320,7 @@ function RootLayoutNav() {
       <Stack.Screen name="delete-account" options={{ title: "Delete Account", presentation: "modal" }} />
     </Stack>
     {/* In-app rating prompt — shown at session milestones after onboarding */}
+    <SplashOverlay visible={showSplashOverlay} />
     <ReviewPromptSheet
       visible={reviewPrompt.visible}
       reason={reviewPrompt.reason}
