@@ -50,13 +50,20 @@ struct LoginScreen: View {
             )
         } else {
         ZStack {
-            // Hero illustration fills the background. In dark mode we dim it
-            // slightly so the white porch remains readable without clashing.
-            Image("LoginHero")
-                .resizable()
-                .aspectRatio(contentMode: .fill)
-                .ignoresSafeArea()
-                .overlay(colorScheme == .dark ? Color.black.opacity(0.28) : Color.clear)
+            // Hero illustration fills the background and stays centered both
+            // horizontally and vertically so the porch/logo composition never
+            // drifts toward an edge. In dark mode we dim it slightly so the
+            // white porch remains readable without clashing.
+            GeometryReader { geo in
+                Image("LoginHero")
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: geo.size.width, height: geo.size.height)
+                    .clipped()
+                    .position(x: geo.size.width / 2, y: geo.size.height / 2)
+                    .overlay(colorScheme == .dark ? Color.black.opacity(0.28) : Color.clear)
+            }
+            .ignoresSafeArea()
 
             // Scrollable controls overlay the bottom half of the illustration.
             ScrollView {

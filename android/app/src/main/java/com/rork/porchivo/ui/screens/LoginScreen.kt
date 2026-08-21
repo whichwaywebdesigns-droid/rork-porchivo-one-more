@@ -84,11 +84,13 @@ fun LoginScreen(
     }
 
     Box(modifier = modifier.fillMaxSize()) {
-        // Hero illustration fills the background.
+        // Hero illustration fills the background and stays centered both
+        // horizontally and vertically so the porch/logo composition never drifts.
         Image(
             painter = painterResource(id = R.drawable.porchlogin),
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
+            alignment = Alignment.Center,
             contentScale = ContentScale.Crop,
         )
 
