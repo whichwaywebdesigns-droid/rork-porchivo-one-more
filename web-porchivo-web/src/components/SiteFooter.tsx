@@ -16,22 +16,14 @@ const FOOTER_SECTION_KEYS: Record<string, string> = {
 function PorchivoWordmark() {
   return (
     <div className="flex items-center gap-2.5">
-      <div className="relative flex-shrink-0" style={{ width: 53, height: 46 }}>
-        <img
-          src="/delivery_box_cardboard.png"
-          alt=""
-          className="absolute inset-0 w-full h-full object-contain opacity-95"
-          aria-hidden
-        />
-        <img
-          src="/porchivo-icon.png"
-          alt="Porchivo"
-          width={32}
-          height={32}
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-xl object-cover"
-          aria-hidden
-        />
-      </div>
+      <img
+        src="/porchivo-icon-liquid-glass-512.png"
+        alt="Porchivo"
+        width={40}
+        height={40}
+        className="h-10 w-10 rounded-xl object-cover shadow-sm ring-1 ring-white/10"
+        aria-hidden
+      />
       <span className="text-lg font-bold text-brand-text-primary tracking-tight">
         {BRAND.name}
       </span>

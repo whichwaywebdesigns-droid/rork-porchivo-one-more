@@ -15,25 +15,17 @@ const NAV_LABEL_KEYS: Record<string, string> = {
   "/pricing": "nav.pricing",
 };
 
-/** Porchivo app icon with the cardboard box underlaid behind it. */
+/** Porchivo liquid-glass app icon. */
 function PorchivoMark() {
   return (
-    <div className="relative flex-shrink-0" style={{ width: 55, height: 48 }}>
-      <img
-        src="/delivery_box_cardboard.png"
-        alt=""
-        className="absolute inset-0 w-full h-full object-contain opacity-95"
-        aria-hidden
-      />
-      <img
-        src="/porchivo-icon.png"
-        alt="Porchivo"
-        width={38}
-        height={38}
-        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-xl object-cover"
-        aria-hidden
-      />
-    </div>
+    <img
+      src="/porchivo-icon-liquid-glass-512.png"
+      alt="Porchivo"
+      width={40}
+      height={40}
+      className="h-10 w-10 rounded-xl object-cover shadow-sm ring-1 ring-white/10 flex-shrink-0"
+      aria-hidden
+    />
   );
 }
 

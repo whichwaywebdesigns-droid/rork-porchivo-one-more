@@ -4,7 +4,6 @@ import PageLayout from "@/components/PageLayout";
 import SEOHead from "@/components/SEOHead";
 import AppStoreBadges from "@/components/AppStoreBadges";
 import FAQSection from "@/components/FAQSection";
-import HeroImageRotator from "@/components/HeroImageRotator";
 import { getPageSEO } from "@/config/seo";
 import {
   buildWebPageSchema,
@@ -72,27 +71,17 @@ export default function IndexPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-brand-orange/8 via-transparent to-transparent pointer-events-none" />
         <div className="max-w-5xl mx-auto relative text-center">
           {/* Hero image */}
-          <div className="relative mx-auto mb-8 max-w-md rounded-[2.5rem] shadow-2xl shadow-amber-900/20 border border-white/10">
-            <HeroImageRotator
-              images={[
-                {
-                  src: "/images/hero-porchivo-before.png",
-                  alt: "Before Porchivo — a family upset after packages were stolen from their porch",
-                },
-                {
-                  src: "/images/hero-porchivo-clean.png",
-                  alt: "After Porchivo — the same family protected by neighbor-powered delivery security",
-                },
-                {
-                  src: "/images/hero-hoa-mailroom-before.png",
-                  alt: "Before Porchivo — an overwhelmed HOA manager in a chaotic, cluttered mailroom",
-                },
-                {
-                  src: "/images/hero-hoa-mailroom-after.jpg",
-                  alt: "After Porchivo — an organized HOA mailroom with clear package, communication, and maintenance workflows",
-                },
-              ]}
-              durations={[4500, 4500, 4500, 9000]}
+          <div className="relative mx-auto mb-10 max-w-5xl rounded-3xl overflow-hidden shadow-2xl shadow-black/10 border border-white/10">
+            <div className="absolute inset-0 z-10 pointer-events-none">
+              <div className="absolute inset-0 bg-gradient-to-r from-brand-navy-900 via-transparent to-brand-navy-900 opacity-80" />
+              <div className="absolute inset-0 bg-gradient-to-b from-brand-navy-900/40 via-transparent to-brand-navy-900/90" />
+              <div className="absolute inset-0 bg-gradient-to-tr from-brand-navy-900/20 via-transparent to-white/5" />
+              <div className="hero-edge-blur absolute inset-0" />
+            </div>
+            <img
+              src="/hero-mailroom.jpg"
+              alt="Before and after: a chaotic HOA mailroom transformed into an organized Smart HOA Mail Center by Porchivo"
+              className="w-full h-full object-cover min-h-[260px] sm:min-h-[420px] max-h-[560px]"
             />
           </div>
 

@@ -8,7 +8,7 @@
  */
 
 const GUIDE_URL = "https://porchivo.com/guide";
-const LOGO_URL = "https://porchivo.com/porchivo-icon.png";
+const LOGO_URL = "https://porchivo.com/porchivo-icon-liquid-glass-512.png";
 const SUPPORT_EMAIL = "support@porchivo.com";
 const WEBSITE_URL = "https://porchivo.com";
 

@@ -17,7 +17,7 @@ export const BRAND = {
   subcategory: "Package Security & Porch Theft Prevention",
   operatingSystem: ["iOS", "Android"],
   url: "https://porchivo.com",
-  logoUrl: "https://porchivo.com/porchivo-icon.png",
+  logoUrl: "https://porchivo.com/porchivo-icon-liquid-glass-512.png",
   ogImageUrl: "https://porchivo.com/og-image.png",
   // App Store id must match ascAppId in expo/eas.json; Play Store package must
   // match android.package in expo/app.config.ts. A mismatch sends every website

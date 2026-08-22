@@ -8,13 +8,8 @@
   "theme_color": "#3A7BD5",
   "icons": [
     {
-      "src": "/favicon.png",
-      "sizes": "32x32",
-      "type": "image/png"
-    },
-    {
-      "src": "/porchivo-icon.png",
-      "sizes": "1024x1024",
+      "src": "/porchivo-icon-liquid-glass-512.png",
+      "sizes": "512x512",
       "type": "image/png"
     }
   ]

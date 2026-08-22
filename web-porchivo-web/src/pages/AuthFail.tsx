@@ -48,7 +48,7 @@ const AuthFail = () => {
         }}
       >
         <img
-          src="/porchivo-icon.png"
+          src="/porchivo-icon-liquid-glass-512.png"
           alt="Porchivo"
           className="h-28 w-28 rounded-3xl shadow-lg"
         />
