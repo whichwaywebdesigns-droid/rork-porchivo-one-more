@@ -39,6 +39,7 @@ ORDER = [
     "package-ops-board-migration.sql",
     "admin-dashboard-migration.sql",
     "maintenance-requests-migration.sql",
+    "org-payments-migration.sql",              # HOA dues/assessment ledger (Community Payments tab)
     "community-calendar-migration.sql",
     "incident-review-migration.sql",
     "community-analytics-migration.sql",
