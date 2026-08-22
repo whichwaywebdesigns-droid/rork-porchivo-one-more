@@ -73,9 +73,8 @@ export default function IndexPage() {
           {/* Hero image */}
           <div className="relative mx-auto mb-10 max-w-5xl rounded-3xl overflow-hidden shadow-2xl shadow-black/10 border border-white/10">
             <div className="absolute inset-0 z-10 pointer-events-none">
-              <div className="absolute inset-0 bg-gradient-to-r from-brand-navy-900 via-transparent to-brand-navy-900 opacity-80" />
-              <div className="absolute inset-0 bg-gradient-to-b from-brand-navy-900/40 via-transparent to-brand-navy-900/90" />
-              <div className="absolute inset-0 bg-gradient-to-tr from-brand-navy-900/20 via-transparent to-white/5" />
+              <div className="absolute inset-0 bg-gradient-to-r from-brand-navy-900/55 via-transparent to-brand-navy-900/55" />
+              <div className="absolute inset-0 bg-gradient-to-b from-brand-navy-900/30 via-transparent to-brand-navy-900/70" />
               <div className="hero-edge-blur absolute inset-0" />
             </div>
             <img
