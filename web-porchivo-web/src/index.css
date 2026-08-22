@@ -116,7 +116,7 @@
     --brand-navy-500: #1E2F58;
     --brand-navy-600: #1A2B52;
     --brand-navy-700: #132040;
-    --brand-navy-800: #0F1D38;
+    --brand-navy-800: #132040;
     --brand-navy-900: #0D1B3E;
 
     --brand-blue: #4A8FE8;
@@ -159,6 +159,14 @@
   }
   .card-lift:hover {
     transform: translateY(-2px);
+  }
+
+  /* Gradient text treatment for the hero brand name */
+  .text-gradient-brand {
+    background: linear-gradient(135deg, var(--brand-blue) 0%, var(--brand-orange) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
   /* Soft blurred edge fade for the home hero image so it melts into the page background */

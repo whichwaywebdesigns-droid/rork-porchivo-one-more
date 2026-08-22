@@ -68,10 +68,23 @@ export default function IndexPage() {
 
       {/* Hero */}
       <section className="pt-20 pb-24 px-4 sm:px-6 border-b border-brand-navy-500/40 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-brand-orange/8 via-transparent to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-brand-blue/10 via-transparent to-transparent pointer-events-none" />
         <div className="max-w-5xl mx-auto relative text-center">
           {/* Hero image */}
-          <div className="relative mx-auto mb-10 max-w-5xl rounded-3xl overflow-hidden shadow-2xl shadow-black/10 border border-white/10">
+          <div className="relative mx-auto mb-10 max-w-5xl rounded-3xl overflow-hidden shadow-2xl shadow-brand-blue/10 border border-brand-blue/15">
+            {/* App icon badge centered over the before/after split */}
+            <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center">
+              <div className="flex flex-col items-center gap-1 p-2.5 sm:p-3 rounded-2xl bg-brand-navy-800/90 backdrop-blur-xl border border-brand-blue/20 shadow-xl">
+                <img
+                  src="/porchivo-icon-liquid-glass-512.png"
+                  alt="Porchivo"
+                  className="h-20 w-20 sm:h-24 sm:w-24 rounded-2xl shadow-sm"
+                />
+                <span className="text-gradient-brand text-2xl sm:text-3xl font-black tracking-tight leading-none">
+                  Porchivo
+                </span>
+              </div>
+            </div>
             <div className="absolute inset-0 z-10 pointer-events-none">
               <div className="absolute inset-0 bg-gradient-to-r from-brand-navy-900/55 via-transparent to-brand-navy-900/55" />
               <div className="absolute inset-0 bg-gradient-to-b from-brand-navy-900/30 via-transparent to-brand-navy-900/70" />
