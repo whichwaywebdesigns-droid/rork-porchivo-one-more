@@ -12,7 +12,7 @@
 -- noise complaints, move-in/move-out, etc.).
 --
 -- Security model
---   * Only support staff / super_admin (auth.app_metadata().role)
+--   * Only support staff / super_admin ((auth.jwt() -> 'app_metadata').role)
 --     can SELECT, INSERT, UPDATE, or DELETE templates.
 --   * Templates are shared across all staff — there is no per-author
 --     ownership filter, so any staff member can refine or remove a
@@ -58,34 +58,34 @@ DROP POLICY IF EXISTS "Staff view reply templates" ON public.support_reply_templ
 CREATE POLICY "Staff view reply templates"
   ON public.support_reply_templates FOR SELECT
   TO authenticated
-  USING (auth.app_metadata() ->> 'role' = 'support_staff'
-         OR auth.app_metadata() ->> 'role' = 'super_admin');
+  USING ((auth.jwt() -> 'app_metadata') ->> 'role' = 'support_staff'
+         OR (auth.jwt() -> 'app_metadata') ->> 'role' = 'super_admin');
 
 -- Staff: create templates.
 DROP POLICY IF EXISTS "Staff insert reply templates" ON public.support_reply_templates;
 CREATE POLICY "Staff insert reply templates"
   ON public.support_reply_templates FOR INSERT
   TO authenticated
-  WITH CHECK (auth.app_metadata() ->> 'role' = 'support_staff'
-              OR auth.app_metadata() ->> 'role' = 'super_admin');
+  WITH CHECK ((auth.jwt() -> 'app_metadata') ->> 'role' = 'support_staff'
+              OR (auth.jwt() -> 'app_metadata') ->> 'role' = 'super_admin');
 
 -- Staff: update any template (shared library, no per-author gate).
 DROP POLICY IF EXISTS "Staff update reply templates" ON public.support_reply_templates;
 CREATE POLICY "Staff update reply templates"
   ON public.support_reply_templates FOR UPDATE
   TO authenticated
-  USING (auth.app_metadata() ->> 'role' = 'support_staff'
-         OR auth.app_metadata() ->> 'role' = 'super_admin')
-  WITH CHECK (auth.app_metadata() ->> 'role' = 'support_staff'
-              OR auth.app_metadata() ->> 'role' = 'super_admin');
+  USING ((auth.jwt() -> 'app_metadata') ->> 'role' = 'support_staff'
+         OR (auth.jwt() -> 'app_metadata') ->> 'role' = 'super_admin')
+  WITH CHECK ((auth.jwt() -> 'app_metadata') ->> 'role' = 'support_staff'
+              OR (auth.jwt() -> 'app_metadata') ->> 'role' = 'super_admin');
 
 -- Staff: delete any template.
 DROP POLICY IF EXISTS "Staff delete reply templates" ON public.support_reply_templates;
 CREATE POLICY "Staff delete reply templates"
   ON public.support_reply_templates FOR DELETE
   TO authenticated
-  USING (auth.app_metadata() ->> 'role' = 'support_staff'
-         OR auth.app_metadata() ->> 'role' = 'super_admin');
+  USING ((auth.jwt() -> 'app_metadata') ->> 'role' = 'support_staff'
+         OR (auth.jwt() -> 'app_metadata') ->> 'role' = 'super_admin');
 
 
 -- ── 3. Triggers ─────────────────────────────────────────────────────────────

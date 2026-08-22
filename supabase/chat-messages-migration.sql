@@ -43,4 +43,15 @@ create index if not exists idx_chat_messages_shipment on public.chat_messages(sh
 create index if not exists idx_chat_messages_created on public.chat_messages(created_at);
 
 -- ENABLE REALTIME
-alter publication supabase_realtime add table public.chat_messages;
+do $$
+begin
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime'
+      and schemaname = 'public'
+      and tablename = 'chat_messages'
+  ) then
+    alter publication supabase_realtime add table public.chat_messages;
+  end if;
+end
+$$;

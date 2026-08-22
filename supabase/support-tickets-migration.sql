@@ -128,8 +128,8 @@ DROP POLICY IF EXISTS "Staff view all support tickets" ON public.support_tickets
 CREATE POLICY "Staff view all support tickets"
   ON public.support_tickets FOR SELECT
   TO authenticated
-  USING (auth.app_metadata() ->> 'role' = 'support_staff'
-         OR auth.app_metadata() ->> 'role' = 'super_admin');
+  USING ((auth.jwt() -> 'app_metadata') ->> 'role' = 'support_staff'
+         OR (auth.jwt() -> 'app_metadata') ->> 'role' = 'super_admin');
 
 -- Staff: update any ticket (reply, change status, set priority, write
 -- resolution_note). user_id must stay stable — staff cannot reassign
@@ -138,10 +138,10 @@ DROP POLICY IF EXISTS "Staff update any support ticket" ON public.support_ticket
 CREATE POLICY "Staff update any support ticket"
   ON public.support_tickets FOR UPDATE
   TO authenticated
-  USING (auth.app_metadata() ->> 'role' = 'support_staff'
-         OR auth.app_metadata() ->> 'role' = 'super_admin')
-  WITH CHECK (auth.app_metadata() ->> 'role' = 'support_staff'
-              OR auth.app_metadata() ->> 'role' = 'super_admin');
+  USING ((auth.jwt() -> 'app_metadata') ->> 'role' = 'support_staff'
+         OR (auth.jwt() -> 'app_metadata') ->> 'role' = 'super_admin')
+  WITH CHECK ((auth.jwt() -> 'app_metadata') ->> 'role' = 'support_staff'
+              OR (auth.jwt() -> 'app_metadata') ->> 'role' = 'super_admin');
 
 -- No staff INSERT/DELETE policies — tickets are created by users and
 -- removed only by the account-deletion cascade (FK ON DELETE CASCADE).
@@ -199,7 +199,7 @@ AS $$
 DECLARE
   v_role text;
 BEGIN
-  v_role := auth.app_metadata() ->> 'role';
+  v_role := (auth.jwt() -> 'app_metadata') ->> 'role';
 
   -- Staff / super_admin: allow any column change (policy already gated role).
   IF v_role IN ('support_staff', 'super_admin') THEN
@@ -323,7 +323,7 @@ CREATE TRIGGER trg_enqueue_ticket_ai_draft
 
 
 -- ── 6. Staff helper: is the caller a support staff member? ────────────────────
--- Checks auth.app_metadata().role for 'support_staff' or 'super_admin'.
+-- Checks (auth.jwt() -> 'app_metadata').role for 'support_staff' or 'super_admin'.
 -- This mirrors the role claims enforced by the staff policies above and is
 -- used by the staff RPCs (get_staff_support_queue / send_staff_ticket_reply /
 -- regenerate_ticket_ai_draft) to gate access before returning AI-draft columns
@@ -335,7 +335,7 @@ STABLE
 SECURITY DEFINER
 SET search_path = public
 AS $$
-  SELECT auth.app_metadata() ->> 'role' IN ('support_staff', 'super_admin');
+  SELECT (auth.jwt() -> 'app_metadata') ->> 'role' IN ('support_staff', 'super_admin');
 $$;
 
 GRANT EXECUTE ON FUNCTION public.is_support_staff() TO authenticated;

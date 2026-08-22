@@ -14,7 +14,7 @@
 -- tables/indexes use IF NOT EXISTS. Running this on a partially-migrated
 -- database brings it fully up to date without erroring on existing objects.
 --
--- Bundles 40 migrations in dependency order.
+-- Bundles 41 migrations in dependency order.
 -- =============================================================
 
 
@@ -1699,7 +1699,18 @@ create index if not exists idx_chat_messages_shipment on public.chat_messages(sh
 create index if not exists idx_chat_messages_created on public.chat_messages(created_at);
 
 -- ENABLE REALTIME
-alter publication supabase_realtime add table public.chat_messages;
+do $$
+begin
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime'
+      and schemaname = 'public'
+      and tablename = 'chat_messages'
+  ) then
+    alter publication supabase_realtime add table public.chat_messages;
+  end if;
+end
+$$;
 
 
 
@@ -3850,7 +3861,7 @@ BEGIN
     p.zip,
     p.total_units,
     p.manager_user_id,
-    prof.display_name AS manager_name,
+    prof.name AS manager_name,
     p.is_active,
     p.notes,
     COUNT(u.id)::bigint AS unit_count,
@@ -3862,7 +3873,7 @@ BEGIN
   LEFT JOIN units u ON u.property_id = p.id AND u.org_id = p_org_id
   LEFT JOIN org_memberships om2 ON om2.unit_id = u.id AND om2.status = 'active'
   WHERE p.org_id = p_org_id
-  GROUP BY p.id, prof.display_name
+  GROUP BY p.id, prof.name
   ORDER BY p.name ASC;
 END;
 $$;
@@ -3897,7 +3908,7 @@ BEGIN
     u.unit_number,
     u.floor,
     u.notes,
-    prof.display_name AS resident_name,
+    prof.name AS resident_name,
     prof.id AS resident_id,
     om.id AS membership_id,
     u.created_at
@@ -4433,7 +4444,7 @@ BEGIN
     u.unit_number::TEXT,
     pkg.resident_id,
     pkg.logged_by,
-    COALESCE(p.display_name, 'Staff')::TEXT AS logged_by_name,
+    COALESCE(p.name, 'Staff')::TEXT AS logged_by_name,
     pkg.carrier,
     pkg.tracking_number,
     pkg.status::TEXT,
@@ -5199,9 +5210,9 @@ LANGUAGE sql SECURITY DEFINER STABLE AS $$
     r.id, r.org_id, r.unit_id,
     u.unit_number,
     r.reporter_id,
-    COALESCE(rp.display_name, 'Unknown') AS reporter_name,
+    COALESCE(rp.name, 'Unknown') AS reporter_name,
     r.assignee_id,
-    ap.display_name AS assignee_name,
+    ap.name AS assignee_name,
     r.category, r.priority, r.status, r.title, r.description,
     r.location_detail, r.preferred_time, r.allow_entry, r.is_urgent,
     r.resident_visible_note, r.resolution_code,
@@ -5274,6 +5285,106 @@ LANGUAGE sql SECURITY DEFINER STABLE AS $$
   FROM maintenance_requests
   WHERE org_id = p_org_id AND _maint_is_staff(p_org_id);
 $$;
+
+
+
+-- #############################################################
+-- ##  org-payments-migration.sql
+-- #############################################################
+-- ─── Org Payments Migration ───────────────────────────────────────────────────
+-- HOA dues / assessment payment ledger, scoped to the organization.
+-- Backs the Community-tier Payments tab (expo/app/(tabs)/payments.tsx).
+--
+-- Run AFTER multi-context-migration.sql (needs organizations + org_memberships).
+-- Idempotent — safe to re-run.
+-- ──────────────────────────────────────────────────────────────────────────────
+
+create table if not exists public.org_payments (
+  id            uuid primary key default gen_random_uuid(),
+  org_id        uuid not null references public.organizations(id) on delete cascade,
+  -- Which resident the payment is for (NULL = org-wide assessment)
+  user_id       uuid references public.profiles(id) on delete set null,
+  description   text not null default 'HOA Dues',
+  amount_cents  integer not null check (amount_cents >= 0),
+  status        text not null default 'pending'
+    check (status in ('pending', 'paid', 'failed', 'refunded')),
+  paid_at       timestamptz,
+  created_at    timestamptz not null default now(),
+  updated_at    timestamptz not null default now()
+);
+
+create index if not exists idx_org_payments_org_created
+  on public.org_payments (org_id, created_at desc);
+
+create index if not exists idx_org_payments_user
+  on public.org_payments (user_id)
+  where user_id is not null;
+
+alter table public.org_payments enable row level security;
+
+-- Members can see their org's payment history
+drop policy if exists "Members can view org payments" on public.org_payments;
+DROP POLICY IF EXISTS "Members can view org payments" ON public.org_payments;
+create policy "Members can view org payments"
+  on public.org_payments for select
+  to authenticated
+  using (
+    exists (
+      select 1 from public.org_memberships om
+      where om.org_id  = org_payments.org_id
+        and om.user_id = auth.uid()
+        and om.status  = 'active'
+    )
+  );
+
+-- Staff/board/admins can record payments
+drop policy if exists "Staff can record org payments" on public.org_payments;
+DROP POLICY IF EXISTS "Staff can record org payments" ON public.org_payments;
+create policy "Staff can record org payments"
+  on public.org_payments for insert
+  to authenticated
+  with check (
+    exists (
+      select 1 from public.org_memberships om
+      where om.org_id  = org_payments.org_id
+        and om.user_id = auth.uid()
+        and om.role    in ('board_member', 'hoa_admin', 'property_manager', 'property_staff', 'super_admin')
+        and om.status  = 'active'
+    )
+  );
+
+-- Staff/board/admins can update payment status (e.g. mark paid)
+drop policy if exists "Staff can update org payments" on public.org_payments;
+DROP POLICY IF EXISTS "Staff can update org payments" ON public.org_payments;
+create policy "Staff can update org payments"
+  on public.org_payments for update
+  to authenticated
+  using (
+    exists (
+      select 1 from public.org_memberships om
+      where om.org_id  = org_payments.org_id
+        and om.user_id = auth.uid()
+        and om.role    in ('board_member', 'hoa_admin', 'property_manager', 'property_staff', 'super_admin')
+        and om.status  = 'active'
+    )
+  );
+
+-- updated_at trigger (matches the set_*_updated_at convention)
+create or replace function public.set_org_payments_updated_at()
+returns trigger
+language plpgsql
+as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
+
+drop trigger if exists trg_org_payments_updated_at on public.org_payments;
+DROP TRIGGER IF EXISTS trg_org_payments_updated_at ON public.org_payments;
+create trigger trg_org_payments_updated_at
+  before update on public.org_payments
+  for each row execute function public.set_org_payments_updated_at();
 
 
 
@@ -5522,7 +5633,7 @@ LANGUAGE sql AS $$
     e.id,
     e.org_id,
     e.created_by,
-    COALESCE(p.display_name, 'Staff') AS creator_name,
+    COALESCE(p.name, 'Staff') AS creator_name,
     e.title,
     e.description,
     e.category::TEXT,
@@ -5563,7 +5674,7 @@ LANGUAGE sql AS $$
           AND om.role IN ('hoa_admin','property_manager','property_staff','board_member','super_admin')
       )
     )
-  GROUP BY e.id, p.display_name
+  GROUP BY e.id, p.name
   ORDER BY e.starts_at ASC;
 $$;
 
@@ -6099,9 +6210,9 @@ BEGIN
         ir.id, ir.org_id, ir.unit_id,
         u.unit_number,
         ir.reporter_id,
-        COALESCE(rp.display_name, 'Unknown') AS reporter_name,
+        COALESCE(rp.name, 'Unknown') AS reporter_name,
         ir.assignee_id,
-        COALESCE(ap.display_name, NULL) AS assignee_name,
+        COALESCE(ap.name, NULL) AS assignee_name,
         ir.package_log_id, ir.related_incident_id,
         ir.type::text, ir.severity::text, ir.status::text,
         ir.title, ir.description, ir.resident_visible_update,
@@ -6129,9 +6240,9 @@ BEGIN
       ir.id, ir.org_id, ir.unit_id,
       u.unit_number,
       ir.reporter_id,
-      COALESCE(rp.display_name, 'Unknown') AS reporter_name,
+      COALESCE(rp.name, 'Unknown') AS reporter_name,
       ir.assignee_id,
-      COALESCE(ap.display_name, NULL) AS assignee_name,
+      COALESCE(ap.name, NULL) AS assignee_name,
       ir.package_log_id, ir.related_incident_id,
       ir.type::text, ir.severity::text, ir.status::text,
       ir.title, ir.description, ir.resident_visible_update,
@@ -7748,8 +7859,8 @@ DROP POLICY IF EXISTS "Staff view all support tickets" ON public.support_tickets
 CREATE POLICY "Staff view all support tickets"
   ON public.support_tickets FOR SELECT
   TO authenticated
-  USING (auth.app_metadata() ->> 'role' = 'support_staff'
-         OR auth.app_metadata() ->> 'role' = 'super_admin');
+  USING ((auth.jwt() -> 'app_metadata') ->> 'role' = 'support_staff'
+         OR (auth.jwt() -> 'app_metadata') ->> 'role' = 'super_admin');
 
 -- Staff: update any ticket (reply, change status, set priority, write
 -- resolution_note). user_id must stay stable — staff cannot reassign
@@ -7759,10 +7870,10 @@ DROP POLICY IF EXISTS "Staff update any support ticket" ON public.support_ticket
 CREATE POLICY "Staff update any support ticket"
   ON public.support_tickets FOR UPDATE
   TO authenticated
-  USING (auth.app_metadata() ->> 'role' = 'support_staff'
-         OR auth.app_metadata() ->> 'role' = 'super_admin')
-  WITH CHECK (auth.app_metadata() ->> 'role' = 'support_staff'
-              OR auth.app_metadata() ->> 'role' = 'super_admin');
+  USING ((auth.jwt() -> 'app_metadata') ->> 'role' = 'support_staff'
+         OR (auth.jwt() -> 'app_metadata') ->> 'role' = 'super_admin')
+  WITH CHECK ((auth.jwt() -> 'app_metadata') ->> 'role' = 'support_staff'
+              OR (auth.jwt() -> 'app_metadata') ->> 'role' = 'super_admin');
 
 -- No staff INSERT/DELETE policies — tickets are created by users and
 -- removed only by the account-deletion cascade (FK ON DELETE CASCADE).
@@ -7821,7 +7932,7 @@ AS $$
 DECLARE
   v_role text;
 BEGIN
-  v_role := auth.app_metadata() ->> 'role';
+  v_role := (auth.jwt() -> 'app_metadata') ->> 'role';
 
   -- Staff / super_admin: allow any column change (policy already gated role).
   IF v_role IN ('support_staff', 'super_admin') THEN
@@ -7948,7 +8059,7 @@ CREATE TRIGGER trg_enqueue_ticket_ai_draft
 
 
 -- ── 6. Staff helper: is the caller a support staff member? ────────────────────
--- Checks auth.app_metadata().role for 'support_staff' or 'super_admin'.
+-- Checks (auth.jwt() -> 'app_metadata').role for 'support_staff' or 'super_admin'.
 -- This mirrors the role claims enforced by the staff policies above and is
 -- used by the staff RPCs (get_staff_support_queue / send_staff_ticket_reply /
 -- regenerate_ticket_ai_draft) to gate access before returning AI-draft columns
@@ -7960,7 +8071,7 @@ STABLE
 SECURITY DEFINER
 SET search_path = public
 AS $$
-  SELECT auth.app_metadata() ->> 'role' IN ('support_staff', 'super_admin');
+  SELECT (auth.jwt() -> 'app_metadata') ->> 'role' IN ('support_staff', 'super_admin');
 $$;
 
 GRANT EXECUTE ON FUNCTION public.is_support_staff() TO authenticated;
@@ -8295,7 +8406,7 @@ REVOKE EXECUTE ON FUNCTION public.get_staff_push_tokens() FROM authenticated, an
 -- noise complaints, move-in/move-out, etc.).
 --
 -- Security model
---   * Only support staff / super_admin (auth.app_metadata().role)
+--   * Only support staff / super_admin ((auth.jwt() -> 'app_metadata').role)
 --     can SELECT, INSERT, UPDATE, or DELETE templates.
 --   * Templates are shared across all staff — there is no per-author
 --     ownership filter, so any staff member can refine or remove a
@@ -8342,8 +8453,8 @@ DROP POLICY IF EXISTS "Staff view reply templates" ON public.support_reply_templ
 CREATE POLICY "Staff view reply templates"
   ON public.support_reply_templates FOR SELECT
   TO authenticated
-  USING (auth.app_metadata() ->> 'role' = 'support_staff'
-         OR auth.app_metadata() ->> 'role' = 'super_admin');
+  USING ((auth.jwt() -> 'app_metadata') ->> 'role' = 'support_staff'
+         OR (auth.jwt() -> 'app_metadata') ->> 'role' = 'super_admin');
 
 -- Staff: create templates.
 DROP POLICY IF EXISTS "Staff insert reply templates" ON public.support_reply_templates;
@@ -8351,8 +8462,8 @@ DROP POLICY IF EXISTS "Staff insert reply templates" ON public.support_reply_tem
 CREATE POLICY "Staff insert reply templates"
   ON public.support_reply_templates FOR INSERT
   TO authenticated
-  WITH CHECK (auth.app_metadata() ->> 'role' = 'support_staff'
-              OR auth.app_metadata() ->> 'role' = 'super_admin');
+  WITH CHECK ((auth.jwt() -> 'app_metadata') ->> 'role' = 'support_staff'
+              OR (auth.jwt() -> 'app_metadata') ->> 'role' = 'super_admin');
 
 -- Staff: update any template (shared library, no per-author gate).
 DROP POLICY IF EXISTS "Staff update reply templates" ON public.support_reply_templates;
@@ -8360,10 +8471,10 @@ DROP POLICY IF EXISTS "Staff update reply templates" ON public.support_reply_tem
 CREATE POLICY "Staff update reply templates"
   ON public.support_reply_templates FOR UPDATE
   TO authenticated
-  USING (auth.app_metadata() ->> 'role' = 'support_staff'
-         OR auth.app_metadata() ->> 'role' = 'super_admin')
-  WITH CHECK (auth.app_metadata() ->> 'role' = 'support_staff'
-              OR auth.app_metadata() ->> 'role' = 'super_admin');
+  USING ((auth.jwt() -> 'app_metadata') ->> 'role' = 'support_staff'
+         OR (auth.jwt() -> 'app_metadata') ->> 'role' = 'super_admin')
+  WITH CHECK ((auth.jwt() -> 'app_metadata') ->> 'role' = 'support_staff'
+              OR (auth.jwt() -> 'app_metadata') ->> 'role' = 'super_admin');
 
 -- Staff: delete any template.
 DROP POLICY IF EXISTS "Staff delete reply templates" ON public.support_reply_templates;
@@ -8371,8 +8482,8 @@ DROP POLICY IF EXISTS "Staff delete reply templates" ON public.support_reply_tem
 CREATE POLICY "Staff delete reply templates"
   ON public.support_reply_templates FOR DELETE
   TO authenticated
-  USING (auth.app_metadata() ->> 'role' = 'support_staff'
-         OR auth.app_metadata() ->> 'role' = 'super_admin');
+  USING ((auth.jwt() -> 'app_metadata') ->> 'role' = 'support_staff'
+         OR (auth.jwt() -> 'app_metadata') ->> 'role' = 'super_admin');
 
 
 -- ── 3. Triggers ─────────────────────────────────────────────────────────────

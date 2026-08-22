@@ -109,7 +109,7 @@ BEGIN
     u.unit_number::TEXT,
     pkg.resident_id,
     pkg.logged_by,
-    COALESCE(p.display_name, 'Staff')::TEXT AS logged_by_name,
+    COALESCE(p.name, 'Staff')::TEXT AS logged_by_name,
     pkg.carrier,
     pkg.tracking_number,
     pkg.status::TEXT,

@@ -230,7 +230,7 @@ LANGUAGE sql AS $$
     e.id,
     e.org_id,
     e.created_by,
-    COALESCE(p.display_name, 'Staff') AS creator_name,
+    COALESCE(p.name, 'Staff') AS creator_name,
     e.title,
     e.description,
     e.category::TEXT,
@@ -271,7 +271,7 @@ LANGUAGE sql AS $$
           AND om.role IN ('hoa_admin','property_manager','property_staff','board_member','super_admin')
       )
     )
-  GROUP BY e.id, p.display_name
+  GROUP BY e.id, p.name
   ORDER BY e.starts_at ASC;
 $$;
 

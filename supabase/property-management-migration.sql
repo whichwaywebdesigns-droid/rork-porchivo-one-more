@@ -72,7 +72,7 @@ BEGIN
     p.zip,
     p.total_units,
     p.manager_user_id,
-    prof.display_name AS manager_name,
+    prof.name AS manager_name,
     p.is_active,
     p.notes,
     COUNT(u.id)::bigint AS unit_count,
@@ -84,7 +84,7 @@ BEGIN
   LEFT JOIN units u ON u.property_id = p.id AND u.org_id = p_org_id
   LEFT JOIN org_memberships om2 ON om2.unit_id = u.id AND om2.status = 'active'
   WHERE p.org_id = p_org_id
-  GROUP BY p.id, prof.display_name
+  GROUP BY p.id, prof.name
   ORDER BY p.name ASC;
 END;
 $$;
@@ -119,7 +119,7 @@ BEGIN
     u.unit_number,
     u.floor,
     u.notes,
-    prof.display_name AS resident_name,
+    prof.name AS resident_name,
     prof.id AS resident_id,
     om.id AS membership_id,
     u.created_at
