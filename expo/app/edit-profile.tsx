@@ -57,6 +57,8 @@ import type {
   PackageSize,
 } from '@/types';
 import { syncVolunteerStatus } from '@/lib/partnerVerification';
+import { useSubscriptionGate } from '@/hooks/useSubscriptionGate';
+import { ReadOnlyNotice } from '@/components/BillingGraceBanner';
 
 // ─── Address field helper ────────────────────────────────────────────────────
 
@@ -349,6 +351,9 @@ export default function EditProfileScreen() {
     useProfileExtension();
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
+  // Billing grace period — stage 2 (day 14+): residents cannot change profile
+  // or notification-preference settings. Views stay fully readable.
+  const { isResidentSettingsReadOnly } = useSubscriptionGate();
 
   // Core fields
   const [name, setName] = useState<string>(user?.name ?? '');
@@ -414,6 +419,8 @@ export default function EditProfileScreen() {
 
   const handleSave = useCallback(async () => {
     if (!user) return;
+    // Billing grace period (day 14+): profile writes are read-only for residents
+    if (isResidentSettingsReadOnly) return;
     const trimmedName = name.trim();
     const trimmedEmail = email.trim();
     const trimmedPhone = phone.trim();
@@ -488,7 +495,7 @@ export default function EditProfileScreen() {
       Alert.alert('Error', 'Could not save your profile. Please try again.');
       setIsSaving(false);
     }
-  }, [user, name, email, phone, homeAddress, avatarUri, pendingAvatarAsset, updateUser, router, saveScale, AVATAR_HOSTS, isPartner, extension.isVolunteer]);
+  }, [user, name, email, phone, homeAddress, avatarUri, pendingAvatarAsset, updateUser, router, saveScale, AVATAR_HOSTS, isPartner, extension.isVolunteer, isResidentSettingsReadOnly]);
 
   const handleDiscard = useCallback(() => {
     if (hasChanges()) {
@@ -525,9 +532,17 @@ export default function EditProfileScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
+        {/* ── Billing grace: read-only notice (stage 2, non-blocking) ── */}
+        <ReadOnlyNotice />
+
         {/* ── Avatar ── */}
         <View style={styles.avatarSection}>
-          <TouchableOpacity style={styles.avatarWrapper} onPress={handlePickImage} activeOpacity={0.8}>
+          <TouchableOpacity
+            style={styles.avatarWrapper}
+            onPress={handlePickImage}
+            activeOpacity={0.8}
+            disabled={isResidentSettingsReadOnly}
+          >
             {avatarUri ? (
               <Image source={{ uri: avatarUri }} style={styles.avatarImage} contentFit="cover" transition={200} />
             ) : (
@@ -546,6 +561,7 @@ export default function EditProfileScreen() {
               style={[styles.avatarActionBtn, { backgroundColor: colors.skyBlue }]}
               onPress={handlePickImage}
               activeOpacity={0.8}
+              disabled={isResidentSettingsReadOnly}
               testID="edit-profile-change-photo"
             >
               <ImagePlus size={15} color={colors.primary} />
@@ -558,6 +574,7 @@ export default function EditProfileScreen() {
                 style={[styles.avatarActionBtn, styles.avatarActionBtnDanger]}
                 onPress={handleRemovePhoto}
                 activeOpacity={0.8}
+                disabled={isResidentSettingsReadOnly}
                 testID="edit-profile-remove-photo"
               >
                 <Trash2 size={15} color={colors.danger} />
@@ -1044,9 +1061,9 @@ export default function EditProfileScreen() {
         <View style={styles.saveSection}>
           <Animated.View style={{ transform: [{ scale: saveScale }] }}>
             <TouchableOpacity
-              style={[styles.saveButton, (!hasChanges() || isSaving) && styles.saveButtonDisabled]}
+              style={[styles.saveButton, (!hasChanges() || isSaving || isResidentSettingsReadOnly) && styles.saveButtonDisabled]}
               onPress={handleSave}
-              disabled={!hasChanges() || isSaving}
+              disabled={!hasChanges() || isSaving || isResidentSettingsReadOnly}
               activeOpacity={0.85}
               testID="edit-profile-save"
             >

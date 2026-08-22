@@ -33,6 +33,8 @@ import {
 } from 'lucide-react-native';
 import { useColors } from '@/constants/colors';
 import { useOrganization } from '@/store/OrganizationContext';
+import { useSubscriptionGate } from '@/hooks/useSubscriptionGate';
+import { ReadOnlyNotice } from '@/components/BillingGraceBanner';
 import { supabase } from '@/lib/supabase';
 import {
   PropertyRow,
@@ -142,10 +144,13 @@ function AddUnitInput({
   const Colors = useColors();
   const { createUnit, isCreatingUnit } = useOrganization();
   const [value, setValue] = useState<string>('');
+  // Billing grace stage 2 (day 14+): property edits are read-only for managers
+  const { isManagerAdminReadOnly } = useSubscriptionGate();
 
   const handleAdd = async () => {
     const trimmed = value.trim();
     if (!trimmed) return;
+    if (isManagerAdminReadOnly) return;
     try {
       await createUnit({ propertyId, unitNumber: trimmed });
       setValue('');
@@ -170,7 +175,7 @@ function AddUnitInput({
       <TouchableOpacity
         style={[styles.addUnitConfirm, { backgroundColor: Colors.primary }]}
         onPress={handleAdd}
-        disabled={isCreatingUnit || !value.trim()}
+        disabled={isCreatingUnit || !value.trim() || isManagerAdminReadOnly}
       >
         {isCreatingUnit ? (
           <ActivityIndicator size="small" color="#fff" />
@@ -197,6 +202,8 @@ function PropertyCard({
   const Colors = useColors();
   const queryClient = useQueryClient();
   const { removeUnit, isRemovingUnit } = useOrganization();
+  // Billing grace stage 2 (day 14+): property edits are read-only for managers
+  const { isManagerAdminReadOnly } = useSubscriptionGate();
   const [expanded, setExpanded] = useState<boolean>(false);
   const [addingUnit, setAddingUnit] = useState<boolean>(false);
   const [removingUnitId, setRemovingUnitId] = useState<string | null>(null);
@@ -230,6 +237,8 @@ function PropertyCard({
   });
 
   const handleRemoveUnit = (unit: UnitRow) => {
+    // Billing grace stage 2: unit removal is a property edit — read-only
+    if (isManagerAdminReadOnly) return;
     Alert.alert(
       'Remove Unit',
       `Remove Unit ${unit.unitNumber}? This will unlink any assigned residents.`,
@@ -382,6 +391,9 @@ export default function PropertyManagementScreen() {
 
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [search, setSearch] = useState<string>('');
+  // Billing grace period — stage 2 (day 14+): manager admin tools are
+  // read-only; billing screens (BILL-08/09/10) stay fully interactive.
+  const { isManagerAdminReadOnly } = useSubscriptionGate();
 
   // ── Properties query ────────────────────────────────────────────────────────
   const { data: properties = [], isLoading: propsLoading } = useQuery<PropertyRow[]>({
@@ -472,6 +484,7 @@ export default function PropertyManagementScreen() {
             style={[styles.addBtn, { backgroundColor: Colors.primary }]}
             onPress={() => router.push('/add-property')}
             activeOpacity={0.8}
+            disabled={isManagerAdminReadOnly}
           >
             <Plus size={16} color="#fff" strokeWidth={2.5} />
           </TouchableOpacity>
@@ -485,6 +498,11 @@ export default function PropertyManagementScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={Colors.primary} />
         }
       >
+        {/* Billing grace — manager read-only notice (stage 2, non-blocking) */}
+        <View style={{ paddingHorizontal: 20, paddingTop: 20 }}>
+          <ReadOnlyNotice variant="manager" />
+        </View>
+
         {/* Summary */}
         {isOrgAdmin && summary && (
           <View style={{ paddingHorizontal: 20, paddingTop: 20 }}>

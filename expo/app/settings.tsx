@@ -45,6 +45,8 @@ import {
 } from 'lucide-react-native';
 
 import { useTheme } from '@/hooks/useTheme';
+import { useSubscriptionGate } from '@/hooks/useSubscriptionGate';
+import { ReadOnlyNotice } from '@/components/BillingGraceBanner';
 import { manualRequestReview } from '@/lib/storeReview';
 import { useApp } from '@/store/AppContext';
 import { useNotifications } from '@/store/NotificationsContext';
@@ -199,16 +201,19 @@ interface PrefToggleProps {
   value: boolean;
   onToggle: () => void;
   tokens: ThemeTokens;
+  /** Billing grace stage 2 (day 14+): notification-preference writes are read-only. */
+  disabled?: boolean;
 }
 
-function PrefToggle({ icon, label, description, value, onToggle, tokens }: PrefToggleProps) {
+function PrefToggle({ icon, label, description, value, onToggle, tokens, disabled }: PrefToggleProps) {
   return (
     <TouchableOpacity
-      style={styles.notifPrefRow}
+      style={[styles.notifPrefRow, disabled && styles.notifPrefRowDisabled]}
       onPress={onToggle}
       activeOpacity={0.72}
+      disabled={disabled}
       accessibilityRole="switch"
-      accessibilityState={{ checked: value }}
+      accessibilityState={{ checked: value, disabled }}
       accessibilityLabel={label}
     >
       <View style={[styles.rowIcon, { backgroundColor: tokens.accentSoft }]}>
@@ -257,6 +262,9 @@ export default function SettingsScreen() {
   const { signOut } = useApp();
   const { expoPushToken } = useNotifications();
   const { prefs, loaded: prefsLoaded, togglePref, setDeliverySound } = useNotificationPreferences();
+  // Billing grace period — stage 2 (day 14+): notification-preference writes
+  // are read-only for residents (soft notice, views stay readable).
+  const { isResidentSettingsReadOnly } = useSubscriptionGate();
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
@@ -445,6 +453,8 @@ export default function SettingsScreen() {
             Choose which push notifications you receive about your packages.
           </Text>
 
+          <ReadOnlyNotice />
+
           {prefsLoaded && (
             <>
               <PrefToggle
@@ -453,6 +463,7 @@ export default function SettingsScreen() {
                 description="Get pinged when your package leaves the truck."
                 value={prefs.outForDeliveryAlerts}
                 onToggle={() => togglePref('outForDeliveryAlerts')}
+                disabled={isResidentSettingsReadOnly}
                 tokens={tokens}
               />
               <PrefToggle
@@ -461,6 +472,7 @@ export default function SettingsScreen() {
                 description="Get pinged the moment your package arrives at your porch."
                 value={prefs.deliveredAlerts}
                 onToggle={() => togglePref('deliveredAlerts')}
+                disabled={isResidentSettingsReadOnly}
                 tokens={tokens}
               />
               <PrefToggle
@@ -469,6 +481,7 @@ export default function SettingsScreen() {
                 description="Pickup, handoff, and completed notifications."
                 value={prefs.partnerPickupAlerts}
                 onToggle={() => togglePref('partnerPickupAlerts')}
+                disabled={isResidentSettingsReadOnly}
                 tokens={tokens}
               />
               <PrefToggle
@@ -477,6 +490,7 @@ export default function SettingsScreen() {
                 description="Theft warnings and community activity nearby."
                 value={prefs.communityAlerts}
                 onToggle={() => togglePref('communityAlerts')}
+                disabled={isResidentSettingsReadOnly}
                 tokens={tokens}
               />
 
@@ -513,8 +527,9 @@ export default function SettingsScreen() {
                           borderColor: active ? tokens.accent : tokens.border,
                         },
                       ]}
-                      onPress={() => void setDeliverySound(sound)}
+                      onPress={() => { if (!isResidentSettingsReadOnly) void setDeliverySound(sound); }}
                       activeOpacity={0.7}
+                      disabled={isResidentSettingsReadOnly}
                       accessibilityRole="radio"
                       accessibilityLabel={`${labels[sound]} delivery sound`}
                       accessibilityState={{ selected: active }}
@@ -765,6 +780,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     gap: 12,
+  },
+  /** Billing grace stage 2 — dimmed but still readable (views stay live). */
+  notifPrefRowDisabled: {
+    opacity: 0.55,
   },
   notifPrefText: {
     flex: 1,

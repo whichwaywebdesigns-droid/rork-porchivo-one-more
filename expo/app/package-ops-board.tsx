@@ -28,6 +28,8 @@ import {
 } from 'lucide-react-native';
 import { useColors } from '@/constants/colors';
 import { useOrganization } from '@/store/OrganizationContext';
+import { useSubscriptionGate } from '@/hooks/useSubscriptionGate';
+import { StaffIntakeLockoutNotice } from '@/components/BillingGraceBanner';
 import { supabase } from '@/lib/supabase';
 import {
   PackageBoardItem,
@@ -442,6 +444,11 @@ export default function PackageOpsBoardScreen() {
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const { activeOrg, isOrgStaff, updatePackageStatus, isUpdatingPackageStatus } = useOrganization();
+  // Billing grace period — staff status updates lock ONLY at stage 3 (day 30+).
+  // Intentionally NOT gated during stages 1-2 (see useSubscriptionGate.ts):
+  // package intake is core value and residents' actual mail, so it stays live
+  // through the entire 30-day window regardless of billing state.
+  const { isStaffIntakeLocked } = useSubscriptionGate();
 
   const [activeFilter, setActiveFilter] = useState<FilterKey>('all');
   const [refreshing, setRefreshing] = useState<boolean>(false);
@@ -506,6 +513,8 @@ export default function PackageOpsBoardScreen() {
   // ── Status update ─────────────────────────────────────────────────────────
   const handleStatusChange = useCallback(
     (packageId: string, newStatus: PackageLogStatus) => {
+      // Billing grace stage 3 (day 30+): the ONLY point where staff intake stops
+      if (isStaffIntakeLocked) return;
       if (newStatus === 'exception') {
         Alert.prompt(
           'Flag Exception',
@@ -545,7 +554,7 @@ export default function PackageOpsBoardScreen() {
         },
       ]);
     },
-    [updatePackageStatus]
+    [updatePackageStatus, isStaffIntakeLocked]
   );
 
   // ── Guard ─────────────────────────────────────────────────────────────────
@@ -635,6 +644,9 @@ export default function PackageOpsBoardScreen() {
             />
           }
         >
+          {/* ── Billing grace — staff lockout notice (stage 3 ONLY) ────────── */}
+          <StaffIntakeLockoutNotice />
+
           {packages.length === 0 ? (
             <EmptyState filter={activeFilter} />
           ) : (
@@ -666,6 +678,7 @@ export default function PackageOpsBoardScreen() {
           onPress={() => router.push('/log-package')}
           style={styles.fabInner}
           activeOpacity={0.85}
+          disabled={isStaffIntakeLocked}
         >
           <Plus size={22} color="#fff" strokeWidth={2.5} />
           <Text style={styles.fabLabel}>Log Package</Text>

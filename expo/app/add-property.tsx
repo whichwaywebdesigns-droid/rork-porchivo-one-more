@@ -26,6 +26,8 @@ import {
 } from 'lucide-react-native';
 import { useColors } from '@/constants/colors';
 import { useOrganization } from '@/store/OrganizationContext';
+import { useSubscriptionGate } from '@/hooks/useSubscriptionGate';
+import { ReadOnlyNotice } from '@/components/BillingGraceBanner';
 
 // ─── Step definitions ──────────────────────────────────────────────────────────
 
@@ -161,6 +163,9 @@ export default function AddPropertyScreen() {
   const Colors = useColors();
   const insets = useSafeAreaInsets();
   const { createProperty, isCreatingProperty, bulkCreateUnits, isBulkCreatingUnits } = useOrganization();
+  // Billing grace period — stage 2 (day 14+): property edits are read-only
+  // for managers. The wizard stays viewable; creation is blocked.
+  const { isManagerAdminReadOnly } = useSubscriptionGate();
 
   const [step, setStep] = useState<number>(0);
   const slideAnim = useRef(new Animated.Value(0)).current;
@@ -226,6 +231,8 @@ export default function AddPropertyScreen() {
 
   const handleCreate = async () => {
     if (!canProceedStep0) return;
+    // Billing grace stage 2 (day 14+): property creation is a manager admin write
+    if (isManagerAdminReadOnly) return;
     setIsSubmitting(true);
     try {
       const propertyId = await createProperty({
@@ -295,6 +302,11 @@ export default function AddPropertyScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <Animated.View style={{ transform: [{ translateX: slideAnim }] }}>
+
+          {/* Billing grace — manager read-only notice (stage 2, non-blocking) */}
+          <View style={{ paddingHorizontal: 20, paddingTop: 16 }}>
+            <ReadOnlyNotice variant="manager" />
+          </View>
 
           {/* ── Step 0: Property details ─────────────────────────────────── */}
           {step === 0 && (
@@ -497,9 +509,9 @@ export default function AddPropertyScreen() {
         >
           {step === 1 ? (
             <TouchableOpacity
-              style={[styles.ctaBtn, { backgroundColor: Colors.primary }, (!canProceedStep1 || isLoading) && { opacity: 0.5 }]}
+              style={[styles.ctaBtn, { backgroundColor: Colors.primary }, (!canProceedStep1 || isLoading || isManagerAdminReadOnly) && { opacity: 0.5 }]}
               onPress={handleCreate}
-              disabled={!canProceedStep1 || isLoading}
+              disabled={!canProceedStep1 || isLoading || isManagerAdminReadOnly}
               activeOpacity={0.85}
             >
               {isLoading ? (

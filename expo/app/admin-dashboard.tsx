@@ -37,6 +37,7 @@ import {
 } from 'lucide-react-native';
 import { useColors } from '@/constants/colors';
 import { useOrganization } from '@/store/OrganizationContext';
+import { BillingGraceBanner } from '@/components/BillingGraceBanner';
 import { supabase } from '@/lib/supabase';
 import { Image } from 'expo-image';
 import {
@@ -463,6 +464,9 @@ export default function AdminDashboardScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={Colors.primary} />
         }
       >
+        {/* ── Billing grace banner (manager-only, persistent, non-blocking) ── */}
+        <BillingGraceBanner />
+
         {/* ── Stats grid ─────────────────────────────────────────────────── */}
         <View style={styles.statsGrid}>
           {statsLoading ? (

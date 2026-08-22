@@ -39,6 +39,8 @@ import {
 } from 'lucide-react-native';
 import { useColors } from '@/constants/colors';
 import { useOrganization } from '@/store/OrganizationContext';
+import { useSubscriptionGate } from '@/hooks/useSubscriptionGate';
+import { ReadOnlyNotice } from '@/components/BillingGraceBanner';
 import { supabase } from '@/lib/supabase';
 import {
   MemberAdminRow,
@@ -544,6 +546,9 @@ export default function RoleManagementScreen() {
     regenerateInviteCode,
     isRegeneratingInviteCode,
   } = useOrganization();
+  // Billing grace period — stage 2 (day 14+): member/role administration is
+  // read-only for managers. Views stay live; mutations are blocked.
+  const { isManagerAdminReadOnly } = useSubscriptionGate();
 
   const [filterTab, setFilterTab] = useState<FilterTab>('all');
   const [refreshing, setRefreshing] = useState<boolean>(false);
@@ -590,6 +595,8 @@ export default function RoleManagementScreen() {
   const handleRoleChange = useCallback(
     async (member: MemberAdminRow, newRole: OrgRole) => {
       if (newRole === member.role) return;
+      // Billing grace stage 2: role changes are manager admin writes
+      if (isManagerAdminReadOnly) return;
       setProcessingId(member.membershipId);
       try {
         await assignMemberRole({ membershipId: member.membershipId, newRole });
@@ -599,12 +606,14 @@ export default function RoleManagementScreen() {
         setProcessingId(null);
       }
     },
-    [assignMemberRole]
+    [assignMemberRole, isManagerAdminReadOnly]
   );
 
   // ── Suspend ───────────────────────────────────────────────────────────────
   const handleSuspend = useCallback(
     (member: MemberAdminRow) => {
+      // Billing grace stage 2: suspensions are manager admin writes
+      if (isManagerAdminReadOnly) return;
       Alert.alert(
         'Suspend Member',
         `Suspend ${member.displayName}? They will lose access until reinstated.`,
@@ -627,12 +636,14 @@ export default function RoleManagementScreen() {
         ]
       );
     },
-    [suspendMember]
+    [suspendMember, isManagerAdminReadOnly]
   );
 
   // ── Reinstate ─────────────────────────────────────────────────────────────
   const handleReinstate = useCallback(
     (member: MemberAdminRow) => {
+      // Billing grace stage 2: reinstatements are manager admin writes
+      if (isManagerAdminReadOnly) return;
       Alert.alert(
         'Reinstate Member',
         `Restore access for ${member.displayName}?`,
@@ -655,12 +666,14 @@ export default function RoleManagementScreen() {
         ]
       );
     },
-    [reinstateMember]
+    [reinstateMember, isManagerAdminReadOnly]
   );
 
   // ── Remove ────────────────────────────────────────────────────────────────
   const handleRemove = useCallback(
     (member: MemberAdminRow) => {
+      // Billing grace stage 2: removals are manager admin writes
+      if (isManagerAdminReadOnly) return;
       Alert.alert(
         'Remove Member',
         `Permanently remove ${member.displayName} from ${activeOrg?.name ?? 'this community'}? This cannot be undone.`,
@@ -683,12 +696,14 @@ export default function RoleManagementScreen() {
         ]
       );
     },
-    [removeMember, activeOrg?.name]
+    [removeMember, activeOrg?.name, isManagerAdminReadOnly]
   );
 
   // ── Invite by email ───────────────────────────────────────────────────────
   const handleInvite = useCallback(
     async (email: string, role: OrgRole) => {
+      // Billing grace stage 2: invites are manager admin writes
+      if (isManagerAdminReadOnly) return;
       try {
         const result = await inviteMemberByEmail({ email, role });
         setShowInvite(false);
@@ -704,11 +719,13 @@ export default function RoleManagementScreen() {
         Alert.alert('Error', 'Could not complete invite. Please try again.');
       }
     },
-    [inviteMemberByEmail]
+    [inviteMemberByEmail, isManagerAdminReadOnly]
   );
 
   // ── Regenerate invite code ────────────────────────────────────────────────
   const handleRegenerateCode = useCallback(() => {
+    // Billing grace stage 2: invite-code regeneration is a manager admin write
+    if (isManagerAdminReadOnly) return;
     Alert.alert(
       'Regenerate Invite Code',
       'The current code will stop working immediately. Share the new code with members who need to join.',
@@ -728,7 +745,7 @@ export default function RoleManagementScreen() {
         },
       ]
     );
-  }, [regenerateInviteCode]);
+  }, [regenerateInviteCode, isManagerAdminReadOnly]);
 
   // ── Copy invite code ──────────────────────────────────────────────────────
   const handleCopyCode = useCallback(async () => {
@@ -780,6 +797,7 @@ export default function RoleManagementScreen() {
           style={[styles.inviteBtn, { backgroundColor: Colors.primary }]}
           onPress={() => setShowInvite(true)}
           activeOpacity={0.85}
+          disabled={isManagerAdminReadOnly}
         >
           <UserPlus size={16} color="#fff" strokeWidth={2.2} />
         </TouchableOpacity>
@@ -792,6 +810,11 @@ export default function RoleManagementScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={Colors.primary} />
         }
       >
+        {/* ── Billing grace — manager read-only notice (stage 2) ─────────── */}
+        <View style={{ paddingHorizontal: 20, paddingTop: 16 }}>
+          <ReadOnlyNotice variant="manager" />
+        </View>
+
         {/* ── Invite code strip ──────────────────────────────────────────── */}
         {activeOrg.inviteCode ? (
           <View style={[styles.codeStrip, { backgroundColor: Colors.primary + '10', borderColor: Colors.primary + '30' }]}>

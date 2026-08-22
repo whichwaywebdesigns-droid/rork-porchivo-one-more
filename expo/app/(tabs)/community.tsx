@@ -43,6 +43,8 @@ import {
 import { isEnabled } from '@/lib/featureFlags';
 import { LayoutDashboard } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSubscriptionGate } from '@/hooks/useSubscriptionGate';
+import { RestrictedCommunityOverlay } from '@/components/BillingGraceBanner';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -628,6 +630,11 @@ export default function CommunityScreen() {
   const insets = useSafeAreaInsets();
   const { isLoading, isOrgMember, isOrgPending, refreshOrgContext } = useOrganization();
   const [refreshing, setRefreshing] = React.useState<boolean>(false);
+  // Billing grace period — stage 3 (day 30+): full restriction (BILL-07).
+  // The community dashboard is replaced by a billing notice; managers get a
+  // billing CTA, residents are pointed at their property manager. Package
+  // history remains reachable from the Packages tab.
+  const { isRestricted } = useSubscriptionGate();
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -657,7 +664,11 @@ export default function CommunityScreen() {
           <ActivityIndicator size="large" color={Colors.primary} />
         </View>
       ) : isOrgMember ? (
-        <CommunityDashboard onRefresh={handleRefresh} refreshing={refreshing} />
+        isRestricted ? (
+          <RestrictedCommunityOverlay />
+        ) : (
+          <CommunityDashboard onRefresh={handleRefresh} refreshing={refreshing} />
+        )
       ) : isOrgPending ? (
         <PendingCard />
       ) : (

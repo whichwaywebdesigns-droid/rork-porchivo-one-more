@@ -19,10 +19,25 @@
 //   invoice.payment_failed        → mark billing_issue (grace period)
 //   customer.subscription.deleted → mark expired, revoke entitlement
 //   checkout.session.completed    → activate subscription for metadata.user_id
+//
+// ORG (property) subscriptions — create-org-checkout stamps metadata.org_id on
+// the Stripe customer/subscription. When an event carries org_id, the ORG branch
+// runs INSTEAD of the user_subscriptions branch (org billing is property-scoped,
+// never a personal entitlement):
+//   invoice.payment_failed + org_id → organizations.subscription_status='past_due',
+//     payment_failed_at = COALESCE(existing, now()) — a FRESH lapse after resume
+//     resets the 3-stage clock; Stripe retries within one dunning cycle must NOT.
+//     Manager-only dunning email+push at day 0/7/14/21 markers (deduped via
+//     dunning_last_marker_sent). Residents/staff are NEVER notified here.
+//   invoice.paid + org_id → status='active', payment_failed_at=NULL (instant
+//     resume from any grace stage — the webhook is the source of truth).
+//   checkout.session.completed + org_id → org billing columns activated.
+//   customer.subscription.deleted + org_id → status='canceled', clock cleared.
 
 import Stripe from 'npm:stripe@16.12.0';
 import { createClient, SupabaseClient } from 'npm:@supabase/supabase-js@2';
 import { SECURITY_HEADERS, jsonResponse, logSecurityEvent } from '../_shared/security.ts';
+import { sendViaResend } from '../_shared/resend.ts';
 
 const ALLOWED_EVENTS = new Set([
   'invoice.paid',
@@ -68,6 +83,163 @@ async function resolveUserId(
   }
 
   return null;
+}
+
+/** Look up the Porchivo ORG for a Stripe object (metadata.org_id). Org events
+ *  route to the organizations table, never to user_subscriptions. */
+const UUID_RE = /^[0-9a-f-]{36}$/i;
+
+async function resolveOrgId(
+  metadata: Record<string, string> | null | undefined,
+): Promise<string | null> {
+  const orgId = metadata?.org_id;
+  if (!orgId || !UUID_RE.test(orgId)) return null;
+  const { data } = await adminClient
+    .from('organizations')
+    .select('id')
+    .eq('id', orgId)
+    .maybeSingle();
+  return (data?.id as string) ?? null;
+}
+
+/** Manager-only dunning content for a day marker (0/7/14/21). */
+function dunningMessage(
+  marker: number,
+): { subject: string; body: string; pushTitle: string; pushBody: string } {
+  if (marker >= 21) {
+    return {
+      subject: 'Final reminder — Porchivo access pauses in 9 days',
+      body: 'Your community subscription payment is still failing. In 9 days, on day 30, package intake and app access will pause for everyone at your property. Please update your payment method.',
+      pushTitle: 'Final billing reminder',
+      pushBody: 'Porchivo access pauses on day 30 — update your payment method.',
+    };
+  }
+  if (marker >= 14) {
+    return {
+      subject: 'Payment failed — resident settings are now read-only',
+      body: 'Your community subscription payment failed 14 days ago. Residents can still see their packages and pickup codes, but account settings are temporarily read-only. Staff intake keeps working. Update your payment method to restore everything instantly.',
+      pushTitle: 'Billing issue — day 14',
+      pushBody: 'Resident settings are read-only until billing is updated.',
+    };
+  }
+  if (marker >= 7) {
+    return {
+      subject: 'Reminder — Porchivo payment failed 7 days ago',
+      body: 'Your community subscription payment failed 7 days ago. Residents and staff still have full access while we retry, but please update your payment method to avoid disruption.',
+      pushTitle: 'Billing reminder — day 7',
+      pushBody: 'Your Porchivo payment failed 7 days ago. Update billing when you can.',
+    };
+  }
+  return {
+    subject: 'Action needed — your Porchivo payment failed',
+    body: 'Your community subscription payment failed. Residents and staff keep full access while we retry — nothing changes for them. Please update your payment method in the billing portal to keep Porchivo active.',
+    pushTitle: 'Payment failed',
+    pushBody: 'Your community payment failed. Residents are unaffected — update billing when you can.',
+  };
+}
+
+/** Send the manager-only dunning email + push. Never throws — notification
+ *  failures must not fail the billing state write. */
+async function notifyOrgManager(
+  orgId: string,
+  adminUserId: string | null,
+  orgName: string | null,
+  marker: number,
+): Promise<void> {
+  if (!adminUserId) return;
+  try {
+    const { data: profile } = await adminClient
+      .from('profiles')
+      .select('email, expo_push_token')
+      .eq('id', adminUserId)
+      .maybeSingle();
+    if (!profile) return;
+
+    const msg = dunningMessage(marker);
+    const orgLabel = orgName ? ` for ${orgName}` : '';
+
+    // Email (best-effort)
+    const apiKey = Deno.env.get('RESEND_API_KEY');
+    const from = Deno.env.get('EMAIL_FROM');
+    if (apiKey && from && profile.email) {
+      const result = await sendViaResend({
+        apiKey,
+        from,
+        to: profile.email,
+        subject: msg.subject,
+        text: `${msg.body}\n\nManage billing: Porchivo app → More → Manage Subscription.`,
+      });
+      if (!result.ok) {
+        console.warn(`[stripe-webhook] dunning email failed (marker=${marker}): ${result.error ?? result.status}`);
+      }
+    }
+
+    // Push (best-effort, direct to Expo — the notifications table is
+    // shipment-scoped and cannot carry billing types)
+    const token = profile.expo_push_token as string | null;
+    if (token) {
+      await fetch('https://exp.host/--/api/v2/push/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: token,
+          title: msg.pushTitle,
+          body: msg.pushBody,
+          sound: 'default',
+          data: { kind: 'billing_dunning', org_id: orgId, marker, scope: orgLabel.trim() ? 'manager' : 'manager' },
+        }),
+      }).catch((e) => {
+        console.warn('[stripe-webhook] dunning push failed:', e instanceof Error ? e.message : 'unknown');
+      });
+    }
+  } catch (e) {
+    console.warn('[stripe-webhook] notifyOrgManager error:', e instanceof Error ? e.message : 'unknown');
+  }
+}
+
+/** Org invoice.payment_failed — start/continue the 3-stage grace clock. */
+async function handleOrgPaymentFailed(orgId: string): Promise<string> {
+  const { data: org } = await adminClient
+    .from('organizations')
+    .select('name, admin_user_id, subscription_status, payment_failed_at, dunning_last_marker_sent')
+    .eq('id', orgId)
+    .maybeSingle();
+  if (!org) return 'org_not_found';
+
+  const nowIso = new Date().toISOString();
+  const isFirstFailure = !org.payment_failed_at;
+  // Fresh lapse (after a resume cleared the timestamp) resets the clock from
+  // zero; retries within the SAME dunning cycle keep the original timestamp.
+  const failedAt: string = (org.payment_failed_at as string) ?? nowIso;
+  const days = Math.max(0, Math.floor((Date.now() - new Date(failedAt).getTime()) / 86_400_000));
+  const marker = days >= 21 ? 21 : days >= 14 ? 14 : days >= 7 ? 7 : 0;
+
+  const update: Record<string, unknown> = {
+    subscription_status: 'past_due',
+    updated_at: nowIso,
+  };
+  if (isFirstFailure) {
+    update.payment_failed_at = failedAt;
+    update.dunning_last_marker_sent = null; // fresh cadence for a new lapse
+  }
+
+  const { error } = await adminClient.from('organizations').update(update).eq('id', orgId);
+  if (error) {
+    console.error('[stripe-webhook] org past_due update failed:', error.message);
+    return 'db_error';
+  }
+
+  // Manager-only dunning at day 0/7/14/21 (deduped by marker)
+  const lastMarker = (org.dunning_last_marker_sent as number | null) ?? -1;
+  if (marker > lastMarker) {
+    await notifyOrgManager(orgId, org.admin_user_id as string | null, org.name as string | null, marker);
+    await adminClient
+      .from('organizations')
+      .update({ dunning_last_marker_sent: marker })
+      .eq('id', orgId);
+  }
+
+  return 'org_past_due';
 }
 
 /** Map a Stripe price lookup_key to a Porchivo tier (see STRIPE_SETUP.md). */
@@ -208,6 +380,21 @@ Deno.serve(async (req: Request) => {
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
+        // Org (property) checkout — update the org, not a personal subscription
+        const orgId = await resolveOrgId(session.metadata);
+        if (orgId) {
+          const { error } = await adminClient
+            .from('organizations')
+            .update({
+              subscription_status: 'active',
+              payment_failed_at: null,
+              dunning_last_marker_sent: null,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', orgId);
+          outcome = error ? 'db_error' : 'org_activated';
+          break;
+        }
         const userId = await resolveUserId(
           session.metadata,
           session.customer_details?.email ?? session.customer_email,
@@ -232,6 +419,30 @@ Deno.serve(async (req: Request) => {
 
       case 'invoice.paid': {
         const invoice = event.data.object as Stripe.Invoice;
+        // Org (property) invoice — instant resume from ANY grace stage: the
+        // webhook is the source of truth, no manual un-pause, no waiting for
+        // a new billing cycle.
+        const paidOrgId = await resolveOrgId(
+          invoice.subscription_details?.metadata ?? invoice.metadata,
+        );
+        if (paidOrgId) {
+          const line = invoice.lines?.data?.[0];
+          const periodEnd = line?.period?.end
+            ? new Date(line.period.end * 1000).toISOString()
+            : null;
+          const { error } = await adminClient
+            .from('organizations')
+            .update({
+              subscription_status: 'active',
+              payment_failed_at: null,
+              dunning_last_marker_sent: null,
+              ...(periodEnd ? { current_period_end: periodEnd } : {}),
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', paidOrgId);
+          outcome = error ? 'db_error' : 'org_resumed';
+          break;
+        }
         const userId = await resolveUserId(
           invoice.subscription_details?.metadata ?? invoice.metadata,
           invoice.customer_email,
@@ -259,6 +470,17 @@ Deno.serve(async (req: Request) => {
 
       case 'invoice.payment_failed': {
         const invoice = event.data.object as Stripe.Invoice;
+        // Org (property) payment failure — enter the 3-stage grace timeline
+        // (silent grace day 0-14 → read-only day 14-30 → restricted day 30+).
+        // Residents/staff see NO change at this point; only the manager is
+        // notified (dunning cadence inside handleOrgPaymentFailed).
+        const failedOrgId = await resolveOrgId(
+          invoice.subscription_details?.metadata ?? invoice.metadata,
+        );
+        if (failedOrgId) {
+          outcome = await handleOrgPaymentFailed(failedOrgId);
+          break;
+        }
         const userId = await resolveUserId(
           invoice.subscription_details?.metadata ?? invoice.metadata,
           invoice.customer_email,
@@ -280,6 +502,21 @@ Deno.serve(async (req: Request) => {
 
       case 'customer.subscription.deleted': {
         const subscription = event.data.object as Stripe.Subscription;
+        // Org (property) subscription canceled — clear the grace clock
+        const deletedOrgId = await resolveOrgId(subscription.metadata);
+        if (deletedOrgId) {
+          const { error } = await adminClient
+            .from('organizations')
+            .update({
+              subscription_status: 'canceled',
+              payment_failed_at: null,
+              dunning_last_marker_sent: null,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', deletedOrgId);
+          outcome = error ? 'db_error' : 'org_canceled';
+          break;
+        }
         const userId = await resolveUserId(subscription.metadata, null);
         if (!userId) {
           outcome = 'user_not_found';

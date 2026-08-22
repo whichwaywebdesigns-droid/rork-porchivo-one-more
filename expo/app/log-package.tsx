@@ -26,6 +26,8 @@ import {
 } from 'lucide-react-native';
 import { useColors } from '@/constants/colors';
 import { useOrganization } from '@/store/OrganizationContext';
+import { useSubscriptionGate } from '@/hooks/useSubscriptionGate';
+import { StaffIntakeLockoutNotice } from '@/components/BillingGraceBanner';
 import { CARRIER_META, PackageSizeHint } from '@/types/organization';
 
 /**
@@ -376,6 +378,11 @@ export default function LogPackageScreen() {
   const Colors = useColors();
   const insets = useSafeAreaInsets();
   const { activeOrg, logPackage, isLoggingPackage } = useOrganization();
+  // Billing grace period — staff intake locks ONLY at stage 3 (day 30+).
+  // Intentionally NOT gated during stages 1-2 (see useSubscriptionGate.ts):
+  // package intake is core value and residents' actual mail, so it stays live
+  // through the entire 30-day window regardless of billing state.
+  const { isStaffIntakeLocked } = useSubscriptionGate();
 
   const [step, setStep] = useState<number>(0);
   const slideAnim = useRef(new Animated.Value(0)).current;
@@ -418,6 +425,8 @@ export default function LogPackageScreen() {
 
   const handleSubmit = useCallback(async () => {
     if (!carrier || !activeOrg?.id) return;
+    // Billing grace stage 3 (day 30+): the ONLY point where staff intake stops
+    if (isStaffIntakeLocked) return;
     try {
       await logPackage({
         carrier,
@@ -438,7 +447,7 @@ export default function LogPackageScreen() {
     } catch {
       Alert.alert('Error', 'Could not log the package. Please try again.');
     }
-  }, [carrier, activeOrg?.id, logPackage, tracking, unitNumber, description, sizeHint, location]);
+  }, [carrier, activeOrg?.id, logPackage, tracking, unitNumber, description, sizeHint, location, isStaffIntakeLocked]);
 
   return (
     <KeyboardAvoidingView
@@ -481,6 +490,9 @@ export default function LogPackageScreen() {
           { transform: [{ translateY: slideAnim }] },
         ]}
       >
+        {/* ── Billing grace — staff lockout notice (stage 3 ONLY) ─────────── */}
+        <StaffIntakeLockoutNotice />
+
         {step === 0 && (
           <ScrollView
             showsVerticalScrollIndicator={false}
@@ -553,7 +565,7 @@ export default function LogPackageScreen() {
           <TouchableOpacity
             style={[styles.nextBtn, { backgroundColor: Colors.success }]}
             onPress={handleSubmit}
-            disabled={isLoggingPackage}
+            disabled={isLoggingPackage || isStaffIntakeLocked}
             activeOpacity={0.85}
           >
             {isLoggingPackage ? (
