@@ -28,6 +28,21 @@ import { useColors } from '@/constants/colors';
 import { useOrganization } from '@/store/OrganizationContext';
 import { CARRIER_META, PackageSizeHint } from '@/types/organization';
 
+/**
+ * ORG PACKAGE INTAKE — the "full lane" of package intake.
+ *
+ * Someone who has PHYSICALLY RECEIVED a package on a resident's behalf
+ * (front desk, community staff, or Porch Partner) logs it here so the ops
+ * board can route it and notify the right resident. Requires an org
+ * context (`useOrganization`) and captures what matters when shelving an
+ * item in hand: size hint, details, confirmation.
+ *
+ * This is intentionally separate from `app/add-package.tsx` (resident
+ * self-tracking of packages still in transit). Do NOT merge the two flows:
+ * different actor (holder vs. recipient), different lifecycle (received vs.
+ * expected), different gating (org member vs. any homeowner).
+ */
+
 // ─── Step config ──────────────────────────────────────────────────────────────
 
 const STEPS = ['Carrier', 'Details', 'Confirm'] as const;

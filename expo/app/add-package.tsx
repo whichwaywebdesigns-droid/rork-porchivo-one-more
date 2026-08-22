@@ -21,6 +21,18 @@ import { Carrier, AddressNickname, PorchPartner } from '@/types';
 import { log } from "@/lib/logger";
 import BarcodeScannerModal from '@/components/BarcodeScannerModal';
 
+/**
+ * RESIDENT SELF-TRACKING — the "quick lane" of package intake.
+ *
+ * A homeowner logs a package they are EXPECTING (package not yet in hand).
+ * Remote watch only: carrier + tracking number + expected date. No photo,
+ * size, or locker fields — those belong to the physical-intake flow in
+ * `app/log-package.tsx` (org-gated, for someone holding the package).
+ *
+ * Do NOT merge this screen with log-package.tsx: different actor, different
+ * data model (PackagesContext vs. org packages), different tier gating.
+ */
+
 const CARRIERS: Carrier[] = ['Amazon', 'UPS', 'FedEx', 'USPS', 'Other'];
 const ADDRESS_OPTIONS: AddressNickname[] = ['Home', 'Work', 'Other'];
 
