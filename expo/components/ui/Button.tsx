@@ -9,6 +9,7 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { palette, radius, space } from '@/constants/theme';
 
 type Variant = 'primary' | 'secondary' | 'tonal' | 'ember' | 'ghost' | 'destructive';
@@ -95,8 +96,13 @@ export default function Button({
   const scale = useRef(new Animated.Value(1)).current;
   const variantStyles = getStyles(variant);
 
-  const handleIn = () =>
+  const handleIn = () => {
+    if (!disabled && !loading) {
+      // Light tick on press — keeps tap feedback consistent with native builds.
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+    }
     Animated.spring(scale, { toValue: 0.97, useNativeDriver: true, speed: 50, bounciness: 4 }).start();
+  };
   const handleOut = () =>
     Animated.spring(scale, { toValue: 1, useNativeDriver: true, speed: 50, bounciness: 4 }).start();
 

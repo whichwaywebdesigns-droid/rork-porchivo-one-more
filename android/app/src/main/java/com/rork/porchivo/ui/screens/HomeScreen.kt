@@ -50,6 +50,8 @@ import com.rork.porchivo.data.MockData
 import com.rork.porchivo.data.LoadState
 import com.rork.porchivo.ui.components.EmptyState
 import com.rork.porchivo.ui.components.ShipmentCard
+import com.rork.porchivo.ui.components.pressScale
+import com.rork.porchivo.ui.components.rememberPressHaptic
 import com.rork.porchivo.ui.navigation.Routes
 import com.rork.porchivo.ui.theme.PorchivoTheme
 import com.rork.porchivo.ui.viewmodel.AppViewModel
@@ -70,6 +72,7 @@ fun HomeScreen(
     notificationsViewModel: NotificationsViewModel = viewModel(),
 ) {
     val c = PorchivoTheme.colors
+    val pressHaptic = rememberPressHaptic()
     val user by appViewModel.user.collectAsStateWithLifecycle()
     val myShipments by shipmentsViewModel.myShipments.collectAsStateWithLifecycle()
     val unreadCount by notificationsViewModel.unreadCount.collectAsStateWithLifecycle()
@@ -107,13 +110,13 @@ fun HomeScreen(
         }
 
         item {
-            PartnerUpsellBanner(onClick = { navController.navigate(Routes.CREATE) })
+            PartnerUpsellBanner(onClick = { pressHaptic(); navController.navigate(Routes.CREATE) })
         }
 
         item {
             TodayRiskCard(
                 score = riskScore,
-                onClick = { navController.navigate(Routes.SAFETY) },
+                onClick = { pressHaptic(); navController.navigate(Routes.SAFETY) },
             )
         }
 
@@ -158,28 +161,28 @@ fun HomeScreen(
                     tint = c.danger,
                     softTint = c.dangerSoft,
                     badge = unreadCount,
-                    onClick = { navController.navigate(Routes.ACTIVITY) },
+                    onClick = { pressHaptic(); navController.navigate(Routes.ACTIVITY) },
                 )
                 QuickLink(
                     label = "Safety",
                     icon = Icons.Outlined.BarChart,
                     tint = c.accent,
                     softTint = c.accentSoft,
-                    onClick = { navController.navigate(Routes.SAFETY) },
+                    onClick = { pressHaptic(); navController.navigate(Routes.SAFETY) },
                 )
                 QuickLink(
                     label = "Add Package",
                     icon = Icons.Filled.Add,
                     tint = c.success,
                     softTint = c.successSoft,
-                    onClick = { navController.navigate(Routes.ADD_PACKAGE) },
+                    onClick = { pressHaptic(); navController.navigate(Routes.ADD_PACKAGE) },
                 )
                 QuickLink(
                     label = "Porch Risk",
                     icon = Icons.Outlined.GppMaybe,
                     tint = c.warmOrange,
                     softTint = c.warmOrangeSoft,
-                    onClick = { navController.navigate(Routes.SAFETY) },
+                    onClick = { pressHaptic(); navController.navigate(Routes.SAFETY) },
                 )
             }
         }
@@ -200,14 +203,15 @@ fun HomeScreen(
                     title = "No packages yet",
                     body = "Add your first package to start tracking deliveries and scoring porch risk.",
                     ctaLabel = "Add your first package",
-                    onCta = { navController.navigate(Routes.ADD_PACKAGE) },
+                    onCta = { pressHaptic(); navController.navigate(Routes.ADD_PACKAGE) },
                 )
             }
         } else {
             items(myShipments, key = { it.id }) { shipment ->
                 ShipmentCard(
                     shipment = shipment,
-                    onClick = { navController.navigate(Routes.shipmentDetail(shipment.id)) },
+                    onClick = { pressHaptic(); navController.navigate(Routes.shipmentDetail(shipment.id)) },
+                    modifier = Modifier.animateItem(),
                 )
             }
         }
@@ -255,7 +259,9 @@ private fun PartnerUpsellBanner(onClick: () -> Unit, modifier: Modifier = Modifi
     val c = PorchivoTheme.colors
     Card(
         onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .pressScale(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = c.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
@@ -313,7 +319,9 @@ private fun TodayRiskCard(score: Int, onClick: () -> Unit, modifier: Modifier = 
 
     Card(
         onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .pressScale(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = c.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
@@ -388,7 +396,9 @@ private fun QuickLink(
     val c = PorchivoTheme.colors
     Card(
         onClick = onClick,
-        modifier = modifier.width(76.dp),
+        modifier = modifier
+            .width(76.dp)
+            .pressScale(),
         shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),

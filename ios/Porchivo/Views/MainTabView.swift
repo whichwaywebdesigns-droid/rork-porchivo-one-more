@@ -24,6 +24,7 @@ struct MainTabView: View {
         }
         .tint(c.accent)
         .animation(.easeInOut(duration: 0.3), value: appState.isOrgMember)
+        .sensoryFeedback(.selection, trigger: selection)
     }
 
     // MARK: - Free Tier (3 tabs)

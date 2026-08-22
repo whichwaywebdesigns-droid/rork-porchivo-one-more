@@ -39,7 +39,9 @@ fun ShipmentCard(
 
     Card(
         onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .pressScale(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = c.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),

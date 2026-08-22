@@ -25,7 +25,7 @@ struct Card<Content: View>: View {
     var body: some View {
         if let action {
             Button(action: action) { inner }
-                .buttonStyle(.plain)
+                .buttonStyle(PressableCardStyle())
         } else {
             inner
         }
