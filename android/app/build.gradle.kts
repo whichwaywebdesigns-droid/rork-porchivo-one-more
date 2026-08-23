@@ -15,7 +15,7 @@ android {
         applicationId = "com.whichwayweblabs.porchivo"
         minSdk = 24
         targetSdk = 36
-        versionCode = 3
+        versionCode = 1787154654
         versionName = "1.0.7"
 
         // Supabase credentials — read from local.properties, system env vars,
