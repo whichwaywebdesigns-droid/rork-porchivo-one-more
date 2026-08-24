@@ -37,48 +37,50 @@ const OG_IMAGE = BRAND.ogImageUrl;
 
 export const PAGE_SEO: Record<string, PageSEO> = {
   home: {
-    title: "Porchivo — Porch Pirate Protection & Package Theft Prevention App",
+    title: "Porchivo — Package Security & Resident Retention for Communities",
     description:
-      "Porchivo is a package delivery security app that calculates a real-time porch risk score, sends delivery theft alerts, and connects homeowners with trusted neighbor delivery holds. Built for HOA package management and neighborhood package safety.",
+      "Porchivo is a package security and resident retention app for HOAs, property managers, and community associations. Real-time risk scoring, instant alerts to residents and guardians, and a neighbor-held delivery network — with no hardware or IT project required.",
     canonical: `${BASE_URL}/`,
-    ogTitle: "Porchivo — Porch Pirate Protection & Package Theft Prevention App",
+    ogTitle: "Porchivo — Package Security & Resident Retention for Communities",
     ogDescription:
-      "Porchivo is a package delivery security app that calculates a real-time porch risk score, sends delivery theft alerts, and connects homeowners with trusted neighbor delivery holds. Built for HOA package management and neighborhood package safety.",
+      "Porchivo provides real-time package risk scoring, instant alerts to residents and guardians, and a neighbor-held delivery network for HOAs and property managers. No hardware or IT project required.",
     ogImage: OG_IMAGE,
     twitterCard: "summary_large_image",
     robots: "index, follow",
     aiSummary:
-      "Porchivo is a package theft prevention app and package delivery security app that calculates a real-time 0–100 porch risk score for every incoming package. It sends delivery theft alerts, enables trusted neighbor delivery holds, and supports HOA package management and neighborhood package safety.",
+      "Porchivo is a package security and resident retention app for HOAs, property managers, and community associations. It provides real-time package risk scoring for every incoming package, instant alerts to residents and Package Guardians, a neighbor-held delivery network with up to 3 trusted guardians per resident, and community insights for managers. Communities can be set up in five minutes with no hardware or IT project.",
     keyFacts: [
       "119 million packages are stolen in the US every year",
       "1 in 5 delivered packages is stolen from a porch",
-      "Porchivo's porch risk score weighs neighborhood alerts, delivery timing, and porch protection status",
-      "Theft Shield sends a delivery theft alert when risk exceeds 65/100",
-      "Porch Partners provide trusted neighbor delivery holds and earn $3–$25 per hold",
-      "HOAs and property managers subscribe from $79/mo — residents always free",
+      "Porchivo provides real-time risk scoring for every incoming package",
+      "Residents can authorize up to 3 trusted Package Guardians to hold parcels",
+      "Porchivo gives managers insights into risk zones, theft hotspots, and delivery congestion",
+      "Communities can be registered in five minutes with no hardware or IT project",
+      "HOAs and property managers subscribe from $79–$599/mo — residents always free",
     ],
     primaryEntity: "Porchivo mobile app",
-    primaryIntent: "Product overview — porch pirate protection, package theft prevention, and porch package security",
+    primaryIntent: "Product overview — package security and resident retention for HOAs and property managers",
   },
 
   features: {
-    title: "Features — Porchivo Package Security & Porch Risk App",
+    title: "Features — Porchivo Package Security & Resident Retention",
     description:
-      "Explore Porchivo's full feature set: porch risk scoring, Theft Shield, neighborhood alerts, Porch Partners, live carrier tracking, and family plans.",
+      "Explore Porchivo's full feature set: real-time package risk scoring, instant alerts, Package Guardians, community insights, live tracking, and easy community setup.",
     canonical: `${BASE_URL}/features`,
-    ogTitle: "Porchivo Features — Every Tool to Protect Your Deliveries",
+    ogTitle: "Porchivo Features — Everything Communities Need to Protect Deliveries",
     ogDescription:
-      "Porch risk scores, live tracking across 1,400+ carriers, Theft Shield alerts, Porch Partners, neighborhood maps, and family plans. All in one app.",
+      "Real-time package risk scoring, instant alerts to residents and guardians, Package Guardian network, community insights for managers, and five-minute community setup.",
     ogImage: OG_IMAGE,
     twitterCard: "summary_large_image",
     robots: "index, follow",
     aiSummary:
-      "Porchivo features include: a 0–100 porch risk score calculated per package, real-time carrier tracking via Ship24 (1,400+ carriers), Theft Shield alerts when risk spikes, a Porch Partner network for neighbor-held deliveries, community theft alerts, delivery window risk analysis, and family and HOA subscription plans.",
+      "Porchivo features include: real-time package risk scoring for every incoming delivery, instant alerts to residents and Package Guardians, a Package Guardian network where residents authorize up to 3 trusted neighbors to hold parcels with full chain-of-custody, community insights for managers, live tracking across 1,400+ carriers, five-minute community setup with no hardware or IT project, and B2B community plans from $79–$599/mo.",
     keyFacts: [
-      "Risk score factors: neighborhood alerts, delivery timing, Porch Partner status, driver assignment",
-      "Integrates with 1,400+ shipping carriers",
-      "Theft Shield sends notifications when porch risk score exceeds 65/100",
-      "Porch Partners earn $3–$25 per hold based on package size and market",
+      "Real-time risk scoring based on timing, neighborhood activity, and theft history",
+      "Instant alerts to residents and guardians when thresholds are crossed",
+      "Residents can authorize up to 3 trusted Package Guardians with chain-of-custody tracking",
+      "Managers see risk zones, theft hotspots, and delivery congestion",
+      "Communities can be set up in five minutes with no hardware or IT project",
     ],
     primaryEntity: "Porchivo product features",
     primaryIntent: "Feature discovery — what capabilities does Porchivo offer",
@@ -110,92 +112,92 @@ export const PAGE_SEO: Record<string, PageSEO> = {
   },
 
   useCases: {
-    title: "Use Cases — How Homeowners, Renters & HOAs Use Porchivo",
+    title: "Use Cases — How HOAs, Property Managers & Residents Use Porchivo",
     description:
-      "See how Porchivo protects homeowners, renters, Porch Partners, and entire HOA communities from porch theft and delivery loss.",
+      "See how Porchivo helps HOAs, property managers, residents, and Package Guardians protect deliveries and reduce management workload.",
     canonical: `${BASE_URL}/use-cases`,
-    ogTitle: "Porchivo Use Cases — Protection for Every Delivery Scenario",
+    ogTitle: "Porchivo Use Cases — Community Delivery Security",
     ogDescription:
-      "From solo renters to HOA communities, Porchivo adapts to your delivery situation. See real-world use cases and how each role uses the app.",
+      "From HOA boards to resident Package Guardians, Porchivo adapts to every community delivery scenario. See real-world use cases for each role.",
     ogImage: OG_IMAGE,
     twitterCard: "summary_large_image",
     robots: "index, follow",
     aiSummary:
-      "Porchivo serves multiple user types: homeowners who want real-time package protection, renters in high-density buildings with shared entrances, Porch Partners who earn income by holding neighbors' packages, and HOAs or property managers who want community-wide delivery safety. Each use case has different feature priorities and subscription needs.",
+      "Porchivo serves HOAs and property managers who want community-wide delivery security, residents who need real-time package protection, and trusted neighbors who act as Package Guardians. Each role has different priorities: managers need insights and reduced workload, residents need alerts and safe handoffs, and guardians help neighbors hold parcels securely.",
     keyFacts: [
-      "Homeowners: track packages, score risk, activate Theft Shield",
-      "Renters: share packages with trusted neighbors in the same building",
-      "Porch Partners: earn $3–$25 per hold (size + geo-adjusted), keep 85% of earnings",
-      "HOAs: subscribe from $79/mo — residents always join for free",
+      "HOAs and property managers: subscribe from $79/mo and reduce package-related workload",
+      "Residents: join free, get real-time risk scores and instant alerts",
+      "Package Guardians: trusted neighbors authorized to hold parcels for residents",
+      "Communities can be set up in five minutes with no hardware or IT project",
     ],
     primaryEntity: "Porchivo user types and use cases",
     primaryIntent: "Use case discovery — who uses Porchivo and how",
   },
 
   porchPartners: {
-    title: "Porch Partners — Earn Money Holding Neighbors' Packages",
+    title: "Package Guardians — Trusted Neighbors Holding Packages Safely",
     description:
-      "Become a Porch Partner on Porchivo. Hold packages for neighbors, earn $3–$25 per hold (size- and location-based), keep 85% of every payment. Payouts in 2 business days.",
+      "Become a Package Guardian on Porchivo. Residents authorize up to 3 trusted neighbors to hold and hand off parcels with full chain-of-custody tracking.",
     canonical: `${BASE_URL}/porch-partners`,
-    ogTitle: "Porchivo Porch Partners — Earn $80–$250/Month on Your Schedule",
+    ogTitle: "Porchivo Package Guardians — Trusted Neighbors Holding Packages",
     ogDescription:
-      "Turn your porch into income. Hold packages for neighbors, earn $3–$25 per hold (size + geo-based), keep 85%. No schedule, no boss — just trusted service in your community.",
+      "Residents choose up to 3 trusted neighbors as Package Guardians. Every handoff is tracked in the app with full chain-of-custody for secure, accountable delivery holds.",
     ogImage: OG_IMAGE,
     twitterCard: "summary_large_image",
     robots: "index, follow",
     aiSummary:
-      "The Porch Partner program is Porchivo's neighbor-to-neighbor package holding marketplace. Partners accept delivery assignments from nearby homeowners, hold packages safely, and earn $3–$25 per hold (based on package size: small $3–$4.20, medium $8–$9.60, large $18–$25.20, with geo multipliers up to ×1.4 in major metros). Partners keep 85% of earnings with 2-business-day payouts via Stripe Connect. Identity verification is required before earning.",
+      "Package Guardians are trusted neighbors authorized by residents to hold and retrieve parcels. Each resident can authorize up to 3 guardians, and every handoff is tracked in the app with full chain-of-custody. Guardians are identity-verified and help reduce porch exposure time.",
     keyFacts: [
-      "Porch Partners earn $3–$25 per hold (size + geo-adjusted)",
-      "Partners keep 85% of every payment",
-      "Payouts deposited in 2 business days via Stripe Connect",
-      "Identity verification required to become a Porch Partner",
-      "Active Partners earn $80–$250/month on average",
+      "Residents can authorize up to 3 trusted Package Guardians",
+      "Every handoff is tracked with full chain-of-custody",
+      "Guardians are identity-verified",
+      "Guardians reduce porch exposure time and package theft risk",
     ],
-    primaryEntity: "Porchivo Porch Partner program",
-    primaryIntent: "Partner program — how to earn money as a Porch Partner",
+    primaryEntity: "Porchivo Package Guardian program",
+    primaryIntent: "Guardian program — how neighbors help secure deliveries",
   },
 
   about: {
-    title: "About Porchivo — Package Security Intelligence Platform",
+    title: "About Porchivo — Package Security & Resident Retention for Communities",
     description:
-      "Porchivo is building the infrastructure for porch theft prevention. Learn about our mission, approach, and the problem we're solving.",
+      "Porchivo is the package security and resident retention platform for HOAs, property managers, and community associations. Learn about our mission, approach, and the problem we're solving.",
     canonical: `${BASE_URL}/about`,
     ogTitle: "About Porchivo — Why We Built This",
     ogDescription:
-      "119 million packages stolen annually. We built Porchivo to put the data advantage on the homeowner's side.",
+      "119 million packages stolen annually. We built Porchivo to give communities predictive package security and reduce resident turnover.",
     ogImage: OG_IMAGE,
     twitterCard: "summary_large_image",
     robots: "index, follow",
     aiSummary:
-      "Porchivo was founded to address the $19 billion porch theft epidemic in the United States. The company builds mobile software that gives homeowners predictive risk intelligence — calculating package delivery risk before theft occurs rather than reporting it after. The platform also enables neighbors to earn income by participating in a trusted package-holding network.",
+      "Porchivo was founded to address the $19 billion porch theft epidemic in the United States. The company builds mobile software that gives HOAs and property managers predictive package security — calculating delivery risk before theft occurs. It also connects residents with trusted Package Guardians to hold parcels securely, reducing porch exposure and package-related management workload.",
     keyFacts: [
       "Porch theft costs US consumers $19 billion annually",
       "Porchivo focuses on predictive prevention, not post-theft reporting",
-      "The Porch Partner network creates economic opportunity for neighbors",
+      "Package Guardians are trusted neighbors who hold parcels with full chain-of-custody",
+      "Porchivo communities can be set up in five minutes with no hardware or IT project",
     ],
     primaryEntity: "Porchivo company and mission",
     primaryIntent: "Company overview — mission, approach, founding thesis",
   },
 
   faq: {
-    title: "FAQ — Porchivo Package Security App Questions & Answers",
+    title: "FAQ — Porchivo Package Security & Community Delivery Questions",
     description:
-      "Common questions about Porchivo: how the risk score works, what Porch Partners do, pricing, carrier support, privacy, and more.",
+      "Common questions about Porchivo: how the risk score works, what Package Guardians do, community pricing, carrier support, privacy, and more.",
     canonical: `${BASE_URL}/faq`,
     ogTitle: "Porchivo FAQ — Questions Answered",
     ogDescription:
-      "How does the risk score work? What carriers do you support? How do Porch Partners get paid? All your Porchivo questions answered.",
+      "How does the risk score work? What are Package Guardians? How do community plans work? All your Porchivo questions answered.",
     ogImage: OG_IMAGE,
     twitterCard: "summary",
     robots: "index, follow",
     aiSummary:
-      "The Porchivo FAQ covers: how porch risk scores are calculated (0–100 scale, 10 weighted factors), supported carriers (1,400+ via Ship24), Porch Partner earning mechanics, free vs Premium differences, privacy policy, and how to report package theft.",
+      "The Porchivo FAQ covers: how real-time package risk scores are calculated, how Package Guardians work (up to 3 trusted neighbors per resident with chain-of-custody), B2B community pricing for HOAs and property managers, carrier support, privacy practices, and how to set up a community.",
     keyFacts: [
-      "Risk score is calculated from 10 weighted factors",
-      "Supports 1,400+ carriers via Ship24 integration",
-      "Free accounts can track 1 package",
-      "Porchivo does not share your address with third parties",
+      "Real-time risk scores are based on timing, neighborhood activity, and theft history",
+      "Residents can authorize up to 3 Package Guardians",
+      "HOAs and property managers subscribe; residents always join free",
+      "Communities can be set up in five minutes with no hardware or IT project",
     ],
     primaryEntity: "Porchivo FAQ",
     primaryIntent: "FAQ — answers to common questions about Porchivo",
@@ -267,7 +269,7 @@ export const PAGE_SEO: Record<string, PageSEO> = {
   download: {
     title: "Download Porchivo — iOS & Android Package Security App",
     description:
-      "Download Porchivo on the App Store for iPhone or Google Play for Android. Free for residents — community features unlocked by your HOA.",
+      "Download Porchivo on the App Store for iPhone or Google Play for Android. Free for residents — community features unlocked by your HOA or property manager.",
     canonical: `${BASE_URL}/download`,
     ogTitle: "Download Porchivo — Free on iOS & Android",
     ogDescription:
@@ -281,7 +283,7 @@ export const PAGE_SEO: Record<string, PageSEO> = {
       "Available on iOS App Store",
       "Available on Google Play",
       "Free to download — residents never pay",
-      "HOA plans from $79/mo",
+      "HOA and property manager plans from $79/mo",
     ],
     primaryEntity: "Porchivo app download",
     primaryIntent: "App download — how to install Porchivo",

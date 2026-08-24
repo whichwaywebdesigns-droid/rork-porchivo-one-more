@@ -15,10 +15,13 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
 };
 
 const ACCENT_MAP: Record<string, { text: string; bg: string; badge: string }> = {
-  "homeowner-frequent-deliveries": { text: "text-brand-orange", bg: "bg-brand-orange/10", badge: "bg-brand-orange/10 text-brand-orange" },
-  "renter-apartment": { text: "text-blue-400", bg: "bg-blue-400/10", badge: "bg-blue-400/10 text-blue-400" },
-  "porch-partner-earner": { text: "text-emerald-400", bg: "bg-emerald-400/10", badge: "bg-emerald-400/10 text-emerald-400" },
   "hoa-community-manager": { text: "text-violet-400", bg: "bg-violet-400/10", badge: "bg-violet-400/10 text-violet-400" },
+  "resident-high-risk-deliveries": { text: "text-brand-orange", bg: "bg-brand-orange/10", badge: "bg-brand-orange/10 text-brand-orange" },
+  "package-guardian": { text: "text-emerald-400", bg: "bg-emerald-400/10", badge: "bg-emerald-400/10 text-emerald-400" },
+  "multi-property-manager": { text: "text-blue-400", bg: "bg-blue-400/10", badge: "bg-blue-400/10 text-blue-400" },
+  "renter-apartment": { text: "text-blue-400", bg: "bg-blue-400/10", badge: "bg-blue-400/10 text-blue-400" },
+  "homeowner-frequent-deliveries": { text: "text-brand-orange", bg: "bg-brand-orange/10", badge: "bg-brand-orange/10 text-brand-orange" },
+  "porch-partner-earner": { text: "text-emerald-400", bg: "bg-emerald-400/10", badge: "bg-emerald-400/10 text-emerald-400" },
   "family-household": { text: "text-rose-400", bg: "bg-rose-400/10", badge: "bg-rose-400/10 text-rose-400" },
 };
 

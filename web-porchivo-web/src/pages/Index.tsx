@@ -28,7 +28,7 @@ const FEATURE_ICONS: Record<string, React.ComponentType<{ className?: string }>>
 };
 
 const HIGHLIGHT_FEATURES = FEATURES.filter((f) =>
-  ["porch-risk-score", "theft-shield", "live-tracking"].includes(f.id)
+  ["porch-risk-score", "guardian-network", "community-insights", "easy-setup"].includes(f.id)
 );
 
 function StatCard({ value, suffix, label }: { value: number; suffix?: string; label: string }) {
@@ -86,8 +86,8 @@ export default function IndexPage() {
               </div>
             </div>
             <div className="absolute inset-0 z-10 pointer-events-none">
-              <div className="absolute inset-0 bg-gradient-to-r from-brand-navy-900/55 via-transparent to-brand-navy-900/55" />
-              <div className="absolute inset-0 bg-gradient-to-b from-brand-navy-900/30 via-transparent to-brand-navy-900/70" />
+              <div className="absolute inset-0 bg-gradient-to-r from-brand-navy-900/40 via-transparent to-brand-navy-900/40" />
+              <div className="absolute inset-0 bg-gradient-to-b from-brand-navy-900/20 via-transparent to-brand-navy-900/50" />
               <div className="hero-edge-blur absolute inset-0" />
             </div>
             <img
@@ -102,19 +102,19 @@ export default function IndexPage() {
             {BRAND.shortTagline}
           </div>
           <h1 className="text-4xl sm:text-6xl font-bold text-brand-text-primary leading-tight mb-4">
-            Making sure your HOA's mailroom doesn't get messy - every delivery organized, visible, and moving smoothly for their cherished residents
+            Package security and resident retention for HOAs, property managers, and community associations
           </h1>
           <p className="text-lg sm:text-xl font-medium text-brand-text-secondary max-w-2xl mx-auto mb-6">
-            From blocks to buildings — superior package and property tracking for homeowners, homeowner associations, and HOA package management.
+            Real-time package risk scoring, instant alerts to residents and guardians, and a neighbor-held delivery network — with no hardware or IT project required.
           </p>
           <p className="text-xl text-brand-text-secondary leading-relaxed max-w-3xl mx-auto mb-6">
             {BRAND.description}
           </p>
           <p className="text-lg text-brand-text-secondary leading-relaxed max-w-3xl mx-auto mb-4">
-            Porchivo is the package delivery security app for modern homes.
+            Porchivo reduces management workload, surfaces community insights, and keeps residents satisfied — so they renew.
           </p>
           <p className="text-lg text-brand-text-secondary leading-relaxed max-w-3xl mx-auto mb-6">
-            It's smart home package protection for every package that lands at your door.
+            HOAs and property managers subscribe from $79–$599/mo. Residents always join free.
           </p>
           <div className="flex justify-center mb-10">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-navy-900/60 border border-brand-navy-500/40 text-brand-text-secondary text-sm font-medium">
@@ -148,7 +148,7 @@ export default function IndexPage() {
         <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-5">
           <StatCard value={119} suffix="M" label="packages stolen in the US every year" />
           <StatCard value={20} suffix="%" label="of delivered packages are stolen from porches" />
-          <StatCard value={1400} suffix="+" label="carriers tracked via Ship24 integration" />
+          <StatCard value={5} label="minutes to register a community and start protecting deliveries" />
         </div>
       </section>
 
@@ -156,70 +156,47 @@ export default function IndexPage() {
       <section id="how-it-works" className="py-20 px-4 sm:px-6 border-b border-brand-navy-500/40">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
-            <h2 className="text-3xl sm:text-4xl font-bold text-brand-text-primary mb-4">How Porchivo works: package delivery security app</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold text-brand-text-primary mb-4">How Porchivo works for your community</h2>
             <p className="text-lg text-brand-text-secondary max-w-2xl mx-auto">
-              From porch-piracy problem to protected delivery — in four simple steps.
+              No hardware. No IT project. Protect every resident's deliveries in four simple steps.
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div className="bg-brand-navy-900/60 border border-brand-navy-500/40 rounded-2xl overflow-hidden">
-              <img
-                src="/images/why-porchivo-porch-piracy.png"
-                alt="Porch pirate protection starts with understanding porch piracy — 1 in 5 households are hit"
-                loading="lazy"
-                className="w-full h-auto"
-              />
-              <div className="p-5">
-                <p className="text-sm font-semibold text-brand-orange mb-1">1. The problem</p>
-                <p className="text-brand-text-secondary text-sm leading-relaxed">
-                  Porch piracy is an everyday problem — 1 in 5 households are hit.
-                </p>
+            <div className="bg-brand-navy-900/60 border border-brand-navy-500/40 rounded-2xl p-6">
+              <div className="w-10 h-10 rounded-xl bg-brand-orange/10 flex items-center justify-center mb-4">
+                <span className="text-brand-orange font-bold text-lg">1</span>
               </div>
+              <p className="text-sm font-semibold text-brand-orange mb-1">Register your community</p>
+              <p className="text-brand-text-secondary text-sm leading-relaxed">
+                Sign up your HOA or property in five minutes. No hardware, no installation, no IT integration.
+              </p>
             </div>
-            <div className="bg-brand-navy-900/60 border border-brand-navy-500/40 rounded-2xl overflow-hidden">
-              <img
-                src="/images/how-it-works-three-taps.png"
-                alt="Porch package security workflow: track, assign a Porch Partner, and receive in three taps"
-                loading="lazy"
-                className="w-full h-auto"
-              />
-              <div className="p-5">
-                <p className="text-sm font-semibold text-brand-orange mb-1">2. The solution</p>
-                <p className="text-brand-text-secondary text-sm leading-relaxed">
-                  Track your package, assign a trusted neighbor, and receive — three taps.
-                </p>
-                <p className="text-brand-text-muted text-sm leading-relaxed mt-2">
-                  Great for when you are going to be home late or about to take a vacation!
-                </p>
+            <div className="bg-brand-navy-900/60 border border-brand-navy-500/40 rounded-2xl p-6">
+              <div className="w-10 h-10 rounded-xl bg-brand-orange/10 flex items-center justify-center mb-4">
+                <span className="text-brand-orange font-bold text-lg">2</span>
               </div>
+              <p className="text-sm font-semibold text-brand-orange mb-1">Residents join free</p>
+              <p className="text-brand-text-secondary text-sm leading-relaxed">
+                Residents download the app and join with your invite code. They authorize up to 3 trusted Package Guardians from their neighborhood.
+              </p>
             </div>
-            <div className="bg-brand-navy-900/60 border border-brand-navy-500/40 rounded-2xl overflow-hidden">
-              <img
-                src="/images/how-it-works-package-secured.png"
-                alt="Delivery theft alert and package secured confirmation when your Porch Partner takes custody"
-                loading="lazy"
-                className="w-full h-auto"
-              />
-              <div className="p-5">
-                <p className="text-sm font-semibold text-brand-orange mb-1">3. The outcome</p>
-                <p className="text-brand-text-secondary text-sm leading-relaxed">
-                  Get an instant "Package secured" confirmation when your partner takes custody.
-                </p>
+            <div className="bg-brand-navy-900/60 border border-brand-navy-500/40 rounded-2xl p-6">
+              <div className="w-10 h-10 rounded-xl bg-brand-orange/10 flex items-center justify-center mb-4">
+                <span className="text-brand-orange font-bold text-lg">3</span>
               </div>
+              <p className="text-sm font-semibold text-brand-orange mb-1">Risk scores update continuously</p>
+              <p className="text-brand-text-secondary text-sm leading-relaxed">
+                Every incoming package gets a real-time risk score based on timing, neighborhood activity, and theft history.
+              </p>
             </div>
-            <div className="bg-brand-navy-900/60 border border-brand-navy-500/40 rounded-2xl overflow-hidden">
-              <img
-                src="/images/built-on-trust-real-neighbors.png"
-                alt="Trusted neighbor delivery hold and neighborhood package safety with verified Porchivo neighbors"
-                loading="lazy"
-                className="w-full h-auto"
-              />
-              <div className="p-5">
-                <p className="text-sm font-semibold text-brand-orange mb-1">4. The trust layer</p>
-                <p className="text-brand-text-secondary text-sm leading-relaxed">
-                  Verified, private, local. Real neighbors keep each other accountable.
-                </p>
+            <div className="bg-brand-navy-900/60 border border-brand-navy-500/40 rounded-2xl p-6">
+              <div className="w-10 h-10 rounded-xl bg-brand-orange/10 flex items-center justify-center mb-4">
+                <span className="text-brand-orange font-bold text-lg">4</span>
               </div>
+              <p className="text-sm font-semibold text-brand-orange mb-1">Alerts trigger action</p>
+              <p className="text-brand-text-secondary text-sm leading-relaxed">
+                Residents and guardians are notified instantly when risk thresholds are crossed, with a full chain-of-custody for every handoff.
+              </p>
             </div>
           </div>
         </div>
@@ -230,8 +207,8 @@ export default function IndexPage() {
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-12">
             <div>
-              <h2 className="text-3xl font-bold text-brand-text-primary mb-3">Porch package security, delivery theft alerts, and trusted neighbor delivery holds</h2>
-              <p className="text-brand-text-secondary text-lg">Everything you need for neighborhood package safety and HOA package management.</p>
+              <h2 className="text-3xl font-bold text-brand-text-primary mb-3">Everything your community needs to protect deliveries and retain residents</h2>
+              <p className="text-brand-text-secondary text-lg">Real-time scoring, alerts, guardian handoffs, and manager insights — all in one app.</p>
             </div>
             <Link
               to="/features"
@@ -264,16 +241,16 @@ export default function IndexPage() {
       {/* CTA */}
       <section className="py-20 px-4 sm:px-6 border-b border-brand-navy-500/40">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl font-bold text-brand-text-primary mb-4">Free to start. Upgrade for HOA package management and neighborhood package safety.</h2>
+          <h2 className="text-3xl font-bold text-brand-text-primary mb-4">Residents join free. Communities subscribe from $79/mo.</h2>
           <p className="text-brand-text-secondary text-lg mb-8">
-            Track 1 package free. Premium unlocks unlimited tracking, Theft Shield alerts, and 90-second live refresh.
+            HOAs and property managers pay one simple subscription. Residents get full access at no cost — no in-app purchases, no upsells.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               to="/pricing"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-brand-navy-500/50 hover:border-brand-navy-500 text-brand-text-secondary font-medium transition-colors"
             >
-              View pricing
+              View community plans
             </Link>
             <Link
               to="/download"

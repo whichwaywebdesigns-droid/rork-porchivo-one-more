@@ -17,23 +17,23 @@ export const FAQS: FAQ[] = [
   // ── Risk Score ─────────────────────────────────────────────────────────────
   {
     id: "how-is-risk-score-calculated",
-    question: "How does Porchivo calculate a porch risk score?",
+    question: "How does Porchivo calculate a package risk score?",
     answer:
-      "Porchivo calculates a 0–100 porch risk score using multiple weighted factors: the number of active theft alerts in your neighborhood, whether your delivery is scheduled before or after 4pm, whether a trusted driver is assigned, whether drop instructions exist, and recent delivery traffic volume on your block. A score of 65 or above is High Risk, 35–64 is Elevated Risk, and under 35 is Low Risk. The score updates in real time as any of these factors change.",
+      "Porchivo continuously calculates a 0–100 risk score for every incoming package based on delivery timing, neighborhood activity, and theft history. The score updates as conditions change — for example, if a package is scheduled for after-hours delivery or if theft activity increases on your block. Communities can set their own alert thresholds.",
     category: "risk-score",
   },
   {
     id: "what-is-high-risk",
     question: "What does a High Risk score mean for my package?",
     answer:
-      "A score of 65 or above means your package has multiple risk factors stacking simultaneously — for example, late afternoon delivery timing combined with recent theft alerts on your block. A High Risk score triggers a Theft Shield notification (Premium feature) so you can take action: add drop instructions, arrange to be home, or reroute the delivery. The score is predictive, not a guarantee of theft.",
+      "A high score means your package has multiple risk factors stacking simultaneously — for example, late afternoon delivery timing combined with recent theft alerts on your block. A high score triggers an instant alert to you and your designated Package Guardians so you can take action: add drop instructions, arrange to be home, or have a guardian retrieve the package. The score is predictive, not a guarantee of theft.",
     category: "risk-score",
   },
   {
     id: "does-risk-score-affect-insurance",
     question: "Does Porchivo's risk score affect my homeowners insurance?",
     answer:
-      "No. Porchivo's risk scores are for your personal awareness only. We do not share scores with insurance providers, and your score has no bearing on your insurance premiums or claims. The score is a private tool to help you make better decisions about protecting incoming deliveries.",
+      "No. Porchivo's risk scores are for your community's awareness only. We do not share scores with insurance providers, and your score has no bearing on your insurance premiums or claims. The score is a private tool to help residents and managers make better decisions about protecting incoming deliveries.",
     category: "risk-score",
   },
 
@@ -49,14 +49,14 @@ export const FAQS: FAQ[] = [
     id: "how-many-packages-can-i-track",
     question: "How many packages can I track at the same time?",
     answer:
-      "Free accounts can track 1 package at a time. Premium accounts track unlimited packages. When you exceed the free limit, the app prompts you to upgrade. Your existing packages remain visible; you just can't add new ones until you upgrade or a current package is delivered.",
+      "Residents in subscribed communities can track unlimited packages at no cost. Free residents outside a subscribed community can track 1 package at a time. When you exceed the free limit, the app prompts you to join a community or wait until your HOA subscribes. Your existing packages remain visible; you just can't add new ones until your community is active.",
     category: "tracking",
   },
   {
     id: "how-often-does-tracking-update",
     question: "How often does tracking information update?",
     answer:
-      "Premium users receive tracking updates every 90 seconds. Free users receive updates every 10 minutes. Tracking data is pulled from Ship24 in real time — we do not cache old data. During high-activity periods like peak shipping season, updates may occasionally be slower due to carrier data availability.",
+      "Residents in subscribed communities receive tracking updates pulled from Ship24 in real time. During high-activity periods like peak shipping season, updates may occasionally be slower due to carrier data availability. Live tracking status feeds directly into the package risk score.",
     category: "tracking",
   },
 
@@ -65,14 +65,14 @@ export const FAQS: FAQ[] = [
     id: "is-porchivo-free",
     question: "Is Porchivo free to use?",
     answer:
-      "Yes — Porchivo is always free for residents. You can track packages, receive neighborhood theft alerts, and access all community features at no cost. If your HOA or property manager has subscribed to a Porchivo community plan, all features are unlocked for you. There are no in-app purchases or subscription prompts for residents — ever.",
+      "Yes — Porchivo is always free for residents. If your HOA or property manager has subscribed to a Porchivo community plan, all residents get full access at no cost. There are no in-app purchases or subscription prompts for residents. HOAs and property managers pay a simple community plan from $79–$599/mo based on community size.",
     category: "pricing",
   },
   {
     id: "what-does-premium-include",
     question: "How does my community unlock Porchivo features?",
     answer:
-      "An HOA board member or property manager signs up through the app, selects a community plan (Starter at $79/mo, Community at $199/mo, Professional at $399/mo, or Enterprise at $599/mo), and completes payment via Stripe Checkout. Once active, they receive an invite code to share with residents. Residents download the free app, enter the code, and get full access — no payment required from them.",
+      "An HOA board member or property manager signs up through the app, selects a community plan (Starter at $79/mo, Community at $199/mo, Professional at $399/mo, or Enterprise at $599/mo), and completes payment via Stripe Checkout. Once active, they receive an invite code to share with residents. Residents download the free app, enter the code, and get full access — no payment required from them. Setup takes about five minutes and requires no hardware or IT integration.",
     category: "pricing",
   },
   {
@@ -86,14 +86,14 @@ export const FAQS: FAQ[] = [
     id: "what-is-the-family-plan",
     question: "What community plans are available?",
     answer:
-      "Porchivo offers four B2B community plans: Starter ($79/mo, up to 50 units), Community ($199/mo, up to 200 units — most popular), Professional ($399/mo, up to 500 units across 3 communities), and Enterprise ($599/mo, up to 2,000 units with unlimited communities). Annual billing saves 20%. Professional includes a $500 one-time onboarding fee; Enterprise includes $1,500. Overage above the tier limit is $1 per additional unit per month.",
+      "Porchivo offers four B2B community plans: Starter ($79/mo, up to 50 units), Community ($199/mo, up to 200 units — most popular), Professional ($399/mo, up to 500 units across 3 communities), and Enterprise ($599/mo, up to 2,000 units with unlimited communities). Annual billing saves 20%. Professional includes a $500 one-time onboarding fee; Enterprise includes $1,500. Overage above the tier limit is $1 per additional unit per month. Residents always join free.",
     category: "pricing",
   },
   {
     id: "is-there-an-hoa-plan",
     question: "Is there a plan for HOAs or property managers?",
     answer:
-      "Yes — all Porchivo community plans are designed for HOAs and property managers. Plans start at $79/mo (Starter) and scale up to $599/mo (Enterprise, covering 2,000 units). Residents always join for free using an invite code. Contact support@porchivo.com for communities larger than 2,000 units — custom pricing is available.",
+      "Yes — all Porchivo community plans are designed for HOAs, property managers, and community associations. Plans start at $79/mo (Starter) and scale up to $599/mo (Enterprise, covering 2,000 units). Residents always join for free using an invite code. Contact support@porchivo.com for communities larger than 2,000 units — custom pricing is available.",
     category: "pricing",
   },
 
@@ -136,10 +136,17 @@ export const FAQS: FAQ[] = [
     category: "general",
   },
   {
+    id: "what-are-package-guardians",
+    question: "What are Package Guardians?",
+    answer:
+      "Package Guardians are trusted neighbors whom residents authorize to retrieve and hold parcels on their behalf. Each resident can authorize up to 3 guardians. Every handoff is tracked in the app with full chain-of-custody, so residents know exactly where their package is. Guardians are identity-verified and help reduce porch exposure time and theft risk.",
+    category: "general",
+  },
+  {
     id: "how-do-i-report-porch-theft",
     question: "How do I report a porch theft incident in Porchivo?",
     answer:
-      "Tap the report icon on the Alerts or Neighborhood screen to open the report sheet. Select the type of incident, add any details, and submit. Your report is anonymized and added to the community alert feed for your neighborhood. You can also call Crime Stoppers USA at 1-800-222-TIPS to submit an anonymous tip to law enforcement — this option is available directly within the Porchivo report screen.",
+      "Tap the report icon on the Alerts or Neighborhood screen to open the report sheet. Select the type of incident, add any details, and submit. Your report is anonymized and added to the community alert feed for your neighborhood. Managers can use aggregated report data to identify theft hotspots and adjust safety measures.",
     category: "general",
   },
 ];

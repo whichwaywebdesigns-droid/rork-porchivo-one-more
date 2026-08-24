@@ -19,102 +19,102 @@ export interface UseCase {
 
 export const USE_CASES: UseCase[] = [
   {
-    id: "homeowner-frequent-deliveries",
-    persona: "The Busy Homeowner",
-    headline: "You order online constantly. Your porch doesn't protect itself.",
+    id: "hoa-community-manager",
+    persona: "The HOA Board or Property Manager",
+    headline: "One subscription. An entire community protected.",
     summary:
-      "A homeowner who receives 3–10 packages per week needs to know which deliveries are at risk before they hit the porch — not after.",
+      "HOAs and property managers need community-wide package security coverage without requiring every resident to manage their own subscription or install new hardware.",
     challenge:
-      "High delivery volume means more exposure time. Late deliveries sit overnight. Neighborhood theft rates vary by block and season. Most package alerts come too late — after theft has already happened.",
+      "Package theft and delivery disputes create constant work for management: 'where's my package?' calls, mailroom congestion, and dissatisfied residents. Individual homeowner subscriptions create inconsistent coverage, and hardware solutions are expensive and slow to deploy.",
     solution:
-      "Porchivo calculates a real-time risk score for every incoming package. When risk is high, Theft Shield fires a notification before delivery. Assigning a Porch Partner on high-risk days moves the delivery to a safe address and drops the risk score by 22 points.",
+      "Porchivo covers the entire community under one B2B subscription. Residents join free with an invite code, authorize up to 3 trusted Package Guardians, and get real-time risk scores and alerts. Managers get a dashboard view of risk zones, theft hotspots, and delivery congestion — with no hardware or IT project required.",
     keyFeatures: [
-      "Real-time porch risk score per package",
-      "Theft Shield alerts on high-risk deliveries",
-      "Porch Partner assignment for safe holding",
-      "Delivery window analysis (before vs after 4pm)",
-      "Neighborhood theft alert map",
+      "Community-wide coverage under one subscription",
+      "Residents join free with an invite code",
+      "Real-time package risk scoring for every incoming delivery",
+      "Instant alerts to residents and guardians",
+      "Manager dashboard with risk zones and hotspots",
+      "Five-minute setup with no hardware installation",
     ],
-    recommendedPlan: "Community Plan ($199/mo — residents free)",
-    icon: "Home",
-  },
-  {
-    id: "renter-apartment",
-    persona: "The City Renter",
-    headline: "Shared entrance. Dozens of neighbors. No dedicated safe drop.",
-    summary:
-      "Renters in apartments and condos face elevated theft risk because packages sit in shared lobbies or unsecured mailrooms for hours.",
-    challenge:
-      "You can't control your building's entrance. Your package sits in a shared space with dozens of strangers walking past. You have no way to know it's at risk until you get home and it's gone.",
-    solution:
-      "Porchivo tracks your package in real time and sends you an alert the moment it's delivered. If you can't get home quickly, you can instantly redirect the delivery to a verified Porch Partner in your building or nearby. Your risk score accounts for your building's alert history.",
-    keyFeatures: [
-      "Delivery notification the moment a package arrives",
-      "Instant Porch Partner redirect for missed deliveries",
-      "Building-level neighborhood alert history",
-      "90-second tracking refresh (Premium)",
-    ],
-    recommendedPlan: "Community Plan ($199/mo — residents free)",
+    recommendedPlan: "Community or Enterprise Plan (residents free)",
     icon: "Building",
   },
   {
-    id: "porch-partner-earner",
-    persona: "The Porch Partner",
-    headline: "Your porch is sitting there. It could be earning.",
+    id: "resident-high-risk-deliveries",
+    persona: "The Resident",
+    headline: "Know your package risk before it lands.",
     summary:
-      "Neighbors with a secure, accessible porch can earn $80–$250/month holding packages for nearby homeowners who aren't home during delivery.",
+      "Residents in subscribed communities get full access to track packages, see risk scores, and receive instant alerts when a delivery needs attention.",
     challenge:
-      "People want to help their neighbors but need a structured, trustworthy system. Informal arrangements have no accountability, no payment system, and no identity verification.",
+      "You're at work, traveling, or home late. A package is about to sit on your porch during high-risk hours. You need to know the risk and have a trusted neighbor ready to take custody before a theft happens.",
     solution:
-      "The Porchivo Porch Partner program handles everything: assignment routing, payment collection ($3–$25/hold based on package size + geo market), 85% payout to Partner, Stripe Connect deposits in 2 business days, and identity verification for trust. Partners choose when they're available — no schedule commitment.",
+      "Porchivo scores every incoming package in real time and sends an instant alert when risk crosses your community's threshold. You can authorize up to 3 trusted Package Guardians who receive the same alert and can retrieve the package with full chain-of-custody tracking.",
     keyFeatures: [
-      "Earn $3–$25 per hold (small/medium/large × geo market)",
-      "Keep 85% of every payment",
-      "2-business-day Stripe payouts",
-      "Identity verification for trust (Stripe Identity)",
-      "No schedule — accept or decline any assignment",
+      "Real-time package risk score per delivery",
+      "Instant alerts when risk thresholds are crossed",
+      "Up to 3 trusted Package Guardians per resident",
+      "Full chain-of-custody for every handoff",
+      "Live tracking across 1,400+ carriers",
     ],
-    recommendedPlan: "Free (Partners don't pay to participate)",
-    icon: "DollarSign",
+    recommendedPlan: "Free for residents in a subscribed community",
+    icon: "Home",
   },
   {
-    id: "hoa-community-manager",
-    persona: "The HOA Board Member",
-    headline: "One subscription. An entire neighborhood protected.",
+    id: "package-guardian",
+    persona: "The Package Guardian",
+    headline: "Be the trusted neighbor who keeps deliveries safe.",
     summary:
-      "HOAs and property managers need community-wide package security coverage without requiring every resident to manage their own subscription.",
+      "Trusted neighbors help residents by retrieving and holding packages securely, with every handoff tracked in the app for full accountability.",
     challenge:
-      "Individual homeowner subscriptions create inconsistent coverage. One unprotected home affects the whole block's alert data. HOA boards can't enforce individual app adoption — but they can fund community infrastructure.",
+      "Informal arrangements for holding neighbors' packages have no accountability, no verification, and no clear chain of custody. Residents are hesitant to hand off a package to someone without a structured system.",
     solution:
-      "The Porchivo HOA Plan covers up to 250 households under one subscription. All residents get full Premium access. The community alert map becomes denser and more accurate as more residents participate. One renewal, one invoice, one administrator.",
+      "Porchivo lets residents authorize up to 3 guardians who can accept handoff requests. Every pickup, hold, and handoff is tracked in the app with full chain-of-custody. Guardians are identity-verified so residents know their packages are in trusted hands.",
     keyFeatures: [
-      "Up to 250 households covered",
-      "All residents get full Premium access",
-      "Denser neighborhood alert data",
-      "Single billing and administration",
-      "14-day free trial on annual plan",
+      "Identity-verified guardian status",
+      "In-app handoff requests from residents",
+      "Full chain-of-custody tracking",
+      "No payment or schedule commitment required",
     ],
-    recommendedPlan: "Enterprise Plan ($599/mo — residents free)",
+    recommendedPlan: "Free for guardians",
     icon: "Users",
   },
   {
-    id: "family-household",
-    persona: "The Multi-Person Household",
-    headline: "Everyone orders. Everyone should be protected.",
+    id: "multi-property-manager",
+    persona: "The Multi-Community Manager",
+    headline: "Scale package security across every property you manage.",
     summary:
-      "Households with multiple adults each receiving packages need everyone covered under one subscription, not juggling separate accounts.",
+      "Property management companies overseeing multiple communities need a single dashboard to monitor risk, reduce workload, and improve retention across all their properties.",
     challenge:
-      "Individual plans get expensive quickly for couples or multi-adult households. Package risk affects everyone in the house — a delivery addressed to any member is at risk on the same porch.",
+      "Managing package security across multiple buildings or HOAs means fragmented tools, inconsistent resident experiences, and no centralized view of where theft or delivery problems are concentrated.",
     solution:
-      "The Porchivo Family Plan covers up to 5 household members under one subscription at $15.00/month (billed annually). Every member gets their own account with full Premium access: unlimited tracking, Theft Shield, and Porch Partner features.",
+      "Porchivo Professional and Enterprise plans include multi-community dashboards, custom branding, and manager insights. See risk zones, theft hotspots, and delivery congestion across all properties from one place, while residents at every location join free.",
     keyFeatures: [
-      "Up to 5 household members",
-      "Each member gets full Premium features",
-      "Shared neighborhood alert data",
-      "7-day free trial on annual plan",
-      "One renewal for the whole household",
+      "Multi-community dashboard",
+      "Risk zones and theft hotspot visibility across properties",
+      "Custom branding",
+      "Dedicated account manager and SLA-backed support",
+      "API access for advanced integrations",
     ],
-    recommendedPlan: "Community Plan ($199/mo — residents free)",
-    icon: "Heart",
+    recommendedPlan: "Professional or Enterprise Plan",
+    icon: "Building",
+  },
+  {
+    id: "renter-apartment",
+    persona: "The Apartment Renter",
+    headline: "Shared entrances and mailrooms don't have to mean lost packages.",
+    summary:
+      "Renters in apartments and condos face elevated theft risk because packages sit in shared lobbies or unsecured mailrooms for hours.",
+    challenge:
+      "You can't control your building's entrance or mailroom. Your package sits in a shared space with dozens of strangers walking past. You have no way to know it's at risk until you get home and it's gone.",
+    solution:
+      "Porchivo tracks your package in real time and sends you an alert the moment it's delivered. If you can't get home quickly, you can request a handoff to a verified Package Guardian in your building or nearby. Your community's alert history feeds into your risk score.",
+    keyFeatures: [
+      "Delivery notification when a package arrives",
+      "Instant Package Guardian handoff request",
+      "Building-level alert history feeds risk scores",
+      "Real-time tracking across 1,400+ carriers",
+    ],
+    recommendedPlan: "Free for residents in a subscribed community",
+    icon: "Home",
   },
 ];

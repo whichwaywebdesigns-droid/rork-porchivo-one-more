@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ShieldAlert, TrendingUp, Heart, ArrowRight } from "lucide-react";
+import { ShieldAlert, TrendingUp, Heart, ArrowRight, Clock } from "lucide-react";
 import PageLayout from "@/components/PageLayout";
 import SEOHead from "@/components/SEOHead";
 import BreadcrumbNav from "@/components/BreadcrumbNav";
@@ -16,21 +16,28 @@ const VALUES = [
     color: "text-brand-orange",
     bg: "bg-brand-orange/10",
     title: "Predictive, not reactive",
-    body: "Every existing porch theft solution tells you after it happened. We built Porchivo to tell you before. The risk score exists so you can act — not grieve.",
+    body: "Every existing porch theft solution tells you after it happened. We built Porchivo to tell you before. The risk score exists so residents and managers can act — not grieve.",
   },
   {
     icon: TrendingUp,
     color: "text-blue-400",
     bg: "bg-blue-400/10",
-    title: "Data that actually helps",
-    body: "A risk number with no context is noise. Porchivo shows you exactly what's driving your score and exactly what to do about it — in the same interface.",
+    title: "Data that drives decisions",
+    body: "A risk number with no context is noise. Porchivo shows managers and residents exactly what's driving the score and what to do about it — from guardian handoffs to staffing adjustments.",
   },
   {
     icon: Heart,
     color: "text-emerald-400",
     bg: "bg-emerald-400/10",
-    title: "Neighborhoods that earn",
-    body: "The Porch Partner program isn't a feature — it's a philosophical choice. We believe the safest neighborhoods are the ones where neighbors have economic incentives to watch out for each other.",
+    title: "Residents first, always free",
+    body: "Residents never pay for Porchivo. Communities subscribe so every resident gets full access. Better package security means happier residents, fewer complaints, and stronger renewals.",
+  },
+  {
+    icon: Clock,
+    color: "text-violet-400",
+    bg: "bg-violet-400/10",
+    title: "Five minutes to safety",
+    body: "No hardware, no IT project, no months of procurement. A community manager can register a community, invite residents, and start protecting deliveries in the time it takes to finish a coffee.",
   },
 ];
 
@@ -58,7 +65,7 @@ export default function AboutPage() {
           <BreadcrumbNav items={[{ label: "Home", href: "/" }, { label: "About", href: "/about" }]} />
           <div className="mt-8">
             <h1 className="text-4xl sm:text-5xl font-bold text-brand-text-primary leading-tight mb-6">
-              We built Porchivo because the data should be on your side.
+              We built Porchivo so communities can stop package theft before it starts.
             </h1>
             <p className="text-xl text-brand-text-secondary leading-relaxed">
               {seo.aiSummary}
@@ -73,16 +80,16 @@ export default function AboutPage() {
           <h2 className="text-2xl font-bold text-brand-text-primary mb-6">The problem we're solving</h2>
           <div className="space-y-5 text-brand-text-secondary leading-relaxed">
             <p>
-              <strong className="text-brand-text-primary">119 million packages are stolen from US porches every year.</strong> That number isn't static — it grows every year as e-commerce volume increases and delivery density in residential neighborhoods rises.
+              <strong className="text-brand-text-primary">119 million packages are stolen from US porches every year.</strong> That number isn't static — it grows every year as e-commerce volume increases and delivery density in residential communities rises.
             </p>
             <p>
-              Homeowners are left with two options: expensive lockboxes that sit empty most of the year, or apps that notify them <em>after</em> theft has already occurred. Neither solves the problem.
+              Property managers and HOA boards are left with two bad options: expensive lockboxes and camera systems that take months to deploy, or doing nothing and absorbing the daily stream of "where's my package?" calls, complaints, and move-out risk.
             </p>
             <p>
-              The root issue is that the data to predict theft already exists — neighborhood crime patterns, delivery timing windows, block-level alert density, seasonal theft spikes — but no one had assembled it into a per-package risk signal that a homeowner could actually act on in real time.
+              The root issue is that the data to predict theft already exists — neighborhood crime patterns, delivery timing windows, block-level alert density, seasonal theft spikes — but no one had assembled it into a per-package risk signal that a community could act on in real time.
             </p>
             <p>
-              <strong className="text-brand-text-primary">That's what Porchivo is.</strong> A risk intelligence layer for your front door. A porch risk score you can see before the delivery lands. A set of actions — assign a Porch Partner, add drop instructions, activate Theft Shield — that you can execute in 30 seconds.
+              <strong className="text-brand-text-primary">That's what Porchivo is.</strong> A risk intelligence layer for your community. A real-time score for every incoming package. Instant alerts to residents and their chosen guardians. A five-minute setup with no hardware or IT project. And a manager dashboard that turns package data into safer, more retentive communities.
             </p>
           </div>
         </div>
@@ -95,7 +102,7 @@ export default function AboutPage() {
             {[
               { value: "119M", label: "packages stolen in the US annually", source: "USPS/CargoNet data" },
               { value: "$19B", label: "annual consumer loss to porch theft", source: "Industry estimate" },
-              { value: "1 in 5", label: "delivered packages stolen", source: "National survey data" },
+              { value: "5 min", label: "to register a community and start protecting deliveries", source: "No hardware or IT project" },
             ].map((stat) => (
               <div key={stat.value}>
                 <div className="text-4xl font-bold text-brand-orange mb-1">{stat.value}</div>
@@ -190,7 +197,7 @@ export default function AboutPage() {
               {[
                 { label: "Features overview", href: "/features" },
                 { label: "Pricing plans", href: "/pricing" },
-                { label: "Porch Partner program", href: "/porch-partners" },
+                { label: "Use cases", href: "/use-cases" },
                 { label: "FAQ", href: "/faq" },
                 { label: "Changelog", href: "/changelog" },
                 { label: "Privacy Policy", href: "/privacy" },

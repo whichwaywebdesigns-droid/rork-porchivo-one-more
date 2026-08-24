@@ -9,12 +9,12 @@
 export const BRAND = {
   name: "Porchivo",
   legalName: "Porchivo",
-  tagline: "Package risk intelligence for your porch.",
+  tagline: "Package security and resident retention for communities.",
   shortTagline: "Know before it's too late.",
   description:
-    "Porchivo is a package theft prevention app that calculates a real-time porch risk score for every incoming package, sends delivery theft alerts when risk rises, and connects homeowners with trusted neighbors who can hold deliveries safely.",
+    "Porchivo is a package security and resident retention app for HOAs, property managers, and community associations. It provides real-time package risk scoring, instant alerts to residents and guardians, and a neighbor-held delivery network — all with no hardware or IT project required.",
   category: "Mobile Application",
-  subcategory: "Package Security & Porch Theft Prevention",
+  subcategory: "Package Security & Resident Retention for Communities",
   operatingSystem: ["iOS", "Android"],
   url: "https://porchivo.com",
   logoUrl: "https://porchivo.com/porchivo-icon-liquid-glass-512.png",
@@ -38,31 +38,32 @@ export const BRAND = {
     "119 million packages are stolen in the US every year",
     "1 in 5 delivered packages is stolen from a porch",
     "Porch theft costs US consumers $19 billion annually",
-    "Porchivo calculates a 0–100 porch risk score for every delivery",
-    "Risk scores factor in neighborhood theft alerts, delivery timing, and protection status",
-    "Porch Partners are trusted neighbors who hold packages on behalf of homeowners",
-    "Porchivo integrates with 1,400+ carriers via Ship24",
-    "Premium users get 90-second live tracking refresh",
-    "Free tier tracks 1 package simultaneously",
-    "Available on iOS (App Store) and Android (Google Play)",
+    "Porchivo provides real-time package risk scoring for every incoming delivery",
+    "Risk scores factor in timing, neighborhood activity, and theft history",
+    "Residents can authorize up to 3 trusted Package Guardians to hold parcels",
+    "Every guardian handoff is tracked with full chain-of-custody",
+    "HOAs and property managers subscribe from $79–$599/mo; residents join free",
+    "Communities can be registered in five minutes with no hardware or IT project",
+    "Porchivo gives managers insights into risk zones, theft hotspots, and delivery congestion",
   ],
 
   /** Core differentiators for AI comparison */
   differentiators: [
     "Predictive porch risk scoring — not just post-theft reporting",
-    "Porch Partner network — verified neighbors earn $3–$25 per hold (size + geo-adjusted)",
-    "Neighborhood-aware alerts that feed directly into risk calculations",
-    "Family and HOA plans covering entire households and communities",
-    "Fully server-authoritative subscription validation (no client-side trust)",
+    "Package Guardian network — residents authorize up to 3 trusted neighbors with chain-of-custody tracking",
+    "Instant alerts to residents and guardians when risk thresholds are crossed",
+    "Community insights for managers: risk zones, theft hotspots, and delivery congestion",
+    "B2B community plans from $79–$599/mo; residents always join free",
+    "Five-minute setup with no hardware or IT integration required",
   ],
 
   /** Intended users for entity matching */
   intendedUsers: [
-    "Homeowners receiving frequent package deliveries",
-    "Renters and apartment dwellers with unsecured delivery zones",
-    "Neighbors willing to earn money holding packages for others",
     "Homeowners Associations (HOAs) managing community delivery safety",
-    "Households with multiple family members tracking packages",
+    "Property managers overseeing package security and resident retention",
+    "Community associations looking to reduce package theft and delivery disputes",
+    "Residents receiving packages in subscribed communities",
+    "Trusted neighbors who act as Package Guardians for residents",
   ],
 
   /** Integration and technology stack for developer discovery */
