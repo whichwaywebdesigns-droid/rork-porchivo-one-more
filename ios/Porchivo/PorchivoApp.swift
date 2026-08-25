@@ -27,6 +27,7 @@ struct PorchivoApp: App {
                     await appState.restoreSession()
                 }
                 .onAppear {
+                    SupabaseConfigDebug.logConfiguration()
                     appDelegate.appState = appState
                 }
                 .onChange(of: appState.isAuthenticated) { _, isAuthenticated in
