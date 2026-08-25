@@ -369,7 +369,7 @@ nonisolated struct DbMyMaintenanceRequest: Codable, Sendable {
 
 actor SupabaseService {
     private let baseURL: URL
-    private let anonKey: String
+    private let publishableKey: String
     private let session: URLSession
     private let decoder: JSONDecoder
     private let encoder: JSONEncoder
@@ -378,16 +378,16 @@ actor SupabaseService {
 
     static let shared: SupabaseService = {
         let urlStr = Config.EXPO_PUBLIC_SUPABASE_URL.trimmingCharacters(in: .whitespaces)
-        let key = Config.EXPO_PUBLIC_SUPABASE_ANON_KEY
+        let key = Config.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY
         let fallbackURL = URL(string: "https://placeholder.supabase.co")
             ?? URL(string: "https://example.com")!
         return SupabaseService(baseURL: URL(string: urlStr) ?? fallbackURL,
-                               anonKey: key)
+                               publishableKey: key)
     }()
 
-    init(baseURL: URL, anonKey: String) {
+    init(baseURL: URL, publishableKey: String) {
         self.baseURL = baseURL
-        self.anonKey = anonKey
+        self.publishableKey = publishableKey
         let cfg = URLSessionConfiguration.default
         cfg.timeoutIntervalForRequest = 20
         cfg.timeoutIntervalForResource = 25
@@ -398,7 +398,7 @@ actor SupabaseService {
     }
 
     var isConfigured: Bool {
-        !anonKey.isEmpty && baseURL.host?.contains("placeholder") == false
+        !publishableKey.isEmpty && baseURL.host?.contains("placeholder") == false
     }
 
     var currentUserId: String? { currentSession?.user?.id }
@@ -473,7 +473,7 @@ actor SupabaseService {
         var req = URLRequest(url: baseURL.appendingPathComponent("auth/v1/otp"))
         req.httpMethod = "POST"
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        req.setValue(anonKey, forHTTPHeaderField: "apikey")
+        req.setValue(publishableKey, forHTTPHeaderField: "apikey")
         req.httpBody = try? JSONSerialization.data(withJSONObject: [
             "email": email,
             "options": ["should_create_user": true],
@@ -537,7 +537,7 @@ actor SupabaseService {
         var req = URLRequest(url: baseURL.appendingPathComponent("auth/v1/user"))
         req.httpMethod = "GET"
         req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        req.setValue(anonKey, forHTTPHeaderField: "apikey")
+        req.setValue(publishableKey, forHTTPHeaderField: "apikey")
         let (data, response) = try await session.data(for: req)
         guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else { return nil }
         return try decoder.decode(AuthUser.self, from: data)
@@ -722,7 +722,7 @@ actor SupabaseService {
         let objectPath = "\(userId)/\(UUID().uuidString).\(ext)"
         var req = URLRequest(url: baseURL.appendingPathComponent("storage/v1/object/avatars/\(objectPath)"))
         req.httpMethod = "POST"
-        req.setValue(anonKey, forHTTPHeaderField: "apikey")
+        req.setValue(publishableKey, forHTTPHeaderField: "apikey")
         if let token = currentSession?.accessToken {
             req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
@@ -751,7 +751,7 @@ actor SupabaseService {
         let objectPath = String(path[range.upperBound...])
         var req = URLRequest(url: baseURL.appendingPathComponent("storage/v1/object/avatars/\(objectPath)"))
         req.httpMethod = "DELETE"
-        req.setValue(anonKey, forHTTPHeaderField: "apikey")
+        req.setValue(publishableKey, forHTTPHeaderField: "apikey")
         if let token = currentSession?.accessToken {
             req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
@@ -761,7 +761,7 @@ actor SupabaseService {
     // MARK: Low-level helpers
 
     private func authHeaders(includeBearer: Bool) -> [String: String] {
-        var h = ["apikey": anonKey, "Content-Type": "application/json"]
+        var h = ["apikey": publishableKey, "Content-Type": "application/json"]
         if includeBearer, let token = currentSession?.accessToken {
             h["Authorization"] = "Bearer \(token)"
         }
@@ -773,7 +773,7 @@ actor SupabaseService {
         var req = URLRequest(url: baseURL.appendingPathComponent("auth/v1/\(path)"))
         req.httpMethod = "POST"
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        req.setValue(anonKey, forHTTPHeaderField: "apikey")
+        req.setValue(publishableKey, forHTTPHeaderField: "apikey")
         req.httpBody = try? JSONSerialization.data(withJSONObject: body)
         do {
             let (data, resp) = try await session.data(for: req)
