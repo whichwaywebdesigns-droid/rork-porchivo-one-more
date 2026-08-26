@@ -5,6 +5,7 @@ import { Home, CreditCard, Wrench, MoreHorizontal, Package, Handshake, User, Bui
 import { useColors } from '@/constants/colors';
 import { useOrganization } from '@/store/OrganizationContext';
 import { isEnabled } from '@/lib/featureFlags';
+import { TabShellSkeleton } from '@/components/SkeletonLoader';
 
 /**
  * Hybrid Navigation — Tab Layout
@@ -17,7 +18,7 @@ import { isEnabled } from '@/lib/featureFlags';
  */
 export default function TabLayout() {
   const Colors = useColors();
-  const { isOrgMember } = useOrganization();
+  const { isOrgMember, isLoading: isOrgLoading } = useOrganization();
   const showPorchPartners = isEnabled('PORCH_PARTNERS');
 
   const tabOptions = {
@@ -36,6 +37,12 @@ export default function TabLayout() {
       letterSpacing: 0.3,
     },
   };
+
+  if (isOrgLoading) {
+    // Tier is still unknown (first launch, no cached membership) — show the
+    // shell skeleton instead of committing to the wrong tab set and flipping.
+    return <TabShellSkeleton />;
+  }
 
   if (isOrgMember) {
     // ── Community Tier: 4-tab nav ──────────────────────────────────────

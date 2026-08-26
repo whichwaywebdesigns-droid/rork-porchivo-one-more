@@ -73,7 +73,7 @@ void initSuperwall();
 const queryClient = new QueryClient();
 
 function RootLayoutNav() {
-  const { isOnboarded, isLoading, isReadyToShowUI, session } = useApp();
+  const { isOnboarded, isLoading, authLoading, session } = useApp();
   const { isOrgMember, isLoading: isOrgLoading } = useOrganization();
   const Colors = useColors();
   const { isDark } = useTheme();
@@ -84,16 +84,17 @@ function RootLayoutNav() {
   const launchRedirectDoneRef = useRef<boolean>(false);
   const [hasSeenSlides, setHasSeenSlides] = useState<boolean | null>(null);
   const [overlayExpired, setOverlayExpired] = useState<boolean>(false);
+  // Boot-phase only: the overlay covers just auth resolution and the pre-auth
+  // slides flag. Profile, org, and shipment data load underneath the dashboard
+  // skeleton loaders instead of holding a static splash over the app — that
+  // keeps cold starts feeling fast on slow networks.
   const rawSplashOverlay =
-    isLoading ||
-    isOnboarded === null ||
-    hasSeenSlides === null ||
-    (!!session && (isOrgLoading || !isReadyToShowUI));
+    authLoading || hasSeenSlides === null || (!session && isOnboarded === null);
 
-  // Watchdog: the overlay blocks all touches, so it must never hang. If the
-  // underlying data (profile/org queries) stalls — e.g. on a slow or offline
-  // network — force-hide the overlay after 6s so the app stays navigable;
-  // screens render their own loading states underneath.
+  // Watchdog: the overlay blocks all touches, so it must never hang. If boot
+  // resolution stalls — e.g. on a slow or offline network — force-hide the
+  // overlay after 6s so the app stays navigable; screens render their own
+  // loading/skeleton states underneath.
   useEffect(() => {
     if (!rawSplashOverlay) {
       setOverlayExpired(false);
@@ -151,13 +152,6 @@ function RootLayoutNav() {
   }, []);
 
   useEffect(() => {
-    if (isLoading || isOnboarded === null || hasSeenSlides === null) return;
-
-    // Wait for org context to resolve before redirecting — we need isOrgMember
-    // to pick the correct initial tab. Only matters when there's a session
-    // (the org query is disabled without a userId, so isOrgLoading is false).
-    if (session && isOrgLoading) return;
-
     const currentSegment = segments[0] as string;
 
     // Guard: wait for the navigator to resolve the initial route before
@@ -166,6 +160,35 @@ function RootLayoutNav() {
     // would be false and we'd yank the user straight to onboarding-setup —
     // skipping the splash screen entirely.
     if (!currentSegment) return;
+
+    // Fresh start on cold launch: with no root index route, Expo Router
+    // resolves the initial URL to the tabs group — the app opens straight
+    // into the tab flow with no splash. Route the first launch through the
+    // splash screen exactly once so every app open begins at the beginning;
+    // the splash then dispatches to the correct flow. The one-shot ref
+    // prevents a redirect loop when the splash sends an onboarded user back
+    // to the tabs, and real nested-tab deep links (non-group segments) are
+    // left untouched.
+    const onTabsRoot =
+      segments[0] === "(tabs)" &&
+      segments.slice(1).every((s) => typeof s === "string" && s.startsWith("("));
+
+    // The launch redirect fires as soon as the navigator resolves — it does
+    // NOT wait for profile/org data, so the animated splash starts right
+    // away while data loads behind it (the splash dispatches once it lands).
+    const pendingLaunchRedirect =
+      onTabsRoot &&
+      !launchRedirectDoneRef.current &&
+      Date.now() - mountedAtRef.current < 15000;
+
+    if (!pendingLaunchRedirect) {
+      if (isLoading || isOnboarded === null || hasSeenSlides === null) return;
+
+      // Wait for org context to resolve before redirecting — we need isOrgMember
+      // to pick the correct initial tab. Only matters when there's a session
+      // (the org query is disabled without a userId, so isOrgLoading is false).
+      if (session && isOrgLoading) return;
+    }
 
     // Tracking onboarding screens manage their own navigation via the step
     // manager (tracking-onboarding.tsx → goHome()). They must NOT be yanked
@@ -207,13 +230,9 @@ function RootLayoutNav() {
     // prevents a redirect loop when the splash sends an onboarded user back
     // to the tabs, and real nested-tab deep links (non-group segments) are
     // left untouched.
-    const onTabsRoot =
-      segments[0] === "(tabs)" &&
-      segments.slice(1).every((s) => typeof s === "string" && s.startsWith("("));
-
     let target: string | null = null;
 
-    if (onTabsRoot && !launchRedirectDoneRef.current && Date.now() - mountedAtRef.current < 15000) {
+    if (pendingLaunchRedirect) {
       launchRedirectDoneRef.current = true;
       target = "/splash";
     } else if (!isOnboarded && !inWelcome) {

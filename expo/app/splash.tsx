@@ -34,17 +34,27 @@ export default function SplashScreen(): React.ReactElement {
   const router = useRouter();
   const { width, height } = useWindowDimensions();
   const { session, isOnboarded } = useApp();
-  const { isOrgMember } = useOrganization();
+  const { isOrgMember, isLoading: isOrgLoading } = useOrganization();
   const [hasSeenSlides, setHasSeenSlides] = useState<boolean | null>(null);
 
-  // Ref so the Reanimated callback (captured at effect-run time) reads the
-  // latest org-membership value when the animation finishes 2.4s later —
-  // without adding isOrgMember to the effect deps (which would restart the
-  // animation every time org context resolves).
+  // Refs so the Reanimated completion callback (captured at effect-run time)
+  // and the failsafe timer read the latest values without restarting the
+  // animation.
   const isOrgMemberRef = useRef<boolean>(isOrgMember);
   useEffect(() => {
     isOrgMemberRef.current = isOrgMember;
   }, [isOrgMember]);
+
+  const sessionRef = useRef(session);
+  const isOnboardedRef = useRef<boolean | null>(isOnboarded);
+  const isOrgLoadingRef = useRef<boolean>(isOrgLoading);
+  const hasSeenSlidesRef = useRef<boolean | null>(hasSeenSlides);
+  useEffect(() => {
+    sessionRef.current = session;
+    isOnboardedRef.current = isOnboarded;
+    isOrgLoadingRef.current = isOrgLoading;
+    hasSeenSlidesRef.current = hasSeenSlides;
+  }, [session, isOnboarded, isOrgLoading, hasSeenSlides]);
 
   useEffect(() => {
     AsyncStorage.getItem(HAS_SEEN_SLIDES_KEY).then((value) => {
@@ -70,8 +80,8 @@ export default function SplashScreen(): React.ReactElement {
       }
     };
 
-    if (session) {
-      if (isOnboarded) {
+    if (sessionRef.current) {
+      if (isOnboardedRef.current) {
         // Tier-aware: community members go to Home, free-tier to Deliveries.
         const dest = isOrgMemberRef.current ? '/(tabs)/(home)' : '/(tabs)/packages';
         safeReplace(dest);
@@ -81,12 +91,58 @@ export default function SplashScreen(): React.ReactElement {
       return;
     }
 
-    if (hasSeenSlides) {
+    if (hasSeenSlidesRef.current) {
       safeReplace('/tracking-onboarding');
     } else {
       safeReplace('/onboarding');
     }
   };
+
+  // Deferred dispatch: if the intro animation finishes before profile/org
+  // context resolves, hold the splash (the truck loader keeps animating) and
+  // navigate as soon as the data lands — instead of guessing the destination
+  // and flashing the wrong screen.
+  const [navPending, setNavPending] = useState<boolean>(false);
+  const navPendingRef = useRef<boolean>(false);
+  const pendingSinceRef = useRef<number>(0);
+
+  const tryNavigate = () => {
+    if (
+      sessionRef.current &&
+      (isOnboardedRef.current === null || isOrgLoadingRef.current)
+    ) {
+      if (!navPendingRef.current) {
+        navPendingRef.current = true;
+        pendingSinceRef.current = Date.now();
+        setNavPending(true);
+      }
+      return;
+    }
+    navigateNext();
+  };
+
+  // Dispatch as soon as profile/org resolve.
+  useEffect(() => {
+    if (!navPending) return;
+    if (session && (isOnboarded === null || isOrgLoading)) return;
+    navPendingRef.current = false;
+    setNavPending(false);
+    navigateNext();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [navPending, session, isOnboarded, isOrgLoading]);
+
+  // Failsafe: never hold the splash longer than 8s — fall back to a
+  // best-guess destination so the app stays navigable on a dead network.
+  useEffect(() => {
+    if (!navPending) return;
+    const timer = setTimeout(() => {
+      navPendingRef.current = false;
+      setNavPending(false);
+      navigateNext();
+    }, 8000);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [navPending]);
 
   useEffect(() => {
     // 0.0s: image fades in, already zoomed slightly so edges have bleed
@@ -147,7 +203,7 @@ export default function SplashScreen(): React.ReactElement {
       2000,
       withTiming(1, { duration: 400, easing: Easing.out(Easing.cubic) }, (finished) => {
         if (finished) {
-          runOnJS(navigateNext)();
+          runOnJS(tryNavigate)();
         }
       })
     );

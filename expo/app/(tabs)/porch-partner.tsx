@@ -14,6 +14,7 @@ import { useApp } from '@/store/AppContext';
 import { useShipments } from '@/store/ShipmentsContext';
 import { usePorchPartners } from '@/store/PorchPartnersContext';
 import ShipmentCard from '@/components/ShipmentCard';
+import { PorchPartnerSkeleton } from '@/components/SkeletonLoader';
 
 /**
  * Porch Partner tab — visible in the Free Tier.
@@ -23,13 +24,40 @@ export default function PorchPartnerScreen() {
   const router = useRouter();
   const Colors = useColors();
   const { user, isPartner } = useApp();
-  const { nearbyShipments, acceptShipment } = useShipments();
-  const { holds } = usePorchPartners();
+  const { nearbyShipments, acceptShipment, isLoading: isShipmentsLoading } = useShipments();
+  const { holds, isLoading: isHoldsLoading } = usePorchPartners();
   const [refreshing, setRefreshing] = React.useState(false);
 
   const activeHolds = holds.filter(
     (h) => h.status === 'pending' || h.status === 'picked_up',
   );
+
+  // Skeleton on first load only — refetches with existing data keep the UI.
+  const isInitialLoading =
+    (isShipmentsLoading || isHoldsLoading) &&
+    activeHolds.length === 0 &&
+    nearbyShipments.length === 0;
+
+  if (isInitialLoading) {
+    return (
+      <View style={[styles.container, { backgroundColor: Colors.background }]}>
+        <Stack.Screen
+          options={{
+            title: 'Porch Partner',
+            headerStyle: { backgroundColor: Colors.surface },
+            headerTintColor: Colors.slate,
+            headerShadowVisible: false,
+          }}
+        />
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.content}
+        >
+          <PorchPartnerSkeleton />
+        </ScrollView>
+      </View>
+    );
+  }
 
   const onRefresh = async () => {
     setRefreshing(true);

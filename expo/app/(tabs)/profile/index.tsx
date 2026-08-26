@@ -15,6 +15,7 @@ import { useOrganization } from '@/store/OrganizationContext';
 import { isEnabled } from '@/lib/featureFlags';
 import { manualRequestReview } from '@/lib/storeReview';
 import { log } from "@/lib/logger";
+import { ProfileSkeleton } from '@/components/SkeletonLoader';
 
 // Static light-mode colors for module-level StyleSheet
 const Colors = getColors(false);
@@ -30,6 +31,7 @@ const roleOptions: { key: UserRole; label: string }[] = [
 export default function ProfileScreen() {
   const {
     user,
+    isLoading,
     updateRole,
     setLocationConsent,
     signOut,
@@ -65,7 +67,12 @@ export default function ProfileScreen() {
     setLocationConsent(newVal);
   }, [user?.hasLocationConsent, setLocationConsent]);
 
-  if (!user) return null;
+  if (!user) {
+    // Signed-in session with the profile still in flight — skeleton beats a
+    // blank screen and keeps the tab shell feeling alive during first load.
+    if (isLoading) return <ProfileSkeleton />;
+    return null;
+  }
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: Colors.background }]} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>

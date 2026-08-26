@@ -158,6 +158,154 @@ export function HomeDashboardSkeleton() {
   );
 }
 
+/**
+ * Full-screen tab shell skeleton — shown while org membership (and thus the
+ * tab tier) is still resolving. Mirrors a generic dashboard: header row, hero
+ * card, quick-link tiles, list cards, and a fake tab bar at the bottom.
+ */
+export function TabShellSkeleton() {
+  const colors = useColors();
+  const cardStyle = useMemo(
+    () => ({ backgroundColor: colors.surface, borderColor: colors.border }),
+    [colors.surface, colors.border],
+  );
+
+  return (
+    <View style={[styles.tabShell, { backgroundColor: colors.background }]}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.tabShellContent}
+      >
+        {/* Header row */}
+        <View style={styles.tabShellHeaderRow}>
+          <SkeletonPulse style={styles.tabShellTitle} />
+          <SkeletonPulse style={styles.tabShellAvatar} />
+        </View>
+
+        {/* Hero card */}
+        <View style={[styles.tabShellHero, cardStyle]}>
+          <SkeletonPulse style={styles.tabShellHeroIcon} />
+          <View style={styles.textGroup}>
+            <SkeletonPulse style={styles.tabShellHeroBar} />
+            <SkeletonPulse style={styles.tabShellHeroBarShort} />
+          </View>
+        </View>
+
+        {/* Quick-link tiles */}
+        <View style={styles.tabShellQuickRow}>
+          {Array.from({ length: 4 }).map((_, i) => (
+            <View key={i} style={[styles.tabShellQuickCard, cardStyle]}>
+              <SkeletonPulse style={styles.tabShellQuickIcon} />
+              <SkeletonPulse style={styles.tabShellQuickLabel} />
+            </View>
+          ))}
+        </View>
+
+        {/* List cards */}
+        {Array.from({ length: 3 }).map((_, i) => (
+          <View key={i} style={[styles.tabShellCard, cardStyle]}>
+            <View style={styles.row}>
+              <SkeletonPulse style={styles.iconSquare} />
+              <View style={styles.textGroup}>
+                <SkeletonPulse style={styles.titleBar} />
+                <SkeletonPulse style={styles.subtitleBar} />
+              </View>
+              <SkeletonPulse style={styles.pill} />
+            </View>
+          </View>
+        ))}
+      </ScrollView>
+
+      {/* Fake tab bar so the shell doesn't resize when tabs mount */}
+      <View
+        style={[
+          styles.tabShellBar,
+          { backgroundColor: colors.surface, borderTopColor: colors.border },
+        ]}
+      >
+        {Array.from({ length: 4 }).map((_, i) => (
+          <View key={i} style={styles.tabShellTabItem}>
+            <SkeletonPulse style={styles.tabShellTabIcon} />
+            <SkeletonPulse style={styles.tabShellTabLabel} />
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+}
+
+/**
+ * Porch Partner tab skeleton — hero card, active-holds rows, quick actions.
+ */
+export function PorchPartnerSkeleton() {
+  const colors = useColors();
+  const cardStyle = useMemo(
+    () => ({ backgroundColor: colors.surface, borderColor: colors.border }),
+    [colors.surface, colors.border],
+  );
+
+  return (
+    <View style={styles.porchPartnerWrap}>
+      <View style={[styles.ppHero, cardStyle]}>
+        <SkeletonPulse style={styles.ppHeroIcon} />
+        <SkeletonPulse style={styles.ppHeroTitle} />
+        <SkeletonPulse style={styles.ppHeroBarWide} />
+        <SkeletonPulse style={styles.ppHeroBar} />
+      </View>
+
+      <SkeletonPulse style={styles.ppSectionTitle} />
+      {Array.from({ length: 2 }).map((_, i) => (
+        <View key={i} style={[styles.ppRow, cardStyle]}>
+          <SkeletonPulse style={styles.ppRowIcon} />
+          <View style={styles.textGroup}>
+            <SkeletonPulse style={styles.titleBar} />
+            <SkeletonPulse style={styles.subtitleBar} />
+          </View>
+        </View>
+      ))}
+
+      <SkeletonPulse style={[styles.ppSectionTitle, { marginTop: 6 }]} />
+      <View style={[styles.ppRow, cardStyle]}>
+        <SkeletonPulse style={styles.ppRowIcon} />
+        <SkeletonPulse style={styles.ppRowActionBar} />
+      </View>
+    </View>
+  );
+}
+
+/**
+ * Account tab skeleton — avatar header, role pill, and two settings cards.
+ */
+export function ProfileSkeleton() {
+  const colors = useColors();
+
+  return (
+    <View style={[styles.profileWrap, { backgroundColor: colors.background }]}>
+      <View style={[styles.profileHeader, { backgroundColor: colors.surface }]}>
+        <SkeletonPulse style={styles.profileAvatar} />
+        <SkeletonPulse style={styles.profileName} />
+        <SkeletonPulse style={styles.profilePill} />
+      </View>
+      <View style={[styles.profileCard, { backgroundColor: colors.surface }]}>
+        {Array.from({ length: 3 }).map((_, i) => (
+          <View key={i} style={styles.row}>
+            <SkeletonPulse style={styles.smallCircle} />
+            <SkeletonPulse style={styles.profileRowBar} />
+          </View>
+        ))}
+      </View>
+      <View style={[styles.profileCard, { backgroundColor: colors.surface }]}>
+        {Array.from({ length: 4 }).map((_, i) => (
+          <View key={i} style={styles.row}>
+            <SkeletonPulse style={styles.smallCircle} />
+            <SkeletonPulse style={styles.profileRowBarShort} />
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   bone: {
     borderRadius: 6,
@@ -348,5 +496,204 @@ const styles = StyleSheet.create({
   },
   homeShipmentsWrap: {
     paddingTop: 0,
+  },
+
+  // ── TabShellSkeleton ────────────────────────────────────────────────
+  tabShell: {
+    flex: 1,
+  },
+  tabShellContent: {
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 24,
+    gap: 12,
+  },
+  tabShellHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  tabShellTitle: {
+    height: 24,
+    width: 130,
+    borderRadius: 6,
+  },
+  tabShellAvatar: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+  },
+  tabShellHero: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+  },
+  tabShellHeroIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+  },
+  tabShellHeroBar: {
+    height: 14,
+    width: 150,
+    borderRadius: 4,
+  },
+  tabShellHeroBarShort: {
+    height: 10,
+    width: 100,
+    borderRadius: 4,
+  },
+  tabShellQuickRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  tabShellQuickCard: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 7,
+    paddingVertical: 14,
+    borderRadius: 16,
+    borderWidth: 1,
+  },
+  tabShellQuickIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+  },
+  tabShellQuickLabel: {
+    height: 10,
+    width: 44,
+    borderRadius: 4,
+  },
+  tabShellCard: {
+    borderRadius: 14,
+    padding: 16,
+  },
+  tabShellBar: {
+    flexDirection: 'row',
+    paddingTop: 10,
+    paddingBottom: 28,
+    borderTopWidth: StyleSheet.hairlineWidth,
+  },
+  tabShellTabItem: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 4,
+  },
+  tabShellTabIcon: {
+    width: 22,
+    height: 22,
+    borderRadius: 7,
+  },
+  tabShellTabLabel: {
+    height: 9,
+    width: 40,
+    borderRadius: 4,
+  },
+
+  // ── PorchPartnerSkeleton ─────────────────────────────────────────────
+  // No horizontal padding — the host screen's contentContainerStyle insets it.
+  porchPartnerWrap: {
+    paddingTop: 8,
+    paddingBottom: 8,
+  },
+  ppHero: {
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 20,
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 20,
+  },
+  ppHeroIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    marginBottom: 2,
+  },
+  ppHeroTitle: {
+    height: 18,
+    width: 150,
+    borderRadius: 5,
+  },
+  ppHeroBarWide: {
+    height: 11,
+    width: '85%',
+    borderRadius: 4,
+  },
+  ppHeroBar: {
+    height: 11,
+    width: '60%',
+    borderRadius: 4,
+  },
+  ppSectionTitle: {
+    height: 13,
+    width: 100,
+    borderRadius: 4,
+    marginBottom: 10,
+  },
+  ppRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginBottom: 8,
+  },
+  ppRowIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+  },
+  ppRowActionBar: {
+    flex: 1,
+    height: 14,
+    borderRadius: 4,
+  },
+
+  // ── ProfileSkeleton ─────────────────────────────────────────────────
+  profileWrap: {
+    flex: 1,
+  },
+  profileHeader: {
+    alignItems: 'center',
+    paddingVertical: 24,
+    gap: 10,
+  },
+  profileAvatar: {
+    width: 84,
+    height: 84,
+    borderRadius: 42,
+  },
+  profileName: {
+    height: 18,
+    width: 140,
+    borderRadius: 5,
+  },
+  profilePill: {
+    height: 24,
+    width: 110,
+    borderRadius: 12,
+  },
+  profileCard: {
+    borderRadius: 14,
+    padding: 16,
+    marginHorizontal: 16,
+    marginBottom: 14,
+    gap: 16,
+  },
+  profileRowBar: {
+    flex: 1,
+    height: 14,
+    borderRadius: 4,
+  },
+  profileRowBarShort: {
+    flex: 1,
+    height: 11,
+    borderRadius: 4,
   },
 });

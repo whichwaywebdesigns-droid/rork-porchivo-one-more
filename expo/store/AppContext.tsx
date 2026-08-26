@@ -217,10 +217,10 @@ export const [AppProvider, useApp] = createContextHook(() => {
       setUser(dbProfileToUser(dbProfile));
       setIsOnboarded(dbProfile.is_onboarded);
       setIsPremium(dbProfile.is_premium);
-    } else if (profileQuery.data === null && session?.user?.id) {
+    } else if (session?.user?.id && (profileQuery.data === null || profileQuery.isError)) {
       setIsOnboarded(false);
     }
-  }, [profileQuery.data, session?.user?.id]);
+  }, [profileQuery.data, profileQuery.isError, session?.user?.id]);
 
   useEffect(() => {
     if (!session?.user?.id) {
@@ -644,6 +644,8 @@ export const [AppProvider, useApp] = createContextHook(() => {
     user,
     isOnboarded,
     isLoading: (!!session?.user?.id && profileQuery.isLoading) || authLoading,
+    /** True only while the Supabase session itself is unresolved (boot phase). */
+    authLoading,
     isReadyToShowUI,
     isHomeowner,
     isPartner,
