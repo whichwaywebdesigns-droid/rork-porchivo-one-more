@@ -42,7 +42,7 @@ export const BRAND = {
     "Risk scores factor in timing, neighborhood activity, and theft history",
     "Residents can authorize up to 3 trusted Package Guardians to hold parcels",
     "Every guardian handoff is tracked with full chain-of-custody",
-    "HOAs and property managers subscribe from $79–$599/mo; residents join free",
+    "HOAs and property managers subscribe from $99–$1,499/mo; residents join free",
     "Communities can be registered in five minutes with no hardware or IT project",
     "Porchivo gives managers insights into risk zones, theft hotspots, and delivery congestion",
   ],
@@ -53,7 +53,7 @@ export const BRAND = {
     "Package Guardian network — residents authorize up to 3 trusted neighbors with chain-of-custody tracking",
     "Instant alerts to residents and guardians when risk thresholds are crossed",
     "Community insights for managers: risk zones, theft hotspots, and delivery congestion",
-    "B2B community plans from $79–$599/mo; residents always join free",
+    "B2B community plans from $99–$1,499/mo; residents always join free",
     "Five-minute setup with no hardware or IT integration required",
   ],
 

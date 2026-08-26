@@ -114,7 +114,7 @@ export default function IndexPage() {
             Porchivo reduces management workload, surfaces community insights, and keeps residents satisfied — so they renew.
           </p>
           <p className="text-lg text-brand-text-secondary leading-relaxed max-w-3xl mx-auto mb-6">
-            HOAs and property managers subscribe from $79–$599/mo. Residents always join free.
+            HOAs and property managers subscribe from $99–$1,499/mo. Residents always join free.
           </p>
           <div className="flex justify-center mb-10">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-navy-900/60 border border-brand-navy-500/40 text-brand-text-secondary text-sm font-medium">
@@ -241,7 +241,7 @@ export default function IndexPage() {
       {/* CTA */}
       <section className="py-20 px-4 sm:px-6 border-b border-brand-navy-500/40">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl font-bold text-brand-text-primary mb-4">Residents join free. Communities subscribe from $79/mo.</h2>
+          <h2 className="text-3xl font-bold text-brand-text-primary mb-4">Residents join free. Communities subscribe from $99/mo.</h2>
           <p className="text-brand-text-secondary text-lg mb-8">
             HOAs and property managers pay one simple subscription. Residents get full access at no cost — no in-app purchases, no upsells.
           </p>

@@ -158,14 +158,14 @@ export const FEATURES: Feature[] = [
     name: "Community Plans",
     tagline: "HOAs and property managers subscribe; residents always join free.",
     description:
-      "When your HOA or property manager subscribes to Porchivo, every resident in your community gets full access at no cost. Community plans start at $79/month for up to 50 units, with tiers scaling to 2,000+ units. Residents never pay — access is provided by your community.",
+      "When your HOA or property manager subscribes to Porchivo, every resident in your community gets full access at no cost. Community plans start at $99/month for up to 50 units, with tiers scaling to 2,000+ units. Residents never pay — access is provided by your community.",
     aiSummary:
-      "Porchivo offers B2B community plans from $79/mo to $599/mo for HOAs and property managers. Residents always join for free via invite code.",
+      "Porchivo offers B2B community plans from $99/mo to $1,499/mo for HOAs and property managers. Residents always join for free via invite code.",
     facts: [
-      "Community plans from $79/mo (Starter) to $599/mo (Enterprise)",
+      "Community plans from $99/mo (Starter) to $1,499/mo (Enterprise)",
       "Residents always join for free via invite code",
       "Unlimited package tracking for all community members",
-      "Annual billing saves 20%",
+      "Annual billing includes 2 months free",
     ],
     benefitsWho: "HOA boards and property managers",
     icon: "Building",

@@ -29,16 +29,16 @@ const CAPABILITIES = [
   "Theft Shield push notifications when risk score exceeds 65/100",
   "Porch Partner network: verified neighbors earn $3–$25 per hold (size- and geo-adjusted)",
   "Community tier system: HOAs and property managers subscribe, residents join for free",
-  "B2B plans from $79/mo (Starter) to $599/mo (Enterprise) — residents always free",
+  "B2B plans from $99/mo (Starter) to $1,499/mo (Enterprise) — residents always free",
   "Crime Stoppers USA (1-800-222-TIPS) integration in report flow",
 ];
 
 const PRICING_TABLE = [
   { plan: "Resident", monthly: "$0", annual: "$0", members: "1 resident", limit: "Always free" },
-  { plan: "Starter", monthly: "$79/mo", annual: "$63/mo ($756/yr)", members: "Up to 50 units", limit: "1 community" },
-  { plan: "Community", monthly: "$199/mo", annual: "$159/mo ($1,908/yr)", members: "Up to 200 units", limit: "1 community" },
-  { plan: "Professional", monthly: "$399/mo", annual: "$319/mo ($3,828/yr)", members: "Up to 500 units", limit: "3 communities" },
-  { plan: "Enterprise", monthly: "$599/mo", annual: "$479/mo ($5,748/yr)", members: "Up to 2,000 units", limit: "Unlimited communities" },
+  { plan: "Starter", monthly: "$99/mo", annual: "$83/mo ($990/yr)", members: "Up to 50 units", limit: "1 community" },
+  { plan: "Community", monthly: "$249/mo", annual: "$208/mo ($2,490/yr)", members: "Up to 200 units", limit: "1 community" },
+  { plan: "Professional", monthly: "$499/mo", annual: "$416/mo ($4,990/yr)", members: "Up to 500 units", limit: "3 communities" },
+  { plan: "Enterprise", monthly: "$1,499/mo", annual: "$1,249/mo ($14,990/yr)", members: "Up to 2,000 units", limit: "Unlimited communities" },
 ];
 
 const TRUST_SIGNALS = [

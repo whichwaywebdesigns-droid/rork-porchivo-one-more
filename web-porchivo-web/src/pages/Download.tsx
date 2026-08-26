@@ -91,10 +91,10 @@ export default function DownloadPage() {
               </div>
               <div className="text-sm font-medium text-brand-text-secondary mb-1">Community Plans</div>
               <div className="flex items-baseline gap-1 mb-1">
-                <span className="text-3xl font-bold text-brand-text-primary">$79</span>
+                <span className="text-3xl font-bold text-brand-text-primary">$99</span>
                 <span className="text-brand-text-muted text-sm">/mo starting</span>
               </div>
-              <div className="text-sm text-brand-text-muted mb-6">From Starter (50 units) to Enterprise (2,000 units). Annual saves 20%.</div>
+              <div className="text-sm text-brand-text-muted mb-6">From Starter (50 units) to Enterprise (2,000 units). Annual includes 2 months free.</div>
               <div className="text-xs font-semibold text-brand-text-muted uppercase tracking-wider mb-3">
                 Your subscription unlocks:
               </div>

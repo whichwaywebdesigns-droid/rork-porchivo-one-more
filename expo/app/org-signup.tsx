@@ -99,8 +99,8 @@ const PLANS: PlanDef[] = [
     id: 'starter',
     name: 'Starter',
     tagline: 'Up to 50 units',
-    monthlyPrice: 79,
-    annualPrice: 756,
+    monthlyPrice: 99,
+    annualPrice: 990,
     maxUnits: 50,
     features: [
       'Community announcements',
@@ -115,8 +115,8 @@ const PLANS: PlanDef[] = [
     id: 'community',
     name: 'Community',
     tagline: 'Up to 200 units',
-    monthlyPrice: 199,
-    annualPrice: 1908,
+    monthlyPrice: 249,
+    annualPrice: 2490,
     maxUnits: 200,
     features: [
       'Everything in Starter, plus:',
@@ -133,8 +133,8 @@ const PLANS: PlanDef[] = [
     id: 'professional',
     name: 'Professional',
     tagline: 'Up to 500 units, 3 communities',
-    monthlyPrice: 399,
-    annualPrice: 3828,
+    monthlyPrice: 499,
+    annualPrice: 4990,
     maxUnits: 500,
     setupFee: 500,
     features: [
@@ -152,8 +152,8 @@ const PLANS: PlanDef[] = [
     id: 'enterprise',
     name: 'Property Manager',
     tagline: 'Up to 2,000 units & communities',
-    monthlyPrice: 599,
-    annualPrice: 5748,
+    monthlyPrice: 1499,
+    annualPrice: 14990,
     maxUnits: 2000,
     setupFee: 1500,
     features: [
@@ -587,7 +587,7 @@ export default function OrgSignupScreen() {
               Annual
             </Text>
             <View style={[styles.saveBadge, { backgroundColor: billingCycle === 'annual' ? 'rgba(255,255,255,0.25)' : Colors.successLight }]}>
-              <Text style={[styles.saveBadgeText, { color: billingCycle === 'annual' ? '#fff' : Colors.success }]}>Save 20%</Text>
+              <Text style={[styles.saveBadgeText, { color: billingCycle === 'annual' ? '#fff' : Colors.success }]}>2 months free</Text>
             </View>
           </TouchableOpacity>
         </View>

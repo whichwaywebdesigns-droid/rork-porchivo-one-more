@@ -70,10 +70,10 @@ private val ORG_TYPES = listOf(
 )
 
 private val PLANS = listOf(
-    PlanInfo("starter", "Starter", 79, "Up to 50 units"),
-    PlanInfo("community", "Community", 199, "Up to 200 units"),
-    PlanInfo("professional", "Professional", 399, "Up to 500 units"),
-    PlanInfo("enterprise", "Enterprise", 599, "Up to 2,000 units"),
+    PlanInfo("starter", "Starter", 99, "Up to 50 units"),
+    PlanInfo("community", "Community", 249, "Up to 200 units"),
+    PlanInfo("professional", "Professional", 499, "Up to 500 units"),
+    PlanInfo("enterprise", "Enterprise", 1499, "Up to 2,000 units"),
 )
 
 private const val SUCCESS_REDIRECT = "porchivo://org-signup/success"
@@ -431,7 +431,7 @@ private fun PlanStep(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text("Annual", color = if (isAnnual) c.onAccent else c.textSecondary, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-                    Text("Save 20%", color = if (isAnnual) c.onAccent else c.success, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                    Text("2 months free", color = if (isAnnual) c.onAccent else c.success, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -463,7 +463,10 @@ private fun PlanStep(
                     }
                     Column(horizontalAlignment = Alignment.End) {
                         Text("$${plan.monthly}", color = c.textPrimary, fontSize = 17.sp, fontWeight = FontWeight.Black)
-                        Text(if (isAnnual) "/mo billed yearly" else "/mo", color = c.textMuted, fontSize = 11.sp)
+                        Text(
+                            if (isAnnual) "$${plan.monthly * 10}/yr — 2 months free" else "/mo",
+                            color = c.textMuted, fontSize = 11.sp,
+                        )
                     }
                 }
             }

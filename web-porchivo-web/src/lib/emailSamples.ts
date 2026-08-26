@@ -79,9 +79,9 @@ export const SAMPLE_EMAILS: SampleEmail[] = [
     template: {
       heading: "Your Porchivo Community receipt",
       bodyHtml:
-        "<p>Thanks for being a Porchivo community subscriber! Here's your receipt for this billing period:</p><p><strong>Plan:</strong> Porchivo Community (Annual)<br/><strong>Amount:</strong> $1,908.00<br/><strong>Date:</strong> July 16, 2026<br/><strong>Payment method:</strong> Visa •••• 4242</p><p>This subscription covers all residents in your community. Residents join free with your invite code. Your subscription renews on July 16, 2027. You can manage your subscription anytime from the Manage Subscription screen in the app.</p>",
+        "<p>Thanks for being a Porchivo community subscriber! Here's your receipt for this billing period:</p><p><strong>Plan:</strong> Porchivo Community (Annual)<br/><strong>Amount:</strong> $2,490.00<br/><strong>Date:</strong> July 16, 2026<br/><strong>Payment method:</strong> Visa •••• 4242</p><p>This subscription covers all residents in your community. Residents join free with your invite code. Your subscription renews on July 16, 2027. You can manage your subscription anytime from the Manage Subscription screen in the app.</p>",
       bodyText:
-        "Thanks for being a Porchivo community subscriber! Here's your receipt for this billing period:\n\nPlan: Porchivo Community (Annual)\nAmount: $1,908.00\nDate: July 16, 2026\nPayment method: Visa ending in 4242\n\nThis subscription covers all residents in your community. Residents join free with your invite code. Your subscription renews on July 16, 2027. You can manage your subscription anytime from the Manage Subscription screen in the app.",
+        "Thanks for being a Porchivo community subscriber! Here's your receipt for this billing period:\n\nPlan: Porchivo Community (Annual)\nAmount: $2,490.00\nDate: July 16, 2026\nPayment method: Visa ending in 4242\n\nThis subscription covers all residents in your community. Residents join free with your invite code. Your subscription renews on July 16, 2027. You can manage your subscription anytime from the Manage Subscription screen in the app.",
       cta: { label: "View Billing History", url: "https://porchivo.com" },
     },
   },

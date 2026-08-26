@@ -31,9 +31,9 @@ const B2B_PLANS: B2BPlan[] = [
   {
     name: "Starter",
     tagline: "Small HOAs and condo associations getting started with community communication.",
-    monthly: "$79",
-    annual: "$756",
-    annualPerMonth: "$63",
+    monthly: "$99",
+    annual: "$990",
+    annualPerMonth: "$83",
     maxUnits: "Up to 50 units",
     setupFee: "No setup fee",
     features: [
@@ -52,9 +52,9 @@ const B2B_PLANS: B2BPlan[] = [
   {
     name: "Community",
     tagline: "The most popular plan for mid-size HOAs with active boards and amenity management needs.",
-    monthly: "$199",
-    annual: "$1,908",
-    annualPerMonth: "$159",
+    monthly: "$249",
+    annual: "$2,490",
+    annualPerMonth: "$208",
     maxUnits: "Up to 200 units",
     setupFee: "No setup fee",
     features: [
@@ -74,9 +74,9 @@ const B2B_PLANS: B2BPlan[] = [
   {
     name: "Professional",
     tagline: "Multi-community property managers who need vendor management and custom branding.",
-    monthly: "$399",
-    annual: "$3,828",
-    annualPerMonth: "$319",
+    monthly: "$499",
+    annual: "$4,990",
+    annualPerMonth: "$416",
     maxUnits: "Up to 500 units, 3 communities",
     setupFee: "$500 one-time onboarding",
     features: [
@@ -96,9 +96,9 @@ const B2B_PLANS: B2BPlan[] = [
   {
     name: "Property Manager",
     tagline: "Large-scale property management companies with white-label and API requirements.",
-    monthly: "$599",
-    annual: "$5,748",
-    annualPerMonth: "$479",
+    monthly: "$1,499",
+    annual: "$14,990",
+    annualPerMonth: "$1,249",
     maxUnits: "Up to 2,000 units, unlimited communities",
     setupFee: "$1,500 one-time onboarding",
     features: [
@@ -236,7 +236,7 @@ export default function PricingPage() {
                     <span className="text-brand-text-muted text-xs">/mo</span>
                   </div>
                   <div className="text-xs text-brand-text-muted mb-1">
-                    or {plan.annual}/yr ({plan.annualPerMonth}/mo) — save 20%
+                    or {plan.annual}/yr ({plan.annualPerMonth}/mo) — 2 months free
                   </div>
                   <div className="text-xs text-brand-text-muted mb-5">{plan.setupFee}</div>
 

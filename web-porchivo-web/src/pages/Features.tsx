@@ -118,7 +118,7 @@ export default function FeaturesPage() {
       <section className="py-20 px-4 sm:px-6 bg-brand-navy-900/40 border-t border-brand-navy-500/40">
         <div className="max-w-2xl mx-auto text-center">
           <h2 className="text-3xl font-bold text-brand-text-primary mb-4">Ready to protect your community's deliveries?</h2>
-          <p className="text-brand-text-secondary mb-8">Residents join free. HOAs and property managers subscribe from $79/mo.</p>
+          <p className="text-brand-text-secondary mb-8">Residents join free. HOAs and property managers subscribe from $99/mo.</p>
           <Link to="/download" className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-brand-orange hover:bg-brand-orange text-brand-text-primary font-bold transition-all hover:scale-[1.02]">
             Download Porchivo
             <ArrowRight className="w-4 h-4" />

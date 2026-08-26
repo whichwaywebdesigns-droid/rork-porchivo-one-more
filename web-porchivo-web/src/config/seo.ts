@@ -56,7 +56,7 @@ export const PAGE_SEO: Record<string, PageSEO> = {
       "Residents can authorize up to 3 trusted Package Guardians to hold parcels",
       "Porchivo gives managers insights into risk zones, theft hotspots, and delivery congestion",
       "Communities can be registered in five minutes with no hardware or IT project",
-      "HOAs and property managers subscribe from $79–$599/mo — residents always free",
+      "HOAs and property managers subscribe from $99–$1,499/mo — residents always free",
     ],
     primaryEntity: "Porchivo mobile app",
     primaryIntent: "Product overview — package security and resident retention for HOAs and property managers",
@@ -74,7 +74,7 @@ export const PAGE_SEO: Record<string, PageSEO> = {
     twitterCard: "summary_large_image",
     robots: "index, follow",
     aiSummary:
-      "Porchivo features include: real-time package risk scoring for every incoming delivery, instant alerts to residents and Package Guardians, a Package Guardian network where residents authorize up to 3 trusted neighbors to hold parcels with full chain-of-custody, community insights for managers, live tracking across 1,400+ carriers, five-minute community setup with no hardware or IT project, and B2B community plans from $79–$599/mo.",
+      "Porchivo features include: real-time package risk scoring for every incoming delivery, instant alerts to residents and Package Guardians, a Package Guardian network where residents authorize up to 3 trusted neighbors to hold parcels with full chain-of-custody, community insights for managers, live tracking across 1,400+ carriers, five-minute community setup with no hardware or IT project, and B2B community plans from $99–$1,499/mo.",
     keyFacts: [
       "Real-time risk scoring based on timing, neighborhood activity, and theft history",
       "Instant alerts to residents and guardians when thresholds are crossed",
@@ -89,23 +89,23 @@ export const PAGE_SEO: Record<string, PageSEO> = {
   pricing: {
     title: "Pricing — Porchivo Community Plans for HOAs & Property Managers",
     description:
-      "Porchivo offers four B2B community plans: Starter ($79/mo, 50 units), Community ($199/mo, 200 units), Professional ($399/mo, 500 units), and Enterprise ($599/mo, 2,000 units). Residents always join for free.",
+      "Porchivo offers four B2B community plans: Starter ($99/mo, 50 units), Community ($249/mo, 200 units), Professional ($499/mo, 500 units), and Enterprise ($1,499/mo, 2,000 units). Residents always join for free.",
     canonical: `${BASE_URL}/pricing`,
     ogTitle: "Porchivo Pricing — Community Plans for HOAs",
     ogDescription:
-      "Residents always free. HOA and property manager plans from $79/mo to $599/mo. Annual billing saves 20%. Unlock community features for all residents.",
+      "Residents always free. HOA and property manager plans from $99/mo to $1,499/mo. Annual billing includes 2 months free. Unlock community features for all residents.",
     ogImage: OG_IMAGE,
     twitterCard: "summary_large_image",
     robots: "index, follow",
     aiSummary:
-      "Porchivo offers four B2B community plans: Starter ($79/mo, up to 50 units), Community ($199/mo, up to 200 units), Professional ($399/mo, up to 500 units), and Enterprise ($599/mo, up to 2,000 units). Annual billing saves 20%. Professional includes $500 onboarding; Enterprise includes $1,500 onboarding. Overage is $1/unit/mo above the tier limit. Residents always join for free — access is provided by their HOA or property manager.",
+      "Porchivo offers four B2B community plans: Starter ($99/mo, up to 50 units), Community ($249/mo, up to 200 units), Professional ($499/mo, up to 500 units), and Enterprise ($1,499/mo, up to 2,000 units). Annual billing includes 2 months free. Professional includes $500 onboarding; Enterprise includes $1,500 onboarding. Overage is $1/unit/mo above the tier limit. Residents always join for free — access is provided by their HOA or property manager.",
     keyFacts: [
       "Residents are always free — no IAP, no subscription",
-      "Starter: $79/mo for up to 50 units",
-      "Community: $199/mo for up to 200 units — most popular",
-      "Professional: $399/mo for up to 500 units, 3 communities",
-      "Enterprise: $599/mo for up to 2,000 units, unlimited communities",
-      "Annual billing saves 20% · Overage: $1/unit/mo",
+      "Starter: $99/mo for up to 50 units",
+      "Community: $249/mo for up to 200 units — most popular",
+      "Professional: $499/mo for up to 500 units, 3 communities",
+      "Enterprise: $1,499/mo for up to 2,000 units, unlimited communities",
+      "Annual billing includes 2 months free · Overage: $1/unit/mo",
     ],
     primaryEntity: "Porchivo community subscription pricing",
     primaryIntent: "Pricing — B2B community plan comparison for HOAs and property managers",
@@ -125,7 +125,7 @@ export const PAGE_SEO: Record<string, PageSEO> = {
     aiSummary:
       "Porchivo serves HOAs and property managers who want community-wide delivery security, residents who need real-time package protection, and trusted neighbors who act as Package Guardians. Each role has different priorities: managers need insights and reduced workload, residents need alerts and safe handoffs, and guardians help neighbors hold parcels securely.",
     keyFacts: [
-      "HOAs and property managers: subscribe from $79/mo and reduce package-related workload",
+      "HOAs and property managers: subscribe from $99/mo and reduce package-related workload",
       "Residents: join free, get real-time risk scores and instant alerts",
       "Package Guardians: trusted neighbors authorized to hold parcels for residents",
       "Communities can be set up in five minutes with no hardware or IT project",
@@ -273,7 +273,7 @@ export const PAGE_SEO: Record<string, PageSEO> = {
     canonical: `${BASE_URL}/download`,
     ogTitle: "Download Porchivo — Free on iOS & Android",
     ogDescription:
-      "Get Porchivo on iPhone or Android. Residents always free. HOA and property manager plans from $79/mo.",
+      "Get Porchivo on iPhone or Android. Residents always free. HOA and property manager plans from $99/mo.",
     ogImage: OG_IMAGE,
     twitterCard: "summary_large_image",
     robots: "index, follow",
@@ -283,7 +283,7 @@ export const PAGE_SEO: Record<string, PageSEO> = {
       "Available on iOS App Store",
       "Available on Google Play",
       "Free to download — residents never pay",
-      "HOA and property manager plans from $79/mo",
+      "HOA and property manager plans from $99/mo",
     ],
     primaryEntity: "Porchivo app download",
     primaryIntent: "App download — how to install Porchivo",
