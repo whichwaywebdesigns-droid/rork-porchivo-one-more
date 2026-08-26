@@ -204,6 +204,17 @@ nonisolated struct DbChatMessage: Codable, Sendable {
     }
 }
 
+/// Row from `blocked_users` — members whose messages the current user has blocked.
+nonisolated struct DbBlockedUser: Codable, Sendable, Equatable {
+    let blockedId: String
+    let blockedName: String?
+
+    enum CodingKeys: String, CodingKey {
+        case blockedId = "blocked_id"
+        case blockedName = "blocked_name"
+    }
+}
+
 /// Org context row from `get_my_org_context` RPC — mirrors OrgContextRow in Expo.
 nonisolated struct DbOrgContextRow: Codable, Sendable {
     let membershipId: String
@@ -670,6 +681,51 @@ actor SupabaseService {
         return await restPost(url: baseURL.appendingPathComponent("rest/v1/chat_messages"), body: payload, singleton: true)
     }
 
+    // MARK: - Chat moderation (App Store Guideline 1.2: report, block, filtered feed)
+
+    /// Reports a chat message via the `report_chat_message` RPC. The reported
+    /// user is derived server-side from the message row, so clients cannot
+    /// forge `reported_user_id`.
+    func reportChatMessage(messageId: String, reason: String, note: String? = nil) async -> Result<Void, Error> {
+        await rpcVoid("report_chat_message", body: [
+            "p_message_id": messageId,
+            "p_reason": reason,
+            "p_note": note,
+        ])
+    }
+
+    /// Fetches members the current user has blocked (RLS scopes to blocker).
+    func fetchBlockedUsers() async -> Result<[DbBlockedUser], Error> {
+        guard let comps = URLComponents(url: baseURL.appendingPathComponent("rest/v1/blocked_users"), resolvingAgainstBaseURL: false),
+              let url = comps.url else { return .failure(URLError(.badURL)) }
+        var c = comps
+        c.queryItems = [
+            URLQueryItem(name: "select", value: "blocked_id,blocked_name"),
+            URLQueryItem(name: "order", value: "created_at.desc"),
+        ]
+        return await restGet(url: c.url ?? url)
+    }
+
+    func blockUser(blockerId: String, userId: String, name: String?) async -> Result<Void, Error> {
+        let payload: [String: Any?] = [
+            "blocker_id": blockerId,
+            "blocked_id": userId,
+            "blocked_name": name,
+        ]
+        return await restPostMinimal(url: baseURL.appendingPathComponent("rest/v1/blocked_users"), body: payload)
+    }
+
+    func unblockUser(blockerId: String, userId: String) async -> Result<Void, Error> {
+        guard let comps = URLComponents(url: baseURL.appendingPathComponent("rest/v1/blocked_users"), resolvingAgainstBaseURL: false),
+              let url = comps.url else { return .failure(URLError(.badURL)) }
+        var c = comps
+        c.queryItems = [
+            URLQueryItem(name: "blocker_id", value: "eq.\(blockerId)"),
+            URLQueryItem(name: "blocked_id", value: "eq.\(userId)"),
+        ]
+        return await restDeleteMinimal(url: c.url ?? url)
+    }
+
     // MARK: - Announcements (direct table read/write — RLS handles permissions)
 
     /// Fetches published announcements for the user's org, ordered pinned-first then newest.
@@ -844,6 +900,39 @@ actor SupabaseService {
         for (k, v) in authHeaders(includeBearer: true) { req.setValue(v, forHTTPHeaderField: k) }
         req.setValue("return=minimal", forHTTPHeaderField: "Prefer")
         req.httpBody = try? JSONSerialization.data(withJSONObject: body.compactMapValues { $0 ?? NSNull() })
+        do {
+            let (_, resp) = try await session.data(for: req)
+            guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+                return .failure(URLError(.badServerResponse))
+            }
+            return .success(())
+        } catch {
+            return .failure(error)
+        }
+    }
+
+    private func restPostMinimal(url: URL, body: [String: Any?]) async -> Result<Void, Error> {
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"
+        for (k, v) in authHeaders(includeBearer: true) { req.setValue(v, forHTTPHeaderField: k) }
+        req.setValue("return=minimal", forHTTPHeaderField: "Prefer")
+        req.httpBody = try? JSONSerialization.data(withJSONObject: body.compactMapValues { $0 ?? NSNull() })
+        do {
+            let (_, resp) = try await session.data(for: req)
+            guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+                return .failure(URLError(.badServerResponse))
+            }
+            return .success(())
+        } catch {
+            return .failure(error)
+        }
+    }
+
+    private func restDeleteMinimal(url: URL) async -> Result<Void, Error> {
+        var req = URLRequest(url: url)
+        req.httpMethod = "DELETE"
+        for (k, v) in authHeaders(includeBearer: true) { req.setValue(v, forHTTPHeaderField: k) }
+        req.setValue("return=minimal", forHTTPHeaderField: "Prefer")
         do {
             let (_, resp) = try await session.data(for: req)
             guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {

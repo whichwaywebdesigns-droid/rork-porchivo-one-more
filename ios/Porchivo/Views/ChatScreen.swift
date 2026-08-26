@@ -16,14 +16,35 @@ struct ChatScreen: View {
     @State private var draft = ""
     @State private var isSending = false
     @State private var loaded = false
+    @State private var blockedIds: Set<String> = []
+    @State private var reportTarget: ChatMessage?
+    @State private var blockTarget: ChatMessage?
+    @State private var showFilterAlert = false
 
     var body: some View {
         VStack(spacing: 0) {
             ScrollViewReader { proxy in
                 ScrollView {
                     LazyVStack(spacing: 10) {
-                        ForEach(messages) { msg in
-                            MessageBubble(message: msg).id(msg.id)
+                        ForEach(visibleMessages) { msg in
+                            MessageBubble(message: msg)
+                                .id(msg.id)
+                                .contextMenu {
+                                    if !msg.isMine {
+                                        Button {
+                                            Haptics.light()
+                                            reportTarget = msg
+                                        } label: {
+                                            Label("Report message", systemImage: "flag")
+                                        }
+                                        Button {
+                                            Haptics.light()
+                                            blockTarget = msg
+                                        } label: {
+                                            Label("Block \(msg.senderName)", systemImage: "person.slash")
+                                        }
+                                    }
+                                }
                         }
                     }
                     .padding(.horizontal, 16)
@@ -41,8 +62,65 @@ struct ChatScreen: View {
         .background(c.background.ignoresSafeArea())
         .navigationTitle("Chat")
         .navigationBarTitleDisplayMode(.inline)
+        .alert("Message not sent", isPresented: $showFilterAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("That message doesn't meet our community guidelines. Please revise it — keep chat respectful for your neighbors.")
+        }
+        .confirmationDialog("Report \(reportTarget?.senderName ?? "this member")'s message?", isPresented: Binding(
+            get: { reportTarget != nil },
+            set: { if !$0 { reportTarget = nil } }
+        )) {
+            ForEach(Self.reportReasons, id: \.self) { reason in
+                Button(reason) { submitReport(reason) }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Our team reviews reports and can restrict members who violate community rules.")
+        }
+        .confirmationDialog("Block \(blockTarget?.senderName ?? "this member")?", isPresented: Binding(
+            get: { blockTarget != nil },
+            set: { if !$0 { blockTarget = nil } }
+        ), titleVisibility: .visible) {
+            Button("Block", role: .destructive) { submitBlock() }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("You won't see their messages in this chat. You can unblock them in Settings.")
+        }
         .task {
             if !loaded { await load(); loaded = true }
+        }
+    }
+
+    private static let reportReasons = ["Spam or scam", "Harassment or abuse", "Inappropriate content", "Other"]
+
+    /// Blocked members' messages never render — this is the feed filter
+    /// App Store Guideline 1.2 expects.
+    private var visibleMessages: [ChatMessage] {
+        messages.filter { $0.isMine || !blockedIds.contains($0.senderId) }
+    }
+
+    private func submitReport(_ reason: String) {
+        guard let msg = reportTarget else { return }
+        reportTarget = nil
+        Haptics.light()
+        guard appState.isSupabaseConfigured else { return }
+        Task { @MainActor in
+            _ = await SupabaseService.shared.reportChatMessage(messageId: msg.id, reason: reason)
+        }
+    }
+
+    private func submitBlock() {
+        guard let msg = blockTarget else { return }
+        blockTarget = nil
+        guard let me = appState.currentUserId else { return }
+        Haptics.medium()
+        blockedIds.insert(msg.senderId)
+        withAnimation { messages.removeAll { !$0.isMine && $0.senderId == msg.senderId } }
+        guard appState.isSupabaseConfigured else { return }
+        Task { @MainActor in
+            _ = await SupabaseService.shared.blockUser(
+                blockerId: me, userId: msg.senderId, name: msg.senderName)
         }
     }
 
@@ -72,6 +150,12 @@ struct ChatScreen: View {
 
     private func send() {
         guard let user = appState.user, !draft.isEmpty else { return }
+        // Pre-publication screen — nothing objectionable ever goes live.
+        guard ChatContentFilter.isAcceptable(draft) else {
+            Haptics.medium()
+            showFilterAlert = true
+            return
+        }
         let body = draft
         draft = ""
         Haptics.light()
@@ -105,6 +189,9 @@ struct ChatScreen: View {
         if case .success(let rows) = result {
             let me = appState.currentUserId ?? ""
             messages = rows.map { Mappers.toChatMessage($0, currentUserId: me) }
+        }
+        if case .success(let blocked) = await SupabaseService.shared.fetchBlockedUsers() {
+            blockedIds = Set(blocked.map(\.blockedId))
         }
     }
 }

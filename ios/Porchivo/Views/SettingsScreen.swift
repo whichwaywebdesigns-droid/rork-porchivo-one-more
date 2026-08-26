@@ -15,6 +15,7 @@ struct SettingsScreen: View {
     @State private var notificationsEnabled = true
     @State private var showDeleteConfirm = false
     @State private var showDeleteSheet = false
+    @State private var blockedUsers: [DbBlockedUser] = []
 
     var body: some View {
         ScrollView {
@@ -39,6 +40,26 @@ struct SettingsScreen: View {
                                 ))
                     } else {
                         disabledBiometryRow
+                    }
+                }
+                section("Blocked users") {
+                    if blockedUsers.isEmpty {
+                        HStack(spacing: 12) {
+                            Image(systemName: "person.slash")
+                                .foregroundStyle(c.textMuted).frame(width: 22)
+                            Text("You haven't blocked anyone.")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundStyle(c.textSecondary)
+                            Spacer()
+                        }
+                        .padding(.horizontal, 14).padding(.vertical, 12)
+                    } else {
+                        ForEach(blockedUsers, id: \.blockedId) { row in
+                            blockedRow(row)
+                            if row != blockedUsers.last {
+                                Divider().overlay(c.border).padding(.leading, 14)
+                            }
+                        }
                     }
                 }
                 section("Privacy") {
@@ -123,6 +144,45 @@ struct SettingsScreen: View {
             DeleteAccountSheet()
                 .environment(appState)
         }
+        .task {
+            await loadBlocked()
+        }
+    }
+
+    private func loadBlocked() async {
+        guard appState.isSupabaseConfigured else { return }
+        if case .success(let rows) = await SupabaseService.shared.fetchBlockedUsers() {
+            blockedUsers = rows
+        }
+    }
+
+    private func unblock(_ row: DbBlockedUser) {
+        guard let me = appState.currentUserId else { return }
+        Haptics.light()
+        Task { @MainActor in
+            _ = await SupabaseService.shared.unblockUser(blockerId: me, userId: row.blockedId)
+            await loadBlocked()
+        }
+    }
+
+    private func blockedRow(_ row: DbBlockedUser) -> some View {
+        HStack(spacing: 12) {
+            AvatarBubble(name: row.blockedName ?? "Member", avatarUrl: nil, size: 30)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(row.blockedName ?? "Member")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(c.textPrimary)
+                Text("Their messages are hidden from your chats")
+                    .font(.system(size: 11))
+                    .foregroundStyle(c.textMuted)
+            }
+            Spacer()
+            Button("Unblock") { unblock(row) }
+                .font(.system(size: 13, weight: .bold))
+                .foregroundStyle(c.accent)
+                .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 14).padding(.vertical, 10)
     }
 
     @ViewBuilder

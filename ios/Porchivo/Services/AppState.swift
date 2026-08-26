@@ -328,8 +328,13 @@ final class AppState {
     func sendMagicLink(email: String) async -> Bool {
         authError = nil
         if !isSupabaseConfigured {
+#if DEBUG
             // Demo mode — pretend the link was sent.
             return true
+#else
+            authError = "Supabase isn't configured in this build."
+            return false
+#endif
         }
         let result = await supabase.sendMagicLink(email.trimmingCharacters(in: .whitespaces))
         switch result {
@@ -351,9 +356,14 @@ final class AppState {
         authError = nil
 
         guard isSupabaseConfigured else {
+#if DEBUG
             seedDemoUser()
             flagBiometricEnrollment()
             return
+#else
+            authError = "Supabase isn't configured in this build."
+            return
+#endif
         }
 
         let qaEmail = "qa@porchivo.dev"
@@ -403,10 +413,15 @@ final class AppState {
     func verifyOtp(email: String, token: String) async -> Bool {
         authError = nil
         if !isSupabaseConfigured {
-            // Demo mode — any 6-digit code signs in.
+#if DEBUG
+            // Demo mode (debug builds only) — any 6-digit code signs in.
             seedDemoUser()
             flagBiometricEnrollment()
             return true
+#else
+            authError = "Supabase isn't configured in this build."
+            return false
+#endif
         }
         let result = await supabase.verifyOtp(
             email: email.trimmingCharacters(in: .whitespaces),
@@ -456,9 +471,14 @@ final class AppState {
     func signIn(email: String, password: String) async -> Bool {
         authError = nil
         if !isSupabaseConfigured {
+#if DEBUG
             // Demo mode
             seedDemoUser()
             return true
+#else
+            authError = "Supabase isn't configured in this build."
+            return false
+#endif
         }
         let result = await supabase.signInWithEmail(email.trimmingCharacters(in: .whitespaces), password)
         switch result {
@@ -476,8 +496,13 @@ final class AppState {
     func signUp(email: String, password: String) async -> Bool {
         authError = nil
         if isDemoMode {
+#if DEBUG
             seedDemoUser()
             return true
+#else
+            authError = "Supabase isn't configured in this build."
+            return false
+#endif
         }
         let result = await supabase.signUpWithEmail(email.trimmingCharacters(in: .whitespaces), password)
         switch result {
