@@ -81,12 +81,29 @@ function RootLayoutNav() {
   const segments = useSegments();
   const lastTarget = useRef<string | null>(null);
   const mountedAtRef = useRef<number>(Date.now());
+  const launchRedirectDoneRef = useRef<boolean>(false);
   const [hasSeenSlides, setHasSeenSlides] = useState<boolean | null>(null);
-  const showSplashOverlay =
+  const [overlayExpired, setOverlayExpired] = useState<boolean>(false);
+  const rawSplashOverlay =
     isLoading ||
     isOnboarded === null ||
     hasSeenSlides === null ||
     (!!session && (isOrgLoading || !isReadyToShowUI));
+
+  // Watchdog: the overlay blocks all touches, so it must never hang. If the
+  // underlying data (profile/org queries) stalls — e.g. on a slow or offline
+  // network — force-hide the overlay after 6s so the app stays navigable;
+  // screens render their own loading states underneath.
+  useEffect(() => {
+    if (!rawSplashOverlay) {
+      setOverlayExpired(false);
+      return;
+    }
+    const timer = setTimeout(() => setOverlayExpired(true), 6000);
+    return () => clearTimeout(timer);
+  }, [rawSplashOverlay]);
+
+  const showSplashOverlay = rawSplashOverlay && !overlayExpired;
 
   useEffect(() => {
     AsyncStorage.getItem("porchivo_pre_auth_slides_seen").then((value) => {
@@ -182,9 +199,24 @@ function RootLayoutNav() {
       currentSegment === "reset-password" ||
       currentSegment === "auth-fail";
 
+    // Fresh start on cold launch: with no root index route, Expo Router
+    // resolves the initial URL to the tabs group — the app opens straight
+    // into the tab flow with no splash. Route the first launch through the
+    // splash screen exactly once so every app open begins at the beginning;
+    // the splash then dispatches to the correct flow. The one-shot ref
+    // prevents a redirect loop when the splash sends an onboarded user back
+    // to the tabs, and real nested-tab deep links (non-group segments) are
+    // left untouched.
+    const onTabsRoot =
+      segments[0] === "(tabs)" &&
+      segments.slice(1).every((s) => typeof s === "string" && s.startsWith("("));
+
     let target: string | null = null;
 
-    if (!isOnboarded && !inWelcome) {
+    if (onTabsRoot && !launchRedirectDoneRef.current && Date.now() - mountedAtRef.current < 15000) {
+      launchRedirectDoneRef.current = true;
+      target = "/splash";
+    } else if (!isOnboarded && !inWelcome) {
       // Pre-auth flow: show onboarding slides once, then the welcome/login screen.
       target = session ? "/onboarding-setup" : hasSeenSlides ? "/welcome" : "/splash";
     } else if (isOnboarded && session && inWelcome && !inTrackingOnboarding) {
