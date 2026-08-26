@@ -52,8 +52,11 @@ enum AppConfig {
     enum Support {
         static let email = "support@porchivo.com"
         static let websiteURL = "https://porchivo.com"
-        static let privacyPolicyURL = "https://porchivo.com/privacy"
-        static let termsURL = "https://porchivo.com/terms"
+        // Privacy/terms live on the Porchivo web app — porchivo.com/privacy
+        // and /terms are not published yet (404 as of 2026-08-26) and a dead
+        // legal URL is an automatic Guideline 5.1.1 rejection.
+        static let privacyPolicyURL = "https://itw0s622ahx9uel9v4pjt-web-porchivo-web.rork.live/privacy"
+        static let termsURL = "https://itw0s622ahx9uel9v4pjt-web-porchivo-web.rork.live/terms"
     }
 
     enum SocialProof {
