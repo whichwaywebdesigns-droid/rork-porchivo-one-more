@@ -58,13 +58,29 @@ export default function FeaturesPage() {
       <section className="pt-16 pb-20 px-4 sm:px-6 border-b border-brand-navy-500/40">
         <div className="max-w-5xl mx-auto">
           <BreadcrumbNav items={[{ label: "Home", href: "/" }, { label: "Features", href: "/features" }]} />
-          <div className="mt-8 max-w-2xl">
-            <h1 className="text-4xl sm:text-5xl font-bold text-brand-text-primary leading-tight mb-5">
-              Everything your community needs to protect deliveries and retain residents
-            </h1>
-            <p className="text-xl text-brand-text-secondary leading-relaxed">
-              {seo.aiSummary}
-            </p>
+          <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12 items-center">
+            <div className="max-w-2xl">
+              <h1 className="text-4xl sm:text-5xl font-bold text-brand-text-primary leading-tight mb-5">
+                Everything your community needs to protect deliveries and retain residents
+              </h1>
+              <p className="text-xl text-brand-text-secondary leading-relaxed">
+                {seo.aiSummary}
+              </p>
+            </div>
+            <div>
+              {/* Edge-faded community handoff photo (soft radial mask on all sides) */}
+              <img
+                src="/images/community-handoff.jpg"
+                alt="A Porch Partner handing a package to a neighbor over a wooden fence"
+                className="w-full h-auto"
+                style={{
+                  WebkitMaskImage:
+                    "radial-gradient(ellipse 72% 72% at 50% 50%, black 55%, transparent 98%)",
+                  maskImage:
+                    "radial-gradient(ellipse 72% 72% at 50% 50%, black 55%, transparent 98%)",
+                }}
+              />
+            </div>
           </div>
         </div>
       </section>
