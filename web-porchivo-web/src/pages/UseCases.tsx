@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Home, Building, DollarSign, Users, Heart, ArrowRight } from "lucide-react";
 import PageLayout from "@/components/PageLayout";
@@ -26,6 +27,31 @@ const ACCENT_MAP: Record<string, { text: string; bg: string; badge: string }> = 
 };
 
 export default function UseCasesPage() {
+  // Gentle fade-in for the hero image: reveals as soon as it enters the
+  // viewport (immediately on page load, or on scroll if it's below the fold).
+  const heroImgRef = useRef<HTMLDivElement | null>(null);
+  const [isHeroShown, setIsHeroShown] = useState(false);
+
+  useEffect(() => {
+    const el = heroImgRef.current;
+    if (!el) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setIsHeroShown(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setIsHeroShown(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.15 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   const schemas = [
     buildWebPageSchema({ name: seo.title, description: seo.description, url: seo.canonical }),
     buildBreadcrumbSchema([{ name: "Home", url: BRAND.url }, { name: "Use Cases", url: seo.canonical }]),
@@ -60,18 +86,20 @@ export default function UseCasesPage() {
             </div>
             <div>
               {/* Edge-faded "HOA office buried in parcels" photo — the problem, before Porchivo */}
-              <img
-                src="/images/hoa-office-overwhelm.jpg"
-                alt="An overwhelmed HOA office: a property manager buried in paperwork while the mailroom behind her overflows with unsorted packages and residents wait with boxes in hand"
-                className="w-full h-auto"
-                loading="lazy"
-                style={{
-                  WebkitMaskImage:
-                    "radial-gradient(ellipse 72% 72% at 50% 50%, black 55%, transparent 98%)",
-                  maskImage:
-                    "radial-gradient(ellipse 72% 72% at 50% 50%, black 55%, transparent 98%)",
-                }}
-              />
+              <div ref={heroImgRef} className={isHeroShown ? "hero-img-reveal hero-img-reveal-in" : "hero-img-reveal"}>
+                <img
+                  src="/images/hoa-office-overwhelm.jpg"
+                  alt="An overwhelmed HOA office: a property manager buried in paperwork while the mailroom behind her overflows with unsorted packages and residents wait with boxes in hand"
+                  className="w-full h-auto"
+                  loading="lazy"
+                  style={{
+                    WebkitMaskImage:
+                      "radial-gradient(ellipse 72% 72% at 50% 50%, black 55%, transparent 98%)",
+                    maskImage:
+                      "radial-gradient(ellipse 72% 72% at 50% 50%, black 55%, transparent 98%)",
+                  }}
+                />
+              </div>
               {/* Signup CTA — straight into the app-store onboarding flow */}
               <div className="mt-6 text-center">
                 <a

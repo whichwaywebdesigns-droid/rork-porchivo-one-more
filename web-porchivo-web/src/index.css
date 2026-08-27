@@ -955,3 +955,24 @@ html.scrolling::-webkit-scrollbar-thumb:hover {
   letter-spacing: 2px;
   color: #8B7355;
 }
+
+/* ── Use Cases hero image gentle fade-in ──
+   Reveal state is toggled by an IntersectionObserver in UseCases.tsx
+   (fires on page load when in view, or on scroll if below the fold). */
+.hero-img-reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.9s ease-out, transform 0.9s ease-out;
+  will-change: opacity, transform;
+}
+.hero-img-reveal-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-img-reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
