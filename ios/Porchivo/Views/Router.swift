@@ -20,6 +20,9 @@ enum Route: Hashable {
     case settings
     case orgSignup
     case announcements
+    case inviteCode
+    case pendingMembers
+    case manageSubscription
 
     static func == (lhs: Route, rhs: Route) -> Bool {
         switch (lhs, rhs) {
@@ -28,6 +31,11 @@ enum Route: Hashable {
              (.residentDirectory, .residentDirectory),
              (.editProfile, .editProfile), (.settings, .settings),
              (.orgSignup, .orgSignup):
+            return true
+        case (.announcements, .announcements),
+             (.inviteCode, .inviteCode),
+             (.pendingMembers, .pendingMembers),
+             (.manageSubscription, .manageSubscription):
             return true
         case (.shipmentDetail(let a), .shipmentDetail(let b)): return a == b
         case (.packageDetail(let a), .packageDetail(let b)): return a == b
@@ -50,6 +58,9 @@ enum Route: Hashable {
         case .settings: hasher.combine(10)
         case .orgSignup: hasher.combine(11)
         case .announcements: hasher.combine(12)
+        case .inviteCode: hasher.combine(13)
+        case .pendingMembers: hasher.combine(14)
+        case .manageSubscription: hasher.combine(15)
         }
     }
 }
@@ -73,6 +84,9 @@ struct RouteView: View {
         case .settings:      SettingsScreen()
         case .orgSignup:     OrgSignupScreen()
         case .announcements: AnnouncementsScreen()
+        case .inviteCode:    InviteCodeScreen()
+        case .pendingMembers: PendingMembersScreen()
+        case .manageSubscription: ManageSubscriptionScreen()
         }
     }
 }

@@ -154,15 +154,43 @@ struct MoreScreen: View {
                 .foregroundStyle(c.textPrimary)
 
             VStack(spacing: 0) {
-                linkRow("Manage Subscription", "creditcard.fill", c.gold) { }
+                NavigationLink(value: Route.manageSubscription) {
+                    adminRow("Manage Subscription", "creditcard.fill", c.gold)
+                }
+                .buttonStyle(.plain)
                 Divider().overlay(c.border).padding(.leading, 54)
-                linkRow("Invite Code", "ticket.fill", c.accent) { }
+                NavigationLink(value: Route.inviteCode) {
+                    adminRow("Invite Code", "ticket.fill", c.accent)
+                }
+                .buttonStyle(.plain)
                 Divider().overlay(c.border).padding(.leading, 54)
-                linkRow("Pending Members", "person.badge.clock", c.warmOrange) { }
+                NavigationLink(value: Route.pendingMembers) {
+                    adminRow("Pending Members", "person.badge.clock", c.warmOrange)
+                }
+                .buttonStyle(.plain)
             }
             .background(c.surface, in: .rect(cornerRadius: Radius.lg))
             .shadow(color: c.textPrimary.opacity(0.05), radius: 6, y: 2)
         }
+    }
+
+    private func adminRow(_ label: String, _ symbol: String, _ tint: Color) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: symbol)
+                .font(.system(size: 14, weight: .bold))
+                .foregroundStyle(tint)
+                .frame(width: 28)
+            Text(label)
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(c.textPrimary)
+            Spacer()
+            Image(systemName: "chevron.right")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(c.textMuted)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 14)
+        .contentShape(Rectangle())
     }
 
     // MARK: - Helper

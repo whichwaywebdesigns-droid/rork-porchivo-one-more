@@ -658,6 +658,110 @@ actor SupabaseService {
         await rpc("get_my_org_context", body: [:])
     }
 
+    // MARK: - Org admin tools
+
+    /// One pending membership request returned by the `get_pending_members` RPC.
+    nonisolated struct PendingMemberRow: Codable, Sendable {
+        let membershipId: String
+        let userId: String
+        let displayName: String
+        let avatarUrl: String?
+        let unitNumber: String?
+        let createdAt: String?
+        let notes: String?
+
+        enum CodingKeys: String, CodingKey {
+            case membershipId = "membership_id"
+            case userId = "user_id"
+            case displayName = "display_name"
+            case avatarUrl = "avatar_url"
+            case unitNumber = "unit_number"
+            case createdAt = "created_at"
+            case notes
+        }
+    }
+
+    /// Org-level details an admin can view: invite code + subscription info.
+    /// Read directly from the `organizations` table (RLS scopes to members).
+    nonisolated struct OrgAdminDetails: Codable, Sendable {
+        var name: String?
+        var inviteCode: String?
+        var planTier: String?
+        var billingCycle: String?
+        var subscriptionStatus: String?
+        var currentPeriodEnd: String?
+
+        enum CodingKeys: String, CodingKey {
+            case name
+            case inviteCode = "invite_code"
+            case planTier = "plan_tier"
+            case billingCycle = "billing_cycle"
+            case subscriptionStatus = "subscription_status"
+            case currentPeriodEnd = "current_period_end"
+        }
+    }
+
+    /// Lists pending join requests for the caller's org via the
+    /// `get_pending_members` security-definer RPC (admin/staff only server-side).
+    func fetchPendingMembers(orgId: String) async -> Result<[PendingMemberRow], Error> {
+        await rpc("get_pending_members", body: ["p_org_id": orgId])
+    }
+
+    /// Approves a pending membership via `approve_org_membership`.
+    func approvePendingMember(membershipId: String, orgId: String) async -> Result<Void, Error> {
+        await rpcVoid("approve_org_membership", body: [
+            "p_membership_id": membershipId,
+            "p_org_id": orgId,
+        ])
+    }
+
+    /// Denies a pending membership via `deny_org_membership` (row → status `removed`).
+    func denyPendingMember(membershipId: String, orgId: String) async -> Result<Void, Error> {
+        await rpcVoid("deny_org_membership", body: [
+            "p_membership_id": membershipId,
+            "p_org_id": orgId,
+        ])
+    }
+
+    /// Regenerates the org invite code via `regenerate_org_invite_code`.
+    /// Returns the new code. Existing codes stop working immediately.
+    func regenerateInviteCode(orgId: String) async -> Result<String, Error> {
+        await rpc("regenerate_org_invite_code", body: ["p_org_id": orgId])
+    }
+
+    /// Fetches org name, invite code, and billing summary for admin screens.
+    func fetchOrgAdminDetails(orgId: String) async -> Result<OrgAdminDetails?, Error> {
+        guard let comps = URLComponents(url: baseURL.appendingPathComponent("rest/v1/organizations"), resolvingAgainstBaseURL: false),
+              let url = comps.url else { return .failure(URLError(.badURL)) }
+        var c = comps
+        c.queryItems = [
+            URLQueryItem(name: "id", value: "eq.\(orgId)"),
+            URLQueryItem(name: "select", value:
+                "name,invite_code,plan_tier,billing_cycle,subscription_status,current_period_end"),
+        ]
+        return await restGet(url: c.url ?? url, singleton: true)
+    }
+
+    /// Opens a Stripe Billing Portal session via the `create-billing-portal`
+    /// edge function. Returns the hosted portal URL to open externally.
+    func createBillingPortalSession(orgId: String) async -> Result<URL, Error> {
+        struct PortalResponse: Decodable { let url: String }
+        switch await invokeEdgeFunction("create-billing-portal", body: ["orgId": orgId]) {
+        case .success(let data):
+            do {
+                let decoded = try JSONDecoder().decode(PortalResponse.self, from: data)
+                guard let url = URL(string: decoded.url), url.scheme == "https" else {
+                    return .failure(URLError(.badURL))
+                }
+                return .success(url)
+            } catch {
+                return .failure(error)
+            }
+        case .failure(let err):
+            return .failure(err)
+        }
+    }
+
     func fetchChatMessages(threadId: String, limit: Int = 100) async -> Result<[DbChatMessage], Error> {
         guard let comps = URLComponents(url: baseURL.appendingPathComponent("rest/v1/chat_messages"), resolvingAgainstBaseURL: false),
               let url = comps.url else { return .failure(URLError(.badURL)) }
