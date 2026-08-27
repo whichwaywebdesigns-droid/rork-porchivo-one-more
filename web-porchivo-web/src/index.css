@@ -10,54 +10,54 @@
    ─────────────────────────────────────────────────────────────────────────── */
 
 @layer base {
-  /* ── Light theme (default) ── */
+  /* ── Light theme (default) — "The Shipping Label": kraft desk + paper sheet ── */
   :root {
     /* shadcn/ui semantic tokens — light */
-    --background: 216 33 97;
-    --foreground: 219 48 20;
+    --background: 36 33% 97%;      /* #FAF8F5 warm paper */
+    --foreground: 24 33% 18%;      /* #3D2B1F dark brown ink */
 
-    --card: 0 0 100;
-    --card-foreground: 219 48 20;
+    --card: 40 40% 99%;            /* fresh label stock */
+    --card-foreground: 24 33% 18%;
 
-    --popover: 0 0 100;
-    --popover-foreground: 219 48 20;
+    --popover: 40 40% 99%;
+    --popover-foreground: 24 33% 18%;
 
-    --primary: 215 65 53;
-    --primary-foreground: 0 0 100;
+    --primary: 43 75% 31%;         /* #8B6914 packing-tape gold */
+    --primary-foreground: 36 33% 97%;
 
-    --secondary: 217 48 95;
-    --secondary-foreground: 219 48 20;
+    --secondary: 36 26% 90%;       /* kraft tint */
+    --secondary-foreground: 23 22% 34%;  /* #6B5344 */
 
-    --muted: 217 48 95;
-    --muted-foreground: 215 20 45;
+    --muted: 36 33% 93%;
+    --muted-foreground: 33 24% 44%;     /* #8B7355 */
 
-    --accent: 217 48 95;
-    --accent-foreground: 219 48 20;
+    --accent: 43 75% 31%;
+    --accent-foreground: 36 33% 97%;
 
     --destructive: 358 75 59;
     --destructive-foreground: 0 0 100;
 
-    --border: 210 44 89;
-    --input: 210 44 89;
-    --ring: 215 65 53;
+    --border: 36 30% 87%;          /* #E8E0D4 */
+    --input: 36 30% 87%;
+    --ring: 43 75% 31%;
 
     --radius: 0.5rem;
 
-    --sidebar-background: 210 36 96;
-    --sidebar-foreground: 219 48 20;
-    --sidebar-primary: 215 65 53;
-    --sidebar-primary-foreground: 0 0 100;
-    --sidebar-accent: 217 48 95;
-    --sidebar-accent-foreground: 219 48 20;
-    --sidebar-border: 210 44 89;
-    --sidebar-ring: 215 65 53;
+    --sidebar-background: 36 26% 92%;
+    --sidebar-foreground: 24 33% 18%;
+    --sidebar-primary: 43 75% 31%;
+    --sidebar-primary-foreground: 36 33% 97%;
+    --sidebar-accent: 43 75% 31%;
+    --sidebar-accent-foreground: 36 33% 97%;
+    --sidebar-border: 36 30% 87%;
+    --sidebar-ring: 43 75% 31%;
 
-    /* Brand palette — light (matches Expo lightPalette) */
-    --brand-navy-500: #D8E4F0;
-    --brand-navy-600: #EBF0F8;
-    --brand-navy-700: #E8EDF5;
-    --brand-navy-800: #FFFFFF;
-    --brand-navy-900: #F5F7FA;
+    /* Brand palette — light (shipping-label / kraft mapping) */
+    --brand-navy-500: #E8E0D4;
+    --brand-navy-600: #F0EADC;
+    --brand-navy-700: #F4EFE5;
+    --brand-navy-800: #FAF8F5;
+    --brand-navy-900: #F5F1E8;
 
     --brand-blue: #3A7BD5;
     --brand-blue-light: #5B93E8;
@@ -65,71 +65,99 @@
     --brand-orange: #E8622A;
     --brand-orange-light: #ED8A5A;
 
-    --brand-text-primary: #1A2B4A;
-    --brand-text-secondary: rgba(26, 43, 74, 0.55);
-    --brand-text-muted: rgba(26, 43, 74, 0.38);
+    --brand-text-primary: #3D2B1F;
+    --brand-text-secondary: rgba(61, 43, 31, 0.62);
+    --brand-text-muted: rgba(61, 43, 31, 0.42);
 
-    --theme-color: #3A7BD5;
+    /* Shipping-label decorative palette */
+    --desk-bg: #D4C4A8;
+    --paper-bg: #FAF8F5;
+    --paper-border: #E8E0D4;
+    --ink: #3D2B1F;
+    --label-dash: #A08060;
+    --label-header: #8B7355;
+    --tape-a: #D4A843;
+    --tape-b: #C49430;
+    --peanut-1: #E8DCC8;
+    --peanut-2: #F5F0E8;
+    --peanut-3: #D4C4A8;
+    --peanut-shade: rgba(92, 61, 30, 0.18);
+
+    --theme-color: #D4C4A8;
   }
 
-  /* ── Dark theme (.dark on <html>) ── */
+  /* ── Dark theme (.dark on <html>) — the same box, warehouse after dark ── */
   .dark {
     /* shadcn/ui semantic tokens — dark */
-    --background: 223 65 15;
-    --foreground: 217 53 94;
+    --background: 30 25% 10%;
+    --foreground: 36 33% 92%;
 
-    --card: 223 54 16;
-    --card-foreground: 217 53 94;
+    --card: 30 22% 13%;
+    --card-foreground: 36 33% 92%;
 
-    --popover: 223 54 16;
-    --popover-foreground: 217 53 94;
+    --popover: 30 22% 13%;
+    --popover-foreground: 36 33% 92%;
 
-    --primary: 214 77 60;
-    --primary-foreground: 0 0 100;
+    --primary: 43 60% 52%;         /* bright brass tape */
+    --primary-foreground: 30 25% 10%;
 
-    --secondary: 222 52 21;
-    --secondary-foreground: 217 53 94;
+    --secondary: 30 16% 18%;
+    --secondary-foreground: 36 33% 90%;
 
-    --muted: 222 52 21;
-    --muted-foreground: 215 20 55;
+    --muted: 30 16% 20%;
+    --muted-foreground: 33 18% 64%;
 
-    --accent: 222 52 21;
-    --accent-foreground: 217 53 94;
+    --accent: 43 60% 52%;
+    --accent-foreground: 30 25% 10%;
 
     --destructive: 0 70 60;
-    --destructive-foreground: 217 53 94;
+    --destructive-foreground: 36 33% 92%;
 
-    --border: 222 49 23;
-    --input: 222 49 23;
-    --ring: 214 77 60;
+    --border: 30 16% 24%;
+    --input: 30 16% 24%;
+    --ring: 43 60% 52%;
 
-    --sidebar-background: 225 65 10;
-    --sidebar-foreground: 217 53 94;
-    --sidebar-primary: 214 77 60;
-    --sidebar-primary-foreground: 0 0 100;
-    --sidebar-accent: 222 52 21;
-    --sidebar-accent-foreground: 217 53 94;
-    --sidebar-border: 222 49 23;
-    --sidebar-ring: 214 77 60;
+    --sidebar-background: 30 18% 12%;
+    --sidebar-foreground: 36 33% 92%;
+    --sidebar-primary: 43 60% 52%;
+    --sidebar-primary-foreground: 30 25% 10%;
+    --sidebar-accent: 43 60% 52%;
+    --sidebar-accent-foreground: 30 25% 10%;
+    --sidebar-border: 30 16% 24%;
+    --sidebar-ring: 43 60% 52%;
 
-    /* Brand palette — dark (matches Expo darkPalette) */
-    --brand-navy-500: #1E2F58;
-    --brand-navy-600: #1A2B52;
-    --brand-navy-700: #132040;
-    --brand-navy-800: #132040;
-    --brand-navy-900: #0D1B3E;
+    /* Brand palette — dark (dark kraft mapping) */
+    --brand-navy-500: #3A2F22;
+    --brand-navy-600: #33291D;
+    --brand-navy-700: #2B2218;
+    --brand-navy-800: #231B12;
+    --brand-navy-900: #1B140D;
 
-    --brand-blue: #4A8FE8;
-    --brand-blue-light: #6BA8F5;
+    --brand-blue: #C9A24B;
+    --brand-blue-light: #D9B45B;
 
     --brand-orange: #F07840;
     --brand-orange-light: #F59E6B;
 
-    --brand-text-primary: #E8EEF8;
-    --brand-text-secondary: rgba(232, 238, 248, 0.65);
-    --brand-text-muted: rgba(232, 238, 248, 0.40);
+    --brand-text-primary: #F0E8DC;
+    --brand-text-secondary: rgba(240, 232, 220, 0.62);
+    --brand-text-muted: rgba(240, 232, 220, 0.40);
 
-    --theme-color: #0D1B3E;
+    /* Shipping-label decorative palette — dark */
+    --desk-bg: #15100B;
+    --paper-bg: #241C14;
+    --paper-border: #3A2E20;
+    --ink: #F0E8DC;
+    --label-dash: #7A6248;
+    --label-header: #A88F70;
+    --tape-a: #D4A843;
+    --tape-b: #C49430;
+    --peanut-1: #4A3D2C;
+    --peanut-2: #3A2F22;
+    --peanut-3: #2E251A;
+    --peanut-shade: rgba(0, 0, 0, 0.35);
+
+    --theme-color: #1B140D;
   }
 }
 
@@ -140,7 +168,7 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Outfit', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   }
 }
 
@@ -209,9 +237,10 @@ main#main-content > section {
   scroll-snap-align: start;
 }
 
-/* ── Auto-hiding overlay scrollbars ─────────────────────────────────────── */
-/* Thin rounded bar that fades in while scrolling and fades out ~600ms after
-   the user stops. Uses a `scrolling` class on <html> toggled by a scroll
+/* ── Auto-hiding overlay scrollbars — thin "paper shadow" bar ───────────── */
+/* 4px rounded thumb in ink-brown that fades in while scrolling and fades out
+   ~600ms after the user stops, like a shadow cast by the paper edge sliding
+   past a fixed edge. Uses a `scrolling` class on <html> toggled by a scroll
    listener in scrollbar-auto-hide.ts. Works across WebKit and Firefox. */
 
 /* Firefox — toggle scrollbar-color via the scrolling class (no transition
@@ -221,32 +250,146 @@ html {
   scrollbar-color: transparent transparent;
 }
 html.scrolling {
-  scrollbar-color: hsl(var(--foreground) / 0.2) transparent;
+  scrollbar-color: rgba(92, 61, 30, 0.25) transparent;
 }
 
 /* WebKit (Chrome / Safari / Edge) */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 4px;
+  height: 4px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
   background: transparent;
-  border-radius: 999px;
-  border: 2px solid transparent;
+  border-radius: 2px;
   background-clip: padding-box;
   transition: background 0.3s ease;
 }
 html.scrolling::-webkit-scrollbar-thumb {
-  background: hsl(var(--foreground) / 0.2);
+  background: rgba(92, 61, 30, 0.25);
   background-clip: padding-box;
 }
 html.scrolling::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--foreground) / 0.35);
+  background: rgba(92, 61, 30, 0.45);
   background-clip: padding-box;
 }
 ::-webkit-scrollbar-corner {
   background: transparent;
+}
+
+/* ── "The Shipping Label" theme — purely decorative surfaces ───────────── */
+
+/* Kraft cardboard desk behind every page. A faint repeating vertical flute
+   pattern suggests corrugation without competing with content. */
+.page-desk {
+  background-color: var(--desk-bg);
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(92, 61, 30, 0.045) 0px,
+    rgba(92, 61, 30, 0.045) 1px,
+    transparent 1px,
+    transparent 14px
+  );
+}
+.dark .page-desk {
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.25) 0px,
+    rgba(0, 0, 0, 0.25) 1px,
+    transparent 1px,
+    transparent 14px
+  );
+}
+
+/* A cut sheet of paper sitting on the desk. */
+.paper-sheet {
+  background: var(--paper-bg);
+  border: 1px solid var(--paper-border);
+  border-radius: 2px;
+  box-shadow:
+    0 2px 8px rgba(92, 61, 30, 0.12),
+    0 1px 3px rgba(92, 61, 30, 0.08),
+    inset 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+/* Packing-tape strip overlapping the top edge of the paper sheet. */
+.packing-tape {
+  position: absolute;
+  top: -6px;
+  left: 18%;
+  right: 18%;
+  height: 24px;
+  background: repeating-linear-gradient(
+    -55deg,
+    var(--tape-a) 0px,
+    var(--tape-a) 10px,
+    var(--tape-b) 10px,
+    var(--tape-b) 20px
+  );
+  opacity: 0.7;
+  transform: rotate(-0.6deg);
+  box-shadow: 0 1px 2px rgba(92, 61, 30, 0.18);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Shipping-label card accent: dashed border + micro label header. */
+.label-card {
+  border: 1px dashed var(--label-dash);
+}
+.label-header {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--label-header);
+}
+
+/* Decorative barcode stripes (non-interactive elements only). */
+.barcode-strip {
+  height: 26px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--ink) 0px,
+    var(--ink) 2px,
+    transparent 2px,
+    transparent 4px,
+    var(--ink) 4px,
+    var(--ink) 7px,
+    transparent 7px,
+    transparent 9px,
+    var(--ink) 9px,
+    var(--ink) 10px,
+    transparent 10px,
+    transparent 14px
+  );
+  opacity: 0.22;
+  pointer-events: none;
+}
+
+/* Foam packing peanuts — loose fill scattered around onboarding sheets.
+   Purely decorative: pointer-events none, no semantics, gentle bobbing. */
+.peanut {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0.9;
+  border-radius: 46% 54% 52% 48% / 52% 46% 54% 48%;
+  box-shadow: inset -1px -1px 1px var(--peanut-shade);
+  animation: peanut-bob var(--dur, 4s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+  will-change: transform;
+}
+@keyframes peanut-bob {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  50% { transform: translate3d(0, calc(-1 * var(--travel, 3px)), 0) rotate(var(--rot, 3deg)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .peanut { animation: none; }
+}
+/* Mobile: shrink travel and hide roughly half the peanuts for performance. */
+@media (max-width: 640px) {
+  .peanut { --travel: 2px; }
+  .peanut-desktop-only { display: none; }
 }

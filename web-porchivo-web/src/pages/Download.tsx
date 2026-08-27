@@ -27,7 +27,7 @@ export default function DownloadPage() {
   ];
 
   return (
-    <PageLayout>
+    <PageLayout peanuts tape>
       <SEOHead
         title={seo.title}
         description={seo.description}
@@ -71,7 +71,7 @@ export default function DownloadPage() {
             Residents are always free. Communities subscribe.
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-brand-navy-900 border border-brand-navy-500/40 rounded-2xl p-7">
+            <div className="label-card bg-brand-navy-900 border-brand-navy-500/40 rounded-2xl p-7">
               <div className="text-sm font-medium text-brand-text-muted mb-1">Residents</div>
               <div className="text-3xl font-bold text-brand-text-primary mb-1">$0</div>
               <div className="text-sm text-brand-text-muted mb-6">Always free. No credit card, no time limit.</div>
@@ -83,6 +83,7 @@ export default function DownloadPage() {
                   </li>
                 ))}
               </ul>
+              <div className="barcode-strip mt-6" aria-hidden />
             </div>
 
             <div className="bg-gradient-to-b from-brand-orange/8 to-transparent border border-brand-orange/30 rounded-2xl p-7">

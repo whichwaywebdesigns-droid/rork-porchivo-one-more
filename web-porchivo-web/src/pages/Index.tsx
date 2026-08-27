@@ -56,7 +56,7 @@ export default function IndexPage() {
   ];
 
   return (
-    <PageLayout>
+    <PageLayout peanuts tape>
       <SEOHead
         title={seo.title}
         description={seo.description}
