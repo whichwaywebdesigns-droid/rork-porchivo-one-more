@@ -768,3 +768,190 @@ html.scrolling::-webkit-scrollbar-thumb:hover {
   .pack-list-table td { padding: 8px 10px; }
   .pack-list-address { display: none; }
 }
+
+/* ═══ FragileModal — fragile-package warning wrapper for existing dialogs.
+   Every decorative layer (hazard bar, stamps, tape, side-up stamp) is
+   pointer-events:none so interactive children are never blocked. Pure CSS. */
+.fragile-modal {
+  position: relative;
+  background: #FAF8F5;
+  border: 3px solid #C0392B;
+  border-radius: 1px;
+  box-shadow:
+    0 4px 24px rgba(192, 57, 43, 0.15),
+    0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: visible;
+}
+
+/* Optional helper: faint kraft glow for whatever backdrop hosts the modal */
+.fragile-backdrop-tint {
+  background-color: rgba(212, 196, 168, 0.15);
+}
+
+/* Diagonal hazard-stripe "Handle With Care" bar (decorative, not clickable) */
+.fragile-modal-hazard {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  background: repeating-linear-gradient(45deg, #C0392B, #C0392B 10px, #A93226 10px, #A93226 20px);
+}
+.fragile-modal-hazard-text {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: #FFFFFF;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Content zone (children stay fully interactive here) */
+.fragile-modal-body {
+  padding: 24px;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color: #3D2B1F;
+}
+.fragile-modal-frame {
+  border: 1px dashed #D4C4A8;
+  padding: 16px;
+}
+
+/* FRAGILE warehouse corner stamps */
+.fragile-stamp {
+  position: absolute;
+  border: 2px solid #C0392B;
+  color: #C0392B;
+  background: transparent;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  padding: 4px 10px;
+  pointer-events: none;
+}
+.fragile-stamp-tr {
+  top: -8px;
+  right: 16px;
+  transform: rotate(8deg);
+  opacity: 0.85;
+}
+.fragile-stamp-bl {
+  bottom: -6px;
+  left: 20px;
+  transform: rotate(-6deg);
+  opacity: 0.75;
+}
+
+/* "THIS SIDE UP" footer stamp */
+.fragile-modal-sideup {
+  position: absolute;
+  bottom: -14px;
+  right: 30px;
+  border: 1px dashed #8B7355;
+  color: #8B7355;
+  background: #FAF8F5;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  padding: 2px 8px;
+  transform: rotate(-3deg);
+  pointer-events: none;
+}
+
+/* Packing-tape accent overlapping the top edge */
+.fragile-modal-tape {
+  position: absolute;
+  top: -10px;
+  left: 10%;
+  width: 80%;
+  height: 22px;
+  background: repeating-linear-gradient(90deg, #D4A843 0px, #D4A843 10px, #C49430 10px, #C49430 20px);
+  opacity: 0.7;
+  transform: rotate(0.5deg);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Mobile: shorter hazard bar, smaller stamps, tighter padding */
+@media (max-width: 640px) {
+  .fragile-modal-hazard { height: 28px; }
+  .fragile-stamp { font-size: 9px; }
+  .fragile-modal-body { padding: 16px; }
+}
+
+/* ═══ TapeDispenserSpinner — packing-tape roll loading spinner.
+   Pure CSS animations driven by --spin-size / --spin-speed custom props
+   (set from props in TSX). Stops under prefers-reduced-motion. No JS logic. */
+.tape-spinner-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.tape-spinner {
+  position: relative;
+  box-sizing: border-box;
+  width: var(--spin-size, 48px);
+  height: var(--spin-size, 48px);
+  border-style: solid;
+  border-color: #D4C4A8;
+  border-top-color: #D4A843;
+  border-radius: 50%;
+  animation: tape-roll-spin var(--spin-speed, 1s) linear infinite;
+}
+
+/* Tape strip pulling out of the roll and snapping back */
+.tape-spinner-strip {
+  position: absolute;
+  top: 2px;
+  right: 6px;
+  width: 4px;
+  height: 8px;
+  background: repeating-linear-gradient(180deg, #D4A843 0px, #D4A843 3px, #C49430 3px, #C49430 6px);
+  border-radius: 1px;
+  opacity: 0.9;
+  transform-origin: bottom center;
+  pointer-events: none;
+  animation: tape-strip-pull calc(var(--spin-speed, 1s) * 1.2) ease-in-out infinite;
+}
+
+/* Cardboard-core axle dot */
+.tape-spinner-axle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  background: #A08060;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+@keyframes tape-roll-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes tape-strip-pull {
+  0% { height: 8px; transform: rotate(0deg); }
+  50% { height: 24px; transform: rotate(5deg); }
+  100% { height: 8px; transform: rotate(0deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tape-spinner,
+  .tape-spinner-strip { animation: none; }
+}
+
+/* Optional label below the spinner */
+.tape-spinner-label {
+  margin-top: 12px;
+  text-align: center;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #8B7355;
+}
