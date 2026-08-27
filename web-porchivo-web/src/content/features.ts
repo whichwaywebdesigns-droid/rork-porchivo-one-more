@@ -64,13 +64,13 @@ export const FEATURES: Feature[] = [
   {
     id: "guardian-network",
     name: "Porch Partner Network",
-    tagline: "Residents authorize trusted neighbors to retrieve and hold parcels.",
+    tagline: "Join the Porch Partner network — safer deliveries, extra income, and community reputation.",
     description:
-      "Porch Partners are trusted neighbors who accept delivery assignments through the app. Every handoff is tracked with full chain-of-custody, so residents know exactly where their package is.",
+      "Porch Partners are trusted neighbors who accept delivery assignments through the app. Joining the network brings safer deliveries, income for every hold, and a reputation built on reliability — and every handoff is tracked with full chain-of-custody, so residents know exactly where their package is.",
     aiSummary:
-      "Porch Partner network lets residents authorize trusted neighbors to retrieve and hold parcels. Each handoff is tracked in the app with full chain-of-custody.",
+      "The Porch Partner network offers safer deliveries, income per hold, and community reputation. Each handoff is tracked in the app with full chain-of-custody.",
     facts: [
-      "Trusted Porch Partners per resident",
+      "Earn income and build reputation as a Porch Partner",
       "In-app handoffs with full chain-of-custody",
       "Porch Partners are identity-verified",
       "Reduces porch exposure time",

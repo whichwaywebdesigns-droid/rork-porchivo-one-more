@@ -27,7 +27,7 @@ export const USE_CASES: UseCase[] = [
     challenge:
       "Package theft and delivery disputes create constant work for management: 'where's my package?' calls, mailroom congestion, and dissatisfied residents. Individual homeowner subscriptions create inconsistent coverage, and hardware solutions are expensive and slow to deploy.",
     solution:
-      "Porchivo covers the entire community under one B2B subscription. Residents join free with an invite code, authorize trusted Porch Partners, and get real-time risk scores and alerts. Managers get a dashboard view of risk zones, theft hotspots, and delivery congestion — with no hardware or IT project required.",
+      "Porchivo covers the entire community under one B2B subscription. Residents join free with an invite code, get real-time risk scores and alerts, and can join the Porch Partner network for safer deliveries, extra income, and community reputation. Managers get a dashboard view of risk zones, theft hotspots, and delivery congestion — with no hardware or IT project required.",
     keyFeatures: [
       "Community-wide coverage under one subscription",
       "Residents join free with an invite code",
@@ -48,11 +48,11 @@ export const USE_CASES: UseCase[] = [
     challenge:
       "You're at work, traveling, or home late. A package is about to sit on your porch during high-risk hours. You need to know the risk and have a trusted neighbor ready to take custody before a theft happens.",
     solution:
-      "Porchivo scores every incoming package in real time and sends an instant alert when risk crosses your community's threshold. You can authorize trusted Porch Partners who receive the same alert and can retrieve the package with full chain-of-custody tracking.",
+      "Porchivo scores every incoming package in real time and sends an instant alert when risk crosses your community's threshold. Trusted Porch Partners from your network receive the same alert and can retrieve the package with full chain-of-custody tracking — every member joins for the safety, income, and reputation the network provides.",
     keyFeatures: [
       "Real-time package risk score per delivery",
       "Instant alerts when risk thresholds are crossed",
-      "Trusted Porch Partners per resident",
+      "Porch Partner network benefits: safety, income, and reputation",
       "Full chain-of-custody for every handoff",
       "Live tracking across 1,400+ carriers",
     ],
@@ -68,7 +68,7 @@ export const USE_CASES: UseCase[] = [
     challenge:
       "Informal arrangements for holding neighbors' packages have no accountability, no verification, and no clear chain of custody. Residents are hesitant to hand off a package to someone without a structured system.",
     solution:
-      "Porchivo lets residents authorize Porch Partners who can accept handoff requests. Every pickup, hold, and handoff is tracked in the app with full chain-of-custody. Porch Partners are identity-verified so residents know their packages are in trusted hands.",
+      "Joining the Porch Partner network comes with real benefits: safer streets, income for every completed hold, and a reputation for reliability. Accept handoff requests from neighbors — every pickup, hold, and handoff is tracked in the app with full chain-of-custody, and identity verification shows residents their packages are in trusted hands.",
     keyFeatures: [
       "Identity-verified Porch Partner status",
       "In-app handoff requests from residents",

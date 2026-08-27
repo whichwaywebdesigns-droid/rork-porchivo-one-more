@@ -189,7 +189,7 @@ export default function IndexPage() {
               </div>
               <p className="text-sm font-semibold text-brand-orange mb-1">Residents join free</p>
               <p className="text-brand-text-secondary text-sm leading-relaxed">
-                Residents download the app and join with your invite code. They authorize trusted Porch Partners from their neighborhood.
+                Residents download the app and join with your invite code — and can join the Porch Partner network for safer deliveries, extra income, and neighborhood reputation.
               </p>
             </div>
             <div className="relative overflow-hidden bg-brand-navy-900/60 border border-brand-navy-500/40 rounded-2xl p-6">
