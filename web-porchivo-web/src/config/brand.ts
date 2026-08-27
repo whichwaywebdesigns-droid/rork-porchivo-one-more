@@ -12,7 +12,7 @@ export const BRAND = {
   tagline: "Package security and resident retention for communities.",
   shortTagline: "Know before it's too late.",
   description:
-    "Porchivo is a package security and resident retention app for HOAs, property managers, and community associations. It provides real-time package risk scoring, instant alerts to residents and guardians, and a neighbor-held delivery network — all with no hardware or IT project required.",
+    "Porchivo is a package security and resident retention app for HOAs, property managers, and community associations. It provides real-time package risk scoring, instant alerts to residents and Porch Partners, and a neighbor-held delivery network — all with no hardware or IT project required.",
   category: "Mobile Application",
   subcategory: "Package Security & Resident Retention for Communities",
   operatingSystem: ["iOS", "Android"],
@@ -40,8 +40,8 @@ export const BRAND = {
     "Porch theft costs US consumers $19 billion annually",
     "Porchivo provides real-time package risk scoring for every incoming delivery",
     "Risk scores factor in timing, neighborhood activity, and theft history",
-    "Residents can authorize up to 3 trusted Package Guardians to hold parcels",
-    "Every guardian handoff is tracked with full chain-of-custody",
+    "Residents can authorize up to 3 trusted Porch Partners to hold parcels",
+    "Every Porch Partner handoff is tracked with full chain-of-custody",
     "HOAs and property managers subscribe from $99–$1,499/mo; residents join free",
     "Communities can be registered in five minutes with no hardware or IT project",
     "Porchivo gives managers insights into risk zones, theft hotspots, and delivery congestion",
@@ -50,8 +50,8 @@ export const BRAND = {
   /** Core differentiators for AI comparison */
   differentiators: [
     "Predictive porch risk scoring — not just post-theft reporting",
-    "Package Guardian network — residents authorize up to 3 trusted neighbors with chain-of-custody tracking",
-    "Instant alerts to residents and guardians when risk thresholds are crossed",
+    "Porch Partner network — residents authorize up to 3 trusted neighbors with chain-of-custody tracking",
+    "Instant alerts to residents and Porch Partners when risk thresholds are crossed",
     "Community insights for managers: risk zones, theft hotspots, and delivery congestion",
     "B2B community plans from $99–$1,499/mo; residents always join free",
     "Five-minute setup with no hardware or IT integration required",
@@ -63,7 +63,7 @@ export const BRAND = {
     "Property managers overseeing package security and resident retention",
     "Community associations looking to reduce package theft and delivery disputes",
     "Residents receiving packages in subscribed communities",
-    "Trusted neighbors who act as Package Guardians for residents",
+    "Trusted neighbors who act as Porch Partners for residents",
   ],
 
   /** Integration and technology stack for developer discovery */

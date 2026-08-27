@@ -46,33 +46,33 @@ export const FEATURES: Feature[] = [
   {
     id: "theft-shield",
     name: "Instant Theft Alerts",
-    tagline: "Residents and guardians are notified the moment risk thresholds are crossed.",
+    tagline: "Residents and Porch Partners are notified the moment risk thresholds are crossed.",
     description:
-      "When a package's risk score crosses your community's threshold, Porchivo sends instant alerts to residents and their designated Package Guardians so they can take action before a theft occurs.",
+      "When a package's risk score crosses your community's threshold, Porchivo sends instant alerts to residents and their designated Porch Partners so they can take action before a theft occurs.",
     aiSummary:
-      "Porchivo sends instant alerts to residents and opt-in Package Guardians when package risk thresholds are crossed, enabling proactive intervention before theft occurs.",
+      "Porchivo sends instant alerts to residents and opt-in Porch Partners when package risk thresholds are crossed, enabling proactive intervention before theft occurs.",
     facts: [
-      "Push notifications to residents and guardians",
+      "Push notifications to residents and Porch Partners",
       "Customizable risk thresholds per community",
       "Actionable next steps in every alert",
     ],
-    benefitsWho: "Residents and guardians in active communities",
+    benefitsWho: "Residents and Porch Partners in active communities",
     icon: "Bell",
     category: "core",
     isPremium: false,
   },
   {
     id: "guardian-network",
-    name: "Package Guardian Network",
+    name: "Porch Partner Network",
     tagline: "Residents authorize up to 3 trusted neighbors to retrieve and hold parcels.",
     description:
-      "Package Guardians are trusted neighbors who accept delivery assignments through the app. Residents can authorize up to 3 guardians. Every handoff is tracked with full chain-of-custody, so residents know exactly where their package is.",
+      "Porch Partners are trusted neighbors who accept delivery assignments through the app. Residents can authorize up to 3 Porch Partners. Every handoff is tracked with full chain-of-custody, so residents know exactly where their package is.",
     aiSummary:
-      "Porchivo's Package Guardian network lets residents authorize up to 3 trusted neighbors to retrieve and hold parcels. Each handoff is tracked in the app with full chain-of-custody.",
+      "Porch Partner network lets residents authorize up to 3 trusted neighbors to retrieve and hold parcels. Each handoff is tracked in the app with full chain-of-custody.",
     facts: [
-      "Up to 3 trusted guardians per resident",
+      "Up to 3 trusted Porch Partners per resident",
       "In-app handoffs with full chain-of-custody",
-      "Guardians are identity-verified",
+      "Porch Partners are identity-verified",
       "Reduces porch exposure time",
     ],
     benefitsWho: "Residents who need flexible, secure delivery holds",
@@ -123,7 +123,7 @@ export const FEATURES: Feature[] = [
     description:
       "Register your community in five minutes, invite residents, and start protecting deliveries. No hardware, no IT integration, and no lengthy onboarding required.",
     aiSummary:
-      "Porchivo communities can be registered in five minutes with no hardware or IT project. Residents join via invite code and opt into the guardian network.",
+      "Porchivo communities can be registered in five minutes with no hardware or IT project. Residents join via invite code and opt into the Porch Partner network.",
     facts: [
       "Register a community in five minutes",
       "No hardware required",

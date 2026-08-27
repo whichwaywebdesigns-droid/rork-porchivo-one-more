@@ -23,9 +23,9 @@ export const SAMPLE_EMAILS: SampleEmail[] = [
     template: {
       heading: "Welcome to Porchivo",
       bodyHtml:
-        "<p>You're all set. Porchivo will now watch every incoming package and calculate a real-time risk score so you know when to pay attention.</p><p><strong>Here's what to do next:</strong></p><ul><li>Add your first tracking number</li><li>Enable push notifications for theft alerts</li><li>Authorize up to 3 trusted neighbors as Package Guardians</li></ul>",
+        "<p>You're all set. Porchivo will now watch every incoming package and calculate a real-time risk score so you know when to pay attention.</p><p><strong>Here's what to do next:</strong></p><ul><li>Add your first tracking number</li><li>Enable push notifications for theft alerts</li><li>Authorize up to 3 trusted neighbors as Porch Partners</li></ul>",
       bodyText:
-        "You're all set. Porchivo will now watch every incoming package and calculate a real-time risk score so you know when to pay attention.\n\nHere's what to do next:\n- Add your first tracking number\n- Enable push notifications for theft alerts\n- Authorize up to 3 trusted neighbors as Package Guardians",
+        "You're all set. Porchivo will now watch every incoming package and calculate a real-time risk score so you know when to pay attention.\n\nHere's what to do next:\n- Add your first tracking number\n- Enable push notifications for theft alerts\n- Authorize up to 3 trusted neighbors as Porch Partners",
       cta: { label: "Open Porchivo", url: "https://porchivo.com/download" },
     },
   },
@@ -40,35 +40,35 @@ export const SAMPLE_EMAILS: SampleEmail[] = [
         "<p>A package from <strong>FedEx</strong> (tracking 7712 3456 8901) was just marked as <strong>delivered</strong>, but your porch risk score is <strong style=\"color:#E8622A;\">82 / 100 — High</strong>.</p><p>Factors contributing to this score:</p><ul><li>3 package thefts reported nearby in the last 30 days</li><li>Delivery occurred during peak porch-theft hours (1–4 PM)</li><li>No Porch Partner currently assigned</li></ul><p>We recommend asking a neighbor to hold this package until you're home.</p>",
       bodyText:
         "A package from FedEx (tracking 7712 3456 8901) was just marked as delivered, but your porch risk score is 82 / 100 — High.\n\nFactors:\n- 3 package thefts reported nearby in the last 30 days\n- Delivery during peak theft hours (1–4 PM)\n- No Porch Partner currently assigned\n\nWe recommend asking a neighbor to hold this package until you're home.",
-      cta: { label: "Request a Guardian Handoff", url: "https://porchivo.com" },
+      cta: { label: "Request a Porch Partner Handoff", url: "https://porchivo.com" },
     },
   },
   {
     id: "guardian-request",
-    label: "Guardian Request",
+    label: "Porch Partner Request",
     description: "Neighbor requesting to hold a package",
     subject: "Sarah wants to hold your package",
     template: {
       heading: "Sarah wants to hold your package",
       bodyHtml:
-        "<p>Your Package Guardian <strong>Sarah K.</strong> (verified, 0.4 mi away) has offered to hold your FedEx delivery until you're home.</p><p>This is a free, neighbor-to-neighbor hold within your community. The package will be available for pickup at Sarah's secure location, and every handoff is tracked with full chain-of-custody.</p><p>You'll get directions once you accept.</p>",
+        "<p>Your Porch Partner <strong>Sarah K.</strong> (verified, 0.4 mi away) has offered to hold your FedEx delivery until you're home.</p><p>This is a free, neighbor-to-neighbor hold within your community. The package will be available for pickup at Sarah's secure location, and every handoff is tracked with full chain-of-custody.</p><p>You'll get directions once you accept.</p>",
       bodyText:
-        "Your Package Guardian Sarah K. (verified, 0.4 mi away) has offered to hold your FedEx delivery until you're home.\n\nThis is a free, neighbor-to-neighbor hold within your community. The package will be available for pickup at Sarah's secure location, and every handoff is tracked with full chain-of-custody.\n\nYou'll get directions once you accept.",
+        "Your Porch Partner Sarah K. (verified, 0.4 mi away) has offered to hold your FedEx delivery until you're home.\n\nThis is a free, neighbor-to-neighbor hold within your community. The package will be available for pickup at Sarah's secure location, and every handoff is tracked with full chain-of-custody.\n\nYou'll get directions once you accept.",
       cta: { label: "Accept Handoff", url: "https://porchivo.com" },
     },
   },
   {
     id: "verification",
     label: "ID Verification",
-    description: "Guardian identity verification result",
+    description: "Porch Partner identity verification result",
     subject: "Your identity verification is complete",
     template: {
       heading: "Your identity verification is complete",
       bodyHtml:
-        "<p>Great news — your identity verification as a <strong>Porchivo Package Guardian</strong> has been approved.</p><p>You can now accept package handoff requests from neighbors in your subscribed community. Every handoff is tracked in the app with full chain-of-custody.</p><p>Remember: always verify the recipient's identity before handing off a package, and never share your verification code with anyone.</p>",
+        "<p>Great news — your identity verification as a <strong>Porchivo Porch Partner</strong> has been approved.</p><p>You can now accept package handoff requests from neighbors in your subscribed community. Every handoff is tracked in the app with full chain-of-custody.</p><p>Remember: always verify the recipient's identity before handing off a package, and never share your verification code with anyone.</p>",
       bodyText:
-        "Great news — your identity verification as a Porchivo Package Guardian has been approved.\n\nYou can now accept package handoff requests from neighbors in your subscribed community. Every handoff is tracked in the app with full chain-of-custody.\n\nRemember: always verify the recipient's identity before handing off a package, and never share your verification code with anyone.",
-      cta: { label: "View Guardian Dashboard", url: "https://porchivo.com" },
+        "Great news — your identity verification as a Porchivo Porch Partner has been approved.\n\nYou can now accept package handoff requests from neighbors in your subscribed community. Every handoff is tracked in the app with full chain-of-custody.\n\nRemember: always verify the recipient's identity before handing off a package, and never share your verification code with anyone.",
+      cta: { label: "View Porch Partner Dashboard", url: "https://porchivo.com" },
     },
   },
   {
@@ -93,9 +93,9 @@ export const SAMPLE_EMAILS: SampleEmail[] = [
     template: {
       heading: "You've been invited to Maple Court HOA",
       bodyHtml:
-        "<p>Your HOA manager has invited you to join <strong>Maple Court HOA</strong> on Porchivo.</p><p>As a resident, you'll get:</p><ul><li>Full package tracking — no extra cost</li><li>Real-time risk scoring for every incoming delivery</li><li>Instant theft alerts and guardian notifications</li><li>Access to the community Package Guardian network</li></ul><p>This invite is covered by your HOA's Porchivo Enterprise plan. You can authorize up to 3 trusted neighbors as Package Guardians.</p>",
+        "<p>Your HOA manager has invited you to join <strong>Maple Court HOA</strong> on Porchivo.</p><p>As a resident, you'll get:</p><ul><li>Full package tracking — no extra cost</li><li>Real-time risk scoring for every incoming delivery</li><li>Instant theft alerts and Porch Partner notifications</li><li>Access to the community Porch Partner network</li></ul><p>This invite is covered by your HOA's Porchivo Enterprise plan. You can authorize up to 3 trusted neighbors as Porch Partners.</p>",
       bodyText:
-        "Your HOA manager has invited you to join Maple Court HOA on Porchivo.\n\nAs a resident, you'll get:\n- Full package tracking — no extra cost\n- Real-time risk scoring for every incoming delivery\n- Instant theft alerts and guardian notifications\n- Access to the community Package Guardian network\n\nThis invite is covered by your HOA's Porchivo Enterprise plan. You can authorize up to 3 trusted neighbors as Package Guardians.",
+        "Your HOA manager has invited you to join Maple Court HOA on Porchivo.\n\nAs a resident, you'll get:\n- Full package tracking — no extra cost\n- Real-time risk scoring for every incoming delivery\n- Instant theft alerts and Porch Partner notifications\n- Access to the community Porch Partner network\n\nThis invite is covered by your HOA's Porchivo Enterprise plan. You can authorize up to 3 trusted neighbors as Porch Partners.",
       cta: { label: "Join Maple Court", url: "https://porchivo.com" },
     },
   },

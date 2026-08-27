@@ -105,7 +105,7 @@ export default function IndexPage() {
             Package security and resident retention for HOAs, property managers, and community associations
           </h1>
           <p className="text-lg sm:text-xl font-medium text-brand-text-secondary max-w-2xl mx-auto mb-6">
-            Real-time package risk scoring, instant alerts to residents and guardians, and a neighbor-held delivery network — with no hardware or IT project required.
+            Real-time package risk scoring, instant alerts to residents and Porch Partners, and a neighbor-held delivery network — with no hardware or IT project required.
           </p>
           <p className="text-xl text-brand-text-secondary leading-relaxed max-w-3xl mx-auto mb-6">
             {BRAND.description}
@@ -177,7 +177,7 @@ export default function IndexPage() {
               </div>
               <p className="text-sm font-semibold text-brand-orange mb-1">Residents join free</p>
               <p className="text-brand-text-secondary text-sm leading-relaxed">
-                Residents download the app and join with your invite code. They authorize up to 3 trusted Package Guardians from their neighborhood.
+                Residents download the app and join with your invite code. They authorize up to 3 trusted Porch Partners from their neighborhood.
               </p>
             </div>
             <div className="bg-brand-navy-900/60 border border-brand-navy-500/40 rounded-2xl p-6">
@@ -195,7 +195,7 @@ export default function IndexPage() {
               </div>
               <p className="text-sm font-semibold text-brand-orange mb-1">Alerts trigger action</p>
               <p className="text-brand-text-secondary text-sm leading-relaxed">
-                Residents and guardians are notified instantly when risk thresholds are crossed, with a full chain-of-custody for every handoff.
+                Residents and Porch Partners are notified instantly when risk thresholds are crossed, with a full chain-of-custody for every handoff.
               </p>
             </div>
           </div>
@@ -208,7 +208,7 @@ export default function IndexPage() {
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-12">
             <div>
               <h2 className="text-3xl font-bold text-brand-text-primary mb-3">Everything your community needs to protect deliveries and retain residents</h2>
-              <p className="text-brand-text-secondary text-lg">Real-time scoring, alerts, guardian handoffs, and manager insights — all in one app.</p>
+              <p className="text-brand-text-secondary text-lg">Real-time scoring, alerts, Porch Partner handoffs, and manager insights — all in one app.</p>
             </div>
             <Link
               to="/features"

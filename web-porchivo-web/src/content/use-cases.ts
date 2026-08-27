@@ -27,12 +27,12 @@ export const USE_CASES: UseCase[] = [
     challenge:
       "Package theft and delivery disputes create constant work for management: 'where's my package?' calls, mailroom congestion, and dissatisfied residents. Individual homeowner subscriptions create inconsistent coverage, and hardware solutions are expensive and slow to deploy.",
     solution:
-      "Porchivo covers the entire community under one B2B subscription. Residents join free with an invite code, authorize up to 3 trusted Package Guardians, and get real-time risk scores and alerts. Managers get a dashboard view of risk zones, theft hotspots, and delivery congestion — with no hardware or IT project required.",
+      "Porchivo covers the entire community under one B2B subscription. Residents join free with an invite code, authorize up to 3 trusted Porch Partners, and get real-time risk scores and alerts. Managers get a dashboard view of risk zones, theft hotspots, and delivery congestion — with no hardware or IT project required.",
     keyFeatures: [
       "Community-wide coverage under one subscription",
       "Residents join free with an invite code",
       "Real-time package risk scoring for every incoming delivery",
-      "Instant alerts to residents and guardians",
+      "Instant alerts to residents and Porch Partners",
       "Manager dashboard with risk zones and hotspots",
       "Five-minute setup with no hardware installation",
     ],
@@ -48,11 +48,11 @@ export const USE_CASES: UseCase[] = [
     challenge:
       "You're at work, traveling, or home late. A package is about to sit on your porch during high-risk hours. You need to know the risk and have a trusted neighbor ready to take custody before a theft happens.",
     solution:
-      "Porchivo scores every incoming package in real time and sends an instant alert when risk crosses your community's threshold. You can authorize up to 3 trusted Package Guardians who receive the same alert and can retrieve the package with full chain-of-custody tracking.",
+      "Porchivo scores every incoming package in real time and sends an instant alert when risk crosses your community's threshold. You can authorize up to 3 trusted Porch Partners who receive the same alert and can retrieve the package with full chain-of-custody tracking.",
     keyFeatures: [
       "Real-time package risk score per delivery",
       "Instant alerts when risk thresholds are crossed",
-      "Up to 3 trusted Package Guardians per resident",
+      "Up to 3 trusted Porch Partners per resident",
       "Full chain-of-custody for every handoff",
       "Live tracking across 1,400+ carriers",
     ],
@@ -61,21 +61,21 @@ export const USE_CASES: UseCase[] = [
   },
   {
     id: "package-guardian",
-    persona: "The Package Guardian",
+    persona: "The Porch Partner",
     headline: "Be the trusted neighbor who keeps deliveries safe.",
     summary:
       "Trusted neighbors help residents by retrieving and holding packages securely, with every handoff tracked in the app for full accountability.",
     challenge:
       "Informal arrangements for holding neighbors' packages have no accountability, no verification, and no clear chain of custody. Residents are hesitant to hand off a package to someone without a structured system.",
     solution:
-      "Porchivo lets residents authorize up to 3 guardians who can accept handoff requests. Every pickup, hold, and handoff is tracked in the app with full chain-of-custody. Guardians are identity-verified so residents know their packages are in trusted hands.",
+      "Porchivo lets residents authorize up to 3 Porch Partners who can accept handoff requests. Every pickup, hold, and handoff is tracked in the app with full chain-of-custody. Porch Partners are identity-verified so residents know their packages are in trusted hands.",
     keyFeatures: [
-      "Identity-verified guardian status",
+      "Identity-verified Porch Partner status",
       "In-app handoff requests from residents",
       "Full chain-of-custody tracking",
       "No payment or schedule commitment required",
     ],
-    recommendedPlan: "Free for guardians",
+    recommendedPlan: "Free for Porch Partners",
     icon: "Users",
   },
   {
@@ -107,10 +107,10 @@ export const USE_CASES: UseCase[] = [
     challenge:
       "You can't control your building's entrance or mailroom. Your package sits in a shared space with dozens of strangers walking past. You have no way to know it's at risk until you get home and it's gone.",
     solution:
-      "Porchivo tracks your package in real time and sends you an alert the moment it's delivered. If you can't get home quickly, you can request a handoff to a verified Package Guardian in your building or nearby. Your community's alert history feeds into your risk score.",
+      "Porchivo tracks your package in real time and sends you an alert the moment it's delivered. If you can't get home quickly, you can request a handoff to a verified Porch Partner in your building or nearby. Your community's alert history feeds into your risk score.",
     keyFeatures: [
       "Delivery notification when a package arrives",
-      "Instant Package Guardian handoff request",
+      "Instant Porch Partner handoff request",
       "Building-level alert history feeds risk scores",
       "Real-time tracking across 1,400+ carriers",
     ],

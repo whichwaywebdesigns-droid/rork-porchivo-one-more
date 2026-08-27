@@ -1,7 +1,7 @@
 {
   "name": "Porchivo",
   "short_name": "Porchivo",
-  "description": "Package security and resident retention for HOAs, property managers, and community associations. Real-time risk scoring, instant alerts, and a trusted neighbor guardian network — no hardware or IT project required.",
+  "description": "Package security and resident retention for HOAs, property managers, and community associations. Real-time risk scoring, instant alerts, and a trusted Porch Partner network — no hardware or IT project required.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#F5F7FA",

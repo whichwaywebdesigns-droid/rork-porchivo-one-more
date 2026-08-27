@@ -26,7 +26,7 @@ export const FAQS: FAQ[] = [
     id: "what-is-high-risk",
     question: "What does a High Risk score mean for my package?",
     answer:
-      "A high score means your package has multiple risk factors stacking simultaneously — for example, late afternoon delivery timing combined with recent theft alerts on your block. A high score triggers an instant alert to you and your designated Package Guardians so you can take action: add drop instructions, arrange to be home, or have a guardian retrieve the package. The score is predictive, not a guarantee of theft.",
+      "A high score means your package has multiple risk factors stacking simultaneously — for example, late afternoon delivery timing combined with recent theft alerts on your block. A high score triggers an instant alert to you and your designated Porch Partners so you can take action: add drop instructions, arrange to be home, or have a Porch Partner retrieve the package. The score is predictive, not a guarantee of theft.",
     category: "risk-score",
   },
   {
@@ -137,9 +137,9 @@ export const FAQS: FAQ[] = [
   },
   {
     id: "what-are-package-guardians",
-    question: "What are Package Guardians?",
+    question: "What are Porch Partners?",
     answer:
-      "Package Guardians are trusted neighbors whom residents authorize to retrieve and hold parcels on their behalf. Each resident can authorize up to 3 guardians. Every handoff is tracked in the app with full chain-of-custody, so residents know exactly where their package is. Guardians are identity-verified and help reduce porch exposure time and theft risk.",
+      "Porch Partners are trusted neighbors whom residents authorize to retrieve and hold parcels on their behalf. Each resident can authorize up to 3 Porch Partners. Every handoff is tracked in the app with full chain-of-custody, so residents know exactly where their package is. Porch Partners are identity-verified and help reduce porch exposure time and theft risk.",
     category: "general",
   },
   {

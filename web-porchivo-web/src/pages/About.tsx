@@ -23,7 +23,7 @@ const VALUES = [
     color: "text-blue-400",
     bg: "bg-blue-400/10",
     title: "Data that drives decisions",
-    body: "A risk number with no context is noise. Porchivo shows managers and residents exactly what's driving the score and what to do about it — from guardian handoffs to staffing adjustments.",
+    body: "A risk number with no context is noise. Porchivo shows managers and residents exactly what's driving the score and what to do about it — from Porch Partner handoffs to staffing adjustments.",
   },
   {
     icon: Heart,
@@ -89,7 +89,7 @@ export default function AboutPage() {
               The root issue is that the data to predict theft already exists — neighborhood crime patterns, delivery timing windows, block-level alert density, seasonal theft spikes — but no one had assembled it into a per-package risk signal that a community could act on in real time.
             </p>
             <p>
-              <strong className="text-brand-text-primary">That's what Porchivo is.</strong> A risk intelligence layer for your community. A real-time score for every incoming package. Instant alerts to residents and their chosen guardians. A five-minute setup with no hardware or IT project. And a manager dashboard that turns package data into safer, more retentive communities.
+              <strong className="text-brand-text-primary">That's what Porchivo is.</strong> A risk intelligence layer for your community. A real-time score for every incoming package. Instant alerts to residents and their chosen Porch Partners. A five-minute setup with no hardware or IT project. And a manager dashboard that turns package data into safer, more retentive communities.
             </p>
           </div>
         </div>
