@@ -6,6 +6,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import AppErrorBoundary from "@/components/AppErrorBoundary";
+import CorrugatedBackground from "@/components/CorrugatedBackground";
 
 import Index from "./pages/Index";
 
@@ -61,6 +62,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <CorrugatedBackground />
           <ScrollToTop />
           <Suspense fallback={<PageLoader />}>
             <Routes>

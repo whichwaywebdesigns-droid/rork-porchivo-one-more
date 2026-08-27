@@ -527,3 +527,244 @@ html.scrolling::-webkit-scrollbar-thumb:hover {
   .ship-label-header-title { font-size: 9px; }
   .ship-label-barcode-strip { height: 32px; }
 }
+
+/* ═══ CorrugatedBackground — full-page fluted-cardboard desk layer.
+   Fixed, pinned behind every sibling (z-index:-1), pointer-events:none.
+   No animations, no shadows, no blur — pure gradients only. Engines without
+   gradient support fall back to the flat desk color declared first. */
+.corrugated-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  /* Flat fallback surface */
+  background-color: #D4C4A8;
+  /* Worn-corner shading → vertical flute ridges → faint horizontal pressing */
+  background-image:
+    radial-gradient(120px circle at 0% 0%, rgba(160, 128, 96, 0.15), transparent),
+    radial-gradient(120px circle at 100% 0%, rgba(160, 128, 96, 0.15), transparent),
+    radial-gradient(120px circle at 0% 100%, rgba(160, 128, 96, 0.15), transparent),
+    radial-gradient(120px circle at 100% 100%, rgba(160, 128, 96, 0.15), transparent),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 3px,
+      rgba(160, 128, 96, 0.06) 3px,
+      rgba(160, 128, 96, 0.06) 6px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 8px,
+      rgba(140, 110, 80, 0.04) 8px,
+      rgba(140, 110, 80, 0.04) 9px
+    );
+}
+/* Mobile: less desk visible around paper sheets → slightly stronger ridges */
+@media (max-width: 640px) {
+  .corrugated-bg {
+    background-image:
+      radial-gradient(120px circle at 0% 0%, rgba(160, 128, 96, 0.15), transparent),
+      radial-gradient(120px circle at 100% 0%, rgba(160, 128, 96, 0.15), transparent),
+      radial-gradient(120px circle at 0% 100%, rgba(160, 128, 96, 0.15), transparent),
+      radial-gradient(120px circle at 100% 100%, rgba(160, 128, 96, 0.15), transparent),
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 3px,
+        rgba(160, 128, 96, 0.12) 3px,
+        rgba(160, 128, 96, 0.12) 6px
+      ),
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 8px,
+        rgba(140, 110, 80, 0.08) 8px,
+        rgba(140, 110, 80, 0.08) 9px
+      );
+  }
+}
+
+/* ═══ PackingListTable — printed packing-list / receipt frame.
+   Every decorative layer (serration, tape, stamp, barcode) is
+   pointer-events:none so interactive children are never blocked. */
+.pack-list {
+  position: relative;
+  background: #FAF8F5;
+  border: 1px solid #D4C4A8;
+  border-radius: 1px;
+  box-shadow: 0 1px 3px rgba(92, 61, 30, 0.1);
+}
+
+/* Torn/perforated edges — top & bottom sawtooth strips. Cardboard (#D4C4A8)
+   fills the teeth gaps against the warm-white paper. */
+.pack-list::before,
+.pack-list::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 4px;
+  z-index: 1;
+  pointer-events: none;
+}
+.pack-list::before {
+  top: 0;
+  background:
+    linear-gradient(135deg, #D4C4A8 3px, transparent 3px) 0 0 / 6px 6px repeat-x,
+    linear-gradient(-135deg, #D4C4A8 3px, transparent 3px) 0 0 / 6px 6px repeat-x;
+}
+.pack-list::after {
+  bottom: 0;
+  background:
+    linear-gradient(45deg, #D4C4A8 3px, transparent 3px) 0 100% / 6px 6px repeat-x,
+    linear-gradient(-45deg, #D4C4A8 3px, transparent 3px) 0 100% / 6px 6px repeat-x;
+}
+
+/* Receipt masthead */
+.pack-list-head {
+  padding: 16px;
+  text-align: center;
+  border-bottom: 1px solid #D4C4A8;
+}
+.pack-list-company {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #3D2B1F;
+}
+.pack-list-address {
+  margin-top: 2px;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 10px;
+  color: #8B7355;
+}
+.pack-list-meta {
+  margin-top: 6px;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: #6B5344;
+}
+
+/* Typewriter table */
+.pack-list-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #3D2B1F;
+}
+.pack-list-table th,
+.pack-list-table td {
+  padding: 10px 12px;
+}
+.pack-list-table th {
+  background: #F5F0E8;
+  border-bottom: 2px solid #A08060;
+  text-align: left;
+  text-transform: uppercase;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #6B5344;
+}
+.pack-list-table td {
+  border-bottom: 1px dashed #E8E0D4;
+}
+/* Subtle zebra striping */
+.pack-list-table tbody tr:nth-child(even) {
+  background: #FFFFFF;
+}
+.pack-list-table tbody tr:last-child td {
+  border-bottom: none;
+}
+/* Totals / summary rows keep double-line feel when passed via tfoot */
+.pack-list-table tfoot td {
+  border-top: 2px solid #3D2B1F;
+  background: #F5F0E8;
+  font-weight: 700;
+  padding-top: 12px;
+}
+
+/* Receipt footer block */
+.pack-list-foot {
+  padding: 12px 16px;
+  text-align: center;
+  border-top: 1px solid #D4C4A8;
+}
+.pack-list-thanks {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 11px;
+  font-style: italic;
+  color: #8B7355;
+}
+.pack-list-barcode {
+  display: block;
+  height: 14px;
+  max-width: 220px;
+  margin: 8px auto 6px;
+  opacity: 0.85;
+  background: repeating-linear-gradient(
+    90deg,
+    #000000 0px,
+    #000000 2px,
+    transparent 2px,
+    transparent 4px,
+    #000000 4px,
+    #000000 5px,
+    transparent 5px,
+    transparent 8px
+  );
+  pointer-events: none;
+}
+.pack-list-contact {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: #A08060;
+}
+
+/* Green PAID rubber-stamp overlay */
+.pack-list-stamp {
+  position: absolute;
+  bottom: 40px;
+  right: 20px;
+  border: 2px solid #27AE60;
+  color: #27AE60;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  padding: 4px 12px;
+  transform: rotate(-8deg);
+  opacity: 0.8;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Small packing-tape accent across the top-left corner */
+.pack-list-tape {
+  position: absolute;
+  top: -6px;
+  left: 20px;
+  width: 80px;
+  height: 18px;
+  background: repeating-linear-gradient(90deg, #D4A843 0px, #D4A843 8px, #C49430 8px, #C49430 16px);
+  opacity: 0.75;
+  transform: rotate(-4deg);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Mobile: tighter padding/type, drop the address line */
+@media (max-width: 640px) {
+  .pack-list-table { font-size: 11px; }
+  .pack-list-table th,
+  .pack-list-table td { padding: 8px 10px; }
+  .pack-list-address { display: none; }
+}
