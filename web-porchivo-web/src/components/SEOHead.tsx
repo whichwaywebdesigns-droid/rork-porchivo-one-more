@@ -12,6 +12,7 @@
 import { useEffect } from "react";
 import type { SchemaObject } from "@/config/schema";
 import { serializeSchema } from "@/config/schema";
+import { SITE_KEYWORDS } from "@/config/seo";
 
 interface SEOHeadProps {
   title: string;
@@ -76,6 +77,7 @@ export function usePageSEO(props: SEOHeadProps): void {
   useEffect(() => {
     document.title = title;
     setMeta("description", description);
+    setMeta("keywords", SITE_KEYWORDS.join(", "));
     setMeta("robots", robots);
 
     // Open Graph

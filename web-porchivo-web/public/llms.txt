@@ -190,3 +190,11 @@ The porch risk score (0–100) is calculated per package from these weighted fac
 - Privacy Policy: https://porchivo.com/privacy
 - Terms of Service: https://porchivo.com/terms
 - Sitemap: https://porchivo.com/sitemap.xml
+
+---
+
+## Search Keywords (crawlable, human + AI search)
+
+Primary keyword set for Porchivo, consistent across web meta tags, JSON-LD, and store listings:
+
+package theft prevention · porch pirate protection · HOA package management · apartment package security · property manager delivery tracking · resident retention amenities · package tracking app · stolen package alerts · trusted neighbor package pickup · neighborhood safety app

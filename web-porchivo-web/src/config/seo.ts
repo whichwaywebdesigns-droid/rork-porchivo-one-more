@@ -35,6 +35,25 @@ export interface PageSEO {
 const BASE_URL = BRAND.url;
 const OG_IMAGE = BRAND.ogImageUrl;
 
+/**
+ * Sitewide search keywords — human SEO + AI/agentic extraction.
+ * Single source of truth, consumed by SEOHead (meta keywords), the static
+ * index.html tag, JSON-LD schema (schema.ts), and public/llms.txt.
+ * Keep all four in sync when updating.
+ */
+export const SITE_KEYWORDS: string[] = [
+  "package theft prevention",
+  "porch pirate protection",
+  "HOA package management",
+  "apartment package security",
+  "property manager delivery tracking",
+  "resident retention amenities",
+  "package tracking app",
+  "stolen package alerts",
+  "trusted neighbor package pickup",
+  "neighborhood safety app",
+];
+
 export const PAGE_SEO: Record<string, PageSEO> = {
   home: {
     title: "Porchivo — Package Security & Resident Retention for Communities",

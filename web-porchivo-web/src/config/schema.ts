@@ -10,6 +10,7 @@
  */
 
 import { BRAND } from "./brand";
+import { SITE_KEYWORDS } from "./seo";
 
 // ─── Base Types ───────────────────────────────────────────────────────────────
 
@@ -60,6 +61,7 @@ export function buildWebSiteSchema(): SchemaObject {
     url: BRAND.url,
     name: BRAND.name,
     description: BRAND.tagline,
+    keywords: SITE_KEYWORDS.join(", "),
     publisher: {
       "@id": `${BRAND.url}/#organization`,
     },
