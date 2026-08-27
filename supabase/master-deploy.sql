@@ -6853,7 +6853,7 @@ AS $$
 DECLARE
   v_actor_name text;
 BEGIN
-  SELECT COALESCE(display_name, 'Unknown')
+  SELECT COALESCE(NULLIF(name, ''), 'Unknown')
     INTO v_actor_name
     FROM profiles
    WHERE id = p_actor_id;
@@ -6889,7 +6889,7 @@ DECLARE
   v_action      text;
   v_member_name text;
 BEGIN
-  SELECT COALESCE(display_name, 'Unknown')
+  SELECT COALESCE(NULLIF(name, ''), 'Unknown')
     INTO v_member_name
     FROM profiles
    WHERE id = COALESCE(NEW.user_id, OLD.user_id);
