@@ -91,7 +91,7 @@ export default function ForAgentsPage() {
   ];
 
   return (
-    <PageLayout>
+    <PageLayout tape>
       <SEOHead
         title={seo.title}
         description={seo.description}

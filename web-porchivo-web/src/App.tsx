@@ -25,6 +25,18 @@ const EmailPreview = lazy(() => import("./pages/EmailPreview"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const AuthFail = lazy(() => import("./pages/AuthFail"));
 
+// Manager portal — lazy so supabase-js stays out of the marketing bundle.
+// PortalAuthProvider is a default export purely for this lazy() import.
+const PortalAuthProvider = lazy(() => import("./providers/PortalAuthProvider"));
+const ManageLayout = lazy(() => import("./components/portal/ManageLayout"));
+const ManageLoginPage = lazy(() => import("./pages/portal/ManageLogin"));
+const ManageDashboardPage = lazy(() => import("./pages/portal/ManageDashboard"));
+const ManageMembersPage = lazy(() => import("./pages/portal/ManageMembers"));
+const ManageInviteCodePage = lazy(() => import("./pages/portal/ManageInviteCode"));
+const ManageAnnouncementsPage = lazy(() => import("./pages/portal/ManageAnnouncements"));
+const ManageMaintenancePage = lazy(() => import("./pages/portal/ManageMaintenance"));
+const ManageBillingPage = lazy(() => import("./pages/portal/ManageBilling"));
+
 const queryClient = new QueryClient();
 
 function ScrollToTop() {
@@ -68,6 +80,32 @@ const App = () => (
               <Route path="/settings" element={<Settings />} />
               <Route path="/email-preview" element={<EmailPreview />} />
               <Route path="/auth-fail" element={<AuthFail />} />
+
+              {/* ── Manager portal (magic-link login, staff-role gated) ── */}
+              <Route
+                path="/manage/login"
+                element={
+                  <PortalAuthProvider>
+                    <ManageLoginPage />
+                  </PortalAuthProvider>
+                }
+              />
+              <Route
+                path="/manage"
+                element={
+                  <PortalAuthProvider>
+                    <ManageLayout />
+                  </PortalAuthProvider>
+                }
+              >
+                <Route index element={<ManageDashboardPage />} />
+                <Route path="members" element={<ManageMembersPage />} />
+                <Route path="invite-code" element={<ManageInviteCodePage />} />
+                <Route path="announcements" element={<ManageAnnouncementsPage />} />
+                <Route path="maintenance" element={<ManageMaintenancePage />} />
+                <Route path="billing" element={<ManageBillingPage />} />
+              </Route>
+
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>

@@ -29,7 +29,7 @@ export default function FAQPage() {
   ];
 
   return (
-    <PageLayout>
+    <PageLayout tape>
       <SEOHead
         title={seo.title}
         description={seo.description}

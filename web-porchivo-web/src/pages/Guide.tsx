@@ -116,7 +116,7 @@ export default function GuidePage() {
   ];
 
   return (
-    <PageLayout>
+    <PageLayout tape>
       <SEOHead
         title={seo.title}
         description={seo.description}

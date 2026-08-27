@@ -161,7 +161,7 @@ export default function PricingPage() {
   ];
 
   return (
-    <PageLayout>
+    <PageLayout peanuts tape>
       <SEOHead
         title={seo.title}
         description={seo.description}

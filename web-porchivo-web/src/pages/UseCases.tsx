@@ -32,7 +32,7 @@ export default function UseCasesPage() {
   ];
 
   return (
-    <PageLayout>
+    <PageLayout tape>
       <SEOHead
         title={seo.title}
         description={seo.description}

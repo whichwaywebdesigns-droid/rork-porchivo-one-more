@@ -49,7 +49,7 @@ export default function AboutPage() {
   ];
 
   return (
-    <PageLayout>
+    <PageLayout peanuts tape>
       <SEOHead
         title={seo.title}
         description={seo.description}

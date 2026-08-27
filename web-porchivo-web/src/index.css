@@ -335,6 +335,13 @@ html.scrolling::-webkit-scrollbar-thumb:hover {
   z-index: 1;
 }
 
+/* Label-printer selection highlight — gold tape tint on selected text.
+   Uses --ink for a readable foreground in both themes. */
+::selection {
+  background: rgba(212, 168, 67, 0.35);
+  color: var(--ink);
+}
+
 /* Shipping-label card accent: dashed border + micro label header. */
 .label-card {
   border: 1px dashed var(--label-dash);

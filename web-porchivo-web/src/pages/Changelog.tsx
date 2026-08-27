@@ -24,7 +24,7 @@ export default function ChangelogPage() {
   ];
 
   return (
-    <PageLayout>
+    <PageLayout tape>
       <SEOHead
         title={seo.title}
         description={seo.description}
