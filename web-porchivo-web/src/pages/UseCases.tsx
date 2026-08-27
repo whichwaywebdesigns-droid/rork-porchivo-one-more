@@ -46,16 +46,33 @@ export default function UseCasesPage() {
       <section className="pt-16 pb-16 px-4 sm:px-6 border-b border-brand-navy-500/40">
         <div className="max-w-5xl mx-auto">
           <BreadcrumbNav items={[{ label: "Home", href: "/" }, { label: "Use Cases", href: "/use-cases" }]} />
-          <div className="mt-8 max-w-2xl">
-            <h1 className="text-4xl sm:text-5xl font-bold text-brand-text-primary leading-tight mb-3">
-              Porchivo protects every delivery scenario
-            </h1>
-            <p className="text-lg font-medium text-brand-text-secondary mb-4">
-              From blocks to buildings — superior package and property tracking for homeowners and homeowner associations.
-            </p>
-            <p className="text-xl text-brand-text-secondary leading-relaxed">
-              From solo renters to HOA communities, Porchivo adapts to how you receive packages and who you trust.
-            </p>
+          <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12 items-center">
+            <div className="max-w-2xl">
+              <h1 className="text-4xl sm:text-5xl font-bold text-brand-text-primary leading-tight mb-3">
+                Porchivo protects every delivery scenario
+              </h1>
+              <p className="text-lg font-medium text-brand-text-secondary mb-4">
+                From blocks to buildings — superior package and property tracking for homeowners and homeowner associations.
+              </p>
+              <p className="text-xl text-brand-text-secondary leading-relaxed">
+                From solo renters to HOA communities, Porchivo adapts to how you receive packages and who you trust.
+              </p>
+            </div>
+            <div>
+              {/* Edge-faded "HOA office buried in parcels" photo — the problem, before Porchivo */}
+              <img
+                src="/images/hoa-office-overwhelm.jpg"
+                alt="An overwhelmed HOA office: a property manager buried in paperwork while the mailroom behind her overflows with unsorted packages and residents wait with boxes in hand"
+                className="w-full h-auto"
+                loading="lazy"
+                style={{
+                  WebkitMaskImage:
+                    "radial-gradient(ellipse 72% 72% at 50% 50%, black 55%, transparent 98%)",
+                  maskImage:
+                    "radial-gradient(ellipse 72% 72% at 50% 50%, black 55%, transparent 98%)",
+                }}
+              />
+            </div>
           </div>
         </div>
       </section>
