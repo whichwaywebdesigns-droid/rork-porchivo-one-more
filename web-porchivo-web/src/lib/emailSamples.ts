@@ -23,9 +23,9 @@ export const SAMPLE_EMAILS: SampleEmail[] = [
     template: {
       heading: "Welcome to Porchivo",
       bodyHtml:
-        "<p>You're all set. Porchivo will now watch every incoming package and calculate a real-time risk score so you know when to pay attention.</p><p><strong>Here's what to do next:</strong></p><ul><li>Add your first tracking number</li><li>Enable push notifications for theft alerts</li><li>Authorize up to 3 trusted neighbors as Porch Partners</li></ul>",
+        "<p>You're all set. Porchivo will now watch every incoming package and calculate a real-time risk score so you know when to pay attention.</p><p><strong>Here's what to do next:</strong></p><ul><li>Add your first tracking number</li><li>Enable push notifications for theft alerts</li><li>Authorize trusted neighbors as Porch Partners</li></ul>",
       bodyText:
-        "You're all set. Porchivo will now watch every incoming package and calculate a real-time risk score so you know when to pay attention.\n\nHere's what to do next:\n- Add your first tracking number\n- Enable push notifications for theft alerts\n- Authorize up to 3 trusted neighbors as Porch Partners",
+        "You're all set. Porchivo will now watch every incoming package and calculate a real-time risk score so you know when to pay attention.\n\nHere's what to do next:\n- Add your first tracking number\n- Enable push notifications for theft alerts\n- Authorize trusted neighbors as Porch Partners",
       cta: { label: "Open Porchivo", url: "https://porchivo.com/download" },
     },
   },
@@ -93,9 +93,9 @@ export const SAMPLE_EMAILS: SampleEmail[] = [
     template: {
       heading: "You've been invited to Maple Court HOA",
       bodyHtml:
-        "<p>Your HOA manager has invited you to join <strong>Maple Court HOA</strong> on Porchivo.</p><p>As a resident, you'll get:</p><ul><li>Full package tracking — no extra cost</li><li>Real-time risk scoring for every incoming delivery</li><li>Instant theft alerts and Porch Partner notifications</li><li>Access to the community Porch Partner network</li></ul><p>This invite is covered by your HOA's Porchivo Enterprise plan. You can authorize up to 3 trusted neighbors as Porch Partners.</p>",
+        "<p>Your HOA manager has invited you to join <strong>Maple Court HOA</strong> on Porchivo.</p><p>As a resident, you'll get:</p><ul><li>Full package tracking — no extra cost</li><li>Real-time risk scoring for every incoming delivery</li><li>Instant theft alerts and Porch Partner notifications</li><li>Access to the community Porch Partner network</li></ul><p>This invite is covered by your HOA's Porchivo Enterprise plan. You can authorize trusted neighbors as Porch Partners.</p>",
       bodyText:
-        "Your HOA manager has invited you to join Maple Court HOA on Porchivo.\n\nAs a resident, you'll get:\n- Full package tracking — no extra cost\n- Real-time risk scoring for every incoming delivery\n- Instant theft alerts and Porch Partner notifications\n- Access to the community Porch Partner network\n\nThis invite is covered by your HOA's Porchivo Enterprise plan. You can authorize up to 3 trusted neighbors as Porch Partners.",
+        "Your HOA manager has invited you to join Maple Court HOA on Porchivo.\n\nAs a resident, you'll get:\n- Full package tracking — no extra cost\n- Real-time risk scoring for every incoming delivery\n- Instant theft alerts and Porch Partner notifications\n- Access to the community Porch Partner network\n\nThis invite is covered by your HOA's Porchivo Enterprise plan. You can authorize trusted neighbors as Porch Partners.",
       cta: { label: "Join Maple Court", url: "https://porchivo.com" },
     },
   },

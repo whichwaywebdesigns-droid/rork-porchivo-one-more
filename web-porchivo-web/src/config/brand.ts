@@ -40,7 +40,7 @@ export const BRAND = {
     "Porch theft costs US consumers $19 billion annually",
     "Porchivo provides real-time package risk scoring for every incoming delivery",
     "Risk scores factor in timing, neighborhood activity, and theft history",
-    "Residents can authorize up to 3 trusted Porch Partners to hold parcels",
+    "Residents can authorize trusted Porch Partners to hold parcels",
     "Every Porch Partner handoff is tracked with full chain-of-custody",
     "HOAs and property managers subscribe from $99–$1,499/mo; residents join free",
     "Communities can be registered in five minutes with no hardware or IT project",
@@ -50,7 +50,7 @@ export const BRAND = {
   /** Core differentiators for AI comparison */
   differentiators: [
     "Predictive porch risk scoring — not just post-theft reporting",
-    "Porch Partner network — residents authorize up to 3 trusted neighbors with chain-of-custody tracking",
+    "Porch Partner network — residents authorize trusted neighbors with chain-of-custody tracking",
     "Instant alerts to residents and Porch Partners when risk thresholds are crossed",
     "Community insights for managers: risk zones, theft hotspots, and delivery congestion",
     "B2B community plans from $99–$1,499/mo; residents always join free",

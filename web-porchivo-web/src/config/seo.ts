@@ -67,12 +67,12 @@ export const PAGE_SEO: Record<string, PageSEO> = {
     twitterCard: "summary_large_image",
     robots: "index, follow",
     aiSummary:
-      "Porchivo is a package security and resident retention app for HOAs, property managers, and community associations. It provides real-time package risk scoring for every incoming package, instant alerts to residents and Porch Partners, a neighbor-held delivery network with up to 3 trusted Porch Partners per resident, and community insights for managers. Communities can be set up in five minutes with no hardware or IT project.",
+      "Porchivo is a package security and resident retention app for HOAs, property managers, and community associations. It provides real-time package risk scoring for every incoming package, instant alerts to residents and Porch Partners, a neighbor-held delivery network with trusted Porch Partners, and community insights for managers. Communities can be set up in five minutes with no hardware or IT project.",
     keyFacts: [
       "119 million packages are stolen in the US every year",
       "1 in 5 delivered packages is stolen from a porch",
       "Porchivo provides real-time risk scoring for every incoming package",
-      "Residents can authorize up to 3 trusted Porch Partners to hold parcels",
+      "Residents can authorize trusted Porch Partners to hold parcels",
       "Porchivo gives managers insights into risk zones, theft hotspots, and delivery congestion",
       "Communities can be registered in five minutes with no hardware or IT project",
       "HOAs and property managers subscribe from $99–$1,499/mo — residents always free",
@@ -93,11 +93,11 @@ export const PAGE_SEO: Record<string, PageSEO> = {
     twitterCard: "summary_large_image",
     robots: "index, follow",
     aiSummary:
-      "Porchivo features include: real-time package risk scoring for every incoming delivery, instant alerts to residents and Porch Partners, a Porch Partner network where residents authorize up to 3 trusted neighbors to hold parcels with full chain-of-custody, community insights for managers, live tracking across 1,400+ carriers, five-minute community setup with no hardware or IT project, and B2B community plans from $99–$1,499/mo.",
+      "Porchivo features include: real-time package risk scoring for every incoming delivery, instant alerts to residents and Porch Partners, a Porch Partner network where residents authorize trusted neighbors to hold parcels with full chain-of-custody, community insights for managers, live tracking across 1,400+ carriers, five-minute community setup with no hardware or IT project, and B2B community plans from $99–$1,499/mo.",
     keyFacts: [
       "Real-time risk scoring based on timing, neighborhood activity, and theft history",
       "Instant alerts to residents and Porch Partners when thresholds are crossed",
-      "Residents can authorize up to 3 trusted Porch Partners with chain-of-custody tracking",
+      "Residents can authorize trusted Porch Partners with chain-of-custody tracking",
       "Managers see risk zones, theft hotspots, and delivery congestion",
       "Communities can be set up in five minutes with no hardware or IT project",
     ],
@@ -156,18 +156,18 @@ export const PAGE_SEO: Record<string, PageSEO> = {
   porchPartners: {
     title: "Porch Partners — Trusted Neighbors Holding Packages Safely",
     description:
-      "Become a Porch Partner on Porchivo. Residents authorize up to 3 trusted neighbors to hold and hand off parcels with full chain-of-custody tracking.",
+      "Become a Porch Partner on Porchivo. Residents authorize trusted neighbors to hold and hand off parcels with full chain-of-custody tracking.",
     canonical: `${BASE_URL}/porch-partners`,
     ogTitle: "Porchivo Porch Partners — Trusted Neighbors Holding Packages",
     ogDescription:
-      "Residents choose up to 3 trusted neighbors as Porch Partners. Every handoff is tracked in the app with full chain-of-custody for secure, accountable delivery holds.",
+      "Residents choose trusted neighbors as Porch Partners. Every handoff is tracked in the app with full chain-of-custody for secure, accountable delivery holds.",
     ogImage: OG_IMAGE,
     twitterCard: "summary_large_image",
     robots: "index, follow",
     aiSummary:
-      "Porch Partners are trusted neighbors authorized by residents to hold and retrieve parcels. Each resident can authorize up to 3 Porch Partners, and every handoff is tracked in the app with full chain-of-custody. Porch Partners are identity-verified and help reduce porch exposure time.",
+      "Porch Partners are trusted neighbors authorized by residents to hold and retrieve parcels. Every handoff is tracked in the app with full chain-of-custody. Porch Partners are identity-verified and help reduce porch exposure time.",
     keyFacts: [
-      "Residents can authorize up to 3 trusted Porch Partners",
+      "Residents can authorize trusted Porch Partners",
       "Every handoff is tracked with full chain-of-custody",
       "Porch Partners are identity-verified",
       "Porch Partners reduce porch exposure time and package theft risk",
@@ -211,10 +211,10 @@ export const PAGE_SEO: Record<string, PageSEO> = {
     twitterCard: "summary",
     robots: "index, follow",
     aiSummary:
-      "The Porchivo FAQ covers: how real-time package risk scores are calculated, how Porch Partners work (up to 3 trusted neighbors per resident with chain-of-custody), B2B community pricing for HOAs and property managers, carrier support, privacy practices, and how to set up a community.",
+      "The Porchivo FAQ covers: how real-time package risk scores are calculated, how Porch Partners work (trusted neighbors with chain-of-custody), B2B community pricing for HOAs and property managers, carrier support, privacy practices, and how to set up a community.",
     keyFacts: [
       "Real-time risk scores are based on timing, neighborhood activity, and theft history",
-      "Residents can authorize up to 3 Porch Partners",
+      "Residents can authorize Porch Partners",
       "HOAs and property managers subscribe; residents always join free",
       "Communities can be set up in five minutes with no hardware or IT project",
     ],

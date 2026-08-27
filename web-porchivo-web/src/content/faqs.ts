@@ -139,7 +139,7 @@ export const FAQS: FAQ[] = [
     id: "what-are-package-guardians",
     question: "What are Porch Partners?",
     answer:
-      "Porch Partners are trusted neighbors whom residents authorize to retrieve and hold parcels on their behalf. Each resident can authorize up to 3 Porch Partners. Every handoff is tracked in the app with full chain-of-custody, so residents know exactly where their package is. Porch Partners are identity-verified and help reduce porch exposure time and theft risk.",
+      "Porch Partners are trusted neighbors whom residents authorize to retrieve and hold parcels on their behalf. Every handoff is tracked in the app with full chain-of-custody, so residents know exactly where their package is. Porch Partners are identity-verified and help reduce porch exposure time and theft risk.",
     category: "general",
   },
   {
