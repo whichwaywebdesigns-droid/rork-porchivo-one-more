@@ -50,6 +50,10 @@ interface PackingListTableProps {
   header?: PackingListHeader;
   /** Optional column headings rendered in the typewriter header row. */
   columns?: readonly string[];
+  /** Optional totals/summary content rendered in a real <tfoot> so it gets
+   *  the double-line "receipt total" treatment while keeping valid table
+   *  semantics (pass <tr> with <td>s). */
+  totals?: React.ReactNode;
   /** Optional receipts-style footer (thanks message + contact). */
   footer?: PackingListFooter;
   /** Green "PAID" rubber stamp overlay. Default false. */
@@ -63,6 +67,7 @@ interface PackingListTableProps {
 export default function PackingListTable({
   header,
   columns,
+  totals,
   footer,
   isPaid = false,
   showTape = false,
@@ -100,6 +105,7 @@ export default function PackingListTable({
         )}
         {/* Children are injected untouched — all interactivity preserved */}
         <tbody>{children}</tbody>
+        {totals && <tfoot>{totals}</tfoot>}
       </table>
 
       {footer && (

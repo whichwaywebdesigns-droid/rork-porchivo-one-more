@@ -6,6 +6,7 @@ import BreadcrumbNav from "@/components/BreadcrumbNav";
 import AppStoreBadges from "@/components/AppStoreBadges";
 import ShareButton from "@/components/ShareButton";
 import ShippingLabelCard from "@/components/ShippingLabelCard";
+import PackingListTable from "@/components/PackingListTable";
 import { getPageSEO } from "@/config/seo";
 import { buildWebPageSchema, buildBreadcrumbSchema, buildMobileAppSchema } from "@/config/schema";
 import { BRAND } from "@/config/brand";
@@ -281,6 +282,55 @@ export default function DownloadPage() {
                 </Link>
               </div>
             </ShippingLabelCard>
+          </div>
+
+          {/* ── Packing-list / payout receipt ── */}
+          <div className="mt-16 max-w-md mx-auto">
+            <PackingListTable
+              header={{
+                company: "PORCHIVO, INC.",
+                address: "800 Sycamore St, Evansville, IN 47708",
+                orderNumber: "ORD-2026-0892",
+                date: "Aug 20, 2026",
+              }}
+              columns={["Item", "Qty", "Rate", "Amount"]}
+              footer={{
+                message: "Thank you for your business!",
+                contactEmail: BRAND.supportEmail,
+              }}
+              isPaid
+              showTape
+              totals={
+                <tr>
+                  <td colSpan={2}>Total paid</td>
+                  <td>$26.00</td>
+                  <td className="text-right">$26.00</td>
+                </tr>
+              }
+            >
+              <tr>
+                <td>Package hold · 3 nights</td>
+                <td>1</td>
+                <td>$9.00</td>
+                <td className="text-right">$9.00</td>
+              </tr>
+              <tr>
+                <td>Weekend hold · Sat–Sun</td>
+                <td>1</td>
+                <td>$12.00</td>
+                <td className="text-right">$12.00</td>
+              </tr>
+              <tr>
+                <td>Referral bonus</td>
+                <td>1</td>
+                <td>$5.00</td>
+                <td className="text-right">$5.00</td>
+              </tr>
+            </PackingListTable>
+            <p className="mt-4 text-center text-xs text-brand-text-muted">
+              Porch Partner payouts print a real paper trail — every hold,
+              bonus, and total, stamped and dated.
+            </p>
           </div>
         </div>
       </section>
