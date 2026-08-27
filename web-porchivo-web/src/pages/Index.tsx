@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ShieldAlert, Bell, Package, ArrowRight, MapPin, Users, Globe } from "lucide-react";
+import { ShieldAlert, Bell, BellRing, Package, ArrowRight, MapPin, Users, Globe, Building2, UserPlus, Gauge } from "lucide-react";
 import PageLayout from "@/components/PageLayout";
 import SEOHead from "@/components/SEOHead";
 import AppStoreBadges from "@/components/AppStoreBadges";
@@ -162,36 +162,60 @@ export default function IndexPage() {
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div className="bg-brand-navy-900/60 border border-brand-navy-500/40 rounded-2xl p-6">
-              <div className="w-10 h-10 rounded-xl bg-brand-orange/10 flex items-center justify-center mb-4">
-                <span className="text-brand-orange font-bold text-lg">1</span>
+            <div className="relative overflow-hidden bg-brand-navy-900/60 border border-brand-navy-500/40 rounded-2xl p-6">
+              <Building2 aria-hidden className="absolute -bottom-5 -right-5 w-28 h-28 text-brand-orange opacity-[0.07] pointer-events-none" />
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-10 h-10 rounded-xl bg-brand-orange/10 flex items-center justify-center">
+                  <span className="text-brand-orange font-bold text-lg">1</span>
+                </div>
+                <div className="w-12 h-12 rounded-2xl bg-brand-orange/10 border border-brand-orange/20 flex items-center justify-center">
+                  <Building2 className="w-6 h-6 text-brand-orange" />
+                </div>
               </div>
               <p className="text-sm font-semibold text-brand-orange mb-1">Register your community</p>
               <p className="text-brand-text-secondary text-sm leading-relaxed">
                 Sign up your HOA or property in five minutes. No hardware, no installation, no IT integration.
               </p>
             </div>
-            <div className="bg-brand-navy-900/60 border border-brand-navy-500/40 rounded-2xl p-6">
-              <div className="w-10 h-10 rounded-xl bg-brand-orange/10 flex items-center justify-center mb-4">
-                <span className="text-brand-orange font-bold text-lg">2</span>
+            <div className="relative overflow-hidden bg-brand-navy-900/60 border border-brand-navy-500/40 rounded-2xl p-6">
+              <UserPlus aria-hidden className="absolute -bottom-5 -right-5 w-28 h-28 text-brand-orange opacity-[0.07] pointer-events-none" />
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-10 h-10 rounded-xl bg-brand-orange/10 flex items-center justify-center">
+                  <span className="text-brand-orange font-bold text-lg">2</span>
+                </div>
+                <div className="w-12 h-12 rounded-2xl bg-brand-orange/10 border border-brand-orange/20 flex items-center justify-center">
+                  <UserPlus className="w-6 h-6 text-brand-orange" />
+                </div>
               </div>
               <p className="text-sm font-semibold text-brand-orange mb-1">Residents join free</p>
               <p className="text-brand-text-secondary text-sm leading-relaxed">
                 Residents download the app and join with your invite code. They authorize up to 3 trusted Porch Partners from their neighborhood.
               </p>
             </div>
-            <div className="bg-brand-navy-900/60 border border-brand-navy-500/40 rounded-2xl p-6">
-              <div className="w-10 h-10 rounded-xl bg-brand-orange/10 flex items-center justify-center mb-4">
-                <span className="text-brand-orange font-bold text-lg">3</span>
+            <div className="relative overflow-hidden bg-brand-navy-900/60 border border-brand-navy-500/40 rounded-2xl p-6">
+              <Gauge aria-hidden className="absolute -bottom-5 -right-5 w-28 h-28 text-brand-orange opacity-[0.07] pointer-events-none" />
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-10 h-10 rounded-xl bg-brand-orange/10 flex items-center justify-center">
+                  <span className="text-brand-orange font-bold text-lg">3</span>
+                </div>
+                <div className="w-12 h-12 rounded-2xl bg-brand-orange/10 border border-brand-orange/20 flex items-center justify-center">
+                  <Gauge className="w-6 h-6 text-brand-orange" />
+                </div>
               </div>
               <p className="text-sm font-semibold text-brand-orange mb-1">Risk scores update continuously</p>
               <p className="text-brand-text-secondary text-sm leading-relaxed">
                 Every incoming package gets a real-time risk score based on timing, neighborhood activity, and theft history.
               </p>
             </div>
-            <div className="bg-brand-navy-900/60 border border-brand-navy-500/40 rounded-2xl p-6">
-              <div className="w-10 h-10 rounded-xl bg-brand-orange/10 flex items-center justify-center mb-4">
-                <span className="text-brand-orange font-bold text-lg">4</span>
+            <div className="relative overflow-hidden bg-brand-navy-900/60 border border-brand-navy-500/40 rounded-2xl p-6">
+              <BellRing aria-hidden className="absolute -bottom-5 -right-5 w-28 h-28 text-brand-orange opacity-[0.07] pointer-events-none" />
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-10 h-10 rounded-xl bg-brand-orange/10 flex items-center justify-center">
+                  <span className="text-brand-orange font-bold text-lg">4</span>
+                </div>
+                <div className="w-12 h-12 rounded-2xl bg-brand-orange/10 border border-brand-orange/20 flex items-center justify-center">
+                  <BellRing className="w-6 h-6 text-brand-orange" />
+                </div>
               </div>
               <p className="text-sm font-semibold text-brand-orange mb-1">Alerts trigger action</p>
               <p className="text-brand-text-secondary text-sm leading-relaxed">
