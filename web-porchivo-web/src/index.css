@@ -393,3 +393,130 @@ html.scrolling::-webkit-scrollbar-thumb:hover {
   .peanut { --travel: 2px; }
   .peanut-desktop-only { display: none; }
 }
+
+/* ═══ ShippingLabelCard — reusable decorative shipping-label frame.
+   Every decorative layer is pointer-events:none so interactive children
+   (buttons/links/forms) are never blocked. Pure CSS — no images/SVGs. */
+.ship-label {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid #cccccc;
+  border-radius: 1px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08), inset 0 0 0 1px rgba(0, 0, 0, 0.03);
+}
+
+/* Header bar */
+.ship-label-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 28px;
+  background: #f5f0e8;
+  border-bottom: 1px solid #e8e0d4;
+}
+.ship-label-header-title {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  color: #8b7355;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding-left: 12px;
+}
+.ship-label-badge {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #ffffff;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 1px;
+  pointer-events: none;
+}
+
+/* Printable zone (children stay fully interactive here) */
+.ship-label-frame {
+  margin: 8px;
+  border: 1px dashed #a08060;
+  padding: 12px;
+}
+
+/* Decorative barcode strip + tracking line — hidden entirely when no trackingNumber prop */
+.ship-label-barcode-block {
+  pointer-events: none;
+}
+.ship-label-barcode-strip {
+  display: block;
+  height: 24px;
+  margin-top: 10px;
+  opacity: 0.85;
+  background: repeating-linear-gradient(
+    90deg,
+    #000000 0px,
+    #000000 2px,
+    transparent 2px,
+    transparent 4px,
+    #000000 4px,
+    #000000 5px,
+    transparent 5px,
+    transparent 8px
+  );
+  pointer-events: none;
+}
+.ship-label-tracking {
+  display: block;
+  margin-top: 6px;
+  text-align: center;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: #333333;
+}
+
+/* Packing-tape accent across the top edge */
+.ship-label-tape {
+  position: absolute;
+  top: -10px;
+  left: 15%;
+  width: 70%;
+  height: 20px;
+  background: repeating-linear-gradient(90deg, #d4a843 0px, #d4a843 10px, #c49430 10px, #c49430 20px);
+  opacity: 0.7;
+  transform: rotate(-0.5deg);
+  border-radius: 1px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* FRAGILE rubber-stamp overlay */
+.ship-label-fragile {
+  position: absolute;
+  top: 40%;
+  right: 10%;
+  background: transparent;
+  border: 2px solid #c0392b;
+  color: #c0392b;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  transform: rotate(-12deg);
+  opacity: 0.8;
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* Desktop: full-size frame padding + header/barcode per spec */
+@media (min-width: 640px) {
+  .ship-label-frame { padding: 24px; }
+  .ship-label-header-title { font-size: 9px; }
+  .ship-label-barcode-strip { height: 32px; }
+}
