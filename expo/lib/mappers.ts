@@ -11,7 +11,7 @@ export function dbProfileToUser(p: DbProfile): User {
     role: p.role,
     address: p.address,
     hasLocationConsent: p.has_location_consent,
-    hasPreciseLocationConsent: p.has_precise_location_consent,
+    hasPreciseLocationConsent: p.has_precise_location_consent ?? false,
     expoPushToken: p.expo_push_token,
   };
 }

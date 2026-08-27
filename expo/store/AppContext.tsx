@@ -308,7 +308,10 @@ export const [AppProvider, useApp] = createContextHook(() => {
       role: userData.role ?? 'homeowner',
       address: userData.address ?? '',
       has_location_consent: userData.hasLocationConsent ?? false,
-      has_precise_location_consent: userData.hasPreciseLocationConsent ?? false,
+      // NOTE: do NOT write has_precise_location_consent — the column doesn't
+      // exist in profiles, and PostgREST rejects the whole update with
+      // PGRST204 (which stranded onboarding: isOnboarded never flipped true
+      // and the layout redirect looped users back to onboarding-setup).
       is_onboarded: true,
     };
 
@@ -333,8 +336,21 @@ export const [AppProvider, useApp] = createContextHook(() => {
       .single();
 
     if (error) {
-      log('[AppContext] Onboarding profile update error:', error.code);
-      throw error;
+      // Schema drift, transient network errors, etc. must never strand the
+      // user mid-onboarding: whenever isOnboarded stays false the layout
+      // redirect bounces them straight back to onboarding-setup. Mark
+      // complete locally and queue the profile write for retry instead.
+      log('[AppContext] Onboarding profile update error:', error.code, error.message);
+      enqueue({
+        type: "update",
+        target: "profiles",
+        payload: profileUpdates as Record<string, unknown>,
+        filter: { id: supabaseUser.id },
+        queryKeysToInvalidate: [["profile"]],
+      });
+      setIsOnboarded(true);
+      await AsyncStorage.setItem(STORAGE_KEYS.onboarded, 'true');
+      return;
     }
 
     const dbProfile = data as DbProfile;
@@ -356,7 +372,8 @@ export const [AppProvider, useApp] = createContextHook(() => {
     if (updates.role !== undefined) dbUpdates.role = updates.role;
     if (updates.address !== undefined) dbUpdates.address = updates.address;
     if (updates.hasLocationConsent !== undefined) dbUpdates.has_location_consent = updates.hasLocationConsent;
-    if (updates.hasPreciseLocationConsent !== undefined) dbUpdates.has_precise_location_consent = updates.hasPreciseLocationConsent;
+    // hasPreciseLocationConsent is local-only (no profiles column — see note
+    // in completeOnboarding); writing it would fail the whole update.
     if (updates.expoPushToken !== undefined) dbUpdates.expo_push_token = updates.expoPushToken;
 
     setUser({ ...user, ...updates });
@@ -393,11 +410,9 @@ export const [AppProvider, useApp] = createContextHook(() => {
   const setLocationConsent = useCallback((consent: boolean, precise?: boolean) => {
     if (!user) return;
     const updates: Partial<User> = { hasLocationConsent: consent };
+    if (precise !== undefined) updates.hasPreciseLocationConsent = precise;
+    // Precise consent stays local-only — profiles has no column for it.
     const dbUpdates: Partial<DbProfile> = { has_location_consent: consent };
-    if (precise !== undefined) {
-      updates.hasPreciseLocationConsent = precise;
-      dbUpdates.has_precise_location_consent = precise;
-    }
     setUser({ ...user, ...updates });
     saveProfileMutation.mutate(dbUpdates);
   }, [user, saveProfileMutation]);

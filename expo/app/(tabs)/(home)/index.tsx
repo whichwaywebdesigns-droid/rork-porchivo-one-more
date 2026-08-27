@@ -43,6 +43,20 @@ export default function HomeScreen() {
   const { unreadNotificationCount } = useNotifications();
   const [refreshing, setRefreshing] = useState(false);
 
+  // Tier guard: (home) is the community-tier tab and is hidden from the bar
+  // for free-tier users. Several screens (login, location-consent,
+  // notifications-permission, +not-found) navigate here unconditionally, so a
+  // free-tier user would otherwise strand on a tab with no bar item. Defer
+  // with setTimeout — synchronous router.replace() during React's reconnect
+  // phase can crash (see note at the bottom of this file).
+  useEffect(() => {
+    if (isOrgLoading || isOrgMember) return;
+    const t = setTimeout(() => {
+      router.replace('/(tabs)/packages' as any);
+    }, 0);
+    return () => clearTimeout(t);
+  }, [isOrgLoading, isOrgMember, router]);
+
 
   // P-3: app-maturity gating. Counted on each home mount so first-time users
   // see a calm screen instead of 6 stacked marketing sections.

@@ -7,7 +7,8 @@ export interface DbProfile {
   role: 'homeowner' | 'partner' | 'both';
   address: string;
   has_location_consent: boolean;
-  has_precise_location_consent: boolean;
+  /** Local-only consent flag — no profiles column; never written to Supabase. */
+  has_precise_location_consent?: boolean;
   expo_push_token: string | null;
   is_premium: boolean;
   /** Backend-confirmed subscription tier. Written only by revenuecat-webhook. */
