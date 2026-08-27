@@ -5,6 +5,7 @@ import SEOHead from "@/components/SEOHead";
 import BreadcrumbNav from "@/components/BreadcrumbNav";
 import AppStoreBadges from "@/components/AppStoreBadges";
 import ShareButton from "@/components/ShareButton";
+import ShippingLabelCard from "@/components/ShippingLabelCard";
 import { getPageSEO } from "@/config/seo";
 import { buildWebPageSchema, buildBreadcrumbSchema, buildMobileAppSchema } from "@/config/schema";
 import { BRAND } from "@/config/brand";
@@ -186,6 +187,100 @@ export default function DownloadPage() {
                 </a>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Product preview — sample screens wrapped in the shipping-label frame.
+          Decorative showcase blocks; every link inside remains fully functional. */}
+      <section className="py-20 px-4 sm:px-6 border-t border-brand-navy-500/40">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <div className="label-header mb-3">Inside the app</div>
+            <h2 className="text-2xl font-bold text-brand-text-primary mb-3">
+              Every delivery arrives looking like this
+            </h2>
+            <p className="text-sm text-brand-text-secondary max-w-xl mx-auto leading-relaxed">
+              Orders, live tracking, and receipts — stamped, sorted, and scored
+              against your block's theft risk. Here's what a shipment looks like in Porchivo.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6 items-start">
+            {/* ── Order details ── */}
+            <ShippingLabelCard priority="STANDARD" showTape>
+              <h3 className="text-[15px] font-bold text-brand-text-primary mb-4">Order #PKG-2026-0892</h3>
+              <dl className="space-y-2.5 text-[13px]">
+                {[
+                  ["Carrier", "UPS Ground"],
+                  ["Delivered", "Today, 2:47 PM"],
+                  ["Left at", "Front porch"],
+                ].map(([term, value]) => (
+                  <div key={term} className="flex justify-between gap-3">
+                    <dt className="text-brand-text-muted">{term}</dt>
+                    <dd className="font-medium text-right text-brand-text-primary">{value}</dd>
+                  </div>
+                ))}
+              </dl>
+              <p className="mt-4 inline-flex px-2.5 py-1 rounded-full bg-green-100 text-green-800 text-[11px] font-semibold uppercase tracking-wide">
+                Risk score 12/100 — Low
+              </p>
+            </ShippingLabelCard>
+
+            {/* ── Tracking info ── */}
+            <ShippingLabelCard
+              priority="PRIORITY"
+              trackingNumber="7712 3456 8901"
+              showTape
+            >
+              <h3 className="text-[15px] font-bold text-brand-text-primary mb-4">Out for delivery</h3>
+              <ol className="space-y-3 text-[13px]">
+                {["Origin scan — Memphis TN", "Arrived at local hub", "On vehicle · ETA 1–4 PM"].map((step, i) => (
+                  <li key={step} className="flex items-start gap-2.5">
+                    <span className={`mt-0.5 w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center text-[9px] font-bold ${
+                      i === 2 ? "bg-brand-orange text-white" : "bg-brand-navy-900/10 text-brand-text-muted"
+                    }`}>
+                      {i + 1}
+                    </span>
+                    <span className={i === 2 ? "font-semibold text-brand-text-primary" : "text-brand-text-muted"}>
+                      {step}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+              <p className="mt-4 inline-flex px-2.5 py-1 rounded-full bg-orange-100 text-orange-800 text-[11px] font-semibold uppercase tracking-wide">
+                High-risk hours · Partner nearby
+              </p>
+            </ShippingLabelCard>
+
+            {/* ── Invoice summary ── */}
+            <ShippingLabelCard>
+              <h3 className="text-[15px] font-bold text-brand-text-primary mb-4">Invoice summary</h3>
+              <dl className="space-y-2.5 text-[13px]">
+                {[
+                  ["Plan", "Starter Community"],
+                  ["Amount", "$99.00 / month"],
+                  ["Next payment", "Sep 1, 2026"],
+                ].map(([term, value]) => (
+                  <div key={term} className="flex justify-between gap-3">
+                    <dt className="text-brand-text-muted">{term}</dt>
+                    <dd className="font-medium text-right text-brand-text-primary">{value}</dd>
+                  </div>
+                ))}
+              </dl>
+              <p className="mt-4 inline-flex px-2.5 py-1 rounded-full bg-green-100 text-green-800 text-[11px] font-semibold uppercase tracking-wide">
+                Paid
+              </p>
+              <div className="mt-5 pt-4 border-t border-dashed border-brand-navy-500/30">
+                <Link
+                  to="/pricing"
+                  className="inline-flex items-center gap-1 text-[13px] font-semibold text-brand-blue-light hover:text-brand-blue transition-colors"
+                >
+                  Compare community plans
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+            </ShippingLabelCard>
           </div>
         </div>
       </section>
