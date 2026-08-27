@@ -144,6 +144,12 @@ export default function SiteFooter() {
             >
               llms.txt
             </a>
+            <Link
+              to="/manage/login"
+              className="inline-flex items-center gap-1 text-xs text-brand-text-muted hover:text-brand-text-secondary transition-colors"
+            >
+              Manager sign-in
+            </Link>
           </div>
         </div>
       </div>
