@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import AppErrorBoundary from "@/components/AppErrorBoundary";
 import CorrugatedBackground from "@/components/CorrugatedBackground";
+import TapeDispenserSpinner from "@/components/TapeDispenserSpinner";
 
 import Index from "./pages/Index";
 
@@ -50,8 +51,8 @@ function ScrollToTop() {
 
 const PageLoader = () => (
   <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-    <div style={{ width: 32, height: 32, border: "3px solid #E8EDF740", borderTopColor: "#E85420", borderRadius: "50%", animation: "spin 0.6s linear infinite" }} />
-    <style>{"@keyframes spin{to{transform:rotate(360deg)}}"}</style>
+    {/* Tape-dispenser loading roll (was a plain bordered-circle spinner) */}
+    <TapeDispenserSpinner size={44} />
   </div>
 );
 

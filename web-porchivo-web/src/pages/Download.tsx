@@ -7,6 +7,8 @@ import AppStoreBadges from "@/components/AppStoreBadges";
 import ShareButton from "@/components/ShareButton";
 import ShippingLabelCard from "@/components/ShippingLabelCard";
 import PackingListTable from "@/components/PackingListTable";
+import FragileModal from "@/components/FragileModal";
+import TapeDispenserSpinner from "@/components/TapeDispenserSpinner";
 import { getPageSEO } from "@/config/seo";
 import { buildWebPageSchema, buildBreadcrumbSchema, buildMobileAppSchema } from "@/config/schema";
 import { BRAND } from "@/config/brand";
@@ -331,6 +333,46 @@ export default function DownloadPage() {
               Porch Partner payouts print a real paper trail — every hold,
               bonus, and total, stamped and dated.
             </p>
+          </div>
+
+          {/* ── Urgent-alert dialog + tape-spinner loading demos ── */}
+          <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-8 items-center">
+            <div>
+              <div className="text-center mb-8">
+                <div className="label-header mb-3">High-priority alerts</div>
+                <h3 className="text-xl font-bold text-brand-text-primary">
+                  Urgent notices ship in a fragile box
+                </h3>
+              </div>
+              <FragileModal showTape>
+                <h4 className="text-base font-bold text-brand-text-primary mb-2">Confirm your pickup window</h4>
+                <p className="text-[13px] text-brand-text-secondary leading-relaxed mb-5">
+                  High theft risk this afternoon. Your Porch Partner can hold
+                  today's delivery until 8 PM — confirm to lock in the hold.
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <Link
+                    to="/features"
+                    className="btn-orange px-4 py-2 rounded-lg text-[13px] no-underline"
+                  >
+                    See alert types
+                  </Link>
+                  <Link
+                    to="/faq"
+                    className="px-4 py-2 rounded-lg border border-brand-navy-500/50 text-[13px] font-medium text-brand-text-secondary hover:text-brand-text-primary transition-colors no-underline"
+                  >
+                    How holds work
+                  </Link>
+                </div>
+              </FragileModal>
+            </div>
+
+            <div className="flex flex-col items-center">
+              <TapeDispenserSpinner size={48} label="Sealing your order..." />
+              <p className="mt-4 text-center text-xs text-brand-text-muted max-w-[240px]">
+                Data loads get sealed, taped, and stamped too.
+              </p>
+            </div>
           </div>
         </div>
       </section>
