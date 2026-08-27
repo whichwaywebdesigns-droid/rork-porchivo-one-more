@@ -72,6 +72,18 @@ export default function UseCasesPage() {
                     "radial-gradient(ellipse 72% 72% at 50% 50%, black 55%, transparent 98%)",
                 }}
               />
+              {/* Signup CTA — straight into the app-store onboarding flow */}
+              <div className="mt-6 text-center">
+                <a
+                  href={BRAND.appStoreUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-orange hover:bg-brand-orange text-brand-text-primary font-bold transition-all hover:scale-[1.02]"
+                >
+                  Get Started
+                  <ArrowRight className="w-4 h-4" />
+                </a>
+              </div>
             </div>
           </div>
         </div>
