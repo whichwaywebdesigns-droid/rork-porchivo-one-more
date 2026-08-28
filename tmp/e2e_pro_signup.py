@@ -8,8 +8,9 @@ Flow tested against LIVE backend (project axmdzrtyznphlfganljb):
      orgId, plan.onboardingFeeCents=50000.
   4. Verify the pending organizations row (max_communities=3, fee=50000,
      stripe_customer_id set).
-  5. Fetch the Stripe Checkout page HTML -> expect $499.00 subscription +
-     $500.00 onboarding line items.
+  5. Retrieve the Stripe Checkout session via the Stripe API (the hosted page
+     is JS-rendered, so HTML scraping proves nothing) -> expect $499.00
+     recurring + $500.00 one-time onboarding line items.
   6. confirm-org-signup with the UNPAID session -> expect 402 guard.
   7. Resident membership present -> second org attempt -> expect 409.
   8. Staff (hoa_admin) membership, community plan (cap 1) with 1 administered
@@ -20,7 +21,6 @@ Stripe side effects that remain in LIVE mode (harmless): 1 customer, 1
 uncompleted checkout session (expires in 24h, never charged).
 """
 import json
-import re
 import sys
 import time
 import urllib.error
@@ -174,14 +174,24 @@ check("pending, inactive, admin = test user",
 check("max_communities=3, fee=50000, max_units=500",
       o.get("max_communities") == 3 and o.get("onboarding_fee_cents") == 50000 and o.get("max_units") == 500)
 
-# ── 5. Stripe Checkout page shows BOTH line items ────────────────────────────
-print("[5] Stripe Checkout page line items")
-req = urllib.request.Request(checkout_url, headers={"User-Agent": "Mozilla/5.0"})
-html = urllib.request.urlopen(req, timeout=60).read().decode("utf-8", "ignore")
-check("subscription line item $499.00", "499.00" in html)
-check("onboarding fee line item $500.00", "500.00" in html)
-check("onboarding product name present", "Onboarding" in html, re.findall(r"Porchivo [A-Za-z]+ Onboarding[^\"<]*", html)[:1].__str__())
-check("plan name present", "Professional" in html)
+# ── 5. Stripe Checkout session line items (via Stripe API — the hosted page is
+#      JS-rendered, so scraping its HTML proves nothing) ────────────────────
+print("[5] Stripe Checkout session line items (Stripe API)")
+req = urllib.request.Request(
+    f"https://api.stripe.com/v1/checkout/sessions/{session_id}?expand%5B%5D=line_items.data.price.product",
+    headers={"Authorization": f"Bearer {ENV['STRIPE_SECRET_KEY']}"},
+)
+session = json.loads(urllib.request.urlopen(req, timeout=60).read().decode())
+lis = session.get("line_items", {}).get("data", [])
+check("subscription mode, unpaid", session.get("mode") == "subscription" and session.get("payment_status") == "unpaid",
+      f"mode={session.get('mode')} payment={session.get('payment_status')}")
+check("subscription line item $499.00/month",
+      any(li["price"]["unit_amount"] == 49900 and (li["price"].get("recurring") or {}).get("interval") == "month" for li in lis))
+check("onboarding fee line item $500.00 one-time",
+      any(li["price"]["unit_amount"] == 50000 and not li["price"].get("recurring") for li in lis))
+names = [(li["price"].get("product") or {}).get("name", "") for li in lis]
+check("line item names (Professional + Onboarding)",
+      any("Professional" in n for n in names) and any("Onboarding" in n for n in names), str(names))
 
 # ── 6. Unpaid session must NOT activate ──────────────────────────────────────
 print("[6] confirm-org-signup on UNPAID session")
@@ -226,6 +236,16 @@ check("no org created by 403 attempt", extra_orgs == 1)
 
 # ── 9. Cleanup ───────────────────────────────────────────────────────────────
 print("[9] Cleanup")
+# Best-effort: delete the live Stripe test customer (ignore failures)
+try:
+    cust = run_query(f"select stripe_customer_id from organizations where id = '{org_id}'")[0]["stripe_customer_id"]
+    if cust:
+        req = urllib.request.Request(f"https://api.stripe.com/v1/customers/{cust}",
+                                     headers={"Authorization": f"Bearer {ENV['STRIPE_SECRET_KEY']}"}, method="DELETE")
+        urllib.request.urlopen(req, timeout=30)
+        print("  Stripe test customer deleted")
+except Exception as e:
+    print(f"  Stripe customer cleanup skipped: {e}")
 run_query(f"delete from org_memberships where user_id = '{uid}';")
 run_query(f"delete from organizations where id = '{org_id}';")
 run_query(f"delete from profiles where id = '{uid}';")
