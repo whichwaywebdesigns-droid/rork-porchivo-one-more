@@ -123,6 +123,8 @@ function announcementRow(row: Record<string, unknown>): OrgAnnouncement {
 // fetch completes on subsequent launches. The network query still runs and
 // updates the data; the cache just prevents the loading-skeleton flash.
 const ORG_CACHE_KEY = 'porchivo_org_cache';
+// Remembers which community the user last viewed (portfolio switching).
+const ACTIVE_ORG_KEY = 'porchivo_active_org';
 
 interface OrgCachePayload {
   userId: string;
@@ -142,11 +144,15 @@ export const [OrganizationProvider, useOrganization] = createContextHook(() => {
   // Loaded synchronously enough (a few ms) to render the correct tier before
   // the RPC fetch resolves. Falls back to null on first-ever launch.
   const [cachedMemberships, setCachedMemberships] = useState<OrgMembership[] | null>(null);
+  // Portfolio: which community the user switched to (null = default/first).
+  const [preferredOrgId, setPreferredOrgId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!userId) {
       setCachedMemberships(null);
+      setPreferredOrgId(null);
       void AsyncStorage.removeItem(ORG_CACHE_KEY);
+      void AsyncStorage.removeItem(ACTIVE_ORG_KEY);
       return;
     }
     void AsyncStorage.getItem(ORG_CACHE_KEY).then((raw) => {
@@ -160,6 +166,9 @@ export const [OrganizationProvider, useOrganization] = createContextHook(() => {
       } catch {
         // Corrupt cache — ignore, query will fetch fresh.
       }
+    });
+    void AsyncStorage.getItem(ACTIVE_ORG_KEY).then((raw) => {
+      if (raw) setPreferredOrgId(raw);
     });
   }, [userId]);
 
@@ -199,14 +208,18 @@ export const [OrganizationProvider, useOrganization] = createContextHook(() => {
     [membershipQuery.data, cachedMemberships],
   );
 
-  // ── Active membership (first active, or first pending) ────────────────────
+  // ── Active membership (portfolio preference → first active → first pending) ─
   const activeMembership = useMemo<OrgMembership | null>(() => {
+    const preferred = preferredOrgId
+      ? memberships.find((m) => m.status === 'active' && m.orgId === preferredOrgId)
+      : undefined;
     return (
+      preferred ??
       memberships.find((m) => m.status === 'active') ??
       memberships.find((m) => m.status === 'pending') ??
       null
     );
-  }, [memberships]);
+  }, [memberships, preferredOrgId]);
 
   const activeOrg: Organization | null = activeMembership?.org ?? null;
   const orgRole: OrgRole | null = activeMembership?.role ?? null;
@@ -730,6 +743,34 @@ export const [OrganizationProvider, useOrganization] = createContextHook(() => {
     },
   });
 
+  // ── Portfolio: switch the active community ────────────────────────────────
+  const switchOrg = useCallback(
+    async (orgId: string) => {
+      setPreferredOrgId(orgId);
+      void AsyncStorage.setItem(ACTIVE_ORG_KEY, orgId);
+      log('[OrgContext] Switched active community', orgId.slice(0, 8));
+      // Reset org-scoped queries so the newly selected community loads fresh.
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['org-announcements'] }),
+        queryClient.invalidateQueries({ queryKey: ['org-package-log'] }),
+        queryClient.invalidateQueries({ queryKey: ['org-package-board'] }),
+        queryClient.invalidateQueries({ queryKey: ['org-admin-stats'] }),
+        queryClient.invalidateQueries({ queryKey: ['org-pending-members'] }),
+        queryClient.invalidateQueries({ queryKey: ['org-incidents'] }),
+        queryClient.invalidateQueries({ queryKey: ['org-incident-counts'] }),
+        queryClient.invalidateQueries({ queryKey: ['org-properties'] }),
+        queryClient.invalidateQueries({ queryKey: ['org-members-admin'] }),
+        queryClient.invalidateQueries({ queryKey: ['org-calendar'] }),
+        queryClient.invalidateQueries({ queryKey: ['org-upcoming-events'] }),
+        queryClient.invalidateQueries({ queryKey: ['org-member-count'] }),
+        queryClient.invalidateQueries({ queryKey: ['maintenance-queue'] }),
+        queryClient.invalidateQueries({ queryKey: ['maintenance-counts'] }),
+        queryClient.invalidateQueries({ queryKey: ['my-maintenance'] }),
+      ]);
+    },
+    [queryClient],
+  );
+
   // ── Refresh ───────────────────────────────────────────────────────────────
   const refreshOrgContext = useCallback(async () => {
     await Promise.all([
@@ -1107,6 +1148,8 @@ export const [OrganizationProvider, useOrganization] = createContextHook(() => {
       activeOrg,
       orgRole,
       allMemberships: memberships,
+      preferredOrgId,
+      switchOrg,
       announcements: announcementsQuery.data ?? [],
       packageLog: packageLogQuery.data ?? [],
       isAnnouncementsLoading: announcementsQuery.isLoading,
@@ -1181,6 +1224,8 @@ export const [OrganizationProvider, useOrganization] = createContextHook(() => {
       activeMembership,
       activeOrg,
       orgRole,
+      preferredOrgId,
+      switchOrg,
       announcementsQuery.data,
       announcementsQuery.isLoading,
       packageLogQuery.data,

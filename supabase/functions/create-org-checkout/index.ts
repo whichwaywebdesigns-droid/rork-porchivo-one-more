@@ -30,6 +30,12 @@ interface PlanConfig {
   monthlyPrice: number;  // cents
   annualPrice: number;   // cents
   maxUnits: number | null;
+  // How many communities (organizations) a subscriber may administer on this
+  // plan. null = unlimited. Starter/Community are single-community plans.
+  maxCommunities: number | null;
+  // One-time onboarding fee (cents) charged as a second line item on the same
+  // Stripe Checkout session — 0 for plans without one.
+  onboardingFeeCents: number;
 }
 
 const PLANS: Record<string, PlanConfig> = {
@@ -39,6 +45,8 @@ const PLANS: Record<string, PlanConfig> = {
     monthlyPrice: 9900,
     annualPrice: 99000,
     maxUnits: 50,
+    maxCommunities: 1,
+    onboardingFeeCents: 0,
   },
   community: {
     name: 'Porchivo Community',
@@ -46,13 +54,17 @@ const PLANS: Record<string, PlanConfig> = {
     monthlyPrice: 24900,
     annualPrice: 249000,
     maxUnits: 200,
+    maxCommunities: 1,
+    onboardingFeeCents: 0,
   },
   professional: {
     name: 'Porchivo Professional',
-    description: 'Up to 500 units across 3 communities — vendor management, branding',
+    description: 'Up to 500 units across 3 communities — portfolio, vendors, branding',
     monthlyPrice: 49900,
     annualPrice: 499000,
     maxUnits: 500,
+    maxCommunities: 3,
+    onboardingFeeCents: 50000,
   },
   enterprise: {
     name: 'Porchivo Property Manager',
@@ -60,6 +72,8 @@ const PLANS: Record<string, PlanConfig> = {
     monthlyPrice: 149900,
     annualPrice: 1499000,
     maxUnits: 2000,
+    maxCommunities: null,
+    onboardingFeeCents: 150000,
   },
 };
 
@@ -134,21 +148,38 @@ serve(async (req: Request) => {
       return json({ error: 'Invalid return URL: only porchivo:// scheme is allowed' }, 400);
     }
 
-    // ── 4. Check user doesn't already have an active org ────────────────────
+    // ── 4. Community cap enforcement ─────────────────────────────────────────
+    // Residents keep the single-community rule. Admins/managers may run a
+    // portfolio of communities up to their chosen plan's limit.
+    const plan = PLANS[planTier];
     const { data: existingMembership } = await adminClient
       .from('org_memberships')
-      .select('org_id, status')
+      .select('role')
       .eq('user_id', user.id)
-      .in('status', ['active', 'pending'])
-      .limit(1);
+      .in('status', ['active', 'pending']);
 
-    if (existingMembership && existingMembership.length > 0) {
+    const hasMembership = !!existingMembership && existingMembership.length > 0;
+    const STAFF_CREATE_ROLES = ['hoa_admin', 'property_manager', 'property_staff', 'board_member', 'super_admin'];
+    const hasStaffRole = hasMembership && existingMembership!.some((m) => STAFF_CREATE_ROLES.includes(m.role));
+
+    if (hasMembership && !hasStaffRole) {
       return json({ error: 'You are already a member of a community. Leave your current community before creating a new one.' }, 409);
+    }
+
+    if (hasStaffRole && plan.maxCommunities !== null) {
+      const { count: administeredCount, error: countError } = await adminClient
+        .from('organizations')
+        .select('id', { count: 'exact', head: true })
+        .eq('admin_user_id', user.id);
+      if (!countError && (administeredCount ?? 0) >= plan.maxCommunities) {
+        return json({
+          error: `Your plan allows up to ${plan.maxCommunities} ${plan.maxCommunities === 1 ? 'community' : 'communities'}. Upgrade to a multi-community plan to add more.`,
+        }, 403);
+      }
     }
 
     // ── 5. Generate invite code ───────────────────────────────────────────────
     const inviteCode = Math.random().toString(36).slice(2, 8).toUpperCase();
-    const plan = PLANS[planTier];
     const unitAmount = billingCycle === 'monthly' ? plan.monthlyPrice : plan.annualPrice;
     const interval: 'month' | 'year' = billingCycle === 'monthly' ? 'month' : 'year';
 
@@ -170,6 +201,8 @@ serve(async (req: Request) => {
         billing_cycle: billingCycle,
         subscription_status: 'pending',
         max_units: plan.maxUnits,
+        max_communities: plan.maxCommunities,
+        onboarding_fee_cents: plan.onboardingFeeCents,
       })
       .select()
       .single();
@@ -248,6 +281,17 @@ serve(async (req: Request) => {
     checkoutParams.set('line_items[0][price_data][product_data][description]', plan.description);
     checkoutParams.set('line_items[0][price_data][recurring][interval]', interval);
 
+    // One-time onboarding fee — charged on the same checkout session's first
+    // invoice alongside the subscription (Stripe supports mixed one-time and
+    // recurring line items in subscription mode).
+    if (plan.onboardingFeeCents > 0) {
+      checkoutParams.set('line_items[1][quantity]', '1');
+      checkoutParams.set('line_items[1][price_data][currency]', 'usd');
+      checkoutParams.set('line_items[1][price_data][unit_amount]', String(plan.onboardingFeeCents));
+      checkoutParams.set('line_items[1][price_data][product_data][name]', `Porchivo Onboarding — ${plan.name.replace('Porchivo ', '')}`);
+      checkoutParams.set('line_items[1][price_data][product_data][description]', 'One-time onboarding fee, charged with your first payment');
+    }
+
     const checkoutRes = await fetch('https://api.stripe.com/v1/checkout/sessions', {
       method: 'POST',
       headers: {
@@ -272,7 +316,7 @@ serve(async (req: Request) => {
       checkoutUrl,
       sessionId,
       orgId,
-      plan: { name: plan.name, price: unitAmount, interval },
+      plan: { name: plan.name, price: unitAmount, interval, onboardingFeeCents: plan.onboardingFeeCents },
     });
 
   } catch (e) {

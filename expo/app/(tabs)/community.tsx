@@ -27,6 +27,8 @@ import {
   BarChart2,
   CalendarDays,
   Wrench,
+  Truck,
+  Palette,
 } from 'lucide-react-native';
 import { useColors } from '@/constants/colors';
 import { useOrganization } from '@/store/OrganizationContext';
@@ -231,6 +233,72 @@ function PendingCard() {
 
 // ─── Community Dashboard (active member) ─────────────────────────────────────
 
+// ─── Portfolio switcher (multi-community plans) ──────────────────────────────
+
+function PortfolioSection() {
+  const Colors = useColors();
+  const { allMemberships, activeOrg, switchOrg } = useOrganization();
+
+  const activeMemberships = allMemberships.filter((m) => m.status === 'active');
+  if (activeMemberships.length < 2) return null;
+
+  return (
+    <View style={styles.portfolioSection}>
+      <View style={styles.sectionHeader}>
+        <Text style={[styles.sectionTitle, { color: Colors.slate }]}>Portfolio</Text>
+        <Text style={[styles.portfolioCount, { color: Colors.slateLighter }]}>
+          {activeMemberships.length} communities
+        </Text>
+      </View>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.portfolioRow}
+      >
+        {activeMemberships.map((m) => {
+          const isActive = m.orgId === activeOrg?.id;
+          return (
+            <TouchableOpacity
+              key={m.orgId}
+              style={[
+                styles.portfolioCard,
+                {
+                  backgroundColor: Colors.surface,
+                  borderColor: isActive ? Colors.primary : Colors.border,
+                  borderWidth: isActive ? 1.5 : 1,
+                },
+              ]}
+              onPress={() => void switchOrg(m.orgId)}
+              activeOpacity={0.8}
+            >
+              <View
+                style={[
+                  styles.portfolioCardIcon,
+                  { backgroundColor: isActive ? Colors.primary + '20' : Colors.elevated },
+                ]}
+              >
+                <Text style={styles.orgLogoEmoji}>{ORG_TYPE_ICON[m.org?.type ?? 'hoa'] ?? '🏡'}</Text>
+              </View>
+              <Text style={[styles.portfolioCardName, { color: Colors.slate }]} numberOfLines={1}>
+                {m.org?.name ?? 'Community'}
+              </Text>
+              <Text
+                style={[
+                  styles.portfolioCardRole,
+                  { color: isActive ? Colors.primary : Colors.slateLighter },
+                ]}
+                numberOfLines={1}
+              >
+                {ORG_ROLE_LABELS[m.role] ?? m.role}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </ScrollView>
+    </View>
+  );
+}
+
 function CommunityDashboard({ onRefresh, refreshing }: { onRefresh: () => void; refreshing: boolean }) {
   const Colors = useColors();
   const insets = useSafeAreaInsets();
@@ -265,6 +333,27 @@ function CommunityDashboard({ onRefresh, refreshing }: { onRefresh: () => void; 
     staleTime: 1000 * 60 * 5,
   });
 
+  // Plan tier + branding — small singleton fetch, gates multi-community tools
+  const { data: orgMeta } = useQuery<{ planTier: string | null; brandColor: string | null }>({
+    queryKey: ['org-meta', activeOrg?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('organizations')
+        .select('plan_tier, brand_color')
+        .eq('id', activeOrg!.id)
+        .maybeSingle();
+      const row = (data ?? {}) as Record<string, unknown>;
+      return {
+        planTier: (row.plan_tier as string | null) ?? null,
+        brandColor: (row.brand_color as string | null) ?? null,
+      };
+    },
+    enabled: !!activeOrg?.id,
+    staleTime: 1000 * 60 * 5,
+  });
+  const isMultiCommunityPlan = orgMeta?.planTier === 'professional' || orgMeta?.planTier === 'enterprise';
+  const brandColor = orgMeta?.brandColor ?? null;
+
   if (!activeOrg || !activeMembership) return null;
 
   const typeLabel = ORG_TYPE_LABELS[activeOrg.type];
@@ -283,7 +372,7 @@ function CommunityDashboard({ onRefresh, refreshing }: { onRefresh: () => void; 
       {/* Org header */}
       <View style={[styles.orgHeader, { backgroundColor: Colors.surface, borderBottomColor: Colors.border }]}>
         <View style={styles.orgHeaderRow}>
-          <View style={[styles.orgLogoCircle, { backgroundColor: Colors.primary + '20' }]}>
+          <View style={[styles.orgLogoCircle, { backgroundColor: brandColor ? brandColor + '22' : Colors.primary + '20' }]}>
             <Text style={styles.orgLogoEmoji}>{typeEmoji}</Text>
           </View>
           <View style={styles.orgHeaderText}>
@@ -303,6 +392,9 @@ function CommunityDashboard({ onRefresh, refreshing }: { onRefresh: () => void; 
           {orgRole ? <RoleBadge role={orgRole} /> : null}
         </View>
       </View>
+
+      {/* Portfolio switcher — multi-community plans */}
+      {isEnabled('ORG_PORTFOLIO') ? <PortfolioSection /> : null}
 
       {/* Stats row */}
       <ScrollView
@@ -603,6 +695,18 @@ function CommunityDashboard({ onRefresh, refreshing }: { onRefresh: () => void; 
                 accent: Colors.primary,
                 onPress: () => router.push('/community-calendar'),
               }] : []),
+              ...(isEnabled('ORG_VENDOR_DIRECTORY') && isMultiCommunityPlan ? [{
+                label: 'Vendors',
+                icon: <Truck size={20} color={Colors.secondary} />,
+                accent: Colors.secondary,
+                onPress: () => router.push('/org-vendors'),
+              }] : []),
+              ...(isEnabled('ORG_BRANDING') && isMultiCommunityPlan && isOrgAdmin ? [{
+                label: 'Branding',
+                icon: <Palette size={20} color={Colors.gold} />,
+                accent: Colors.gold,
+                onPress: () => router.push('/org-branding'),
+              }] : []),
             ].map((item) => (
               <TouchableOpacity
                 key={item.label}
@@ -787,6 +891,27 @@ const styles = StyleSheet.create({
   pendingHint: { fontSize: 13, marginTop: 16, textAlign: 'center' },
 
   // ── Dashboard ─────────────────────────────────────────────────────────────
+  portfolioSection: { paddingHorizontal: 20, marginBottom: 4 },
+  portfolioCount: { fontSize: 13, fontWeight: '600' as const },
+  portfolioRow: { gap: 10, paddingBottom: 4 },
+  portfolioCard: {
+    width: 128,
+    padding: 12,
+    borderRadius: 14,
+    borderWidth: 1,
+    alignItems: 'center',
+    gap: 6,
+  },
+  portfolioCardIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  portfolioCardName: { fontSize: 13, fontWeight: '700' as const },
+  portfolioCardRole: { fontSize: 11, fontWeight: '600' as const },
+
   orgHeader: {
     paddingHorizontal: 20,
     paddingVertical: 16,

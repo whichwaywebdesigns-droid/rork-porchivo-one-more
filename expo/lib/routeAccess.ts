@@ -77,6 +77,8 @@ export const ROUTE_ACCESS: Record<string, RouteAccess> = {
   'privacy-policy': 'free',
   'terms-of-service': 'free',
   'community-guidelines': 'free',
+  'org-vendors': 'free',
+  'org-branding': 'free',
   'contact-support': 'free',
   'support-ticket-detail': 'free',
   billing: 'free',

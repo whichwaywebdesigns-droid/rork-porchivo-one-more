@@ -124,6 +124,27 @@ export const FeatureFlags = {
    * scheduling, comments, and resolution tracking. Phase 13.
    */
   ORG_MAINTENANCE: true,
+
+  /**
+   * Portfolio view — multi-community switcher for admins/managers whose plan
+   * allows several communities (Professional: 3, Property Manager: unlimited).
+   * Renders the horizontal community switcher on the Community tab.
+   */
+  ORG_PORTFOLIO: true,
+
+  /**
+   * Vendor Directory — org-scoped vendor list (name, trade, contact) with
+   * staff CRUD. Gated in-app to Professional / Property Manager plans.
+   * Backed by the org_vendors table.
+   */
+  ORG_VENDOR_DIRECTORY: true,
+
+  /**
+   * Custom Branding — admin picks the community's accent color (stored on
+   * organizations.brand_color) and it tints the Community surfaces.
+   * Gated in-app to Professional / Property Manager plans.
+   */
+  ORG_BRANDING: true,
 } as const;
 
 export type FeatureFlagKey = keyof typeof FeatureFlags;

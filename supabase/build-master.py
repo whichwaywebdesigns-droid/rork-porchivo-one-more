@@ -50,6 +50,7 @@ ORDER = [
     "support-tickets-migration.sql",          # support_tickets + AI-drafted replies (references profiles + update_updated_at)
     "support-reply-templates-migration.sql",  # staff reply-templates library (references profiles + update_updated_at)
     "avatar-storage-migration.sql",           # public avatars bucket + owner-scoped Storage RLS
+    "portfolio-vendors-branding-migration.sql", # org portfolio caps, brand_color, org_vendors
     "delete-account-procedure.sql",           # references most tables — run last
     "add_apns_token.sql",                    # native iOS APNS token column on profiles
     "add_is_volunteer.sql",                  # volunteer partner flag + stats view rebuild
