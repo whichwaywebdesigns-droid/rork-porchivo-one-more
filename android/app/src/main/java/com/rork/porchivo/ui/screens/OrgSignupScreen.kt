@@ -60,7 +60,13 @@ import kotlinx.coroutines.launch
 
 private enum class SignupStep { DETAILS, PLAN, LAUNCHING, CONFIRMING, SUCCESS, CANCELLED }
 
-private data class PlanInfo(val id: String, val name: String, val monthly: Int, val blurb: String)
+private data class PlanInfo(
+    val id: String,
+    val name: String,
+    val monthly: Int,
+    val blurb: String,
+    val onboardingFee: Int = 0,
+)
 
 private val ORG_TYPES = listOf(
     "hoa" to "HOA",
@@ -72,8 +78,8 @@ private val ORG_TYPES = listOf(
 private val PLANS = listOf(
     PlanInfo("starter", "Starter", 99, "Up to 50 units"),
     PlanInfo("community", "Community", 249, "Up to 200 units"),
-    PlanInfo("professional", "Professional", 499, "Up to 500 units"),
-    PlanInfo("enterprise", "Enterprise", 1499, "Up to 2,000 units"),
+    PlanInfo("professional", "Professional", 499, "Up to 500 units", onboardingFee = 500),
+    PlanInfo("enterprise", "Enterprise", 1499, "Up to 2,000 units", onboardingFee = 1500),
 )
 
 private const val SUCCESS_REDIRECT = "porchivo://org-signup/success"
@@ -467,8 +473,24 @@ private fun PlanStep(
                             if (isAnnual) "$${plan.monthly * 10}/yr — 2 months free" else "/mo",
                             color = c.textMuted, fontSize = 11.sp,
                         )
+                        if (plan.onboardingFee > 0) {
+                            Text(
+                                "+ $${plan.onboardingFee} onboarding",
+                                color = c.textMuted, fontSize = 10.sp,
+                            )
+                        }
                     }
                 }
+            }
+        }
+
+        // Onboarding-fee disclosure for plans that charge one (mirrors Stripe Checkout line items)
+        plans.firstOrNull { it.id == selectedPlan }?.let { plan ->
+            if (plan.onboardingFee > 0) {
+                Text(
+                    "Includes a one-time $$plan.onboardingFee onboarding fee, charged together with your subscription at checkout.",
+                    color = c.textMuted, fontSize = 11.sp,
+                )
             }
         }
 
