@@ -1,0 +1,33 @@
+== Real-payment test VERIFY: e2e-pay-1788029011@porchivo.test ==
+   session=cs_live_a1sLjJQYKOSnbY2wVqkRlDlZMQZary9AidDUt65UIH7NZpYwq3XTVVDlWG
+[1] Waiting for payment (polls up to 90s)
+  PASS — checkout session PAID | status=paid amount=9900 sub=sub_1U9s0LGjjmBBuuB6XxSWAJyX
+[2] Webhook activation (polls org row up to 60s)
+    0s: subscription_status=pending
+    5s: subscription_status=pending
+    10s: subscription_status=pending
+    15s: subscription_status=pending
+    20s: subscription_status=pending
+    25s: subscription_status=pending
+    30s: subscription_status=pending
+    35s: subscription_status=pending
+    40s: subscription_status=pending
+    45s: subscription_status=pending
+    50s: subscription_status=pending
+    55s: subscription_status=pending
+  FAIL — webhook activated org (active + is_active) | {"subscription_status": "pending", "is_active": false, "plan_tier": "starter", "billing_cycle": "monthly", "current_period_end": null, "stripe_customer_id": "cus_VABbOXiCmy25Eg", "has_sub_id": false}
+  FAIL — period end set (~30 days out) | None
+[3] confirm-org-signup (success-redirect path)
+  PASS — login returns JWT | HTTP 200
+  PASS — confirm-org-signup 200 (idempotent) | HTTP 200 {"success": true, "org": {"id": "e147e457-9fa1-4029-964f-199f5b963849", "name": "E2E Payment Test Org", "inviteCode": "304FLA", "planTier": "starter", "billingCycle": "monthly"}}
+[4] Stripe subscription state
+  PASS — subscription active | status=active
+[5] Cleanup (real $99 charge remains — refund in Stripe dashboard if desired)
+  subscription canceled
+  Stripe customer deleted
+  PASS — test user + org removed
+
+== RESULT: 5 passed, 2 failed ==
+Failed:
+  - webhook activated org (active + is_active)
+  - period end set (~30 days out)
