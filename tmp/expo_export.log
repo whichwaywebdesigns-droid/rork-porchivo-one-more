@@ -1,0 +1,106 @@
+env: load .env
+[33m› [1m[@sentry/react-native/expo][22m Missing config for [1morganization, project[22m. Environment variables will be used as a fallback during the build. https://docs.sentry.io/platforms/react-native/manual-setup/[0m
+env: export EXPO_PUBLIC_SUPABASE_URL EXPO_PUBLIC_SUPABASE_ANON_KEY EXPO_PUBLIC_REVENUECAT_TEST_API_KEY EXPO_PUBLIC_REVENUECAT_IOS_API_KEY EXPO_PUBLIC_SENTRY_DSN EXPO_PUBLIC_SHIP24_API_KEY EXPO_PUBLIC_RORK_TOOLKIT_SECRET_KEY EXPO_PUBLIC_SUPERWALL_IOS_API_KEY EXPO_PUBLIC_SUPERWALL_ANDROID_API_KEY EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY EXPO_TOKEN REVENUECAT_SECRET_API_KEY SUPABASE_ACCESS_TOKEN STRIPE_SECRET_KEY EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY EXPO_PUBLIC_RORK_AUTH_URL EXPO_PUBLIC_RORK_API_BASE_URL EXPO_PUBLIC_RORK_FUNCTIONS_URL EXPO_PUBLIC_TOOLKIT_URL EXPO_PUBLIC_PROJECT_ID EXPO_PUBLIC_TEAM_ID
+
+Using (experimental) base path: /app
+Starting Metro Bundler
+Error while reading cache, falling back to a full crawl:
+ Error: Unable to deserialize cloned data due to invalid or unsupported version.
+    at deserialize (node:v8:435:7)
+    at DiskCacheManager.read (/home/user/rork-app/expo/node_modules/metro-file-map/src/cache/DiskCacheManager.js:60:33)
+    at FileMap.read (/home/user/rork-app/expo/node_modules/metro-file-map/src/index.js:284:14)
+    at /home/user/rork-app/expo/node_modules/metro-file-map/src/index.js:202:25
+    at DependencyGraph.ready (/home/user/rork-app/expo/node_modules/metro/src/node-haste/DependencyGraph.js:88:5)
+    at Bundler.ready (/home/user/rork-app/expo/node_modules/metro/src/Bundler.js:62:5)
+    at IncrementalBundler.ready (/home/user/rork-app/expo/node_modules/metro/src/IncrementalBundler.js:302:5)
+    at Server.ready (/home/user/rork-app/expo/node_modules/metro/src/Server.js:1305:5)
+| (node:5176) Warning: The 'NODE_DISABLE_COLORS' and 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:5177) Warning: The 'NODE_DISABLE_COLORS' and 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:5183) Warning: The 'NODE_DISABLE_COLORS' and 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:5187) Warning: The 'NODE_DISABLE_COLORS' and 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:5190) Warning: The 'NODE_DISABLE_COLORS' and 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:5196) Warning: The 'NODE_DISABLE_COLORS' and 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+Web node_modules/expo-router/entry.js ▓▓▓▓▓▓░░░░░░░░░░ 39.1% (103/347)
+Web node_modules/expo-router/entry.js ▓▓▓▓▓▓░░░░░░░░░░ 39.1% (168/440)
+ WARN  Attempted to import the module "/home/user/rork-app/expo/node_modules/expo-superwall/compat" which is listed in the "exports" of "/home/user/rork-app/expo/node_modules/expo-superwall", however no match was resolved for this request (platform = web). Falling back to file-based resolution. Consider updating the call site or asking the package maintainer(s) to expose this API.
+ WARN  Attempted to import the module "/home/user/rork-app/expo/node_modules/expo-superwall/compat" which is listed in the "exports" of "/home/user/rork-app/expo/node_modules/expo-superwall", however no match was resolved for this request (platform = web). Falling back to file-based resolution. Consider updating the call site or asking the package maintainer(s) to expose this API.
+ WARN  Attempted to import the module "/home/user/rork-app/expo/node_modules/expo-superwall/compat" which is listed in the "exports" of "/home/user/rork-app/expo/node_modules/expo-superwall", however no match was resolved for this request (platform = web). Falling back to file-based resolution. Consider updating the call site or asking the package maintainer(s) to expose this API.
+Web node_modules/expo-router/entry.js ▓▓▓▓▓▓░░░░░░░░░░ 39.1% (427/805)
+Web node_modules/expo-router/entry.js ▓▓▓▓▓▓░░░░░░░░░░ 43.0% ( 774/2873)
+| [33m› [1m[@sentry/react-native/expo][22m Missing config for [1morganization, project[22m. Environment variables will be used as a fallback during the build. https://docs.sentry.io/platforms/react-native/manual-setup/[0m
+Web node_modules/expo-router/entry.js ▓▓▓▓▓▓░░░░░░░░░░ 43.0% (1186/3171)
+Web node_modules/expo-router/entry.js ▓▓▓▓▓▓▓░░░░░░░░░ 49.1% (2251/3213)
+Web node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓░░░ 85.8% (3199/3469)
+Web node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░ 91.0% (3567/3768)
+Web node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 97.1% (4054/4115)
+Web Bundled 33475ms node_modules/expo-router/entry.js (4144 modules)
+
+› Assets (54):
+assets/audio/porch-light-verified-chime.f1b8c01a7bd96789df280446082acf99.mp3 (29.3 kB)
+assets/audio/splash-chime.deddf2265a363b8b1a5f9a59ee69a4f1.mp3 (65.2 kB)
+assets/images/delivery_box_cardboard.709235c586aabcb0c28fc93e42b81c93.png (1.06 MB)
+assets/images/icon.6682d9bb815c5db76c19bf702d2bb562.png (627 kB)
+assets/images/login-porch-bg.56b7590ee65e4b4ba93c68610d49f1a3.png (2.01 MB)
+assets/images/onboarding-1.250d0c7797d3949ff4941f7de323dee9.png (1.38 MB)
+assets/images/onboarding-2.771ff32a4a5109d2c964f970de72e4dc.png (1.37 MB)
+assets/images/onboarding-3.e9275822c19fb0171ff125920b4d6f61.png (1.18 MB)
+assets/images/onboarding-4.7fe3168e14a61f68d0d2723addcb2cf7.png (1.37 MB)
+assets/images/porchivo-logo.5cfb2fb7c470c97428aa8e442773b1ab.png (468 kB)
+assets/images/role-mark-hoa.3dc6aac0e48501584a57b3fbbbcd6802.png (382 kB)
+assets/images/role-mark-other.d47741b60ccd003f62622eaef3104434.png (374 kB)
+assets/images/role-mark-staff.2a6608c344fba1f69044a86c13a0f0c6.png (394 kB)
+assets/images/role-mark.0563b1eee5094ef67eefa1918f43aa60.png (343 kB)
+assets/images/splash-anim.3b71b6c7fc9089cfa8fba3226cff6434.webp (1.83 MB)
+assets/images/splash-box.2d78c639cb218891ad11d19c207ce4b4.png (902 kB)
+assets/images/splash-video-poster.66b092f3d264fb7db69685f7d262d029.jpg (101 kB)
+node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/AntDesign.3f78af31cca60105799838a1a7a59fbd.ttf (130 kB)
+node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Entypo.31b5ffea3daddc69dd01a1f3d6cf63c5.ttf (66.2 kB)
+node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/EvilIcons.140c53a7643ea949007aa9a282153849.ttf (13.5 kB)
+node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Feather.ca4b48e04dc1ce10bfbddb262c8b835f.ttf (55.6 kB)
+node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/FontAwesome.b06871f281fee6b241d60582ae9369b9.ttf (166 kB)
+node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/FontAwesome5_Brands.3b89dd103490708d19a95adcae52210e.ttf (134 kB)
+node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/FontAwesome5_Regular.1f77739ca9ff2188b539c36f30ffa2be.ttf (33.7 kB)
+node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/FontAwesome5_Solid.605ed7926cf39a2ad5ec2d1f9d391d3d.ttf (203 kB)
+node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/FontAwesome6_Brands.56c8d80832e37783f12c05db7c8849e2.ttf (209 kB)
+node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/FontAwesome6_Regular.370dd5af19f8364907b6e2c41f45dbbf.ttf (68 kB)
+node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/FontAwesome6_Solid.adec7d6f310bc577f05e8fe06a5daccf.ttf (424 kB)
+node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Fontisto.b49ae8ab2dbccb02c4d11caaacf09eab.ttf (314 kB)
+node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Foundation.e20945d7c929279ef7a6f1db184a4470.ttf (57 kB)
+node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Ionicons.b4eb097d35f44ed943676fd56f6bdc51.ttf (390 kB)
+node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/MaterialCommunityIcons.6e435534bd35da5fef04168860a9b8fa.ttf (1.31 MB)
+node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/MaterialIcons.4e85bc9ebe07e0340c9c4fc2f6c38908.ttf (357 kB)
+node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Octicons.871378c6eab492a3e689a9385dc45a12.ttf (69.4 kB)
+node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/SimpleLineIcons.d2285965fe34b05465047401b8595dd0.ttf (54.1 kB)
+node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Zocial.1681f34aaca71b8dfb70756bca331eb2.ttf (25.8 kB)
+node_modules/@react-navigation/elements/lib/module/assets/back-icon-mask.0a328cd9c1afd0afe8e3b1ec5165b1b4.png (653 B)
+node_modules/@react-navigation/elements/lib/module/assets/back-icon.35ba0eaec5a4f5ed12ca16fabeae451d.png (207 B)
+node_modules/@react-navigation/elements/lib/module/assets/clear-icon.c94f6478e7ae0cdd9f15de1fcb9e5e55.png (4 variations | 425 B)
+node_modules/@react-navigation/elements/lib/module/assets/close-icon.808e1b1b9b53114ec2838071a7e6daa7.png (4 variations | 235 B)
+node_modules/@react-navigation/elements/lib/module/assets/search-icon.286d67d3f74808a60a78d3ebf1a5fb57.png (928 B)
+node_modules/expo-router/assets/arrow_down.017bc6ba3fc25503e5eb5e53826d48a8.png (9.46 kB)
+node_modules/expo-router/assets/error.d1ea1496f9057eb392d5bbf3732a61b7.png (469 B)
+node_modules/expo-router/assets/file.19eeb73b9593a38f8e9f418337fc7d10.png (138 B)
+node_modules/expo-router/assets/forward.d8b800c443b8972542883e0b9de2bdc6.png (188 B)
+node_modules/expo-router/assets/pkg.ab19f4cbc543357183a20571f68380a3.png (364 B)
+node_modules/expo-router/assets/sitemap.412dd9275b6b48ad28f5e3d81bb1f626.png (465 B)
+node_modules/expo-router/assets/unmatched.20e71bdf79e3a97bf55fd9e164041578.png (4.75 kB)
+
+› web bundles (5):
+_expo/static/css/default-styles-2e00b4e7501f7bba74b02fc5cbed8c86.css (6.78 kB)
+_expo/static/js/web/entry-2cee8afc1834e692730b6dc368348aaf.js (9.46 MB)
+_expo/static/js/web/index-d7ae7e47aea8152644714bd5f5a5bf10.js (790 kB)
+_expo/static/js/web/index-dcbc6f06951899d44cb8725dd79e5c92.js (11.2 kB)
+_expo/static/js/web/StoreReview-dd8fa75c8037919530027ce757b41799.js (1.03 kB)
+
+› Files (3):
+favicon.ico (14.5 kB)
+index.html (1.44 kB)
+metadata.json (49 B)
+
+Exported: dist

@@ -40,7 +40,7 @@ struct RootView: View {
                 }
             }
 
-            SplashView()
+            SplashVideoView()
                 .opacity(showSplashOverlay ? 1 : 0)
                 .animation(.easeOut(duration: 0.45), value: showSplashOverlay)
                 .allowsHitTesting(showSplashOverlay)
@@ -61,19 +61,6 @@ struct RootView: View {
             @unknown default:
                 break
             }
-        }
-    }
-}
-
-private struct SplashView: View {
-    var body: some View {
-        ZStack {
-            Color("SplashBackground")
-                .ignoresSafeArea()
-            Image("SplashImage")
-                .resizable()
-                .aspectRatio(contentMode: .fill)
-                .ignoresSafeArea()
         }
     }
 }
