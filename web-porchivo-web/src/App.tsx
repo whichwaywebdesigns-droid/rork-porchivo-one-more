@@ -56,6 +56,18 @@ const PageLoader = () => (
   </div>
 );
 
+/**
+ * The Expo web app lives at /app/index.html. The static host's catch-all
+ * serves this marketing shell for /app/* paths (its _redirects file isn't
+ * honored), so bounce those URLs to the real app entry.
+ */
+const AppRedirect = () => {
+  useEffect(() => {
+    window.location.replace("/app/index.html");
+  }, []);
+  return <PageLoader />;
+};
+
 const App = () => (
   <AppErrorBoundary>
     <QueryClientProvider client={queryClient}>
@@ -83,6 +95,10 @@ const App = () => (
               <Route path="/settings" element={<Settings />} />
               <Route path="/email-preview" element={<EmailPreview />} />
               <Route path="/auth-fail" element={<AuthFail />} />
+
+              {/* Expo web app — host catch-all can't serve /app/ directly */}
+              <Route path="/app" element={<AppRedirect />} />
+              <Route path="/app/*" element={<AppRedirect />} />
 
               {/* ── Manager portal (magic-link login, staff-role gated) ── */}
               <Route

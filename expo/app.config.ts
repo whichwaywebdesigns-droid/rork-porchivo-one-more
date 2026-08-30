@@ -39,6 +39,9 @@ export default (): { expo: ExpoConfig } => ({
     },
     web: {
       favicon: "./assets/images/favicon.png",
+      // SPA output — the app is auth-gated, so static prerendering of every
+      // route is unnecessary (and would hit Supabase at build time).
+      output: "single",
     },
     plugins: [
       [
@@ -82,6 +85,9 @@ export default (): { expo: ExpoConfig } => ({
     },
     experiments: {
       typedRoutes: true,
+      // Deploy the web export under the marketing site's /app subpath
+      // (web-porchivo-web/public/app) — asset URLs are prefixed accordingly.
+      baseUrl: "/app",
     },
     extra: {
       router: {

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Menu, X, HelpCircle, ChevronRight } from "lucide-react";
+import { Menu, X, HelpCircle, ChevronRight, Smartphone } from "lucide-react";
 import { PRIMARY_NAV } from "@/config/navigation";
 import { BRAND } from "@/config/brand";
 import LanguageSelector from "./LanguageSelector";
@@ -161,6 +161,16 @@ export default function SiteHeader() {
                 {t("nav.help")}
               </Link>
 
+              {/* Full web app — same codebase as the mobile apps */}
+              <a
+                href="/app/index.html"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12.5px] font-medium text-brand-text-muted hover:text-brand-text-secondary hover:bg-brand-navy-600/40 transition-all"
+                aria-label="Open the Porchivo web app"
+              >
+                <Smartphone className="w-3.5 h-3.5" />
+                Open the App
+              </a>
+
               <LanguageSelector compact />
 
               <Link
@@ -173,6 +183,13 @@ export default function SiteHeader() {
 
             {/* ── Mobile toggle ─────────────────────────────────────────── */}
             <div className="md:hidden flex items-center gap-1">
+              <a
+                href="/app/index.html"
+                className="p-2.5 rounded-xl text-brand-text-muted hover:text-brand-text-primary hover:bg-brand-navy-600/50 transition-colors"
+                aria-label="Open the Porchivo web app"
+              >
+                <Smartphone className="w-5 h-5" />
+              </a>
               <ThemeToggle />
               <button
                 className="p-2.5 rounded-xl text-brand-text-muted hover:text-brand-text-primary hover:bg-brand-navy-600/50 transition-colors"
