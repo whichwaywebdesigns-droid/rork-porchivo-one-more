@@ -24,6 +24,7 @@ import DailyStreakCard from '@/components/DailyStreakCard';
 import ReferralCard from '@/components/ReferralCard';
 import InviteNeighborsCard from '@/components/InviteNeighborsCard';
 import { isEnabled } from '@/lib/featureFlags';
+import { usePostHog } from '@/providers/PostHogProvider';
 import { log } from '@/lib/logger';
 import { Shipment } from '@/types';
 
@@ -31,6 +32,11 @@ import { Shipment } from '@/types';
 const APP_OPENS_KEY = 'porchivo_app_opens';
 const PARTNER_UPSELL_MIN_OPENS = 3;
 const THEFT_FACT_MIN_OPENS = 3;
+
+// First PostHog experiment: horizontal quick-links row (control) vs a 2-column
+// grid. Variant is resolved from the `home-quick-links-layout-v1` feature flag;
+// 'control' renders whenever flags haven't loaded or the key is off.
+const QUICK_LINKS_EXPERIMENT_KEY = 'home-quick-links-layout-v1';
 
 
 export default function HomeScreen() {
@@ -41,6 +47,7 @@ export default function HomeScreen() {
   const { isOrgMember, isLoading: isOrgLoading } = useOrganization();
   const { myShipments, nearbyShipments, acceptShipment, isLoading: isShipmentsLoading } = useShipments();
   const { unreadNotificationCount } = useNotifications();
+  const posthog = usePostHog();
   const [refreshing, setRefreshing] = useState(false);
 
   // Tier guard: (home) is the community-tier tab and is hidden from the bar
@@ -130,6 +137,22 @@ export default function HomeScreen() {
     />
   ), [handleShipmentPress, handleAccept, isPartnerView, user?.hasLocationConsent]);
 
+  // Experiment variant + exposure tracking. The exposure event fires once per
+  // resolved variant (not per re-render) so PostHog's experiment metric —
+  // "share of exposed users who tap a quick link" — counts each person once.
+  const quickLinksFlag = posthog.getFlag(QUICK_LINKS_EXPERIMENT_KEY);
+  const quickLinksVariant: 'control' | 'grid' = quickLinksFlag === 'grid' ? 'grid' : 'control';
+
+  const exposureFiredRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (quickLinksFlag === undefined || exposureFiredRef.current === quickLinksVariant) return;
+    exposureFiredRef.current = quickLinksVariant;
+    posthog.capture('home_quick_links_exposure', {
+      experiment: QUICK_LINKS_EXPERIMENT_KEY,
+      variant: quickLinksVariant,
+    });
+  }, [quickLinksFlag, quickLinksVariant, posthog]);
+
   const quickLinks = useMemo(() => [
     { label: 'Alerts', icon: Bell, color: colors.danger, bg: colors.dangerLight, route: '/notifications', badge: unreadNotificationCount },
     { label: 'Safety', icon: BarChart3, color: colors.primary, bg: colors.primaryLight, route: '/safety-score', badge: 0 },
@@ -137,6 +160,38 @@ export default function HomeScreen() {
     { label: 'Invite', icon: Users, color: palette.warmOrange, bg: palette.warmOrangeGlow, route: '/invite-partner', badge: 0 },
     { label: 'Porch Risk', icon: ShieldAlert, color: palette.warmOrange, bg: palette.warmOrangeGlow, route: '/porch-risk', badge: 0 },
   ], [unreadNotificationCount, colors]);
+
+  const handleQuickLinkPress = useCallback((link: (typeof quickLinks)[number]) => {
+    posthog.capture('quick_link_tapped', {
+      experiment: QUICK_LINKS_EXPERIMENT_KEY,
+      variant: quickLinksVariant,
+      label: link.label,
+      route: link.route,
+    });
+    router.push(link.route as any);
+  }, [posthog, quickLinksVariant, router]);
+
+  const renderQuickLink = useCallback((link: (typeof quickLinks)[number], grid: boolean) => (
+    <TouchableOpacity
+      key={link.label}
+      style={grid ? [styles.quickLinkCard, styles.quickLinkGridCard] : styles.quickLinkCard}
+      onPress={() => handleQuickLinkPress(link)}
+      activeOpacity={0.75}
+      testID={`quick-link-${link.label.toLowerCase()}`}
+      accessibilityRole="button"
+      accessibilityLabel={`Open ${link.label}`}
+    >
+      <View style={[styles.quickLinkIcon, { backgroundColor: link.bg }]}>
+        <link.icon size={18} color={link.color} strokeWidth={2.2} />
+        {link.badge > 0 && (
+          <View style={styles.quickLinkBadge}>
+            <Text style={styles.quickLinkBadgeText}>{link.badge > 9 ? '9+' : link.badge}</Text>
+          </View>
+        )}
+      </View>
+      <Text style={[styles.quickLinkLabel, { color: colors.slateLight }]}>{link.label}</Text>
+    </TouchableOpacity>
+  ), [handleQuickLinkPress, colors.slateLight]);
 
   const ListHeader = useCallback(() => (
     <View style={styles.headerArea}>
@@ -185,33 +240,19 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.quickLinksRow}
-      >
-        {quickLinks.map((link) => (
-          <TouchableOpacity
-            key={link.label}
-            style={styles.quickLinkCard}
-            onPress={() => router.push(link.route as any)}
-            activeOpacity={0.75}
-            testID={`quick-link-${link.label.toLowerCase()}`}
-            accessibilityRole="button"
-            accessibilityLabel={`Open ${link.label}`}
-          >
-            <View style={[styles.quickLinkIcon, { backgroundColor: link.bg }]}>
-              <link.icon size={18} color={link.color} strokeWidth={2.2} />
-              {link.badge > 0 && (
-                <View style={styles.quickLinkBadge}>
-                  <Text style={styles.quickLinkBadgeText}>{link.badge > 9 ? '9+' : link.badge}</Text>
-                </View>
-              )}
-            </View>
-            <Text style={[styles.quickLinkLabel, { color: colors.slateLight }]}>{link.label}</Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+      {quickLinksVariant === 'grid' ? (
+        <View style={styles.quickLinksGrid}>
+          {quickLinks.map((link) => renderQuickLink(link, true))}
+        </View>
+      ) : (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.quickLinksRow}
+        >
+          {quickLinks.map((link) => renderQuickLink(link, false))}
+        </ScrollView>
+      )}
 
       {isPartnerView && !user?.hasLocationConsent && (
         <TouchableOpacity
@@ -250,7 +291,7 @@ export default function HomeScreen() {
         />
       )}
     </View>
-  ), [user, isPartnerView, router, quickLinks, myShipments, showTheftFact, showPartnerUpsell, showDailyStreak, showReferral]);
+  ), [user, isPartnerView, router, quickLinks, myShipments, showTheftFact, showPartnerUpsell, showDailyStreak, showReferral, posthog, quickLinksVariant, handleQuickLinkPress, renderQuickLink]);
 
   const ListEmpty = useCallback(() => (
     <View>
@@ -426,6 +467,17 @@ const styles = StyleSheet.create({
     paddingRight: space.lg,
     paddingVertical: space.xs,
     marginBottom: space.md,
+  },
+  quickLinksGrid: {
+    flexDirection: 'row' as const,
+    flexWrap: 'wrap' as const,
+    gap: space.sm,
+    marginBottom: space.md,
+  },
+  quickLinkGridCard: {
+    flexBasis: '47%',
+    flexGrow: 1,
+    minWidth: 0,
   },
   quickLinkCard: {
     alignItems: 'center',

@@ -20,7 +20,7 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AppState, type AppStateStatus } from 'react-native';
+import { AppState, Platform, type AppStateStatus } from 'react-native';
 import { log, warn } from './logger';
 
 const POSTHOG_KEY = process.env.EXPO_PUBLIC_POSTHOG_API_KEY ?? '';

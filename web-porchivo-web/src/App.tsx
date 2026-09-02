@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import AppErrorBoundary from "@/components/AppErrorBoundary";
 import CorrugatedBackground from "@/components/CorrugatedBackground";
+import PostHogPageView from "./components/PostHogPageView";
 import TapeDispenserSpinner from "@/components/TapeDispenserSpinner";
 
 import Index from "./pages/Index";
@@ -77,6 +78,7 @@ const App = () => (
         <BrowserRouter>
           <CorrugatedBackground />
           <ScrollToTop />
+          <PostHogPageView />
           <Suspense fallback={<PageLoader />}>
             <Routes>
               <Route path="/" element={<Index />} />
