@@ -9,7 +9,9 @@ import posthog from "posthog-js";
 
 const POSTHOG_KEY = import.meta.env.VITE_POSTHOG_API_KEY;
 const POSTHOG_HOST =
-  import.meta.env.VITE_POSTHOG_HOST ?? "https://us.i.posthog.com";
+  import.meta.env.VITE_POSTHOG_HOST ?? "https://t.porchivo.com";
+const POSTHOG_UI_HOST =
+  import.meta.env.VITE_POSTHOG_UI_HOST ?? "https://us.posthog.com";
 
 export const isPostHogEnabled = (): boolean => Boolean(POSTHOG_KEY);
 
@@ -20,6 +22,7 @@ export function initPostHog(): void {
   initialized = true;
   posthog.init(POSTHOG_KEY, {
     api_host: POSTHOG_HOST,
+    ui_host: POSTHOG_UI_HOST,
     // Marketing site: full autocapture (clicks, forms) + exception capture.
     autocapture: true,
     capture_exceptions: true,
