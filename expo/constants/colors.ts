@@ -53,10 +53,18 @@ export function getColors(isDark: boolean) {
   } as const;
 }
 
+// Pre-built per-theme color objects. getColors() is deterministic given
+// isDark, so module-level singletons give every useColors() caller a stable
+// identity. Without this, each render returned a fresh object, which broke
+// every useMemo/useCallback dependency chain downstream (notably FlatList
+// ListHeaderComponents remounting on each parent re-render → scroll jumps).
+const LIGHT_COLORS: AppColors = getColors(false);
+const DARK_COLORS: AppColors = getColors(true);
+
 /** Hook — returns reactive colors that update when the theme toggle changes. */
 export function useColors(): AppColors {
   const { isDark } = useTheme();
-  return getColors(isDark);
+  return isDark ? DARK_COLORS : LIGHT_COLORS;
 }
 
 // Static light-mode Colors (backward compat for screens not yet using useColors)

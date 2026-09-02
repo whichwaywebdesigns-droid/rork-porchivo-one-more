@@ -193,7 +193,12 @@ export default function HomeScreen() {
     </TouchableOpacity>
   ), [handleQuickLinkPress, colors.slateLight]);
 
-  const ListHeader = useCallback(() => (
+  // Memoized ELEMENT (not a component function): FlatList remounts the whole
+  // header subtree whenever ListHeaderComponent's identity changes, which was
+  // causing visible scroll jumps on every re-render (flag resolution,
+  // notification badge updates, pull-to-refresh state). An element with a
+  // stable identity reconciles instead of remounting.
+  const listHeader = useMemo(() => (
     <View style={styles.headerArea}>
       <ActivationChecklist />
       {showTheftFact && <DailyPackageTheftFact />}
@@ -291,7 +296,7 @@ export default function HomeScreen() {
         />
       )}
     </View>
-  ), [user, isPartnerView, router, quickLinks, myShipments, showTheftFact, showPartnerUpsell, showDailyStreak, showReferral, posthog, quickLinksVariant, handleQuickLinkPress, renderQuickLink]);
+  ), [user, isPartnerView, router, quickLinks, myShipments, showTheftFact, showPartnerUpsell, showDailyStreak, showReferral, posthog, quickLinksVariant, handleQuickLinkPress, renderQuickLink, colors]);
 
   const ListEmpty = useCallback(() => (
     <View>
@@ -385,7 +390,7 @@ export default function HomeScreen() {
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
-        ListHeaderComponent={ListHeader}
+        ListHeaderComponent={listHeader}
         ListEmptyComponent={ListEmpty}
         refreshControl={
           <RefreshControl

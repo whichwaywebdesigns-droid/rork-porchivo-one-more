@@ -264,8 +264,10 @@ export default function PartnersScreen() {
     [router],
   );
 
-  const renderHeader = useCallback(() => {
-    return (
+  // Memoized ELEMENT (not a component function) — FlatList remounts the whole
+  // header subtree when ListHeaderComponent's identity changes, which caused
+  // scroll jumps on data updates. An element reconciles instead of remounting.
+  const listHeader = useMemo(() => (
       <View>
         {isPartner && myHolds.length > 0 && (
           <View style={styles.section}>
@@ -319,8 +321,7 @@ export default function PartnersScreen() {
           </View>
         )}
       </View>
-    );
-  }, [isPartner, isHomeowner, myHolds, upcomingForPartner, activePartners, packages, handlePickUp, handleReturn]);
+  ), [isPartner, isHomeowner, myHolds, upcomingForPartner, activePartners, packages, handlePickUp, handleReturn, colors]);
 
   return (
     <View style={styles.container}>
@@ -350,7 +351,7 @@ export default function PartnersScreen() {
             data={isHomeowner ? activePartners : []}
             renderItem={renderPartner}
             keyExtractor={(item) => item.id}
-            ListHeaderComponent={renderHeader}
+            ListHeaderComponent={listHeader}
             contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}
             ListFooterComponent={
