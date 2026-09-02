@@ -32,6 +32,7 @@ import { OrganizationProvider, useOrganization } from "@/store/OrganizationConte
 import { FieldGuideProvider } from "@/store/FieldGuideContext";
 import { TrustEngineProvider } from "@/store/TrustEngineContext";
 import { ThemeProvider } from "@/providers/ThemeProvider";
+import { PostHogProvider } from "@/providers/PostHogProvider";
 import { LanguageRootProvider } from "@/i18n/LanguageProvider";
 import { ToastProvider } from "@/providers/ToastProvider";
 import { OfflineQueueProvider } from "@/store/OfflineQueueContext";
@@ -396,6 +397,7 @@ export default function RootLayout() {
           <ToastProvider>
           <OfflineQueueProvider>
           <AppProvider>
+          <PostHogProvider>
             <PaywallProvider>
             <NotificationsProvider>
             <BackgroundErrorProvider>
@@ -433,6 +435,7 @@ export default function RootLayout() {
             </BackgroundErrorProvider>
             </NotificationsProvider>
             </PaywallProvider>
+          </PostHogProvider>
           </AppProvider>
           </OfflineQueueProvider>
           </ToastProvider>
