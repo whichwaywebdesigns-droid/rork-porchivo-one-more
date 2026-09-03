@@ -160,6 +160,11 @@ struct MoreScreen: View {
                 .foregroundStyle(c.textPrimary)
 
             VStack(spacing: 0) {
+                NavigationLink(value: Route.orgLedger) {
+                    adminRow("Payments Ledger", "receipt", c.gold)
+                }
+                .buttonStyle(.plain)
+                Divider().overlay(c.border).padding(.leading, 54)
                 NavigationLink(value: Route.manageSubscription) {
                     adminRow("Manage Subscription", "creditcard.fill", c.gold)
                 }

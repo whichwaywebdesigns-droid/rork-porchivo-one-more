@@ -10,6 +10,7 @@ import com.rork.porchivo.data.dto.DbOrgAmenity
 import com.rork.porchivo.data.dto.DbOrgAmenityReservation
 import com.rork.porchivo.data.dto.DbOrgContextRow
 import com.rork.porchivo.data.dto.DbOrgDocument
+import com.rork.porchivo.data.dto.DbOrgPayment
 import com.rork.porchivo.data.dto.DbPlanTierRow
 import com.rork.porchivo.data.dto.DbProfile
 import com.rork.porchivo.data.dto.DbShipment
@@ -619,6 +620,28 @@ class SupabaseClient(
     /** Fetch the org's plan tier (null on failure — callers fail open). */
     suspend fun fetchOrgPlanTier(orgId: String): Result<DbPlanTierRow?> =
         selectSingle("organizations", mapOf("id" to "eq.$orgId", "select" to "plan_tier"))
+
+    /** Full payment ledger for the org, newest first (RLS: staff/board read). */
+    suspend fun fetchOrgPayments(orgId: String): Result<List<DbOrgPayment>> = try {
+        val response = httpClient.get("$restBase/org_payments") {
+            authHeaders().forEach { (k, v) -> header(k, v) }
+            header("Accept", "application/json")
+            url {
+                parameters.append("select", "*,member:profiles(name)")
+                parameters.append("org_id", "eq.$orgId")
+                parameters.append("order", "created_at.desc")
+                parameters.append("limit", "500")
+            }
+        }
+        if (response.status.isSuccess()) {
+            val list: List<DbOrgPayment> = response.body()
+            Result.success(list)
+        } else {
+            Result.failure(Exception("Failed to fetch payments: ${response.status}"))
+        }
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
 
     /** Upload bytes to the private `org-documents` bucket under the org's folder. */
     suspend fun uploadOrgDocObject(path: String, data: ByteArray, mime: String): Result<Unit> = try {

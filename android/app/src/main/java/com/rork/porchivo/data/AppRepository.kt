@@ -10,6 +10,7 @@ import com.rork.porchivo.data.dto.DbOrgAmenity
 import com.rork.porchivo.data.dto.DbOrgAmenityReservation
 import com.rork.porchivo.data.dto.DbOrgContextRow
 import com.rork.porchivo.data.dto.DbOrgDocument
+import com.rork.porchivo.data.dto.DbOrgPayment
 import com.rork.porchivo.data.dto.DbProfile
 import com.rork.porchivo.data.dto.DbShipment
 import com.rork.porchivo.data.dto.SlotTakenException
@@ -1250,6 +1251,26 @@ class AppRepository(context: Context) {
         val tier = client.fetchOrgPlanTier(orgId).getOrNull()?.planTier
         _orgPlanTier.value = tier
         return tier
+    }
+
+    private val _orgPayments = MutableStateFlow<List<DbOrgPayment>>(emptyList())
+    val orgPayments: StateFlow<List<DbOrgPayment>> = _orgPayments.asStateFlow()
+
+    private val _orgPaymentsLoadState = MutableStateFlow<LoadState<Unit>>(LoadState.Idle)
+    val orgPaymentsLoadState: StateFlow<LoadState<Unit>> = _orgPaymentsLoadState.asStateFlow()
+
+    /** Staff: load the payment ledger (org_payments, newest first). */
+    suspend fun loadOrgPayments() {
+        val client = supabase ?: return
+        val orgId = currentOrgId ?: return
+        _orgPaymentsLoadState.value = LoadState.Loading
+        val result = client.fetchOrgPayments(orgId)
+        if (result.isSuccess) {
+            _orgPayments.value = result.getOrNull() ?: emptyList()
+            _orgPaymentsLoadState.value = LoadState.Success(Unit)
+        } else {
+            _orgPaymentsLoadState.value = LoadState.Error("Could not load payments")
+        }
     }
 
     /** Staff: add an amenity (UNIQUE(org_id, name) — duplicate names rejected). */

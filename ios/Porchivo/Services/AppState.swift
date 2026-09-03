@@ -66,6 +66,8 @@ final class AppState {
     var orgReservationsLoadState: LoadState<Unit> = .idle
     /// Plan tier of the active org — nil when unknown (callers fail open).
     var orgPlanTier: String? = nil
+    var orgPayments: [OrgPayment] = []
+    var orgPaymentsLoadState: LoadState<Unit> = .idle
 
     // Local data (UserDefaults — mirrors AsyncStorage/SharedPreferences)
     var packages: [TrackedPackage] = []
@@ -562,6 +564,8 @@ final class AppState {
         orgReservations = []
         orgReservationsLoadState = .idle
         orgPlanTier = nil
+        orgPayments = []
+        orgPaymentsLoadState = .idle
         shipmentsLoadState = .idle
         notificationsLoadState = .idle
     }
@@ -1179,6 +1183,27 @@ final class AppState {
     var isAmenityPlanAllowed: Bool {
         guard let tier = orgPlanTier else { return true }
         return ["community", "professional", "enterprise"].contains(tier)
+    }
+
+    /// The ledger starts on the Community plan; nil tier (fetch failed) fails open.
+    var isLedgerPlanAllowed: Bool {
+        guard let tier = orgPlanTier else { return true }
+        return ["community", "professional", "enterprise"].contains(tier)
+    }
+
+    /// Staff: loads the payment ledger (org_payments, newest first).
+    @MainActor
+    func loadOrgPayments(orgId: String) async {
+        guard isSupabaseConfigured else { return }
+        orgPaymentsLoadState = .loading
+        let result = await supabase.fetchOrgPayments(orgId: orgId)
+        switch result {
+        case .success(let rows):
+            orgPayments = rows
+            orgPaymentsLoadState = .success(Unit())
+        case .failure(let err):
+            orgPaymentsLoadState = .error(err.localizedDescription)
+        }
     }
 
     /// Staff: add an amenity. Returns nil on success, else an error message.

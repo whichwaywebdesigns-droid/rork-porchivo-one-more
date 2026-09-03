@@ -23,6 +23,7 @@ import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material.icons.outlined.Person3
 import androidx.compose.material.icons.outlined.Pool
+import androidx.compose.material.icons.outlined.Receipt
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Campaign
 import androidx.compose.material.icons.outlined.HelpOutline
@@ -179,6 +180,10 @@ fun MoreScreen(
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                 ) {
                     Column {
+                        LinkRow(icon = Icons.Outlined.Receipt, tint = c.gold, label = "Payments Ledger") {
+                            navController.navigate(Routes.ORG_LEDGER)
+                        }
+                        HorizontalDivider(color = c.border)
                         LinkRow(icon = Icons.Outlined.CreditCard, tint = c.gold, label = "Manage Subscription") { }
                         HorizontalDivider(color = c.border)
                         LinkRow(icon = Icons.Outlined.Apartment, tint = c.accent, label = "Invite Code") { }

@@ -57,6 +57,19 @@ data class DbPlanTierRow(
     @SerialName("plan_tier") val planTier: String? = null,
 )
 
+/** Payment row from `org_payments` (ledger is staff-facing; RLS restricts reads). */
+@Serializable
+data class DbOrgPayment(
+    @SerialName("id") val id: String = "",
+    @SerialName("org_id") val orgId: String? = null,
+    @SerialName("user_id") val userId: String? = null,
+    @SerialName("amount_cents") val amountCents: Long = 0,
+    @SerialName("status") val status: String = "",
+    @SerialName("paid_at") val paidAt: String? = null,
+    @SerialName("created_at") val createdAt: String? = null,
+    @SerialName("member") val member: DbReservationMember? = null,
+)
+
 /**
  * Thrown when a booking overlaps an existing confirmed slot — the Postgres
  * GiST exclusion constraint surfaces as SQLSTATE 23P01 (exclusion_violation).

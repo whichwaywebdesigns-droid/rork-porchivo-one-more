@@ -12,6 +12,7 @@ import com.rork.porchivo.data.dto.OrgConfirmResponse
 import com.rork.porchivo.data.dto.DbOrgAmenity
 import com.rork.porchivo.data.dto.DbOrgAmenityReservation
 import com.rork.porchivo.data.dto.DbOrgDocument
+import com.rork.porchivo.data.dto.DbOrgPayment
 import com.rork.porchivo.data.dto.RiskScoreResponse
 import com.rork.porchivo.model.Announcement
 import com.rork.porchivo.model.MaintenanceRequest
@@ -189,6 +190,17 @@ class AppViewModel : ViewModel() {
             repo.loadOrgPlanTier()
             repo.loadOrgAmenities()
             repo.loadOrgReservations()
+        }
+    }
+
+    val orgPayments: StateFlow<List<DbOrgPayment>> = repo.orgPayments
+    val orgPaymentsLoadState: StateFlow<LoadState<Unit>> = repo.orgPaymentsLoadState
+
+    /** Staff: loads plan tier + payment ledger for the Payments Ledger screen. */
+    fun loadOrgLedger() {
+        viewModelScope.launch {
+            repo.loadOrgPlanTier()
+            repo.loadOrgPayments()
         }
     }
 

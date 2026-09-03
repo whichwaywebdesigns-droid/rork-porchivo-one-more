@@ -485,6 +485,41 @@ nonisolated struct OrgPlanRow: Codable, Sendable {
     }
 }
 
+/// Payment row from `org_payments` (ledger is staff-facing; RLS restricts reads).
+nonisolated struct OrgPayment: Codable, Sendable {
+    let id: String
+    var orgId: String?
+    var userId: String?
+    var amountCents: Int
+    var status: String
+    var paidAt: String?
+    var createdAt: String?
+    var member: OrgReservationMember?
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case orgId = "org_id"
+        case userId = "user_id"
+        case amountCents = "amount_cents"
+        case status
+        case paidAt = "paid_at"
+        case createdAt = "created_at"
+        case member
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decodeIfPresent(String.self, forKey: .id) ?? ""
+        orgId = try c.decodeIfPresent(String.self, forKey: .orgId)
+        userId = try c.decodeIfPresent(String.self, forKey: .userId)
+        amountCents = try c.decodeIfPresent(Int.self, forKey: .amountCents) ?? 0
+        status = try c.decodeIfPresent(String.self, forKey: .status) ?? ""
+        paidAt = try c.decodeIfPresent(String.self, forKey: .paidAt)
+        createdAt = try c.decodeIfPresent(String.self, forKey: .createdAt)
+        member = try c.decodeIfPresent(OrgReservationMember.self, forKey: .member)
+    }
+}
+
 /// Thrown when a booking overlaps an existing confirmed slot — the Postgres
 /// GiST exclusion constraint surfaces as SQLSTATE 23P01 (exclusion_violation).
 nonisolated struct SlotTakenError: LocalizedError {
@@ -1101,6 +1136,21 @@ actor SupabaseService {
             return row.planTier
         }
         return nil
+    }
+
+    /// Full payment ledger for the org, newest first (RLS: staff/board read).
+    func fetchOrgPayments(orgId: String) async -> Result<[OrgPayment], Error> {
+        guard let comps = URLComponents(url: baseURL.appendingPathComponent("rest/v1/org_payments"),
+                                        resolvingAgainstBaseURL: false),
+              let url = comps.url else { return .failure(URLError(.badURL)) }
+        var c = comps
+        c.queryItems = [
+            URLQueryItem(name: "select", value: "*,member:profiles(name)"),
+            URLQueryItem(name: "org_id", value: "eq.\(orgId)"),
+            URLQueryItem(name: "order", value: "created_at.desc"),
+            URLQueryItem(name: "limit", value: "500"),
+        ]
+        return await restGet(url: c.url ?? url)
     }
 
     /// Uploads bytes to the private `org-documents` bucket under the org's
