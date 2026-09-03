@@ -51,6 +51,7 @@ ORDER = [
     "support-reply-templates-migration.sql",  # staff reply-templates library (references profiles + update_updated_at)
     "avatar-storage-migration.sql",           # public avatars bucket + owner-scoped Storage RLS
     "portfolio-vendors-branding-migration.sql", # org portfolio caps, brand_color, org_vendors
+    "b2b-feature-gaps-migration.sql",          # org_documents + private org-documents bucket, org_amenities + reservations (Starter/Community tier gaps)
     "delete-account-procedure.sql",           # references most tables — run last
     "add_apns_token.sql",                    # native iOS APNS token column on profiles
     "add_is_volunteer.sql",                  # volunteer partner flag + stats view rebuild

@@ -29,6 +29,9 @@ import {
   Wrench,
   Truck,
   Palette,
+  FolderOpen,
+  CalendarClock,
+  Receipt,
 } from 'lucide-react-native';
 import { useColors } from '@/constants/colors';
 import { useOrganization } from '@/store/OrganizationContext';
@@ -352,6 +355,10 @@ function CommunityDashboard({ onRefresh, refreshing }: { onRefresh: () => void; 
     staleTime: 1000 * 60 * 5,
   });
   const isMultiCommunityPlan = orgMeta?.planTier === 'professional' || orgMeta?.planTier === 'enterprise';
+  // Starter < Community ≤ Professional ≤ Property Manager — amenities and the
+  // payments ledger begin on the Community plan (see Pricing comparison rows).
+  const isCommunityPlanOrHigher =
+    orgMeta?.planTier === 'community' || orgMeta?.planTier === 'professional' || orgMeta?.planTier === 'enterprise';
   const brandColor = orgMeta?.brandColor ?? null;
 
   if (!activeOrg || !activeMembership) return null;
@@ -602,6 +609,62 @@ function CommunityDashboard({ onRefresh, refreshing }: { onRefresh: () => void; 
         )}
       </View>
 
+      {/* Document Library — all active members (Starter and up) */}
+      {isEnabled('ORG_DOCUMENT_LIBRARY') && activeOrg ? (
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={[styles.sectionTitle, { color: Colors.slate }]}>Documents</Text>
+            <TouchableOpacity onPress={() => router.push('/org-documents')} activeOpacity={0.7}>
+              <Text style={[styles.seeAll, { color: Colors.primary }]}>Browse</Text>
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity
+            style={[styles.directoryCard, { backgroundColor: Colors.surface, borderColor: Colors.border }]}
+            onPress={() => router.push('/org-documents')}
+            activeOpacity={0.8}
+          >
+            <View style={[styles.directoryIconWrap, { backgroundColor: Colors.success + '18' }]}>
+              <FolderOpen size={22} color={Colors.success} />
+            </View>
+            <View style={styles.directoryText}>
+              <Text style={[styles.directoryTitle, { color: Colors.slate }]}>Document Library</Text>
+              <Text style={[styles.directoryDesc, { color: Colors.slateLighter }]}>
+                Bylaws, budgets, notices, and community files
+              </Text>
+            </View>
+            <ChevronRight size={18} color={Colors.slateLighter} />
+          </TouchableOpacity>
+        </View>
+      ) : null}
+
+      {/* Amenity Reservations — all active members (Community and up) */}
+      {isEnabled('ORG_AMENITY_RESERVATIONS') && isCommunityPlanOrHigher ? (
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={[styles.sectionTitle, { color: Colors.slate }]}>Amenities</Text>
+            <TouchableOpacity onPress={() => router.push('/amenity-reservations')} activeOpacity={0.7}>
+              <Text style={[styles.seeAll, { color: Colors.primary }]}>Book</Text>
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity
+            style={[styles.directoryCard, { backgroundColor: Colors.surface, borderColor: Colors.border }]}
+            onPress={() => router.push('/amenity-reservations')}
+            activeOpacity={0.8}
+          >
+            <View style={[styles.directoryIconWrap, { backgroundColor: Colors.secondary + '18' }]}>
+              <CalendarClock size={22} color={Colors.secondary} />
+            </View>
+            <View style={styles.directoryText}>
+              <Text style={[styles.directoryTitle, { color: Colors.slate }]}>Amenity Reservations</Text>
+              <Text style={[styles.directoryDesc, { color: Colors.slateLighter }]}>
+                Book the pool, clubhouse, tennis court, and more
+              </Text>
+            </View>
+            <ChevronRight size={18} color={Colors.slateLighter} />
+          </TouchableOpacity>
+        </View>
+      ) : null}
+
       {/* Directory entry — all active members */}
       {showDirectory ? (
         <View style={styles.section}>
@@ -706,6 +769,12 @@ function CommunityDashboard({ onRefresh, refreshing }: { onRefresh: () => void; 
                 icon: <Palette size={20} color={Colors.gold} />,
                 accent: Colors.gold,
                 onPress: () => router.push('/org-branding'),
+              }] : []),
+              ...(isEnabled('ORG_LEDGER_EXPORT') && isCommunityPlanOrHigher ? [{
+                label: 'Ledger',
+                icon: <Receipt size={20} color={Colors.success} />,
+                accent: Colors.success,
+                onPress: () => router.push('/org-ledger'),
               }] : []),
             ].map((item) => (
               <TouchableOpacity

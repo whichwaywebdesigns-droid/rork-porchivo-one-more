@@ -145,6 +145,31 @@ export const FeatureFlags = {
    * Gated in-app to Professional / Property Manager plans.
    */
   ORG_BRANDING: true,
+
+  /**
+   * Document Library — org-scoped doc list (external links + files in the
+   * private `org-documents` bucket). All active members browse; staff/board
+   * manage. Available on every community plan (Starter and up). Backed by
+   * org_documents + storage RLS.
+   */
+  ORG_DOCUMENT_LIBRARY: true,
+
+  /**
+   * Amenity Reservations — members book hourly time slots for community
+   * amenities (pool, clubhouse, tennis court…). Gated in-app to Community /
+   * Professional / Property Manager plans. Backed by org_amenities +
+   * org_amenity_reservations (DB-level GiST overlap guard prevents
+   * double-booking).
+   */
+  ORG_AMENITY_RESERVATIONS: true,
+
+  /**
+   * Ledger Export — staff view of all org payments with collected totals and
+   * one-tap CSV export (share sheet). Gated in-app to Community /
+   * Professional / Property Manager plans. Reads org_payments; the export is
+   * built client-side — no schema or edge function needed.
+   */
+  ORG_LEDGER_EXPORT: true,
 } as const;
 
 export type FeatureFlagKey = keyof typeof FeatureFlags;
