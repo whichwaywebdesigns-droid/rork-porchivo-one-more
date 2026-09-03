@@ -225,11 +225,11 @@ follow the existing pattern for adding a new carrier regex.
 | Terms of Service | `app/terms-of-service.tsx` |
 
 <!-- AUTO-GENERATED:SCREEN-INDEX:START -->
-> _Auto-generated from `expo/app/` on **2026-09-02 16:37 UTC** by `scripts/refresh-docs.mjs`. The
+> _Auto-generated from `expo/app/` on **2026-09-03 03:43 UTC** by `scripts/refresh-docs.mjs`. The
 > curated table above stays hand-written; this list is the complete, always-current
 > set of route files so nothing silently goes missing as the app grows._
 
-**101 route screens detected:**
+**104 route screens detected:**
 
 | Route | File |
 |-------|------|
@@ -250,6 +250,7 @@ follow the existing pattern for adding a new carrier regex.
 | `admin-funnel.tsx` | `app/admin-funnel.tsx` |
 | `alert-detail.tsx` | `app/alert-detail.tsx` |
 | `alerts.tsx` | `app/alerts.tsx` |
+| `amenity-reservations.tsx` | `app/amenity-reservations.tsx` |
 | `analytics-dashboard.tsx` | `app/analytics-dashboard.tsx` |
 | `announcements.tsx` | `app/announcements.tsx` |
 | `auth-fail.tsx` | `app/auth-fail.tsx` |
@@ -287,6 +288,8 @@ follow the existing pattern for adding a new carrier regex.
 | `onboarding-setup.tsx` | `app/onboarding-setup.tsx` |
 | `onboarding.tsx` | `app/onboarding.tsx` |
 | `org-branding.tsx` | `app/org-branding.tsx` |
+| `org-documents.tsx` | `app/org-documents.tsx` |
+| `org-ledger.tsx` | `app/org-ledger.tsx` |
 | `org-signup.tsx` | `app/org-signup.tsx` |
 | `org-vendors.tsx` | `app/org-vendors.tsx` |
 | `package-detail.tsx` | `app/package-detail.tsx` |
