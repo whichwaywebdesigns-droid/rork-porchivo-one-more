@@ -6,9 +6,13 @@ import com.rork.porchivo.data.dto.DbAnnouncement
 import com.rork.porchivo.data.dto.DbMyMaintenanceRequest
 import com.rork.porchivo.data.dto.AuthSession
 import com.rork.porchivo.data.dto.DbNotification
+import com.rork.porchivo.data.dto.DbOrgAmenity
+import com.rork.porchivo.data.dto.DbOrgAmenityReservation
 import com.rork.porchivo.data.dto.DbOrgContextRow
+import com.rork.porchivo.data.dto.DbOrgDocument
 import com.rork.porchivo.data.dto.DbProfile
 import com.rork.porchivo.data.dto.DbShipment
+import com.rork.porchivo.data.dto.SlotTakenException
 import com.rork.porchivo.data.dto.OrgCheckoutResponse
 import com.rork.porchivo.data.dto.OrgConfirmResponse
 import com.rork.porchivo.data.dto.OrgMembership
@@ -1094,6 +1098,208 @@ class AppRepository(context: Context) {
             loadMaintenanceRequests(orgId)
             true
         } else false
+    }
+
+    // ── Org documents + amenities (paid-tier community features) ───────
+
+    private val _orgDocuments = MutableStateFlow<List<DbOrgDocument>>(emptyList())
+    val orgDocuments: StateFlow<List<DbOrgDocument>> = _orgDocuments.asStateFlow()
+
+    private val _orgDocumentsLoadState = MutableStateFlow<LoadState<Unit>>(LoadState.Idle)
+    val orgDocumentsLoadState: StateFlow<LoadState<Unit>> = _orgDocumentsLoadState.asStateFlow()
+
+    private val _orgAmenities = MutableStateFlow<List<DbOrgAmenity>>(emptyList())
+    val orgAmenities: StateFlow<List<DbOrgAmenity>> = _orgAmenities.asStateFlow()
+
+    private val _orgAmenitiesLoadState = MutableStateFlow<LoadState<Unit>>(LoadState.Idle)
+    val orgAmenitiesLoadState: StateFlow<LoadState<Unit>> = _orgAmenitiesLoadState.asStateFlow()
+
+    private val _orgReservations = MutableStateFlow<List<DbOrgAmenityReservation>>(emptyList())
+    val orgReservations: StateFlow<List<DbOrgAmenityReservation>> = _orgReservations.asStateFlow()
+
+    private val _orgReservationsLoadState = MutableStateFlow<LoadState<Unit>>(LoadState.Idle)
+    val orgReservationsLoadState: StateFlow<LoadState<Unit>> = _orgReservationsLoadState.asStateFlow()
+
+    /** Plan tier of the active org — null when unknown (callers fail open). */
+    private val _orgPlanTier = MutableStateFlow<String?>(null)
+    val orgPlanTier: StateFlow<String?> = _orgPlanTier.asStateFlow()
+
+    /** Staff/board — same role set the RLS `is_org_staff` helper uses. */
+    val isOrgStaff: Boolean get() = _orgMembership.value?.isAdmin == true
+
+    private val currentOrgId: String? get() = _orgMembership.value?.takeIf { it.isActive }?.orgId
+
+    val currentUserId: String? get() = (authState.value as? AuthState.Authenticated)?.userId
+
+    suspend fun loadOrgDocuments() {
+        val client = supabase ?: return
+        val orgId = currentOrgId ?: return
+        _orgDocumentsLoadState.value = LoadState.Loading
+        val result = client.fetchOrgDocuments(orgId)
+        if (result.isSuccess) {
+            _orgDocuments.value = result.getOrNull() ?: emptyList()
+            _orgDocumentsLoadState.value = LoadState.Success(Unit)
+        } else {
+            _orgDocumentsLoadState.value = LoadState.Error("Could not load documents")
+        }
+    }
+
+    /** Staff: add an external-link document. */
+    suspend fun addOrgDocumentLink(name: String, url: String): Result<Unit> {
+        val client = supabase ?: return Result.failure(Exception("Not configured"))
+        val orgId = currentOrgId ?: return Result.failure(Exception("Join a community first"))
+        val userId = currentUserId ?: return Result.failure(Exception("Not signed in"))
+        return client.insertOrgDocument(
+            mapOf(
+                "org_id" to orgId,
+                "name" to name,
+                "external_url" to url,
+                "uploaded_by" to userId,
+            ),
+        ).map { loadOrgDocuments() }
+    }
+
+    /**
+     * Staff: upload a photo to the org's folder in the private `org-documents`
+     * bucket (path `{org_id}/{ts}.{ext}` per storage RLS) and index it as a row.
+     */
+    suspend fun uploadOrgDocument(
+        name: String,
+        bytes: ByteArray,
+        ext: String,
+        mime: String,
+        sizeBytes: Long,
+    ): Result<Unit> {
+        val client = supabase ?: return Result.failure(Exception("Not configured"))
+        val orgId = currentOrgId ?: return Result.failure(Exception("Join a community first"))
+        val userId = currentUserId ?: return Result.failure(Exception("Not signed in"))
+        val path = "$orgId/${System.currentTimeMillis()}.$ext"
+        val upload = client.uploadOrgDocObject(path, bytes, mime)
+        if (upload.isFailure) {
+            return Result.failure(upload.exceptionOrNull() ?: Exception("Upload failed"))
+        }
+        return client.insertOrgDocument(
+            mapOf(
+                "org_id" to orgId,
+                "name" to name,
+                "file_path" to path,
+                "file_size" to sizeBytes,
+                "mime_type" to mime,
+                "uploaded_by" to userId,
+            ),
+        ).map { loadOrgDocuments() }
+    }
+
+    /** Staff: remove a document — bucket object best-effort, then the row. */
+    suspend fun removeOrgDocument(doc: DbOrgDocument): Result<Unit> {
+        val client = supabase ?: return Result.failure(Exception("Not configured"))
+        doc.filePath?.let { client.deleteOrgDocObject(it) }
+        return client.deleteOrgDocument(doc.id).map { loadOrgDocuments() }
+    }
+
+    /** Staff: remove a document by id (storage object best-effort). */
+    suspend fun removeOrgDocument(id: String, filePath: String?): Result<Unit> {
+        val client = supabase ?: return Result.failure(Exception("Not configured"))
+        filePath?.let { client.deleteOrgDocObject(it) }
+        return client.deleteOrgDocument(id).map { loadOrgDocuments() }
+    }
+
+    /** Open a bucket document via a 300-second signed URL. */
+    suspend fun openOrgDocument(doc: DbOrgDocument): Result<String> {
+        val client = supabase ?: return Result.failure(Exception("Not configured"))
+        val path = doc.filePath ?: return Result.failure(Exception("No file"))
+        return client.createOrgDocSignedUrl(path)
+    }
+
+    /** Open a bucket document via a 300-second signed URL (by object path). */
+    suspend fun openOrgDocument(filePath: String): Result<String> {
+        val client = supabase ?: return Result.failure(Exception("Not configured"))
+        return client.createOrgDocSignedUrl(filePath)
+    }
+
+    suspend fun loadOrgAmenities() {
+        val client = supabase ?: return
+        val orgId = currentOrgId ?: return
+        _orgAmenitiesLoadState.value = LoadState.Loading
+        val result = client.fetchOrgAmenities(orgId)
+        if (result.isSuccess) {
+            _orgAmenities.value = result.getOrNull() ?: emptyList()
+            _orgAmenitiesLoadState.value = LoadState.Success(Unit)
+        } else {
+            _orgAmenitiesLoadState.value = LoadState.Error("Could not load amenities")
+        }
+    }
+
+    suspend fun loadOrgReservations() {
+        val client = supabase ?: return
+        val orgId = currentOrgId ?: return
+        _orgReservationsLoadState.value = LoadState.Loading
+        val result = client.fetchOrgAmenityReservations(orgId)
+        if (result.isSuccess) {
+            _orgReservations.value = result.getOrNull() ?: emptyList()
+            _orgReservationsLoadState.value = LoadState.Success(Unit)
+        } else {
+            _orgReservationsLoadState.value = LoadState.Error("Could not load reservations")
+        }
+    }
+
+    /** Plan tier of the active org; null (fail-open) if the fetch fails. */
+    suspend fun loadOrgPlanTier(): String? {
+        val client = supabase ?: return null
+        val orgId = currentOrgId ?: return null
+        val tier = client.fetchOrgPlanTier(orgId).getOrNull()?.planTier
+        _orgPlanTier.value = tier
+        return tier
+    }
+
+    /** Staff: add an amenity (UNIQUE(org_id, name) — duplicate names rejected). */
+    suspend fun addOrgAmenity(name: String): Result<Unit> {
+        val client = supabase ?: return Result.failure(Exception("Not configured"))
+        val orgId = currentOrgId ?: return Result.failure(Exception("Join a community first"))
+        val userId = currentUserId ?: return Result.failure(Exception("Not signed in"))
+        return client.insertOrgAmenity(
+            mapOf(
+                "org_id" to orgId,
+                "name" to name,
+                "created_by" to userId,
+            ),
+        ).map { loadOrgAmenities() }
+    }
+
+    /** Staff: remove an amenity (cascades its reservations). */
+    suspend fun removeOrgAmenity(amenityId: String): Result<Unit> {
+        val client = supabase ?: return Result.failure(Exception("Not configured"))
+        return client.deleteOrgAmenity(amenityId).map {
+            loadOrgAmenities()
+            loadOrgReservations()
+        }
+    }
+
+    /** Book an hour slot — SlotTakenException when someone grabbed it first. */
+    suspend fun reserveAmenity(amenityId: String, startIso: String, endIso: String): Result<Unit> {
+        val client = supabase ?: return Result.failure(Exception("Not configured"))
+        val orgId = currentOrgId ?: return Result.failure(Exception("Join a community first"))
+        val userId = currentUserId ?: return Result.failure(Exception("Not signed in"))
+        return try {
+            client.insertOrgAmenityReservation(
+                mapOf(
+                    "org_id" to orgId,
+                    "amenity_id" to amenityId,
+                    "reserved_by" to userId,
+                    "starts_at" to startIso,
+                    "ends_at" to endIso,
+                    "status" to "confirmed",
+                ),
+            ).map { loadOrgReservations() }
+        } catch (e: SlotTakenException) {
+            Result.failure(e)
+        }
+    }
+
+    /** Cancel own booking (or any, as staff). */
+    suspend fun cancelOrgReservation(reservationId: String): Result<Unit> {
+        val client = supabase ?: return Result.failure(Exception("Not configured"))
+        return client.cancelOrgAmenityReservation(reservationId).map { loadOrgReservations() }
     }
 
     // ── Subscription ────────────────────────────────────────────────────

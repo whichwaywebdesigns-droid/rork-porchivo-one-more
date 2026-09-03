@@ -9,6 +9,9 @@ import com.rork.porchivo.data.AppLanguage
 import com.rork.porchivo.data.dto.OrgMembership
 import com.rork.porchivo.data.dto.OrgCheckoutResponse
 import com.rork.porchivo.data.dto.OrgConfirmResponse
+import com.rork.porchivo.data.dto.DbOrgAmenity
+import com.rork.porchivo.data.dto.DbOrgAmenityReservation
+import com.rork.porchivo.data.dto.DbOrgDocument
 import com.rork.porchivo.data.dto.RiskScoreResponse
 import com.rork.porchivo.model.Announcement
 import com.rork.porchivo.model.MaintenanceRequest
@@ -140,6 +143,73 @@ class AppViewModel : ViewModel() {
         location: String?,
     ): Boolean {
         return repo.submitMaintenanceRequest(category, priority, title, description, location)
+    }
+
+    // ── Org documents + amenities (paid-tier community features) ──────
+
+    val orgDocuments: StateFlow<List<DbOrgDocument>> = repo.orgDocuments
+    val orgDocumentsLoadState: StateFlow<LoadState<Unit>> = repo.orgDocumentsLoadState
+    val orgAmenities: StateFlow<List<DbOrgAmenity>> = repo.orgAmenities
+    val orgAmenitiesLoadState: StateFlow<LoadState<Unit>> = repo.orgAmenitiesLoadState
+    val orgReservations: StateFlow<List<DbOrgAmenityReservation>> = repo.orgReservations
+    val orgReservationsLoadState: StateFlow<LoadState<Unit>> = repo.orgReservationsLoadState
+    val orgPlanTier: StateFlow<String?> = repo.orgPlanTier
+
+    val isOrgStaff: Boolean get() = repo.isOrgStaff
+    val currentUserId: String? get() = repo.currentUserId
+
+    fun loadOrgDocuments() {
+        viewModelScope.launch { repo.loadOrgDocuments() }
+    }
+
+    suspend fun addOrgDocumentLink(name: String, url: String): Result<Unit> {
+        return repo.addOrgDocumentLink(name, url)
+    }
+
+    suspend fun uploadOrgDocument(
+        name: String,
+        bytes: ByteArray,
+        ext: String,
+        mime: String,
+        sizeBytes: Long,
+    ): Result<Unit> {
+        return repo.uploadOrgDocument(name, bytes, ext, mime, sizeBytes)
+    }
+
+    suspend fun removeOrgDocument(id: String, filePath: String?): Result<Unit> {
+        return repo.removeOrgDocument(id, filePath)
+    }
+
+    suspend fun openOrgDocument(filePath: String): Result<String> {
+        return repo.openOrgDocument(filePath)
+    }
+
+    fun loadOrgAmenitiesAndReservations() {
+        viewModelScope.launch {
+            repo.loadOrgPlanTier()
+            repo.loadOrgAmenities()
+            repo.loadOrgReservations()
+        }
+    }
+
+    fun refreshOrgReservations() {
+        viewModelScope.launch { repo.loadOrgReservations() }
+    }
+
+    suspend fun addOrgAmenity(name: String): Result<Unit> {
+        return repo.addOrgAmenity(name)
+    }
+
+    suspend fun removeOrgAmenity(amenityId: String): Result<Unit> {
+        return repo.removeOrgAmenity(amenityId)
+    }
+
+    suspend fun reserveAmenity(amenityId: String, startIso: String, endIso: String): Result<Unit> {
+        return repo.reserveAmenity(amenityId, startIso, endIso)
+    }
+
+    suspend fun cancelOrgReservation(reservationId: String): Result<Unit> {
+        return repo.cancelOrgReservation(reservationId)
     }
 
     suspend fun createOrgCheckout(

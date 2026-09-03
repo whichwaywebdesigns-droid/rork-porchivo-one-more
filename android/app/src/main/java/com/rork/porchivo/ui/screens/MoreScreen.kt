@@ -19,8 +19,10 @@ import androidx.compose.material.icons.outlined.Build
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.CreditCard
+import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material.icons.outlined.Person3
+import androidx.compose.material.icons.outlined.Pool
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Campaign
 import androidx.compose.material.icons.outlined.HelpOutline
@@ -109,6 +111,16 @@ fun MoreScreen(
                 Column {
                     LinkRow(icon = Icons.Outlined.Campaign, tint = c.warmOrange, label = "Announcements") {
                         navController.navigate(Routes.ANNOUNCEMENTS)
+                    }
+                    if (orgMembership?.isActive == true) {
+                        HorizontalDivider(color = c.border)
+                        LinkRow(icon = Icons.Outlined.FolderOpen, tint = c.success, label = "Documents") {
+                            navController.navigate(Routes.ORG_DOCUMENTS)
+                        }
+                        HorizontalDivider(color = c.border)
+                        LinkRow(icon = Icons.Outlined.Pool, tint = c.accent, label = "Amenities") {
+                            navController.navigate(Routes.ORG_AMENITIES)
+                        }
                     }
                     HorizontalDivider(color = c.border)
                     LinkRow(icon = Icons.Outlined.CalendarMonth, tint = c.accent, label = "Calendar") { }

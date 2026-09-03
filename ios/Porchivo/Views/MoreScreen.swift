@@ -105,6 +105,12 @@ struct MoreScreen: View {
 
             VStack(spacing: 0) {
                 linkRow("Announcements", "megaphone.fill", c.warmOrange) { path.append(Route.announcements) }
+                if appState.isOrgMember {
+                    Divider().overlay(c.border).padding(.leading, 54)
+                    linkRow("Documents", "folder.fill", c.success) { path.append(Route.orgDocuments) }
+                    Divider().overlay(c.border).padding(.leading, 54)
+                    linkRow("Amenities", "figure.pool.swim", c.accent) { path.append(Route.orgAmenities) }
+                }
                 Divider().overlay(c.border).padding(.leading, 54)
                 linkRow("Calendar", "calendar.fill", c.accent) { }
                 Divider().overlay(c.border).padding(.leading, 54)

@@ -57,6 +57,16 @@ final class AppState {
     var maintenanceRequests: [MaintenanceRequest] = []
     var maintenanceLoadState: LoadState<Unit> = .idle
 
+    // Org documents + amenities (paid-tier community features)
+    var orgDocuments: [OrgDocument] = []
+    var orgDocumentsLoadState: LoadState<Unit> = .idle
+    var orgAmenities: [OrgAmenity] = []
+    var orgAmenitiesLoadState: LoadState<Unit> = .idle
+    var orgReservations: [OrgAmenityReservation] = []
+    var orgReservationsLoadState: LoadState<Unit> = .idle
+    /// Plan tier of the active org — nil when unknown (callers fail open).
+    var orgPlanTier: String? = nil
+
     // Local data (UserDefaults — mirrors AsyncStorage/SharedPreferences)
     var packages: [TrackedPackage] = []
 
@@ -545,6 +555,13 @@ final class AppState {
         announcementsLoadState = .idle
         maintenanceRequests = []
         maintenanceLoadState = .idle
+        orgDocuments = []
+        orgDocumentsLoadState = .idle
+        orgAmenities = []
+        orgAmenitiesLoadState = .idle
+        orgReservations = []
+        orgReservationsLoadState = .idle
+        orgPlanTier = nil
         shipmentsLoadState = .idle
         notificationsLoadState = .idle
     }
@@ -1017,6 +1034,224 @@ final class AppState {
         if isOrgMember, let orgId = orgMembership?.orgId {
             await loadAnnouncements(orgId: orgId)
             await loadMaintenanceRequests(orgId: orgId)
+        }
+    }
+
+    // MARK: - Org documents & amenities
+
+    /// Booking result for the amenity reservation sheet.
+    enum ReserveOutcome: Equatable {
+        case success
+        case slotTaken
+        case failure(String)
+    }
+
+    @MainActor
+    func loadOrgDocuments(orgId: String) async {
+        guard isSupabaseConfigured else { return }
+        orgDocumentsLoadState = .loading
+        let result = await supabase.fetchOrgDocuments(orgId: orgId)
+        switch result {
+        case .success(let rows):
+            orgDocuments = rows
+            orgDocumentsLoadState = .success(Unit())
+        case .failure(let err):
+            orgDocumentsLoadState = .error(err.localizedDescription)
+        }
+    }
+
+    /// Staff: add an external-link document. Returns nil on success, else an error message.
+    @MainActor
+    func addOrgDocumentLink(name: String, url: String) async -> String? {
+        guard isSupabaseConfigured, let orgId = orgMembership?.orgId, let userId = currentUserId else {
+            return "Not ready — try again."
+        }
+        let result = await supabase.insertOrgDocument([
+            "org_id": orgId,
+            "name": name,
+            "external_url": url,
+            "uploaded_by": userId,
+        ])
+        switch result {
+        case .success:
+            await loadOrgDocuments(orgId: orgId)
+            return nil
+        case .failure(let err):
+            return err.localizedDescription
+        }
+    }
+
+    /// Staff: upload a photo to the org's folder in the private `org-documents`
+    /// bucket and index it as a row. Returns nil on success, else an error message.
+    @MainActor
+    func uploadOrgDocument(name: String, data: Data, ext: String, mime: String) async -> String? {
+        guard isSupabaseConfigured, let orgId = orgMembership?.orgId, let userId = currentUserId else {
+            return "Not ready — try again."
+        }
+        let upload = await supabase.uploadOrgDocument(orgId: orgId, data: data, ext: ext, mime: mime)
+        switch upload {
+        case .success(let path):
+            let insert = await supabase.insertOrgDocument([
+                "org_id": orgId,
+                "name": name,
+                "file_path": path,
+                "file_size": data.count,
+                "mime_type": mime,
+                "uploaded_by": userId,
+            ])
+            await loadOrgDocuments(orgId: orgId)
+            switch insert {
+            case .success: return nil
+            case .failure(let err): return err.localizedDescription
+            }
+        case .failure:
+            return "Upload failed — try again."
+        }
+    }
+
+    /// Staff: remove a document — bucket object best-effort, then the row.
+    @MainActor
+    func removeOrgDocument(_ doc: OrgDocument) async -> String? {
+        guard isSupabaseConfigured, let orgId = orgMembership?.orgId else { return "Not ready — try again." }
+        if let path = doc.filePath {
+            await supabase.deleteOrgDocObject(path: path)
+        }
+        let result = await supabase.deleteOrgDocument(id: doc.id)
+        await loadOrgDocuments(orgId: orgId)
+        switch result {
+        case .success: return nil
+        case .failure(let err): return err.localizedDescription
+        }
+    }
+
+    /// Opens a bucket document via a 300-second signed URL.
+    @MainActor
+    func openOrgDocument(_ doc: OrgDocument) async -> Result<URL, Error> {
+        guard let path = doc.filePath else {
+            return .failure(NSError(domain: "OrgDocuments", code: 1,
+                                    userInfo: [NSLocalizedDescriptionKey: "No file attached."]))
+        }
+        return await supabase.createOrgDocSignedUrl(path: path)
+    }
+
+    @MainActor
+    func loadOrgAmenities(orgId: String) async {
+        guard isSupabaseConfigured else { return }
+        orgAmenitiesLoadState = .loading
+        let result = await supabase.fetchOrgAmenities(orgId: orgId)
+        switch result {
+        case .success(let rows):
+            orgAmenities = rows
+            orgAmenitiesLoadState = .success(Unit())
+        case .failure(let err):
+            orgAmenitiesLoadState = .error(err.localizedDescription)
+        }
+    }
+
+    @MainActor
+    func loadOrgReservations(orgId: String) async {
+        guard isSupabaseConfigured else { return }
+        orgReservationsLoadState = .loading
+        let result = await supabase.fetchOrgAmenityReservations(orgId: orgId)
+        switch result {
+        case .success(let rows):
+            orgReservations = rows
+            orgReservationsLoadState = .success(Unit())
+        case .failure(let err):
+            orgReservationsLoadState = .error(err.localizedDescription)
+        }
+    }
+
+    /// Loads plan tier + amenities + reservations for the amenity screen.
+    @MainActor
+    func loadOrgAmenitiesSection(orgId: String) async {
+        await loadOrgPlanTier(orgId: orgId)
+        await loadOrgAmenities(orgId: orgId)
+        await loadOrgReservations(orgId: orgId)
+    }
+
+    @MainActor
+    func loadOrgPlanTier(orgId: String) async {
+        orgPlanTier = await supabase.fetchOrgPlanTier(orgId: orgId)
+    }
+
+    /// Amenities start on the Community plan; nil tier (fetch failed) fails open.
+    var isAmenityPlanAllowed: Bool {
+        guard let tier = orgPlanTier else { return true }
+        return ["community", "professional", "enterprise"].contains(tier)
+    }
+
+    /// Staff: add an amenity. Returns nil on success, else an error message.
+    @MainActor
+    func addOrgAmenity(name: String) async -> String? {
+        guard isSupabaseConfigured, let orgId = orgMembership?.orgId, let userId = currentUserId else {
+            return "Not ready — try again."
+        }
+        let result = await supabase.insertOrgAmenity([
+            "org_id": orgId,
+            "name": name,
+            "created_by": userId,
+        ])
+        switch result {
+        case .success:
+            await loadOrgAmenities(orgId: orgId)
+            return nil
+        case .failure(let err):
+            let msg = err.localizedDescription
+            if msg.contains("duplicate") || msg.contains("unique") {
+                return "An amenity with that name already exists."
+            }
+            return msg
+        }
+    }
+
+    /// Staff: remove an amenity (cascades its reservations).
+    @MainActor
+    func removeOrgAmenity(_ amenity: OrgAmenity) async -> String? {
+        guard isSupabaseConfigured, let orgId = orgMembership?.orgId else { return "Not ready — try again." }
+        let result = await supabase.deleteOrgAmenity(id: amenity.id)
+        await loadOrgAmenities(orgId: orgId)
+        await loadOrgReservations(orgId: orgId)
+        switch result {
+        case .success: return nil
+        case .failure(let err): return err.localizedDescription
+        }
+    }
+
+    /// Book an hour slot — `.slotTaken` when someone grabbed it first.
+    @MainActor
+    func reserveAmenity(amenityId: String, startsAt: Date, endsAt: Date) async -> ReserveOutcome {
+        guard isSupabaseConfigured, let orgId = orgMembership?.orgId, let userId = currentUserId else {
+            return .failure("Not ready — try again.")
+        }
+        let formatter = ISO8601DateFormatter()
+        let result = await supabase.insertOrgAmenityReservation([
+            "org_id": orgId,
+            "amenity_id": amenityId,
+            "reserved_by": userId,
+            "starts_at": formatter.string(from: startsAt),
+            "ends_at": formatter.string(from: endsAt),
+            "status": "confirmed",
+        ])
+        switch result {
+        case .success:
+            await loadOrgReservations(orgId: orgId)
+            return .success
+        case .failure(let err):
+            if err is SlotTakenError { return .slotTaken }
+            return .failure(err.localizedDescription)
+        }
+    }
+
+    /// Cancel own booking (or any, as staff).
+    @MainActor
+    func cancelOrgReservation(id: String) async -> String? {
+        guard isSupabaseConfigured, let orgId = orgMembership?.orgId else { return "Not ready — try again." }
+        let result = await supabase.cancelOrgAmenityReservation(id: id)
+        await loadOrgReservations(orgId: orgId)
+        switch result {
+        case .success: return nil
+        case .failure(let err): return err.localizedDescription
         }
     }
 

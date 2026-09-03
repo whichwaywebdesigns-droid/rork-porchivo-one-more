@@ -376,6 +376,121 @@ nonisolated struct DbMyMaintenanceRequest: Codable, Sendable {
     }
 }
 
+// MARK: - Org documents & amenities
+
+/// Document row from `org_documents` (RLS-gated: all active org members read).
+/// Exactly one of `externalUrl` / `filePath` is set (DB check constraint).
+nonisolated struct OrgDocument: Codable, Sendable {
+    let id: String
+    var orgId: String?
+    var name: String
+    var externalUrl: String?
+    var filePath: String?
+    var fileSize: Int?
+    var mimeType: String?
+    var createdAt: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case orgId = "org_id"
+        case name
+        case externalUrl = "external_url"
+        case filePath = "file_path"
+        case fileSize = "file_size"
+        case mimeType = "mime_type"
+        case createdAt = "created_at"
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decodeIfPresent(String.self, forKey: .id) ?? ""
+        orgId = try c.decodeIfPresent(String.self, forKey: .orgId)
+        name = try c.decodeIfPresent(String.self, forKey: .name) ?? ""
+        externalUrl = try c.decodeIfPresent(String.self, forKey: .externalUrl)
+        filePath = try c.decodeIfPresent(String.self, forKey: .filePath)
+        fileSize = try c.decodeIfPresent(Int.self, forKey: .fileSize)
+        mimeType = try c.decodeIfPresent(String.self, forKey: .mimeType)
+        createdAt = try c.decodeIfPresent(String.self, forKey: .createdAt)
+    }
+}
+
+/// Amenity row from `org_amenities`.
+nonisolated struct OrgAmenity: Codable, Sendable {
+    let id: String
+    var orgId: String?
+    var name: String
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case orgId = "org_id"
+        case name
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decodeIfPresent(String.self, forKey: .id) ?? ""
+        orgId = try c.decodeIfPresent(String.self, forKey: .orgId)
+        name = try c.decodeIfPresent(String.self, forKey: .name) ?? ""
+    }
+}
+
+/// Embedded `member:profiles(name)` object on reservation rows.
+nonisolated struct OrgReservationMember: Codable, Sendable {
+    var name: String?
+}
+
+/// Reservation row from `org_amenity_reservations` (confirmed, upcoming).
+/// Double-booking is impossible: a DB-level GiST EXCLUDE constraint
+/// (`org_amenity_reservations_no_overlap`) rejects overlapping confirmed slots.
+nonisolated struct OrgAmenityReservation: Codable, Sendable {
+    let id: String
+    var orgId: String?
+    var amenityId: String
+    var reservedBy: String
+    var startsAt: String
+    var endsAt: String
+    var status: String?
+    var member: OrgReservationMember?
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case orgId = "org_id"
+        case amenityId = "amenity_id"
+        case reservedBy = "reserved_by"
+        case startsAt = "starts_at"
+        case endsAt = "ends_at"
+        case status
+        case member
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decodeIfPresent(String.self, forKey: .id) ?? ""
+        orgId = try c.decodeIfPresent(String.self, forKey: .orgId)
+        amenityId = try c.decodeIfPresent(String.self, forKey: .amenityId) ?? ""
+        reservedBy = try c.decodeIfPresent(String.self, forKey: .reservedBy) ?? ""
+        startsAt = try c.decodeIfPresent(String.self, forKey: .startsAt) ?? ""
+        endsAt = try c.decodeIfPresent(String.self, forKey: .endsAt) ?? ""
+        status = try c.decodeIfPresent(String.self, forKey: .status)
+        member = try c.decodeIfPresent(OrgReservationMember.self, forKey: .member)
+    }
+}
+
+/// Single-column row from `organizations?select=plan_tier`.
+nonisolated struct OrgPlanRow: Codable, Sendable {
+    var planTier: String?
+
+    enum CodingKeys: String, CodingKey {
+        case planTier = "plan_tier"
+    }
+}
+
+/// Thrown when a booking overlaps an existing confirmed slot — the Postgres
+/// GiST exclusion constraint surfaces as SQLSTATE 23P01 (exclusion_violation).
+nonisolated struct SlotTakenError: LocalizedError {
+    var errorDescription: String? { "Someone grabbed that slot first. Pick another time." }
+}
+
 // MARK: - SupabaseService
 
 actor SupabaseService {
@@ -874,6 +989,179 @@ actor SupabaseService {
         await rpc("get_my_maintenance_requests", body: ["p_org_id": orgId])
     }
 
+    // MARK: Org documents & amenities (paid-tier community features)
+
+    /// All documents for the org, newest first (RLS: active members read).
+    func fetchOrgDocuments(orgId: String) async -> Result<[OrgDocument], Error> {
+        guard let comps = URLComponents(url: baseURL.appendingPathComponent("rest/v1/org_documents"),
+                                        resolvingAgainstBaseURL: false),
+              let url = comps.url else { return .failure(URLError(.badURL)) }
+        var c = comps
+        c.queryItems = [
+            URLQueryItem(name: "org_id", value: "eq.\(orgId)"),
+            URLQueryItem(name: "order", value: "created_at.desc"),
+        ]
+        return await restGet(url: c.url ?? url)
+    }
+
+    /// Inserts a document row (RLS: staff/board only).
+    func insertOrgDocument(_ body: [String: Any?]) async -> Result<OrgDocument, Error> {
+        await restPost(url: baseURL.appendingPathComponent("rest/v1/org_documents"), body: body, singleton: true)
+    }
+
+    func deleteOrgDocument(id: String) async -> Result<Void, Error> {
+        await restDeleteMinimal(url: baseURL.appendingPathComponent("rest/v1/org_documents?id=eq.\(id)"))
+    }
+
+    /// All amenities for the org, alphabetical (RLS: active members read).
+    func fetchOrgAmenities(orgId: String) async -> Result<[OrgAmenity], Error> {
+        guard let comps = URLComponents(url: baseURL.appendingPathComponent("rest/v1/org_amenities"),
+                                        resolvingAgainstBaseURL: false),
+              let url = comps.url else { return .failure(URLError(.badURL)) }
+        var c = comps
+        c.queryItems = [
+            URLQueryItem(name: "org_id", value: "eq.\(orgId)"),
+            URLQueryItem(name: "order", value: "name.asc"),
+        ]
+        return await restGet(url: c.url ?? url)
+    }
+
+    /// Inserts an amenity (RLS: staff/board only, UNIQUE(org_id, name)).
+    func insertOrgAmenity(_ body: [String: Any?]) async -> Result<OrgAmenity, Error> {
+        await restPost(url: baseURL.appendingPathComponent("rest/v1/org_amenities"), body: body, singleton: true)
+    }
+
+    func deleteOrgAmenity(id: String) async -> Result<Void, Error> {
+        await restDeleteMinimal(url: baseURL.appendingPathComponent("rest/v1/org_amenities?id=eq.\(id)"))
+    }
+
+    /// Upcoming confirmed reservations with the booker's profile name embedded,
+    /// earliest first.
+    func fetchOrgAmenityReservations(orgId: String) async -> Result<[OrgAmenityReservation], Error> {
+        guard let comps = URLComponents(url: baseURL.appendingPathComponent("rest/v1/org_amenity_reservations"),
+                                        resolvingAgainstBaseURL: false),
+              let url = comps.url else { return .failure(URLError(.badURL)) }
+        let nowIso = ISO8601DateFormatter().string(from: Date())
+        var c = comps
+        c.queryItems = [
+            URLQueryItem(name: "select", value: "*,member:profiles(name)"),
+            URLQueryItem(name: "org_id", value: "eq.\(orgId)"),
+            URLQueryItem(name: "status", value: "eq.confirmed"),
+            URLQueryItem(name: "starts_at", value: "gte.\(nowIso)"),
+            URLQueryItem(name: "order", value: "starts_at.asc"),
+            URLQueryItem(name: "limit", value: "200"),
+        ]
+        return await restGet(url: c.url ?? url)
+    }
+
+    /// Inserts a reservation. Double-booking is blocked by the DB-level GiST
+    /// EXCLUDE constraint — a 23P01 exclusion violation maps to `SlotTakenError`.
+    func insertOrgAmenityReservation(_ body: [String: Any?]) async -> Result<OrgAmenityReservation, Error> {
+        var req = URLRequest(url: baseURL.appendingPathComponent("rest/v1/org_amenity_reservations"))
+        req.httpMethod = "POST"
+        for (k, v) in authHeaders(includeBearer: true) { req.setValue(v, forHTTPHeaderField: k) }
+        req.setValue("return=representation", forHTTPHeaderField: "Prefer")
+        req.httpBody = try? JSONSerialization.data(withJSONObject: body.compactMapValues { $0 ?? NSNull() })
+        do {
+            let (data, resp) = try await session.data(for: req)
+            guard let http = resp as? HTTPURLResponse else { return .failure(URLError(.badServerResponse)) }
+            guard (200..<300).contains(http.statusCode) else {
+                if errorCode(from: data) == "23P01" {
+                    return .failure(SlotTakenError())
+                }
+                let msg = errorMessage(from: data) ?? "Reservation failed (\(http.statusCode))."
+                return .failure(NSError(domain: "SupabaseREST", code: http.statusCode,
+                                        userInfo: [NSLocalizedDescriptionKey: msg]))
+            }
+            let rows = try decoder.decode([OrgAmenityReservation].self, from: data)
+            guard let row = rows.first else { return .failure(URLError(.cannotDecodeContentData)) }
+            return .success(row)
+        } catch {
+            return .failure(error)
+        }
+    }
+
+    /// Cancels a reservation (RLS: own booking or staff).
+    func cancelOrgAmenityReservation(id: String) async -> Result<Void, Error> {
+        await restPatchMinimal(url: baseURL.appendingPathComponent("rest/v1/org_amenity_reservations?id=eq.\(id)"),
+                               body: ["status": "cancelled"])
+    }
+
+    /// Fetches the org's plan tier (nil on failure — callers fail open).
+    func fetchOrgPlanTier(orgId: String) async -> String? {
+        guard let comps = URLComponents(url: baseURL.appendingPathComponent("rest/v1/organizations"),
+                                        resolvingAgainstBaseURL: false),
+              let url = comps.url else { return nil }
+        var c = comps
+        c.queryItems = [
+            URLQueryItem(name: "id", value: "eq.\(orgId)"),
+            URLQueryItem(name: "select", value: "plan_tier"),
+        ]
+        if case .success(let row) = await restGet(url: c.url ?? url, singleton: true) as Result<OrgPlanRow, Error> {
+            return row.planTier
+        }
+        return nil
+    }
+
+    /// Uploads bytes to the private `org-documents` bucket under the org's
+    /// folder (`{orgId}/{uuid}.{ext}` — storage RLS is org-scoped).
+    /// Returns the object path for the `org_documents` row.
+    func uploadOrgDocument(orgId: String, data: Data, ext: String, mime: String) async -> Result<String, Error> {
+        let objectPath = "\(orgId)/\(UUID().uuidString).\(ext)"
+        var req = URLRequest(url: baseURL.appendingPathComponent("storage/v1/object/org-documents/\(objectPath)"))
+        req.httpMethod = "POST"
+        req.setValue(publishableKey, forHTTPHeaderField: "apikey")
+        if let token = currentSession?.accessToken {
+            req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        req.setValue(mime, forHTTPHeaderField: "Content-Type")
+        req.httpBody = data
+        do {
+            let (_, resp) = try await session.data(for: req)
+            guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+                return .failure(URLError(.cannotWriteToFile))
+            }
+            return .success(objectPath)
+        } catch {
+            return .failure(error)
+        }
+    }
+
+    /// Creates a 300-second signed URL for a private org document.
+    func createOrgDocSignedUrl(path: String) async -> Result<URL, Error> {
+        var req = URLRequest(url: baseURL.appendingPathComponent("storage/v1/object/sign/org-documents/\(path)"))
+        req.httpMethod = "POST"
+        for (k, v) in authHeaders(includeBearer: true) { req.setValue(v, forHTTPHeaderField: k) }
+        req.httpBody = try? JSONSerialization.data(withJSONObject: ["expiresIn": 300])
+        do {
+            let (data, resp) = try await session.data(for: req)
+            guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+                return .failure(URLError(.badURL))
+            }
+            let obj = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+            guard let signed = obj?["signedURL"] as? String else {
+                return .failure(URLError(.badURL))
+            }
+            guard let url = URL(string: "\(baseURL.absoluteString)/storage/v1\(signed)") else {
+                return .failure(URLError(.badURL))
+            }
+            return .success(url)
+        } catch {
+            return .failure(error)
+        }
+    }
+
+    /// Best-effort delete of a bucket object (non-fatal if it fails).
+    func deleteOrgDocObject(path: String) async {
+        var req = URLRequest(url: baseURL.appendingPathComponent("storage/v1/object/org-documents/\(path)"))
+        req.httpMethod = "DELETE"
+        req.setValue(publishableKey, forHTTPHeaderField: "apikey")
+        if let token = currentSession?.accessToken {
+            req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        _ = try? await session.data(for: req)
+    }
+
     // MARK: Storage (avatars)
 
     /// Uploads avatar bytes to the `avatars` bucket under `<userId>/<uuid>.<ext>`.
@@ -1289,5 +1577,11 @@ actor SupabaseService {
         if let msg = obj["message"] as? String { return msg }
         if let error = obj["error"] as? String { return error }
         return nil
+    }
+
+    /// Postgres error code from a PostgREST error body (e.g. "23P01" exclusion violation).
+    private func errorCode(from data: Data) -> String? {
+        guard let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return nil }
+        return obj["code"] as? String
     }
 }

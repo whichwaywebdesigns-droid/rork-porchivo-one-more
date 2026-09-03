@@ -6,14 +6,20 @@ import com.rork.porchivo.data.dto.AuthSession
 import com.rork.porchivo.data.dto.AuthUser
 import com.rork.porchivo.data.dto.DbMyMaintenanceRequest
 import com.rork.porchivo.data.dto.DbNotification
+import com.rork.porchivo.data.dto.DbOrgAmenity
+import com.rork.porchivo.data.dto.DbOrgAmenityReservation
 import com.rork.porchivo.data.dto.DbOrgContextRow
+import com.rork.porchivo.data.dto.DbOrgDocument
+import com.rork.porchivo.data.dto.DbPlanTierRow
 import com.rork.porchivo.data.dto.DbProfile
 import com.rork.porchivo.data.dto.DbShipment
+import com.rork.porchivo.data.dto.SlotTakenException
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.android.Android
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.patch
@@ -515,6 +521,165 @@ class SupabaseClient(
         }
     } catch (e: Exception) {
         Result.success(emptyList())
+    }
+
+    // ── Org documents + amenities (paid-tier community features) ────────
+
+    /** All documents for the org, newest first (RLS: active members read). */
+    suspend fun fetchOrgDocuments(orgId: String): Result<List<DbOrgDocument>> =
+        selectFrom("org_documents", mapOf(
+            "org_id" to "eq.$orgId",
+            "order" to "created_at.desc",
+        ))
+
+    /** Insert a document row (RLS: staff/board only). */
+    suspend fun insertOrgDocument(body: Map<String, Any?>): Result<DbOrgDocument> =
+        insertInto("org_documents", body)
+
+    suspend fun deleteOrgDocument(id: String): Result<Unit> = deleteFrom("org_documents", id)
+
+    /** All amenities for the org, alphabetical (RLS: active members read). */
+    suspend fun fetchOrgAmenities(orgId: String): Result<List<DbOrgAmenity>> =
+        selectFrom("org_amenities", mapOf(
+            "org_id" to "eq.$orgId",
+            "order" to "name.asc",
+        ))
+
+    /** Insert an amenity (RLS: staff/board only, UNIQUE(org_id, name)). */
+    suspend fun insertOrgAmenity(body: Map<String, Any?>): Result<DbOrgAmenity> =
+        insertInto("org_amenities", body)
+
+    suspend fun deleteOrgAmenity(id: String): Result<Unit> = deleteFrom("org_amenities", id)
+
+    /**
+     * Upcoming confirmed reservations with the booker's profile name embedded
+     * (`select=*,member:profiles(name)`), earliest first.
+     */
+    suspend fun fetchOrgAmenityReservations(orgId: String): Result<List<DbOrgAmenityReservation>> = try {
+        val nowIso = java.time.Instant.now().toString()
+        val response = httpClient.get("$restBase/org_amenity_reservations") {
+            authHeaders().forEach { (k, v) -> header(k, v) }
+            header("Accept", "application/json")
+            url {
+                parameters.append("select", "*,member:profiles(name)")
+                parameters.append("org_id", "eq.$orgId")
+                parameters.append("status", "eq.confirmed")
+                parameters.append("starts_at", "gte.$nowIso")
+                parameters.append("order", "starts_at.asc")
+                parameters.append("limit", "200")
+            }
+        }
+        if (response.status.isSuccess()) {
+            val list: List<DbOrgAmenityReservation> = response.body()
+            Result.success(list)
+        } else {
+            Result.failure(Exception("Failed to fetch reservations: ${response.status}"))
+        }
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    /**
+     * Insert a reservation. Double-booking is blocked by the DB-level GiST
+     * EXCLUDE constraint — a 23P01 exclusion violation maps to [SlotTakenException].
+     */
+    suspend fun insertOrgAmenityReservation(body: Map<String, Any?>): Result<DbOrgAmenityReservation> = try {
+        val response = httpClient.post("$restBase/org_amenity_reservations") {
+            authHeaders().forEach { (k, v) -> header(k, v) }
+            contentType(ContentType.Application.Json)
+            header("Prefer", "return=representation")
+            setBody(body)
+        }
+        if (response.status.isSuccess()) {
+            val list: List<DbOrgAmenityReservation> = response.body()
+            if (list.isNotEmpty()) Result.success(list.first())
+            else Result.failure(Exception("Insert returned no rows"))
+        } else {
+            if (parseErrorCode(response) == "23P01") Result.failure(SlotTakenException())
+            else Result.failure(Exception(parseErrorMessage(response) ?: "Reservation failed"))
+        }
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    /** Cancel a reservation (RLS: own booking or staff). */
+    suspend fun cancelOrgAmenityReservation(id: String): Result<Unit> = try {
+        val response = httpClient.patch("$restBase/org_amenity_reservations?id=eq.$id") {
+            authHeaders().forEach { (k, v) -> header(k, v) }
+            contentType(ContentType.Application.Json)
+            header("Prefer", "return=minimal")
+            setBody(mapOf("status" to "cancelled"))
+        }
+        if (response.status.isSuccess()) Result.success(Unit)
+        else Result.failure(Exception("Failed to cancel reservation"))
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    /** Fetch the org's plan tier (null on failure — callers fail open). */
+    suspend fun fetchOrgPlanTier(orgId: String): Result<DbPlanTierRow?> =
+        selectSingle("organizations", mapOf("id" to "eq.$orgId", "select" to "plan_tier"))
+
+    /** Upload bytes to the private `org-documents` bucket under the org's folder. */
+    suspend fun uploadOrgDocObject(path: String, data: ByteArray, mime: String): Result<Unit> = try {
+        val response = httpClient.post("$supabaseUrl/storage/v1/object/org-documents/$path") {
+            authHeaders().forEach { (k, v) -> header(k, v) }
+            contentType(ContentType.parse(mime))
+            header("x-upsert", "false")
+            setBody(data)
+        }
+        if (response.status.isSuccess()) Result.success(Unit)
+        else Result.failure(Exception("Upload failed (${response.status.value})"))
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    /** Create a 300-second signed URL for a private org document. */
+    suspend fun createOrgDocSignedUrl(path: String): Result<String> = try {
+        val response = httpClient.post("$supabaseUrl/storage/v1/object/sign/org-documents/$path") {
+            authHeaders().forEach { (k, v) -> header(k, v) }
+            contentType(ContentType.Application.Json)
+            setBody(mapOf("expiresIn" to 300))
+        }
+        if (response.status.isSuccess()) {
+            val body = response.body<String>()
+            val signed = json.parseToJsonElement(body).jsonObject["signedURL"]?.jsonPrimitive?.content
+            if (signed != null) Result.success("$supabaseUrl/storage/v1$signed")
+            else Result.failure(Exception("Could not create a link for this document"))
+        } else {
+            Result.failure(Exception("Link expired — try again."))
+        }
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    /** Best-effort delete of a bucket object (non-fatal if it fails). */
+    suspend fun deleteOrgDocObject(path: String): Boolean = try {
+        val response = httpClient.delete("$supabaseUrl/storage/v1/object/org-documents/$path") {
+            authHeaders().forEach { (k, v) -> header(k, v) }
+        }
+        response.status.isSuccess()
+    } catch (_: Exception) {
+        false
+    }
+
+    private suspend fun parseErrorCode(response: io.ktor.client.statement.HttpResponse): String? = try {
+        val body = response.body<String>()
+        json.parseToJsonElement(body).jsonObject["code"]?.jsonPrimitive?.content
+    } catch (_: Exception) {
+        null
+    }
+
+    /** DELETE a row by id (Prefer: return=minimal). */
+    private suspend inline fun deleteFrom(table: String, id: String): Result<Unit> = try {
+        val response = httpClient.delete("$restBase/$table?id=eq.$id") {
+            authHeaders().forEach { (k, v) -> header(k, v) }
+            header("Prefer", "return=minimal")
+        }
+        if (response.status.isSuccess()) Result.success(Unit)
+        else Result.failure(Exception("Delete failed: ${response.status}"))
+    } catch (e: Exception) {
+        Result.failure(e)
     }
 
     // ── Edge Functions ───────────────────────────────────────────────────
