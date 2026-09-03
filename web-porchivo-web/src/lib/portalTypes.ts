@@ -42,6 +42,43 @@ export interface OrgAnnouncementRow {
   created_at: string;
 }
 
+export interface OrgDocumentRow {
+  id: string;
+  org_id: string;
+  name: string;
+  external_url: string | null;
+  file_path: string | null;
+  file_size: number | null;
+  mime_type: string | null;
+  created_at: string;
+}
+
+export interface OrgAmenityRow {
+  id: string;
+  org_id: string;
+  name: string;
+}
+
+export interface OrgReservationRow {
+  id: string;
+  amenity_id: string;
+  reserved_by: string;
+  starts_at: string;
+  ends_at: string;
+  status: string;
+  created_at: string;
+  member: { name: string | null } | null;
+}
+
+export interface OrgPaymentRow {
+  id: string;
+  amount_cents: number;
+  status: string;
+  paid_at: string | null;
+  created_at: string;
+  member: { name: string | null } | null;
+}
+
 export interface MaintenanceRequestRow {
   id: string;
   title: string;
@@ -75,6 +112,12 @@ export function canDecideMembers(role: PortalRole): boolean {
 // Matches regenerate_org_invite_code allowlist
 export function canRegenInviteCode(role: PortalRole): boolean {
   return role === "hoa_admin" || role === "super_admin";
+}
+
+// Amenities + payments ledger start on the Community plan (Starter excluded,
+// matching the mobile tier gate and the Pricing comparison rows).
+export function isCommunityPlanOrHigher(planTier: string | null | undefined): boolean {
+  return planTier === "community" || planTier === "professional" || planTier === "enterprise";
 }
 
 export const ROLE_LABELS: Record<PortalRole, string> = {

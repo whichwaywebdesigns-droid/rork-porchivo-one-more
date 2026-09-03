@@ -14,6 +14,9 @@ import {
   Megaphone,
   Wrench,
   CreditCard,
+  FolderOpen,
+  CalendarClock,
+  Receipt,
   LogOut,
   ShieldAlert,
   ArrowLeft,
@@ -31,6 +34,9 @@ const NAV_ITEMS = [
   { to: "/manage/invite-code", label: "Invite code", icon: KeyRound },
   { to: "/manage/announcements", label: "Announcements", icon: Megaphone },
   { to: "/manage/maintenance", label: "Maintenance", icon: Wrench },
+  { to: "/manage/documents", label: "Documents", icon: FolderOpen },
+  { to: "/manage/amenities", label: "Amenities", icon: CalendarClock },
+  { to: "/manage/ledger", label: "Ledger", icon: Receipt },
   { to: "/manage/billing", label: "Billing", icon: CreditCard },
 ];
 

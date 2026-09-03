@@ -38,6 +38,9 @@ const ManageMembersPage = lazy(() => import("./pages/portal/ManageMembers"));
 const ManageInviteCodePage = lazy(() => import("./pages/portal/ManageInviteCode"));
 const ManageAnnouncementsPage = lazy(() => import("./pages/portal/ManageAnnouncements"));
 const ManageMaintenancePage = lazy(() => import("./pages/portal/ManageMaintenance"));
+const ManageDocumentsPage = lazy(() => import("./pages/portal/ManageDocuments"));
+const ManageAmenitiesPage = lazy(() => import("./pages/portal/ManageAmenities"));
+const ManageLedgerPage = lazy(() => import("./pages/portal/ManageLedger"));
 const ManageBillingPage = lazy(() => import("./pages/portal/ManageBilling"));
 
 const queryClient = new QueryClient();
@@ -124,6 +127,9 @@ const App = () => (
                 <Route path="invite-code" element={<ManageInviteCodePage />} />
                 <Route path="announcements" element={<ManageAnnouncementsPage />} />
                 <Route path="maintenance" element={<ManageMaintenancePage />} />
+                <Route path="documents" element={<ManageDocumentsPage />} />
+                <Route path="amenities" element={<ManageAmenitiesPage />} />
+                <Route path="ledger" element={<ManageLedgerPage />} />
                 <Route path="billing" element={<ManageBillingPage />} />
               </Route>
 
