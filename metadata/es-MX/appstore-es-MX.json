@@ -1,0 +1,10 @@
+{
+  "locale": "es-MX",
+  "note": "Staged es-MX App Store localization for the Mexican condominio launch. Subtitle + keywords are VERSION-level localizations — ASC refuses version-localization edits while a submission is staged (see 1.0.7 whatsNew gotcha), so push these right after the 1.0.7 review clears (same flow as the pending en-US whatsNew push). App name stays 'Porchivo' and privacyPolicyUrl is unchanged. Keyword + limit counts verified 2026-09-03.",
+  "subtitle": "Del portal a tu departamento.",
+  "subtitle_chars": 29,
+  "keywords": "robo paquetes, condominio, seguridad, paquetería, vecino, alertas, administrador, fraccionamiento",
+  "keywords_chars": 97,
+  "keywords_note": "Consultant draft was 104 chars (over the 100 limit) — removed 'robos' (redundant with 'robo paquetes') to hit 97/100.",
+  "whatsNew": "Nuevas herramientas de administración para gestores de condominios: códigos de invitación, aprobaciones de miembros pendientes y gestión de suscripciones. Además: reportar y bloquear en el chat comunitario, inicio de sesión más confiable y códigos de verificación mejorados."
+}
