@@ -10,6 +10,17 @@ import { checkRateLimit, rateLimitResponse } from '../_shared/rateLimit.ts';
 const RATE_LIMIT = 3;
 const RATE_WINDOW_SECONDS = 600;
 
+// ─── MXN pricing (Mexico-market push) ───────────────────────────────────────
+// Fixed MXN prices, reviewed quarterly (never FX-converted at checkout).
+// Starter + Professional only; all amounts in centavos. Prices are quoted
+// IVA-incluido (16% Mexican VAT is inside the gross amount — no Stripe Tax
+// behavior set, so the checkout shows exactly these amounts).
+const MXN_PLANS: Record<string, { monthly: number; annual: number; onboardingFee: number }> = {
+  starter: { monthly: 149000, annual: 1490000, onboardingFee: 0 },
+  professional: { monthly: 369000, annual: 3690000, onboardingFee: 369000 },
+};
+const MXN_NOTE = 'IVA incluido';
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -123,6 +134,7 @@ serve(async (req: Request) => {
       totalUnits?: number;
       planTier: string;
       billingCycle: 'monthly' | 'annual';
+      currency?: 'usd' | 'mxn';
       returnUrl?: string;
     };
     try { body = await req.json(); } catch { return json({ error: 'Invalid JSON body' }, 400); }
@@ -131,6 +143,10 @@ serve(async (req: Request) => {
       name, type, address, city, state, zip, totalUnits,
       planTier, billingCycle,
     } = body;
+    const currency = body.currency === 'mxn' ? 'mxn' : 'usd';
+    if (currency === 'mxn' && !MXN_PLANS[planTier]) {
+      return json({ error: 'MXN pricing is available for Starter and Professional plans only' }, 400);
+    }
 
     // Validate required fields
     if (!name?.trim()) return json({ error: 'Organization name is required' }, 400);
@@ -152,6 +168,7 @@ serve(async (req: Request) => {
     // Residents keep the single-community rule. Admins/managers may run a
     // portfolio of communities up to their chosen plan's limit.
     const plan = PLANS[planTier];
+    const mxnPricing = currency === 'mxn' ? MXN_PLANS[planTier] : null;
     const { data: existingMembership } = await adminClient
       .from('org_memberships')
       .select('role')
@@ -180,7 +197,10 @@ serve(async (req: Request) => {
 
     // ── 5. Generate invite code ───────────────────────────────────────────────
     const inviteCode = Math.random().toString(36).slice(2, 8).toUpperCase();
-    const unitAmount = billingCycle === 'monthly' ? plan.monthlyPrice : plan.annualPrice;
+    const unitAmount = mxnPricing
+      ? (billingCycle === 'monthly' ? mxnPricing.monthly : mxnPricing.annual)
+      : (billingCycle === 'monthly' ? plan.monthlyPrice : plan.annualPrice);
+    const onboardingFeeCents = mxnPricing ? mxnPricing.onboardingFee : plan.onboardingFeeCents;
     const interval: 'month' | 'year' = billingCycle === 'monthly' ? 'month' : 'year';
 
     // ── 6. Create org with pending subscription ───────────────────────────────
@@ -202,7 +222,8 @@ serve(async (req: Request) => {
         subscription_status: 'pending',
         max_units: plan.maxUnits,
         max_communities: plan.maxCommunities,
-        onboarding_fee_cents: plan.onboardingFeeCents,
+        onboarding_fee_cents: onboardingFeeCents,
+        billing_currency: currency,
       })
       .select()
       .single();
@@ -275,19 +296,22 @@ serve(async (req: Request) => {
 
     // Line item with inline price_data (no pre-created Stripe products needed)
     checkoutParams.set('line_items[0][quantity]', '1');
-    checkoutParams.set('line_items[0][price_data][currency]', 'usd');
+    checkoutParams.set('line_items[0][price_data][currency]', currency);
     checkoutParams.set('line_items[0][price_data][unit_amount]', String(unitAmount));
     checkoutParams.set('line_items[0][price_data][product_data][name]', plan.name);
-    checkoutParams.set('line_items[0][price_data][product_data][description]', plan.description);
+    checkoutParams.set(
+      'line_items[0][price_data][product_data][description]',
+      currency === 'mxn' ? `${plan.description} — ${MXN_NOTE}` : plan.description,
+    );
     checkoutParams.set('line_items[0][price_data][recurring][interval]', interval);
 
     // One-time onboarding fee — charged on the same checkout session's first
     // invoice alongside the subscription (Stripe supports mixed one-time and
     // recurring line items in subscription mode).
-    if (plan.onboardingFeeCents > 0) {
+    if (onboardingFeeCents > 0) {
       checkoutParams.set('line_items[1][quantity]', '1');
-      checkoutParams.set('line_items[1][price_data][currency]', 'usd');
-      checkoutParams.set('line_items[1][price_data][unit_amount]', String(plan.onboardingFeeCents));
+      checkoutParams.set('line_items[1][price_data][currency]', currency);
+      checkoutParams.set('line_items[1][price_data][unit_amount]', String(onboardingFeeCents));
       checkoutParams.set('line_items[1][price_data][product_data][name]', `Porchivo Onboarding — ${plan.name.replace('Porchivo ', '')}`);
       checkoutParams.set('line_items[1][price_data][product_data][description]', 'One-time onboarding fee, charged with your first payment');
     }
@@ -316,7 +340,7 @@ serve(async (req: Request) => {
       checkoutUrl,
       sessionId,
       orgId,
-      plan: { name: plan.name, price: unitAmount, interval, onboardingFeeCents: plan.onboardingFeeCents },
+      plan: { name: plan.name, price: unitAmount, interval, onboardingFeeCents, currency },
     });
 
   } catch (e) {

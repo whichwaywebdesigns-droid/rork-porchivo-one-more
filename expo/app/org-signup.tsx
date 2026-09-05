@@ -27,6 +27,7 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
+import { getLocales } from 'expo-localization';
 import {
   Building2,
   ChevronLeft,
@@ -54,6 +55,19 @@ WebBrowser.maybeCompleteAuthSession();
 
 const SUCCESS_REDIRECT = 'porchivo://org-signup/success';
 const CANCEL_REDIRECT = 'porchivo://org-signup/cancelled';
+
+// ─── MXN pricing (Mexico-market push) ─────────────────────────────────────────
+// Fixed MXN prices, reviewed quarterly — must match MXN_PLANS in the
+// create-org-checkout edge function. Starter + Professional only; prices
+// are IVA-incluido (16% VAT inside the gross amount).
+const MXN_PLANS: Record<string, { monthly: number; annual: number; setupFee: number }> = {
+  starter: { monthly: 1490, annual: 14900, setupFee: 0 },
+  professional: { monthly: 3690, annual: 36900, setupFee: 3690 },
+};
+
+function formatPrice(amount: number, currency: 'usd' | 'mxn'): string {
+  return currency === 'mxn' ? `$${amount.toLocaleString('en-US')} MXN` : `$${amount}`;
+}
 
 /**
  * Parse session_id and org_id from the Stripe redirect URL.
@@ -200,6 +214,11 @@ export default function OrgSignupScreen() {
   // Plan state
   const [selectedPlan, setSelectedPlan] = useState<string>('community');
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
+  // Currency — defaults to MXN on Spanish devices (Mexico-market push);
+  // MXN is only available for Starter and Professional.
+  const [currency, setCurrency] = useState<'usd' | 'mxn'>(
+    (getLocales()?.[0]?.languageCode ?? 'en') === 'es' ? 'mxn' : 'usd',
+  );
 
   // Checkout state
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
@@ -236,7 +255,8 @@ export default function OrgSignupScreen() {
   const autoNavTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ── Validate details step ──────────────────────────────────────────────────
-  const detailsValid = orgName.trim().length > 0 && address.trim().length > 0 && city.trim().length > 0 && stateField.length === 2 && zip.length >= 5;
+  // State allows 2–5 chars so Mexican states (e.g. JAL, NLE) work alongside US.
+  const detailsValid = orgName.trim().length > 0 && address.trim().length > 0 && city.trim().length > 0 && stateField.length >= 2 && stateField.length <= 5 && zip.length >= 5;
 
   // ── Launch Stripe Checkout ─────────────────────────────────────────────────
   const handleLaunchCheckout = useCallback(async () => {
@@ -256,6 +276,7 @@ export default function OrgSignupScreen() {
           totalUnits: totalUnits ? parseInt(totalUnits, 10) : undefined,
           planTier: selectedPlan,
           billingCycle,
+          currency,
           returnUrl: SUCCESS_REDIRECT,
         },
       });
@@ -308,7 +329,7 @@ export default function OrgSignupScreen() {
       setError(msg);
       setStep('plan');
     }
-  }, [orgName, orgType, address, city, stateField, zip, totalUnits, selectedPlan, billingCycle]);
+  }, [orgName, orgType, address, city, stateField, zip, totalUnits, selectedPlan, billingCycle, currency]);
 
   // ── Confirm signup after Stripe redirect ───────────────────────────────────
   const handleConfirmSignup = useCallback(async (sid: string, oid: string) => {
@@ -513,7 +534,7 @@ export default function OrgSignupScreen() {
             value={stateField}
             onChangeText={(v) => setStateField(v.toUpperCase().slice(0, 2))}
             autoCapitalize="characters"
-            maxLength={2}
+            maxLength={5}
             returnKeyType="next"
           />
         </View>
@@ -556,9 +577,20 @@ export default function OrgSignupScreen() {
   );
 
   // ─── Step: Plan ────────────────────────────────────────────────────────────
+  // ─── Currency switch (MXN restricted to Starter + Professional) ────────────
+  const handleSwitchCurrency = useCallback((next: 'usd' | 'mxn') => {
+    setCurrency(next);
+    if (next === 'mxn' && !MXN_PLANS[selectedPlan]) {
+      setSelectedPlan('starter');
+    }
+  }, [selectedPlan]);
+
   const renderPlanStep = () => {
     const selectedPlanDef = PLANS.find((p) => p.id === selectedPlan)!;
-    const price = billingCycle === 'monthly' ? selectedPlanDef.monthlyPrice : selectedPlanDef.annualPrice;
+    const mxnSelected = currency === 'mxn' ? MXN_PLANS[selectedPlan] : null;
+    const price = mxnSelected
+      ? (billingCycle === 'monthly' ? mxnSelected.monthly : mxnSelected.annual)
+      : (billingCycle === 'monthly' ? selectedPlanDef.monthlyPrice : selectedPlanDef.annualPrice);
 
     return (
       <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
@@ -566,6 +598,30 @@ export default function OrgSignupScreen() {
         <Text style={[styles.subtext, { color: Colors.slateLight }]}>
           Residents always join for free. Your subscription unlocks community features for everyone.
         </Text>
+
+        {/* Currency toggle — MXN is the Mexico-market push (Starter + Professional) */}
+        <View style={[styles.currencyToggle, { borderColor: Colors.border }]}>
+          {(['usd', 'mxn'] as const).map((cur) => {
+            const active = currency === cur;
+            return (
+              <TouchableOpacity
+                key={cur}
+                style={[styles.currencyChip, active && { backgroundColor: Colors.primary, borderColor: Colors.primary }]}
+                onPress={() => handleSwitchCurrency(cur)}
+                activeOpacity={0.75}
+              >
+                <Text style={[styles.currencyChipText, { color: active ? '#fff' : Colors.slateLight }]}>
+                  {cur === 'usd' ? 'USD $' : 'MXN $'}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+          {currency === 'mxn' && (
+            <Text style={[styles.currencyNote, { color: Colors.slateLighter }]}>
+              Precios fijos en pesos — IVA incluido
+            </Text>
+          )}
+        </View>
 
         {/* Billing cycle toggle */}
         <View style={[styles.billingToggle, { backgroundColor: Colors.surface, borderColor: Colors.border }]}>
@@ -596,7 +652,12 @@ export default function OrgSignupScreen() {
         <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 420 }}>
           {PLANS.map((plan) => {
             const isSelected = selectedPlan === plan.id;
-            const planPrice = billingCycle === 'monthly' ? plan.monthlyPrice : plan.annualPrice;
+            const mxnPlan = currency === 'mxn' ? MXN_PLANS[plan.id] : null;
+            const planPrice = mxnPlan
+              ? (billingCycle === 'monthly' ? mxnPlan.monthly : mxnPlan.annual)
+              : (billingCycle === 'monthly' ? plan.monthlyPrice : plan.annualPrice);
+            // MXN only covers Starter + Professional — other tiers stay USD-only
+            const mxnUnavailable = currency === 'mxn' && !mxnPlan;
 
             return (
               <TouchableOpacity
@@ -607,6 +668,7 @@ export default function OrgSignupScreen() {
                     backgroundColor: Colors.surface,
                     borderColor: isSelected ? Colors.primary : Colors.border,
                     borderWidth: isSelected ? 2 : 1,
+                    opacity: mxnUnavailable ? 0.55 : 1,
                   },
                 ]}
                 onPress={() => setSelectedPlan(plan.id)}
@@ -623,14 +685,28 @@ export default function OrgSignupScreen() {
                     <Text style={[styles.planTagline, { color: Colors.slateLighter }]}>{plan.tagline}</Text>
                   </View>
                   <View style={styles.planPriceWrap}>
-                    <Text style={[styles.planPrice, { color: Colors.slate }]}>${planPrice}</Text>
+                    <Text style={[styles.planPrice, { color: Colors.slate }]}>
+                      {formatPrice(planPrice, currency)}
+                    </Text>
                     <Text style={[styles.planPriceInterval, { color: Colors.slateLighter }]}>
                       /{billingCycle === 'monthly' ? 'mo' : 'yr'}
                     </Text>
                   </View>
                 </View>
+                {mxnUnavailable && (
+                  <View style={styles.mxnOnlyNote}>
+                    <Text style={[styles.mxnOnlyText, { color: Colors.slateLighter }]}>
+                      Available in USD only
+                    </Text>
+                  </View>
+                )}
                 <View style={[styles.planFeatureList, { borderTopColor: Colors.borderLight }]}>
-                  {plan.features.map((feature, i) => (
+                  {plan.features.map((rawFeature, i) => {
+                    // Swap the USD onboarding line for the MXN equivalent
+                    const feature = currency === 'mxn' && mxnPlan && mxnPlan.setupFee > 0
+                      ? `${formatPrice(mxnPlan.setupFee, 'mxn')} one-time onboarding — IVA incluido`
+                      : rawFeature;
+                    return (
                     <View key={i} style={styles.planFeatureRow}>
                       {feature === 'Everything in Starter, plus:' || feature === 'Everything in Community, plus:' || feature === 'Everything in Professional, plus:' ? (
                         <Text style={[styles.planFeatureHeader, { color: Colors.slate }]}>{feature}</Text>
@@ -641,7 +717,8 @@ export default function OrgSignupScreen() {
                         </>
                       )}
                     </View>
-                  ))}
+                    );
+                  })}
                 </View>
                 {isSelected && (
                   <View style={[styles.selectedIndicator, { backgroundColor: Colors.primary }]}>
@@ -663,9 +740,11 @@ export default function OrgSignupScreen() {
         {/* Total + checkout button */}
         <View style={[styles.checkoutBar, { backgroundColor: Colors.surface, borderColor: Colors.border }]}>
           <View>
-            <Text style={[styles.totalLabel, { color: Colors.slateLighter }]}>Total {billingCycle === 'monthly' ? 'per month' : 'per year'}</Text>
+            <Text style={[styles.totalLabel, { color: Colors.slateLighter }]}>
+              Total {billingCycle === 'monthly' ? 'per month' : 'per year'}{currency === 'mxn' ? ' — IVA incluido' : ''}
+            </Text>
             <Text style={[styles.totalAmount, { color: Colors.slate }]}>
-              ${price}
+              {formatPrice(price, currency)}
               <Text style={[styles.totalInterval, { color: Colors.slateLighter }]}>
                 {' '}/{billingCycle === 'monthly' ? 'mo' : 'yr'}
               </Text>
@@ -987,6 +1066,25 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   backLinkText: { fontSize: 14, fontWeight: '500' as const },
+
+  // Currency toggle
+  currencyToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 12,
+    flexWrap: 'wrap',
+  },
+  currencyChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 9,
+    borderWidth: 1,
+  },
+  currencyChipText: { fontSize: 12, fontWeight: '700' as const },
+  currencyNote: { fontSize: 11, fontWeight: '600' as const, marginLeft: 2 },
+  mxnOnlyNote: { paddingHorizontal: 16, paddingTop: 10 },
+  mxnOnlyText: { fontSize: 11, fontWeight: '600' as const },
 
   // Billing toggle
   billingToggle: {

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Check, ArrowRight, Building2, Users, Zap, Shield } from "lucide-react";
 import PageLayout from "@/components/PageLayout";
@@ -125,6 +126,19 @@ const FREE_FEATURES = [
   "No credit card required, no time limit",
 ];
 
+// MXN pricing (Mexico-market push) — fixed MXN, reviewed quarterly.
+// Starter + Professional only; prices are IVA-incluido (16% VAT inside the
+// gross amount). Must match MXN_PLANS in supabase/functions/create-org-checkout.
+const MXN_PLANS: Record<
+  string,
+  { monthly: number; annual: number; annualPerMonth: number; setupFee: number }
+> = {
+  Starter: { monthly: 1490, annual: 14900, annualPerMonth: 1242, setupFee: 0 },
+  Professional: { monthly: 3690, annual: 36900, annualPerMonth: 3075, setupFee: 3690 },
+};
+
+const fmtMXN = (n: number) => `$${n.toLocaleString("en-US")}`;
+
 const COMPARISON_ROWS = [
   { feature: "Max units", starter: "50", community: "200", professional: "500", enterprise: "2,000" },
   { feature: "Communities", starter: "1", community: "1", professional: "3", enterprise: "Unlimited" },
@@ -153,6 +167,11 @@ const PLAN_ICONS: Record<string, React.ComponentType<{ className?: string }>> = 
 };
 
 export default function PricingPage() {
+  // Currency — defaults to MXN on Spanish browsers (Mexico-market push)
+  const [currency, setCurrency] = useState<"USD" | "MXN">(() =>
+    typeof navigator !== "undefined" && navigator.language?.toLowerCase().startsWith("es") ? "MXN" : "USD",
+  );
+
   const schemas = [
     buildWebPageSchema({ name: seo.title, description: seo.description, url: seo.canonical }),
     buildBreadcrumbSchema([{ name: "Home", url: BRAND.url }, { name: "Pricing", url: seo.canonical }]),
@@ -177,6 +196,28 @@ export default function PricingPage() {
           <BreadcrumbNav items={[{ label: "Home", href: "/" }, { label: "Pricing", href: "/pricing" }]} />
           <div className="mt-8 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-orange/10 border border-brand-orange/20 text-brand-orange text-xs font-semibold mb-5">
             Residents always free
+          </div>
+          {/* Currency toggle — MXN is the Mexico-market push (Starter + Professional) */}
+          <div className="mb-5 flex flex-wrap items-center justify-center gap-2">
+            {(["USD", "MXN"] as const).map((c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => setCurrency(c)}
+                className={`px-4 py-1.5 rounded-full text-xs font-semibold border transition-all ${
+                  currency === c
+                    ? "bg-brand-orange border-brand-orange text-brand-text-primary"
+                    : "border-brand-navy-500/50 text-brand-text-secondary hover:text-brand-text-primary"
+                }`}
+              >
+                {c === "USD" ? "USD $" : "MXN $"}
+              </button>
+            ))}
+            {currency === "MXN" && (
+              <span className="text-xs text-brand-text-muted">
+                Precios fijos en pesos — IVA incluido (Starter y Professional)
+              </span>
+            )}
           </div>
           <h1 className="text-4xl sm:text-5xl font-bold text-brand-text-primary mb-4">
             Pricing for communities
@@ -211,11 +252,22 @@ export default function PricingPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
             {B2B_PLANS.map((plan) => {
               const Icon = PLAN_ICONS[plan.name] ?? Building2;
+              const mxn = currency === "MXN" ? MXN_PLANS[plan.name] : undefined;
+              const mxnUnavailable = currency === "MXN" && !mxn;
+              const monthly = mxn ? fmtMXN(mxn.monthly) : plan.monthly;
+              const annual = mxn ? fmtMXN(mxn.annual) : plan.annual;
+              const annualPerMonth = mxn ? fmtMXN(mxn.annualPerMonth) : plan.annualPerMonth;
+              const setupFee =
+                mxn && mxn.setupFee > 0
+                  ? `${fmtMXN(mxn.setupFee)} one-time onboarding — IVA incluido`
+                  : plan.setupFee;
               return (
                 <div
                   key={plan.name}
                   className={`rounded-2xl border p-6 flex flex-col ${
-                    plan.highlight
+                    mxnUnavailable
+                      ? "border-brand-navy-500/25 bg-brand-navy-900/60 opacity-70"
+                      : plan.highlight
                       ? "border-brand-orange/50 bg-gradient-to-b from-brand-orange/5 to-transparent"
                       : "border-brand-navy-500/40 bg-brand-navy-900"
                   }`}
@@ -232,13 +284,15 @@ export default function PricingPage() {
                   <div className="text-xs text-brand-text-muted mb-4">{plan.maxUnits}</div>
 
                   <div className="flex items-baseline gap-1 mb-1">
-                    <span className="text-3xl font-bold text-brand-text-primary">{plan.monthly}</span>
-                    <span className="text-brand-text-muted text-xs">/mo</span>
+                    <span className="text-3xl font-bold text-brand-text-primary">{monthly}</span>
+                    <span className="text-brand-text-muted text-xs">/mo{mxn ? " MXN" : ""}</span>
                   </div>
                   <div className="text-xs text-brand-text-muted mb-1">
-                    or {plan.annual}/yr ({plan.annualPerMonth}/mo) — 2 months free
+                    or {annual}/yr{mxn ? " MXN" : ""} ({annualPerMonth}/mo) — 2 months free
                   </div>
-                  <div className="text-xs text-brand-text-muted mb-5">{plan.setupFee}</div>
+                  <div className="text-xs text-brand-text-muted mb-5">
+                    {mxnUnavailable ? "Billed in USD" : setupFee}
+                  </div>
 
                   <ul className="space-y-2 mb-6 flex-1">
                     {plan.features.map((f, i) => (
@@ -273,6 +327,12 @@ export default function PricingPage() {
           <p className="text-center text-sm text-brand-text-muted mt-8">
             Need more than 2,000 units? <a href="mailto:support@porchivo.com" className="text-brand-orange hover:underline">Contact us</a> for a custom quote.
           </p>
+
+          {currency === "MXN" && (
+            <p className="text-center text-xs text-brand-text-muted mt-6 max-w-2xl mx-auto">
+              Starter and Professional are billed in fixed Mexican pesos (IVA incluido) and reviewed quarterly — no exchange-rate surprises. Community and Enterprise remain billed in USD.
+            </p>
+          )}
         </div>
       </section>
 

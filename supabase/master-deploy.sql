@@ -14,7 +14,7 @@
 -- tables/indexes use IF NOT EXISTS. Running this on a partially-migrated
 -- database brings it fully up to date without erroring on existing objects.
 --
--- Bundles 45 migrations in dependency order.
+-- Bundles 46 migrations in dependency order.
 -- =============================================================
 
 
@@ -9415,8 +9415,8 @@ declare
   v_partner record; v_homeowner record; v_open_ships int;
 begin
   if new.status <> 'pending' then return new; end if;
-  select name, email, address into v_partner from public.profiles where id = new.partner_id;
-  select name, email, address into v_homeowner from public.profiles where id = new.homeowner_id;
+  select id, name, email, address into v_partner from public.profiles where id = new.partner_id;
+  select id, name, email, address into v_homeowner from public.profiles where id = new.homeowner_id;
   if v_partner.email is null or position('@' in v_partner.email) = 0 then return new; end if;
   select count(*) into v_open_ships from public.shipments
     where homeowner_id = new.homeowner_id and status in ('open','accepted');
@@ -9454,8 +9454,8 @@ declare
   v_homeowner record; v_partner record;
 begin
   if old.status <> 'pending' then return new; end if;
-  select name, email, address into v_homeowner from public.profiles where id = new.homeowner_id;
-  select name, email, address into v_partner  from public.profiles where id = new.partner_id;
+  select id, name, email, address into v_homeowner from public.profiles where id = new.homeowner_id;
+  select id, name, email, address into v_partner  from public.profiles where id = new.partner_id;
 
   if new.status = 'active' then
     -- To the requester: request accepted
@@ -9634,7 +9634,7 @@ returns trigger language plpgsql security definer set search_path = public as $$
 declare
   v_reporter record; v_item_name text;
 begin
-  select name, email into v_reporter from public.profiles where id = new.reporter_id;
+  select id, name, email into v_reporter from public.profiles where id = new.reporter_id;
   if v_reporter.email is null or position('@' in v_reporter.email) = 0 then return new; end if;
   if new.package_log_id is not null then
     select coalesce(nullif(notes, ''), 'Your package') into v_item_name
@@ -9672,7 +9672,7 @@ returns trigger language plpgsql security definer set search_path = public as $$
 declare
   v_reporter record; v_item_name text;
 begin
-  select name, email into v_reporter from public.profiles where id = new.reporter_id;
+  select id, name, email into v_reporter from public.profiles where id = new.reporter_id;
   if v_reporter.email is null or position('@' in v_reporter.email) = 0 then return new; end if;
   if new.package_log_id is not null then
     select coalesce(nullif(notes, ''), 'Your package') into v_item_name
@@ -9703,7 +9703,7 @@ create trigger trg_incident_resolved
   after update on public.incident_reports
   for each row when (
     new.status in ('resolved','closed')
-    and coalesce(old.status,'') not in ('resolved','closed')
+    and (old.status is null or old.status::text not in ('resolved','closed'))
     and new.type in ('missing_package','delivered_not_found','misdelivered','tampered'))
   execute function public.notify_incident_resolved();
 
@@ -9713,8 +9713,8 @@ returns trigger language plpgsql security definer set search_path = public as $$
 declare
   v_homeowner record; v_partner record; v_item_name text;
 begin
-  select name, email, address into v_homeowner from public.profiles where id = new.homeowner_id;
-  select name, email, address into v_partner  from public.profiles where id = new.partner_id;
+  select id, name, email, address into v_homeowner from public.profiles where id = new.homeowner_id;
+  select id, name, email, address into v_partner  from public.profiles where id = new.partner_id;
   if v_homeowner.email is null or position('@' in v_homeowner.email) = 0 then return new; end if;
   if new.shipment_id is not null then
     select coalesce(nullif(packages_expected, ''), 'Your package') into v_item_name
@@ -9752,8 +9752,8 @@ returns trigger language plpgsql security definer set search_path = public as $$
 declare
   v_homeowner record; v_partner record;
 begin
-  select name, email, address into v_homeowner from public.profiles where id = new.homeowner_id;
-  select name, email, address into v_partner  from public.profiles where id = new.partner_id;
+  select id, name, email, address into v_homeowner from public.profiles where id = new.homeowner_id;
+  select id, name, email, address into v_partner  from public.profiles where id = new.partner_id;
   if v_homeowner.email is null or position('@' in v_homeowner.email) = 0 then return new; end if;
   begin
     perform public.enqueue_template_email(
@@ -9791,7 +9791,7 @@ begin
     where referred_id = new.homeowner_id and status = 'pending'
     limit 1;
   if not found then return new; end if;
-  select name, email into v_referrer from public.profiles where id = v_referral.referrer_id;
+  select id, name, email into v_referrer from public.profiles where id = v_referral.referrer_id;
   select name, email into v_referred from public.profiles where id = new.homeowner_id;
   if v_referrer.email is null or position('@' in v_referrer.email) = 0 then return new; end if;
   update public.referrals set status = 'credited', credited_at = now() where id = v_referral.id;
@@ -10142,7 +10142,7 @@ begin
       )
     limit 100
   loop
-    select name, email into v_homeowner from public.profiles where id = v_s.homeowner_id;
+    select id, name, email into v_homeowner from public.profiles where id = v_s.homeowner_id;
     if v_homeowner.email is null or position('@' in v_homeowner.email) = 0 then continue; end if;
     begin
       perform public.enqueue_template_email(
@@ -10269,7 +10269,7 @@ begin
       and pa.homeowner_rating is null
     limit 100
   loop
-    select name, email into v_homeowner from public.profiles where id = v_a.homeowner_id;
+    select id, name, email into v_homeowner from public.profiles where id = v_a.homeowner_id;
     select name into v_partner from public.profiles where id = v_a.partner_id;
     if v_homeowner.email is null or position('@' in v_homeowner.email) = 0 then continue; end if;
     v_item := coalesce(nullif(v_a.packages_expected, ''), 'Your package');
@@ -10366,7 +10366,7 @@ begin
       and (delivery_window_start::date = current_date or delivery_window_end::date = current_date)
     limit 200
   loop
-    select name, email into v_homeowner from public.profiles where id = v_s.homeowner_id;
+    select id, name, email into v_homeowner from public.profiles where id = v_s.homeowner_id;
     if v_homeowner.email is null or position('@' in v_homeowner.email) = 0 then continue; end if;
     begin
       perform public.enqueue_template_email(
@@ -10398,7 +10398,7 @@ revoke all on function public.run_risk_spike_job()       from public, anon, auth
 revoke all on function public.run_arriving_today_job()   from public, anon, authenticated;
 
 -- ── 12. pg_cron schedules (direct RPC calls — jobs are pure SQL) ────────────
-do $$ begin
+do $job$ begin
   perform cron.schedule('email-safety-digest', '0 14 * * 1',  $$select public.run_safety_digest_job()$$);
   perform cron.schedule('email-at-risk',       '0 * * * *',   $$select public.run_at_risk_job()$$);
   perform cron.schedule('email-re-engagement', '0 15 * * *',  $$select public.run_reengagement_job()$$);
@@ -10408,7 +10408,27 @@ do $$ begin
   perform cron.schedule('email-arriving-today','0 */2 * * *', $$select public.run_arriving_today_job()$$);
 exception when others then
   raise warning 'cron schedule: %', sqlerrm;
-end $$;
+end $job$;
+
+
+
+-- #############################################################
+-- ##  org-billing-currency-migration.sql
+-- #############################################################
+-- ============================================================
+-- Org billing currency (MXN launch)
+-- Records the currency an organization's B2B subscription is
+-- billed in. 'usd' everywhere today; 'mxn' for the Mexico-market
+-- push (Starter + Professional, fixed MXN prices, IVA incluido,
+-- reviewed quarterly). Backfill: every existing org is USD.
+-- ============================================================
+
+alter table public.organizations
+  add column if not exists billing_currency text not null default 'usd'
+  check (billing_currency in ('usd', 'mxn'));
+
+comment on column public.organizations.billing_currency is
+  'Currency the B2B subscription is billed in. mxn = fixed MXN prices (Starter/Professional, IVA incluido); reviewed quarterly.';
 
 
 

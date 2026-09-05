@@ -54,6 +54,7 @@ ORDER = [
     "b2b-feature-gaps-migration.sql",          # org_documents + private org-documents bucket, org_amenities + reservations (Starter/Community tier gaps)
     "api-keys-migration.sql",                  # Enterprise API keys (api-gateway Bearer keys)
     "email-templates-migration.sql",           # 22 Resend templates: prefs, dedupe, triggers, jobs, referrals
+    "org-billing-currency-migration.sql",      # organizations.billing_currency — MXN launch (Starter/Professional, IVA incluido)
     "delete-account-procedure.sql",           # references most tables — run last
     "add_apns_token.sql",                    # native iOS APNS token column on profiles
     "add_is_volunteer.sql",                  # volunteer partner flag + stats view rebuild
