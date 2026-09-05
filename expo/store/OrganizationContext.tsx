@@ -586,6 +586,7 @@ export const [OrganizationProvider, useOrganization] = createContextHook(() => {
       description,
       unitNumber,
       packageLogId,
+      estimatedValue,
     }: {
       type: IncidentType;
       severity: IncidentSeverity;
@@ -593,6 +594,7 @@ export const [OrganizationProvider, useOrganization] = createContextHook(() => {
       description?: string | null;
       unitNumber?: string | null;
       packageLogId?: string | null;
+      estimatedValue?: number | null;
     }) => {
       if (!activeOrg?.id) throw new Error('No active org');
       const { data, error } = await supabase.rpc('file_org_incident', {
@@ -603,6 +605,7 @@ export const [OrganizationProvider, useOrganization] = createContextHook(() => {
         p_description: description ?? null,
         p_unit_number: unitNumber ?? null,
         p_package_log_id: packageLogId ?? null,
+        p_estimated_value: estimatedValue ?? null,
       });
       if (error) {
         warn('[OrgContext] File incident error:', error.code);

@@ -255,6 +255,7 @@ export default function FileIncidentScreen() {
   const [title,            setTitle]            = useState<string>('');
   const [description,      setDescription]      = useState<string>('');
   const [unitNumber,       setUnitNumber]       = useState<string>('');
+  const [estimatedValue,   setEstimatedValue]   = useState<string>('');
   const [submitted,        setSubmitted]        = useState<boolean>(false);
 
   const headerAnim = useRef(new Animated.Value(0)).current;
@@ -277,9 +278,21 @@ export default function FileIncidentScreen() {
 
   const canSubmit = selectedType !== null && title.trim().length > 0;
   const showCarrierReminder = selectedType !== null && CARRIER_ACTION_TYPES.includes(selectedType);
+  const showValueField = showCarrierReminder;
+
+  // Digits + a single decimal point only; keeps the decimal-pad input honest.
+  const handleValueChange = useCallback((text: string) => {
+    const cleaned = text.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1').slice(0, 11);
+    setEstimatedValue(cleaned);
+  }, []);
 
   const handleSubmit = useCallback(async () => {
     if (!canSubmit || !activeOrg) return;
+    const parsedValue = Number.parseFloat(estimatedValue);
+    const declaredValue =
+      Number.isFinite(parsedValue) && parsedValue > 0
+        ? Math.min(Math.round(parsedValue * 100) / 100, 99999999.99)
+        : null;
     try {
       await fileIncident({
         type: selectedType!,
@@ -287,12 +300,13 @@ export default function FileIncidentScreen() {
         title: title.trim(),
         description: description.trim() || null,
         unitNumber: unitNumber.trim() || null,
+        estimatedValue: declaredValue,
       });
       setSubmitted(true);
     } catch {
       Alert.alert('Error', 'Could not file incident. Please check your connection and try again.');
     }
-  }, [canSubmit, activeOrg, fileIncident, selectedType, selectedSeverity, title, description, unitNumber]);
+  }, [canSubmit, activeOrg, fileIncident, selectedType, selectedSeverity, title, description, unitNumber, estimatedValue]);
 
   if (submitted) {
     return <SuccessView onDone={() => router.replace('/incident-queue')} />;
@@ -441,6 +455,39 @@ export default function FileIncidentScreen() {
             </Text>
           ) : null}
         </View>
+
+        {/* ── Estimated item value ─────────────────────────────────────────── */}
+        {showValueField ? (
+          <View style={styles.section}>
+            <SectionLabel text="Estimated item value (USD)" />
+            <View style={styles.valueRow}>
+              <View style={[styles.valuePrefix, { backgroundColor: Colors.surface, borderColor: Colors.border }]}>
+                <Text style={[styles.valuePrefixText, { color: Colors.slateLight }]}>$</Text>
+              </View>
+              <TextInput
+                style={[
+                  styles.textField,
+                  styles.valueField,
+                  {
+                    backgroundColor: Colors.surface,
+                    borderColor: Colors.border,
+                    color: Colors.slate,
+                  },
+                ]}
+                placeholder="e.g. 129.99"
+                placeholderTextColor={Colors.slateLighter}
+                value={estimatedValue}
+                onChangeText={handleValueChange}
+                keyboardType="decimal-pad"
+                maxLength={11}
+                returnKeyType="done"
+              />
+            </View>
+            <Text style={[styles.valueHint, { color: Colors.slateLighter }]}>
+              Included in theft-report follow-ups. Optional.
+            </Text>
+          </View>
+        ) : null}
 
         {/* ── Unit number ──────────────────────────────────────────────────── */}
         <View style={styles.section}>
@@ -614,6 +661,22 @@ const styles = StyleSheet.create({
     minHeight: 110,
   },
   charCount: { fontSize: 11, textAlign: 'right', marginTop: 4 },
+
+  // Estimated value
+  valueRow: { flexDirection: 'row', alignItems: 'stretch' },
+  valuePrefix: {
+    borderWidth: 1,
+    borderRightWidth: 0,
+    borderRadius: 12,
+    borderTopRightRadius: 0,
+    borderBottomRightRadius: 0,
+    paddingHorizontal: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  valuePrefixText: { fontSize: 15, fontWeight: '700' as const },
+  valueField: { flex: 1, borderTopLeftRadius: 0, borderBottomLeftRadius: 0 },
+  valueHint: { fontSize: 11, marginTop: 6, lineHeight: 15 },
 
   // Carrier reminder
   carrierNote: {
