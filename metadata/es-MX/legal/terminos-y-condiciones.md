@@ -1,12 +1,14 @@
 # TÉRMINOS Y CONDICIONES — PORCHIVO
 
-> **ESTADO: BORRADOR es-MX (staged 2026-09-03).** Los valores entre corchetes
-> `[ASÍ]` son marcadores pendientes de datos legales del titular. Sigue los
-> puntos centrales del consultor: escudo de responsabilidad de la red Porch
-> Partners, límites explícitos del registro de pagos (sin función financiera),
-> moderación de chat y jurisdicción mexicana.
+> **ESTADO: FINAL (2026-09-05) — listo para publicar.** Datos confirmados:
+entidad = WhichWay Web Labs LLC (la operadora de los términos en inglés),
+contacto = soporte@porchivo.com, jurisdicción = Ciudad de México
+(predeterminado estándar; sustituible por Monterrey u otra ciudad si el
+titular decide lo contrario). Sigue los puntos centrales del consultor: escudo
+de responsabilidad de la red Porch Partners, límites explícitos del registro
+de pagos (sin función financiera), moderación de chat y jurisdicción mexicana.
 
-**Fecha de última actualización:** [DD de mes de 2026]
+**Fecha de última actualización:** 5 de septiembre de 2026
 
 ## 1. Aceptación de los Términos
 
@@ -14,7 +16,7 @@ Al crear una cuenta, descargar o utilizar la aplicación Porchivo (la
 "Aplicación"), usted acepta estos Términos y Condiciones ("Términos") y el
 Aviso de Privacidad de Porchivo. Si no está de acuerdo, no utilice la
 Aplicación. Estos Términos constituyen un acuerdo entre usted y
-[RAZÓN SOCIAL / NOMBRE LEGAL DE LA ENTIDAD] ("Porchivo").
+**WhichWay Web Labs LLC** ("Porchivo").
 
 ## 2. Roles y Gestión de la Comunidad
 
@@ -57,9 +59,11 @@ mantenimiento de su comunidad. Usted reconoce y acepta que:
 
 La suscripción de Porchivo que contrata la administración de la comunidad se
 paga mediante la plataforma de Stripe. Los precios, periodos de facturación y
-tarifas de configuración se muestran al momento de la contratación. Las
-suscripciones se renuevan automáticamente hasta su cancelación. La cancelación
-no genera reembolsos prorrateados salvo lo exigido por la ley aplicable.
+tarifas de configuración se muestran al momento de la contratación. Para
+comunidades en México, los precios se expresan en pesos mexicanos con IVA
+incluido (16%), conforme a la página de precios publicada. Las suscripciones
+se renuevan automáticamente hasta su cancelación. La cancelación no genera
+reembolsos prorrateados salvo lo exigido por la ley aplicable.
 
 ## 6. Chat Comunitario y Contenido de Usuarios
 
@@ -87,7 +91,7 @@ incluyen de manera enunciativa más no limitativa: paquetes perdidos, disputas
 entre vecinos o entre residentes y administradores, lucro cesante y daños
 emergentes. La responsabilidad total acumulada de Porchivo frente a usted, por
 cualquier reclamo, no excederá el importe que usted haya pagado a Porchivo en
-los [12] meses previos al reclamo.
+los 12 meses previos al reclamo.
 
 ## 9. Disponibilidad del Servicio
 
@@ -107,8 +111,8 @@ sobreviven a la terminación.
 
 Estos Términos se rigen por las leyes federales de los Estados Unidos
 Mexicanos. Cualquier controversia derivada de estos Términos se someterá a
-los tribunales competentes de **[CIUDAD ELEGIDA, p. ej. Ciudad de México /
-Monterrey]**, renunciando las partes a cualquier otra jurisdicción que, por
+los tribunales competentes de **Ciudad de México**, renunciando las partes a
+cualquier otra jurisdicción que, por
 su domicilio presente o futuro, pudiera corresponderles.
 
 ## 12. Disposiciones Generales
@@ -116,5 +120,5 @@ su domicilio presente o futuro, pudiera corresponderles.
 Si alguna disposición de estos Términos resulta inválida, las demás
 permanecerán en vigor. La falta de exigencia de un derecho no constituye su
 renuncia. Estos Términos no crean asociaciones, empleos ni agencias entre las
-partes. Puede contactarnos en [soporte@porchivo.com] para cualquier duda
+partes. Puede contactarnos en soporte@porchivo.com para cualquier duda
 sobre estos Términos.

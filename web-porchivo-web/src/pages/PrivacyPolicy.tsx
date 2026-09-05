@@ -87,6 +87,14 @@ export default function PrivacyPolicyPage() {
             Version <span className="text-brand-text-secondary font-medium">{POLICY_VERSION}</span> · Last updated{" "}
             <span className="text-brand-text-secondary font-medium">{LAST_UPDATED}</span>
           </p>
+          <p className="text-xs mt-3">
+            <a
+              href="/es/privacidad"
+              className="text-brand-orange hover:text-brand-orange-light underline transition-colors"
+            >
+              Versión en español →
+            </a>
+          </p>
         </div>
 
         {/* Intro */}

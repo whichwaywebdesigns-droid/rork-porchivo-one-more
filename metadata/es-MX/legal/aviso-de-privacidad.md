@@ -1,19 +1,25 @@
 # AVISO DE PRIVACIDAD — PORCHIVO
 
-> **ESTADO: BORRADOR es-MX (staged 2026-09-03).** Los valores entre corchetes
-> `[ASÍ]` son marcadores pendientes de datos legales del titular. Este aviso
-> sigue los puntos centrales del consultor (LFPDPPP) y las reglas de compliance
-> del proyecto: sin afirmaciones de auditoría certificada ("bajo estándares de
-> la industria"), sin implicaciones de cobro automático de cuotas.
+> **ESTADO: FINAL (2026-09-05) — listo para publicar.** Único dato pendiente:
+el domicilio registrado del titular (`[DOMICILIO REGISTRADO]` en la sección 1).
+Datos ya confirmados: entidad = WhichWay Web Labs LLC (la operadora de los
+avisos en inglés), DPO = privacidad@porchivo.com, jurisdicción contractual =
+Ciudad de México (predeterminado estándar; sustituible por Monterrey u otra
+ciudad si el titular decide lo contrario). Este aviso sigue los puntos
+centrales del consultor (LFPDPPP) y las reglas de compliance del proyecto: sin
+afirmaciones de auditoría certificada ("bajo estándares de la industria"),
+sin implicaciones de cobro automático de cuotas.
 
-**Fecha de última actualización:** [DD de mes de 2026]
+**Fecha de última actualización:** 5 de septiembre de 2026
 
 ## 1. Identidad del Responsable
 
-Porchivo, operado por [RAZÓN SOCIAL / NOMBRE LEGAL DE LA ENTIDAD], con domicilio
-en [DOMICILIO REGISTRADO COMPLETO], es el responsable del tratamiento de sus
-datos personales, en términos de la Ley Federal de Protección de Datos
-Personales en Posesión de los Particulares (LFPDPPP) y su Reglamento.
+Porchivo, operado por **WhichWay Web Labs LLC**, sociedad de responsabilidad
+limitada constituida conforme a las leyes de los Estados Unidos de América,
+con domicilio registrado en [DOMICILIO REGISTRADO], es el responsable del
+tratamiento de sus datos personales, en términos de la Ley Federal de
+Protección de Datos Personales en Posesión de los Particulares (LFPDPPP) y su
+Reglamento.
 
 Correo de contacto para cuestiones de privacidad: privacidad@porchivo.com
 
@@ -76,7 +82,7 @@ De conformidad con la LFPDPPP, usted tiene derecho a **Acceder**, **Rectificar**
 revocar el consentimiento otorgado.
 
 Para ejercer estos derechos, envíe su solicitud a nuestro responsable de
-protección de datos personales en: **[privacidad@porchivo.com]**
+protección de datos personales en: **privacidad@porchivo.com**
 
 Su solicitud deberá incluir: (i) su nombre completo y datos de contacto;
 (ii) el correo electrónico registrado en la aplicación; (iii) una descripción
@@ -87,7 +93,7 @@ identidad. Responderemos su solicitud en un plazo máximo de 20 días hábiles.
 
 Usted puede limitar el uso o la divulgación de sus datos personales,
 así como desactivar las notificaciones de la aplicación, desde la sección
-Configuración de Porchivo, o escribiendo a [privacidad@porchivo.com].
+Configuración de Porchivo, o escribiendo a privacidad@porchivo.com.
 
 ## 7. Medidas de Seguridad
 
@@ -102,7 +108,7 @@ notificaremos por los medios de contacto que tengamos registrados.
 
 Este aviso puede ser actualizado. Cualquier cambio se publicará en esta
 página y, cuando el cambio sea sustancial, se notificará dentro de la
-aplicación con al menos [30] días de anticipación.
+aplicación con al menos 30 días de anticipación.
 
 ---
 

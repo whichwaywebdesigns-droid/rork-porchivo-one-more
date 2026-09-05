@@ -23,6 +23,9 @@ const ForAgents = lazy(() => import("./pages/ForAgents"));
 const Guide = lazy(() => import("./pages/Guide"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
+// es-MX legal pages (Mexican-market push) — masters live in metadata/es-MX/legal/.
+const PrivacyPolicyEs = lazy(() => import("./pages/PrivacyPolicyEs"));
+const TermsOfServiceEs = lazy(() => import("./pages/TermsOfServiceEs"));
 const Settings = lazy(() => import("./pages/Settings"));
 const EmailPreview = lazy(() => import("./pages/EmailPreview"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -126,6 +129,8 @@ const App = () => (
               <Route path="/guide" element={<Guide />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/terms" element={<TermsOfService />} />
+              <Route path="/es/privacidad" element={<PrivacyPolicyEs />} />
+              <Route path="/es/terminos" element={<TermsOfServiceEs />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/email-preview" element={<EmailPreview />} />
               <Route path="/auth-fail" element={<AuthFail />} />

@@ -54,6 +54,14 @@ export default function TermsOfServicePage() {
             Effective Date: <span className="text-brand-text-secondary font-medium">{EFFECTIVE_DATE}</span>
             &ensp;·&ensp;Operated by <span className="text-brand-text-secondary font-medium">{COMPANY}</span>
           </p>
+          <p className="text-xs mt-3">
+            <a
+              href="/es/terminos"
+              className="text-brand-orange hover:text-brand-orange-light underline transition-colors"
+            >
+              Versión en español →
+            </a>
+          </p>
         </div>
 
         {/* Intro */}
