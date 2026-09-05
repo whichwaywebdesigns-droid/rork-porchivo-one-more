@@ -47,6 +47,20 @@
       "Community Hub": "Your HOA<br>Reimagined",
       "Maintenance Requests": "Submit Track<br>Resolved",
       "Admin Dashboard": "Built for<br>Property Managers"
+    },
+    "es-MX": {
+      "Porch Risk Score": "Conoce el riesgo<br>antes de que llegue",
+      "Package Tracking": "Cada paquete<br>bajo control",
+      "Community Hub": "Tu condominio<br>reinventado",
+      "Maintenance Requests": "Mantenimiento<br>sin pendientes",
+      "Admin Dashboard": "Hecho para<br>administradores"
+    },
+    "es-419": {
+      "Porch Risk Score": "Conoce el riesgo<br>antes de que llegue",
+      "Package Tracking": "Cada paquete<br>bajo control",
+      "Community Hub": "Tu condominio<br>reinventado",
+      "Maintenance Requests": "Mantenimiento<br>sin pendientes",
+      "Admin Dashboard": "Hecho para<br>administradores"
     }
   }
 }
