@@ -1024,6 +1024,23 @@ actor SupabaseService {
         await rpc("get_my_maintenance_requests", body: ["p_org_id": orgId])
     }
 
+    /// Files an incident in the caller's community via the `file_org_incident` RPC.
+    /// Returns the new incident UUID.
+    func fileOrgIncident(orgId: String, type: String, severity: String, title: String,
+                         description: String?, unitNumber: String?, estimatedValue: Double?) async -> Result<String, Error> {
+        let body: [String: Any?] = [
+            "p_org_id": orgId,
+            "p_type": type,
+            "p_severity": severity,
+            "p_title": title,
+            "p_description": description,
+            "p_unit_number": unitNumber,
+            "p_estimated_value": estimatedValue,
+        ]
+        let result: Result<String, Error> = await rpc("file_org_incident", body: body)
+        return result
+    }
+
     // MARK: Org documents & amenities (paid-tier community features)
 
     /// All documents for the org, newest first (RLS: active members read).

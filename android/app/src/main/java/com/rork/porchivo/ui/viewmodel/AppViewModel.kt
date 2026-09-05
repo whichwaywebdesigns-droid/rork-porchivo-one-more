@@ -146,6 +146,18 @@ class AppViewModel : ViewModel() {
         return repo.submitMaintenanceRequest(category, priority, title, description, location)
     }
 
+    /** Files a community incident; see [AppRepository.fileOrgIncident]. */
+    suspend fun fileOrgIncident(
+        type: String,
+        severity: String,
+        title: String,
+        description: String?,
+        unitNumber: String?,
+        estimatedValue: Double?,
+    ): Boolean {
+        return repo.fileOrgIncident(type, severity, title, description, unitNumber, estimatedValue)
+    }
+
     // ── Org documents + amenities (paid-tier community features) ──────
 
     val orgDocuments: StateFlow<List<DbOrgDocument>> = repo.orgDocuments

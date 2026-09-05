@@ -486,6 +486,43 @@ class SupabaseClient(
         Result.failure(e)
     }
 
+    /**
+     * File an incident in the caller's community via `file_org_incident` RPC.
+     * Returns the new incident UUID.
+     */
+    suspend fun fileOrgIncident(
+        orgId: String,
+        type: String,
+        severity: String,
+        title: String,
+        description: String?,
+        unitNumber: String?,
+        estimatedValue: Double?,
+    ): Result<String> = try {
+        val response = httpClient.post("$restBase/rpc/file_org_incident") {
+            authHeaders().forEach { (k, v) -> header(k, v) }
+            contentType(ContentType.Application.Json)
+            setBody(buildMap<String, Any?> {
+                put("p_org_id", orgId)
+                put("p_type", type)
+                put("p_severity", severity)
+                put("p_title", title)
+                description?.let { put("p_description", it) }
+                unitNumber?.let { put("p_unit_number", it) }
+                estimatedValue?.let { put("p_estimated_value", it) }
+            })
+        }
+        if (response.status.isSuccess()) {
+            // RPC returns a UUID string directly
+            val raw: String = response.body()
+            Result.success(raw.trim().removeSurrounding("\""))
+        } else {
+            Result.failure(Exception("Failed to file incident: ${response.status}"))
+        }
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
     /** Fetch the current user's maintenance requests via `get_my_maintenance_requests` RPC. */
     suspend fun fetchMyMaintenanceRequests(orgId: String): Result<List<DbMyMaintenanceRequest>> = try {
         val response = httpClient.post("$restBase/rpc/get_my_maintenance_requests") {

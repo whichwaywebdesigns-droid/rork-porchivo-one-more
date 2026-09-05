@@ -28,6 +28,7 @@ import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Campaign
 import androidx.compose.material.icons.outlined.HelpOutline
 import androidx.compose.material.icons.outlined.Shield
+import androidx.compose.material.icons.outlined.ReportProblem
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -154,6 +155,10 @@ fun MoreScreen(
                     HorizontalDivider(color = c.border)
                     LinkRow(icon = Icons.Outlined.Shield, tint = c.warmOrange, label = "Safety Score") {
                         navController.navigate(Routes.SAFETY)
+                    }
+                    HorizontalDivider(color = c.border)
+                    LinkRow(icon = Icons.Outlined.ReportProblem, tint = c.danger, label = "File an Incident") {
+                        navController.navigate(Routes.FILE_INCIDENT)
                     }
                     HorizontalDivider(color = c.border)
                     LinkRow(icon = Icons.Outlined.HelpOutline, tint = c.success, label = "Support") {

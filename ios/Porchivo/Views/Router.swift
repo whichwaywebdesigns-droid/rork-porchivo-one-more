@@ -26,6 +26,7 @@ enum Route: Hashable {
     case orgDocuments
     case orgAmenities
     case orgLedger
+    case fileIncident
 
     static func == (lhs: Route, rhs: Route) -> Bool {
         switch (lhs, rhs) {
@@ -33,7 +34,7 @@ enum Route: Hashable {
              (.alerts, .alerts), (.addPackage, .addPackage),
              (.residentDirectory, .residentDirectory),
              (.editProfile, .editProfile), (.settings, .settings),
-             (.orgSignup, .orgSignup):
+             (.orgSignup, .orgSignup), (.fileIncident, .fileIncident):
             return true
         case (.announcements, .announcements),
              (.inviteCode, .inviteCode),
@@ -41,7 +42,8 @@ enum Route: Hashable {
              (.manageSubscription, .manageSubscription),
              (.orgDocuments, .orgDocuments),
              (.orgAmenities, .orgAmenities),
-             (.orgLedger, .orgLedger):
+             (.orgLedger, .orgLedger),
+             (.fileIncident, .fileIncident):
             return true
         case (.shipmentDetail(let a), .shipmentDetail(let b)): return a == b
         case (.packageDetail(let a), .packageDetail(let b)): return a == b
@@ -70,6 +72,7 @@ enum Route: Hashable {
         case .orgDocuments: hasher.combine(16)
         case .orgAmenities: hasher.combine(17)
         case .orgLedger: hasher.combine(18)
+        case .fileIncident: hasher.combine(19)
         }
     }
 }
@@ -99,6 +102,7 @@ struct RouteView: View {
         case .orgDocuments:  OrgDocumentsScreen()
         case .orgAmenities:  OrgAmenitiesScreen()
         case .orgLedger:     OrgLedgerScreen()
+        case .fileIncident:  FileIncidentScreen()
         }
     }
 }

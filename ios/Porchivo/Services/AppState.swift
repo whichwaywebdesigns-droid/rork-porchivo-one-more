@@ -1323,6 +1323,29 @@ final class AppState {
         return false
     }
 
+    // MARK: - Incidents
+
+    /// Files a community incident via `file_org_incident` (estimated item value
+    /// feeds theft-report follow-ups). Returns true when the RPC accepted it.
+    @MainActor
+    func fileIncident(type: IncidentKind, severity: IncidentSeverity, title: String,
+                      description: String?, unitNumber: String?, estimatedValue: Double?) async -> Bool {
+        guard isSupabaseConfigured, isOrgMember, let orgId = orgMembership?.orgId else { return false }
+        let result = await supabase.fileOrgIncident(
+            orgId: orgId,
+            type: type.rawValue,
+            severity: severity.rawValue,
+            title: title,
+            description: description,
+            unitNumber: unitNumber,
+            estimatedValue: estimatedValue
+        )
+        if case .success = result {
+            return true
+        }
+        return false
+    }
+
     // MARK: - Maintenance
 
     @MainActor

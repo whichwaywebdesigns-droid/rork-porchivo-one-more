@@ -43,7 +43,7 @@ struct CreateScreen: View {
                         "File a porch incident",
                         "Report a theft or suspicious activity to warn neighbors.",
                         "exclamationmark.shield.fill", c.danger, c.dangerSoft
-                    ) { path.append(Route.safety) }
+                    ) { path.append(Route.fileIncident) }
 
                     actionCard(
                         "Post a block announcement",

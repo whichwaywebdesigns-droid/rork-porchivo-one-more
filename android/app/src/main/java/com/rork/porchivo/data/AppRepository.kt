@@ -1103,6 +1103,49 @@ class AppRepository(context: Context) {
         } else false
     }
 
+    /**
+     * File an incident in the caller's community via `file_org_incident` RPC.
+     * Queues offline and replays when connectivity returns.
+     */
+    suspend fun fileOrgIncident(
+        type: String,
+        severity: String,
+        title: String,
+        description: String?,
+        unitNumber: String?,
+        estimatedValue: Double?,
+    ): Boolean {
+        val client = supabase ?: return false
+        val orgId = _orgMembership.value?.orgId ?: return false
+        if (!_isOnline.value) {
+            enqueueAction(
+                type = "rpc",
+                target = "file_org_incident",
+                payload = buildMap<String, Any?> {
+                    put("p_org_id", orgId)
+                    put("p_type", type)
+                    put("p_severity", severity)
+                    put("p_title", title)
+                    description?.let { put("p_description", it) }
+                    unitNumber?.let { put("p_unit_number", it) }
+                    estimatedValue?.let { put("p_estimated_value", it) }
+                }.toJsonString(),
+                refreshKey = "maintenance",
+            )
+            return true
+        }
+        val result = client.fileOrgIncident(
+            orgId = orgId,
+            type = type,
+            severity = severity,
+            title = title,
+            description = description,
+            unitNumber = unitNumber,
+            estimatedValue = estimatedValue,
+        )
+        return result.isSuccess
+    }
+
     // ── Org documents + amenities (paid-tier community features) ───────
 
     private val _orgDocuments = MutableStateFlow<List<DbOrgDocument>>(emptyList())

@@ -57,6 +57,7 @@ import com.rork.porchivo.ui.screens.OrgLedgerScreen
 import com.rork.porchivo.ui.screens.OrgSignupScreen
 import com.rork.porchivo.ui.screens.RequestsScreen
 import com.rork.porchivo.ui.screens.SafetyScreen
+import com.rork.porchivo.ui.screens.FileIncidentScreen
 import com.rork.porchivo.ui.screens.ShipmentDetailScreen
 import com.rork.porchivo.ui.screens.UpgradeScreen
 import com.rork.porchivo.ui.theme.PorchivoTheme
@@ -76,6 +77,7 @@ object Routes {
     const val ORG_SIGNUP = "org-signup"
     const val UPGRADE = "upgrade"
     const val SAFETY = "safety"
+    const val FILE_INCIDENT = "file-incident"
     const val ANNOUNCEMENTS = "announcements"
     const val ORG_DOCUMENTS = "org-documents"
     const val ORG_AMENITIES = "org-amenities"
@@ -193,6 +195,7 @@ fun AppNavigation() {
             composable(Routes.ORG_SIGNUP) { OrgSignupScreen(navController) }
             composable(Routes.UPGRADE) { UpgradeScreen(navController) }
             composable(Routes.SAFETY) { SafetyScreen(navController) }
+            composable(Routes.FILE_INCIDENT) { FileIncidentScreen(navController) }
             composable(Routes.ANNOUNCEMENTS) { AnnouncementsScreen(navController) }
             composable(Routes.ORG_DOCUMENTS) { OrgDocumentsScreen(navController) }
             composable(Routes.ORG_AMENITIES) { OrgAmenitiesScreen(navController) }
