@@ -1,6 +1,6 @@
 // @ts-nocheck — Deno runtime
 //
-// Porchivo email service — one typed function per Resend template (22 total).
+// Porchivo email service — one typed function per Resend template (23 total).
 //
 // All sends funnel through the SQL service `enqueue_template_email()`
 // (email-templates-migration.sql), which is the single source of truth for:
@@ -709,7 +709,40 @@ export function sendPackageAtRisk(client: SqlRpcClient, p: PackageAtRiskPayload)
   });
 }
 
-// ── 21. Package Reported Stolen (security) ──────────────────────────────────
+// ── 21a. Package Reported Missing (security) ─────────────────────────────────
+// Fired when a package incident is reported but not yet confirmed stolen.
+// Neutral/investigating tone; includes investigation_status. Split from the
+// single stolen email per the 2026-09-05 update (missing vs stolen states).
+export interface PackageMissingPayload {
+  recipient: string;
+  userId: string;
+  reportId: string;
+  firstName: string;
+  itemName: string;
+  lastSeenTime: string;
+  investigationStatus: string;
+}
+export function sendPackageMissing(client: SqlRpcClient, p: PackageMissingPayload) {
+  return enqueueTemplateEmail(client, {
+    slug: 'package-missing',
+    recipient: p.recipient,
+    userId: p.userId,
+    category: 'security',
+    dedupeKey: `inc-new:${p.reportId}`,
+    variables: {
+      first_name: p.firstName,
+      item_name: p.itemName,
+      last_seen_time: p.lastSeenTime,
+      report_id: p.reportId.slice(0, 8),
+      investigation_status: p.investigationStatus,
+      report_url: `${WEB_BASE}/reports/${p.reportId}`,
+    },
+    sourceTable: 'incident_reports',
+    sourceId: p.reportId,
+  });
+}
+
+// ── 21b. Package Reported Stolen (security) ──────────────────────────────────
 export interface PackageStolenPayload {
   recipient: string;
   userId: string;
