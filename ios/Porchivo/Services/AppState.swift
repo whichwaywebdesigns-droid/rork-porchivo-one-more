@@ -1374,12 +1374,12 @@ final class AppState {
     func createOrgCheckout(
         name: String, type: String, address: String, city: String, state: String,
         zip: String, totalUnits: Int?, planTier: String, billingCycle: String,
-        returnUrl: String
+        currency: String, returnUrl: String
     ) async -> Result<SupabaseService.OrgCheckoutResponse, Error> {
         await supabase.createOrgCheckout(
             name: name, type: type, address: address, city: city, state: state,
             zip: zip, totalUnits: totalUnits, planTier: planTier,
-            billingCycle: billingCycle, returnUrl: returnUrl
+            billingCycle: billingCycle, currency: currency, returnUrl: returnUrl
         )
     }
 

@@ -910,6 +910,7 @@ class AppRepository(context: Context) {
         totalUnits: Int?,
         planTier: String,
         billingCycle: String,
+        currency: String,
         returnUrl: String,
     ): Result<OrgCheckoutResponse> {
         val client = supabase ?: return Result.failure(Exception("Backend not configured"))
@@ -923,6 +924,7 @@ class AppRepository(context: Context) {
             if (totalUnits != null) put("totalUnits", totalUnits)
             put("planTier", planTier)
             put("billingCycle", billingCycle)
+            put("currency", currency)
             put("returnUrl", returnUrl)
         }
         return client.invokeFunction(

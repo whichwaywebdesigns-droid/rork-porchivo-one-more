@@ -234,10 +234,11 @@ class AppViewModel : ViewModel() {
         totalUnits: Int?,
         planTier: String,
         billingCycle: String,
+        currency: String,
         returnUrl: String,
     ): Result<OrgCheckoutResponse> {
         return repo.createOrgCheckout(
-            name, type, address, city, state, zip, totalUnits, planTier, billingCycle, returnUrl,
+            name, type, address, city, state, zip, totalUnits, planTier, billingCycle, currency, returnUrl,
         )
     }
 

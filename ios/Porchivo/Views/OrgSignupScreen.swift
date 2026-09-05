@@ -29,6 +29,8 @@ struct OrgSignupScreen: View {
     @State private var totalUnits = ""
     @State private var selectedPlan = "community"
     @State private var isAnnual = true
+    /// "usd" | "mxn" — defaults to MXN on Spanish devices (Mexico-market push)
+    @State private var currency: String = Locale.preferredLanguages.first?.hasPrefix("es") == true ? "mxn" : "usd"
     @State private var isProcessing = false
     @State private var errorMessage: String?
     @State private var checkoutSessionId: String?
@@ -48,6 +50,15 @@ struct OrgSignupScreen: View {
         ("community", "Community", 199, "Up to 200 units"),
         ("professional", "Professional", 399, "Up to 500 units"),
         ("enterprise", "Enterprise", 599, "Up to 2,000 units"),
+    ]
+
+    /// Fixed MXN prices (Mexico-market push) — must match MXN_PLANS in the
+    /// create-org-checkout edge function. Starter + Professional only; prices
+    /// are IVA-incluido (16% VAT inside the gross). Annual = 10× monthly.
+    private struct MXNPlan { let monthly: Int; let setupFee: Int }
+    private let mxnPlans: [String: MXNPlan] = [
+        "starter": MXNPlan(monthly: 1490, setupFee: 0),
+        "professional": MXNPlan(monthly: 3690, setupFee: 3690),
     ]
 
     private let successRedirect = "porchivo://org-signup/success"
@@ -200,6 +211,26 @@ struct OrgSignupScreen: View {
             .padding(12)
             .background(c.elevated, in: .rect(cornerRadius: Radius.md))
 
+            // Currency toggle — MXN is the Mexico-market push (Starter + Professional)
+            HStack(spacing: 8) {
+                ForEach(["usd", "mxn"], id: \.self) { cur in
+                    Button(action: { switchCurrency(cur) }) {
+                        Text(cur == "usd" ? "USD $" : "MXN $")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(currency == cur ? c.onAccent : c.textSecondary)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 8)
+                            .background(currency == cur ? c.accent : c.elevated, in: .capsule)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            if currency == "mxn" {
+                Text("Precios fijos en pesos — IVA incluido")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(c.textSecondary)
+            }
+
             HStack {
                 Button(action: { Haptics.selection(); isAnnual = false }) {
                     Text("Monthly")
@@ -230,6 +261,8 @@ struct OrgSignupScreen: View {
             }
 
             ForEach(plans, id: \.id) { plan in
+                let mxn = currency == "mxn" ? mxnPlans[plan.id] : nil
+                let mxnUnavailable = currency == "mxn" && mxn == nil
                 Button(action: { Haptics.selection(); selectedPlan = plan.id }) {
                     HStack(spacing: 12) {
                         Image(systemName: selectedPlan == plan.id ? "largecircle.fill.circle" : "circle")
@@ -245,18 +278,28 @@ struct OrgSignupScreen: View {
                         }
                         Spacer()
                         VStack(alignment: .trailing, spacing: 0) {
-                            Text("$\(plan.monthly)")
+                            Text(mxn.map { mxnPrice($0.monthly) } ?? "$\(plan.monthly)")
                                 .font(.system(size: 17, weight: .black))
                                 .foregroundStyle(c.textPrimary)
                             Text(isAnnual ? "/mo billed yearly" : "/mo")
                                 .font(.system(size: 11))
                                 .foregroundStyle(c.textMuted)
+                            if mxnUnavailable {
+                                Text("Available in USD only")
+                                    .font(.system(size: 10, weight: .semibold))
+                                    .foregroundStyle(c.textMuted)
+                            } else if let fee = mxn?.setupFee, fee > 0 {
+                                Text("+ \(mxnPrice(fee)) onboarding")
+                                    .font(.system(size: 9, weight: .semibold))
+                                    .foregroundStyle(c.textMuted)
+                            }
                         }
                     }
                     .padding(Space.md)
                     .background(c.surface, in: .rect(cornerRadius: Radius.lg))
                     .overlay(RoundedRectangle(cornerRadius: Radius.lg).stroke(selectedPlan == plan.id ? c.accent : c.border, lineWidth: selectedPlan == plan.id ? 2 : 1))
                     .shadow(color: c.textPrimary.opacity(0.05), radius: 6, y: 2)
+                    .opacity(mxnUnavailable ? 0.55 : 1)
                 }
                 .buttonStyle(.plain)
             }
@@ -397,6 +440,19 @@ struct OrgSignupScreen: View {
 
     // MARK: - Helpers
 
+    /// Formats a fixed MXN amount, e.g. "$1,490 MXN" (IVA incluido).
+    private func mxnPrice(_ amount: Int) -> String {
+        "$\(amount.formatted()) MXN"
+    }
+
+    private func switchCurrency(_ next: String) {
+        Haptics.selection()
+        currency = next
+        if next == "mxn" && mxnPlans[selectedPlan] == nil {
+            selectedPlan = "starter"
+        }
+    }
+
     private func field<Content: View>(_ label: String, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(label)
@@ -428,6 +484,7 @@ struct OrgSignupScreen: View {
             totalUnits: units,
             planTier: selectedPlan,
             billingCycle: isAnnual ? "annual" : "monthly",
+            currency: currency,
             returnUrl: successRedirect
         )
 

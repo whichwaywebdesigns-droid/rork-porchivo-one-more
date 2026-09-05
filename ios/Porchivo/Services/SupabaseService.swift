@@ -1462,7 +1462,7 @@ actor SupabaseService {
     func createOrgCheckout(
         name: String, type: String, address: String, city: String, state: String,
         zip: String, totalUnits: Int?, planTier: String, billingCycle: String,
-        returnUrl: String
+        currency: String, returnUrl: String
     ) async -> Result<OrgCheckoutResponse, Error> {
         let body: [String: Any] = [
             "name": name,
@@ -1474,6 +1474,7 @@ actor SupabaseService {
             "totalUnits": totalUnits ?? NSNull(),
             "planTier": planTier,
             "billingCycle": billingCycle,
+            "currency": currency,
             "returnUrl": returnUrl,
         ]
         let result = await invokeEdgeFunction("create-org-checkout", body: body)

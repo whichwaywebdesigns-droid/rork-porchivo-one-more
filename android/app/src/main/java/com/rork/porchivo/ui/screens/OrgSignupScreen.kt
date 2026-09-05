@@ -44,6 +44,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -56,6 +57,7 @@ import com.rork.porchivo.data.AppRepositoryHolder
 import com.rork.porchivo.ui.theme.PorchivoColors
 import com.rork.porchivo.ui.theme.PorchivoTheme
 import com.rork.porchivo.ui.viewmodel.AppViewModel
+import java.util.Locale
 import kotlinx.coroutines.launch
 
 private enum class SignupStep { DETAILS, PLAN, LAUNCHING, CONFIRMING, SUCCESS, CANCELLED }
@@ -82,6 +84,20 @@ private val PLANS = listOf(
     PlanInfo("enterprise", "Enterprise", 1499, "Up to 2,000 units", onboardingFee = 1500),
 )
 
+private data class MxnPlan(val monthly: Int, val annual: Int, val onboardingFee: Int = 0)
+
+/**
+ * Fixed MXN prices (Mexico-market push) — must match MXN_PLANS in the
+ * create-org-checkout edge function. Starter + Professional only; prices are
+ * IVA-incluido (16% VAT inside the gross). Annual = 10× monthly.
+ */
+private val MXN_PLANS = mapOf(
+    "starter" to MxnPlan(monthly = 1490, annual = 14900),
+    "professional" to MxnPlan(monthly = 3690, annual = 36900, onboardingFee = 3690),
+)
+
+private fun formatMxn(amount: Int): String = String.format(Locale.US, "\$%,d MXN", amount)
+
 private const val SUCCESS_REDIRECT = "porchivo://org-signup/success"
 private const val CANCEL_REDIRECT = "porchivo://org-signup/cancelled"
 
@@ -105,6 +121,8 @@ fun OrgSignupScreen(
     var totalUnits by remember { mutableStateOf("") }
     var selectedPlan by remember { mutableStateOf("community") }
     var isAnnual by remember { mutableStateOf(true) }
+    // "usd" | "mxn" — defaults to MXN on Spanish devices (Mexico-market push)
+    var currency by remember { mutableStateOf(if (Locale.getDefault().language == "es") "mxn" else "usd") }
     var isProcessing by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var checkoutSessionId by remember { mutableStateOf<String?>(null) }
@@ -187,12 +205,12 @@ fun OrgSignupScreen(
                 orgType = orgType, onOrgTypeChange = { orgType = it },
                 address = address, onAddressChange = { address = it },
                 city = city, onCityChange = { city = it },
-                stateField = stateField, onStateChange = { stateField = it.uppercase().take(2) },
+                stateField = stateField, onStateChange = { stateField = it.uppercase().take(5) },
                 zip = zip, onZipChange = { zip = it.take(5) },
                 totalUnits = totalUnits, onTotalUnitsChange = { totalUnits = it },
             ) {
                 val canContinue = orgName.isNotBlank() && address.isNotBlank() &&
-                    city.isNotBlank() && stateField.length == 2 && zip.length == 5
+                    city.isNotBlank() && stateField.length >= 2 && zip.length == 5
                 Button(
                     onClick = { step = SignupStep.PLAN },
                     enabled = canContinue,
@@ -209,6 +227,13 @@ fun OrgSignupScreen(
                 c = c, plans = PLANS, selectedPlan = selectedPlan,
                 onPlanSelect = { selectedPlan = it },
                 isAnnual = isAnnual, onBillingToggle = { isAnnual = it },
+                currency = currency,
+                onCurrencyToggle = { next ->
+                    currency = next
+                    if (next == "mxn" && MXN_PLANS[selectedPlan] == null) {
+                        selectedPlan = "starter"
+                    }
+                },
                 isProcessing = isProcessing, errorMessage = errorMessage,
             ) {
                 scope.launch {
@@ -226,6 +251,7 @@ fun OrgSignupScreen(
                         totalUnits = totalUnits.toIntOrNull(),
                         planTier = selectedPlan,
                         billingCycle = if (isAnnual) "annual" else "monthly",
+                        currency = currency,
                         returnUrl = SUCCESS_REDIRECT,
                     )
 
@@ -412,12 +438,35 @@ private fun PlanStep(
     onPlanSelect: (String) -> Unit,
     isAnnual: Boolean,
     onBillingToggle: (Boolean) -> Unit,
+    currency: String,
+    onCurrencyToggle: (String) -> Unit,
     isProcessing: Boolean,
     errorMessage: String?,
     onCheckout: () -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Text("Choose your plan", color = c.textPrimary, fontSize = 20.sp, fontWeight = FontWeight.Black)
+
+        // Currency toggle — MXN is the Mexico-market push (Starter + Professional)
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            listOf("usd" to "USD $", "mxn" to "MXN $").forEach { (code, label) ->
+                val active = currency == code
+                Box(
+                    modifier = Modifier
+                        .background(if (active) c.accent else c.elevated, RoundedCornerShape(999.dp))
+                        .clickable { onCurrencyToggle(code) }
+                        .padding(horizontal = 14.dp, vertical = 8.dp)
+                ) {
+                    Text(label, color = if (active) c.onAccent else c.textSecondary, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                }
+            }
+        }
+        if (currency == "mxn") {
+            Text(
+                "Precios fijos en pesos — IVA incluido",
+                color = c.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.SemiBold,
+            )
+        }
 
         // Billing cycle toggle
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -443,9 +492,13 @@ private fun PlanStep(
         }
 
         plans.forEach { plan ->
+            val mxn = if (currency == "mxn") MXN_PLANS[plan.id] else null
+            val mxnUnavailable = currency == "mxn" && mxn == null
             Card(
                 onClick = { onPlanSelect(plan.id) },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .alpha(if (mxnUnavailable) 0.55f else 1f),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = c.surface),
                 border = if (selectedPlan == plan.id)
@@ -468,12 +521,30 @@ private fun PlanStep(
                         Text(plan.blurb, color = c.textSecondary, fontSize = 11.sp)
                     }
                     Column(horizontalAlignment = Alignment.End) {
-                        Text("$${plan.monthly}", color = c.textPrimary, fontSize = 17.sp, fontWeight = FontWeight.Black)
                         Text(
-                            if (isAnnual) "$${plan.monthly * 10}/yr — 2 months free" else "/mo",
+                            if (mxn != null) formatMxn(mxn.monthly) else "$${plan.monthly}",
+                            color = c.textPrimary, fontSize = 17.sp, fontWeight = FontWeight.Black,
+                        )
+                        Text(
+                            when {
+                                mxn != null && isAnnual -> "${formatMxn(mxn.annual)}/yr — 2 months free"
+                                mxn != null -> "/mo"
+                                isAnnual -> "$${plan.monthly * 10}/yr — 2 months free"
+                                else -> "/mo"
+                            },
                             color = c.textMuted, fontSize = 11.sp,
                         )
-                        if (plan.onboardingFee > 0) {
+                        if (mxnUnavailable) {
+                            Text(
+                                "Available in USD only",
+                                color = c.textMuted, fontSize = 10.sp, fontWeight = FontWeight.SemiBold,
+                            )
+                        } else if (mxn != null && mxn.onboardingFee > 0) {
+                            Text(
+                                "+ ${formatMxn(mxn.onboardingFee)} onboarding",
+                                color = c.textMuted, fontSize = 10.sp,
+                            )
+                        } else if (plan.onboardingFee > 0) {
                             Text(
                                 "+ $${plan.onboardingFee} onboarding",
                                 color = c.textMuted, fontSize = 10.sp,
@@ -486,7 +557,13 @@ private fun PlanStep(
 
         // Onboarding-fee disclosure for plans that charge one (mirrors Stripe Checkout line items)
         plans.firstOrNull { it.id == selectedPlan }?.let { plan ->
-            if (plan.onboardingFee > 0) {
+            val mxn = if (currency == "mxn") MXN_PLANS[plan.id] else null
+            if (mxn != null && mxn.onboardingFee > 0) {
+                Text(
+                    "Includes a one-time ${formatMxn(mxn.onboardingFee)} onboarding fee (IVA incluido), charged together with your subscription at checkout.",
+                    color = c.textMuted, fontSize = 11.sp,
+                )
+            } else if (plan.onboardingFee > 0) {
                 Text(
                     "Includes a one-time $$plan.onboardingFee onboarding fee, charged together with your subscription at checkout.",
                     color = c.textMuted, fontSize = 11.sp,
