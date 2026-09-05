@@ -41,6 +41,7 @@ const ManageMaintenancePage = lazy(() => import("./pages/portal/ManageMaintenanc
 const ManageDocumentsPage = lazy(() => import("./pages/portal/ManageDocuments"));
 const ManageAmenitiesPage = lazy(() => import("./pages/portal/ManageAmenities"));
 const ManageLedgerPage = lazy(() => import("./pages/portal/ManageLedger"));
+const ManageApiKeysPage = lazy(() => import("./pages/portal/ManageApiKeys"));
 const ManageBillingPage = lazy(() => import("./pages/portal/ManageBilling"));
 
 const queryClient = new QueryClient();
@@ -130,6 +131,7 @@ const App = () => (
                 <Route path="documents" element={<ManageDocumentsPage />} />
                 <Route path="amenities" element={<ManageAmenitiesPage />} />
                 <Route path="ledger" element={<ManageLedgerPage />} />
+                <Route path="api" element={<ManageApiKeysPage />} />
                 <Route path="billing" element={<ManageBillingPage />} />
               </Route>
 

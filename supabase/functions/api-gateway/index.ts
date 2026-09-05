@@ -4,6 +4,7 @@
 //   0. Strict security headers on EVERY response (see _shared/security.ts)
 //   1. IP rate limit for unauthenticated probes (10/min per IP)
 //   2. JWT signature verification (JWKS) + expiry/malformed rejection
+//      OR Bearer pvk_live_* API-key verification (Enterprise integrations)
 //   3. DB-authoritative role + enrolled-context re-fetch (claims never trusted)
 //   4. Per-user rate limit (60/min) + mutation rate limit (20/min)
 //   5. Content-Type + body-size enforcement (64KB standard / 256KB file-adjacent)
@@ -32,7 +33,13 @@ import {
   logSecurityEvent,
   clientIp,
 } from '../_shared/security.ts';
-import { verifyAuth, roleAtLeast, type AuthContext, type EnrolledContext } from '../_shared/verifyAuth.ts';
+import {
+  verifyAuth,
+  roleAtLeast,
+  type AuthContext,
+  type AuthResult,
+  type EnrolledContext,
+} from '../_shared/verifyAuth.ts';
 import {
   BODY_LIMIT_STANDARD,
   BODY_LIMIT_FILE_ADJACENT,
@@ -222,6 +229,72 @@ function resolveContext(auth: AuthContext, contextId: string | undefined): Conte
   }
   if (!auth.primaryContext) return { ok: false };
   return { ok: true, context: auth.primaryContext };
+}
+
+// ── API-key auth (Enterprise integrations) ────────────────────────────────────
+
+interface ApiKeyRow {
+  id: string;
+  org_id: string;
+  created_by: string;
+}
+
+async function sha256Hex(input: string): Promise<string> {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input));
+  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+/**
+ * Verify a `pvk_live_*` API key against the hashed api_keys table and return a
+ * synthetic staff AuthContext scoped to the key's single org. The gateway's
+ * service-role client handles data access for key requests (a key carries no
+ * JWT, so RLS cannot scope it) — every query is explicitly filtered to the
+ * key's org by resolveContext, and the manager-level route guards stay in force.
+ */
+async function verifyApiKey(token: string): Promise<AuthResult> {
+  if (!token.startsWith('pvk_') || token.length < 16 || token.length > 200) {
+    return { ok: false, failure: { kind: 'malformed' } };
+  }
+  const keyHash = await sha256Hex(token);
+  const { data, error } = await infraClient
+    .from('api_keys')
+    .select('id, org_id, created_by')
+    .eq('key_hash', keyHash)
+    .is('revoked_at', null)
+    .maybeSingle();
+  if (error) {
+    console.error('[gateway] api key lookup failed:', error.message);
+    return { ok: false, failure: { kind: 'invalid' } };
+  }
+  const key = (data ?? null) as unknown as ApiKeyRow | null;
+  if (!key) return { ok: false, failure: { kind: 'invalid' } };
+
+  const context: EnrolledContext = {
+    orgId: key.org_id,
+    propertyId: null,
+    unitId: null,
+    dbRole: 'property_manager',
+    role: 'manager',
+    isPrimary: true,
+  };
+
+  // Best-effort usage tracking — never block a valid request on it
+  await infraClient
+    .from('api_keys')
+    .update({ last_used_at: new Date().toISOString() })
+    .eq('id', key.id);
+
+  return {
+    ok: true,
+    ctx: {
+      userId: key.created_by,
+      email: null,
+      role: 'manager',
+      apiKeyId: key.id,
+      contexts: [context],
+      primaryContext: context,
+    },
+  };
 }
 
 // ── Environment / clients ─────────────────────────────────────────────────────
@@ -576,9 +649,14 @@ Deno.serve(async (req: Request) => {
       return errorResponse(401, 'UNAUTHORIZED', 'Authentication required');
     }
 
-    // ── JWT verification + DB-authoritative context ──────────────────────────
-    const db = userScopedClient(authHeader);
-    const authResult = await verifyAuth(token, SUPABASE_URL, db);
+    // ── Auth: Supabase JWT (app clients) or pvk_ API key (Enterprise) ────────
+    const isApiKey = token.startsWith('pvk_');
+    const db: SupabaseClient = isApiKey
+      ? createClient(SUPABASE_URL, SERVICE_ROLE_KEY, { auth: { persistSession: false } })
+      : userScopedClient(authHeader);
+    const authResult = isApiKey
+      ? await verifyApiKey(token)
+      : await verifyAuth(token, SUPABASE_URL, db);
 
     if (!authResult.ok) {
       // Failed auth counts against the IP bucket too
@@ -605,8 +683,9 @@ Deno.serve(async (req: Request) => {
 
     const auth = authResult.ctx;
 
-    // ── Authenticated rate limits: 60/min per user, 20/min for mutations ────
-    const userLimit = await checkRateLimit(infraClient, `gw:user:${auth.userId}`, 60, 60);
+    // ── Authenticated rate limits: 60/min per user or key, 20/min mutations ─
+    const subject = auth.apiKeyId ? `key:${auth.apiKeyId}` : `user:${auth.userId}`;
+    const userLimit = await checkRateLimit(infraClient, `gw:${subject}`, 60, 60);
     if (!userLimit.allowed) {
       logSecurityEvent(infraClient, {
         type: 'rate_limit_breach',
@@ -619,7 +698,7 @@ Deno.serve(async (req: Request) => {
 
     const isMutation = MUTATION_METHODS.has(req.method);
     if (isMutation) {
-      const mutLimit = await checkRateLimit(infraClient, `gw:mut:${auth.userId}`, 20, 60);
+      const mutLimit = await checkRateLimit(infraClient, `gw:mut:${subject}`, 20, 60);
       if (!mutLimit.allowed) {
         logSecurityEvent(infraClient, {
           type: 'rate_limit_breach',

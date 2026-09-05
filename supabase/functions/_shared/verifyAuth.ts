@@ -38,6 +38,8 @@ export interface AuthContext {
   email: string | null;
   /** Highest-privilege canonical role across enrolled contexts (DB-derived). */
   role: CanonicalRole;
+  /** Set when the caller authenticated with a pvk_ API key (not a JWT). */
+  apiKeyId?: string;
   contexts: EnrolledContext[];
   primaryContext: EnrolledContext | null;
 }

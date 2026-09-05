@@ -11,6 +11,7 @@ import {
   LayoutDashboard,
   Users,
   KeyRound,
+  Braces,
   Megaphone,
   Wrench,
   CreditCard,
@@ -37,6 +38,7 @@ const NAV_ITEMS = [
   { to: "/manage/documents", label: "Documents", icon: FolderOpen },
   { to: "/manage/amenities", label: "Amenities", icon: CalendarClock },
   { to: "/manage/ledger", label: "Ledger", icon: Receipt },
+  { to: "/manage/api", label: "API", icon: Braces },
   { to: "/manage/billing", label: "Billing", icon: CreditCard },
 ];
 

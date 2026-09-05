@@ -79,6 +79,15 @@ export interface OrgPaymentRow {
   member: { name: string | null } | null;
 }
 
+export interface ApiKeyRow {
+  id: string;
+  name: string;
+  key_prefix: string;
+  created_at: string;
+  last_used_at: string | null;
+  revoked_at: string | null;
+}
+
 export interface MaintenanceRequestRow {
   id: string;
   title: string;
@@ -118,6 +127,11 @@ export function canRegenInviteCode(role: PortalRole): boolean {
 // matching the mobile tier gate and the Pricing comparison rows).
 export function isCommunityPlanOrHigher(planTier: string | null | undefined): boolean {
   return planTier === "community" || planTier === "professional" || planTier === "enterprise";
+}
+
+// API access is Enterprise-only (matches the Pricing comparison rows).
+export function isEnterprisePlan(planTier: string | null | undefined): boolean {
+  return planTier === "enterprise";
 }
 
 export const ROLE_LABELS: Record<PortalRole, string> = {
