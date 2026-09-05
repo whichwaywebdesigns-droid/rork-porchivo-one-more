@@ -42,8 +42,15 @@ import { BackgroundErrorProvider } from "@/store/BackgroundErrorContext";
 import { BackgroundErrorBanner } from "@/components/BackgroundErrorBanner";
 import { useTheme } from "@/hooks/useTheme";
 import { useColors } from "@/constants/colors";
+import { applyWebDeepLink } from "@/lib/webDeepLink";
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
+
+// Web deep links from email CTAs land on /app/index.html?pv_deep=/screen
+// (reconstructed by the marketing shell's AppRedirect). Rewrite the history
+// entry to the real path BEFORE expo-router boots so the deep-linked screen
+// is the app's initial route. No-op on native.
+applyWebDeepLink();
 
 // Sentry crash reporting
 Sentry.init({

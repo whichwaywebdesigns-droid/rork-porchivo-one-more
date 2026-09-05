@@ -71,9 +71,31 @@ const PageLoader = () => (
  * The Expo web app lives at /app/index.html. The static host's catch-all
  * serves this marketing shell for /app/* paths (its _redirects file isn't
  * honored), so bounce those URLs to the real app entry.
+ *
+ * Deep links (e.g. /app/shipment-detail?id=x from an email CTA) are preserved:
+ * the subpath + query are stashed in sessionStorage AND forwarded as a
+ * ?pv_deep= param; the Expo app's root layout consumes whichever survives the
+ * hop and routes there once auth resolves (see expo/lib/deepLink.ts).
  */
 const AppRedirect = () => {
   useEffect(() => {
+    const subPath =
+      window.location.pathname.replace(/^\/app\/?/, "") + window.location.search;
+    const deep = subPath.replace(/^\/+/, "");
+    if (deep) {
+      try {
+        sessionStorage.setItem(
+          "porchivo_deep_link",
+          JSON.stringify({ path: `/${deep}`, ts: Date.now() }),
+        );
+      } catch {
+        /* private browsing — the pv_deep param below still works */
+      }
+      window.location.replace(
+        `/app/index.html?pv_deep=${encodeURIComponent(`/${deep}`)}`,
+      );
+      return;
+    }
     window.location.replace("/app/index.html");
   }, []);
   return <PageLoader />;

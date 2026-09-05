@@ -58,6 +58,7 @@ ORDER = [
     "org-billing-currency-migration.sql",      # organizations.billing_currency — MXN launch (Starter/Professional, IVA incluido)
     "incident-estimated-value-migration.sql",  # incident_reports.estimated_value → real item_value in stolen email + capture param on file_org_incident
     "incident-audit-trigger-fix.sql",          # CRITICAL: trg_audit_incident referenced NEW.incident_type (42703) — broke ALL incident inserts/updates; also collapses file_org_incident to single 9-arg overload
+    "deep-link-cta-migration.sql",             # email CTA deep links: directory/stats/tracking/message URLs → real in-app screens
     "delete-account-procedure.sql",           # references most tables — run last
     "add_apns_token.sql",                    # native iOS APNS token column on profiles
     "add_is_volunteer.sql",                  # volunteer partner flag + stats view rebuild
