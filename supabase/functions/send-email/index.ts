@@ -24,7 +24,7 @@
 
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { sendViaResend } from '../_shared/resend.ts';
+import { sendViaResend, sendViaResendTemplate } from '../_shared/resend.ts';
 import { renderEmail } from '../_shared/emailTemplate.ts';
 
 const corsHeaders = {
@@ -187,6 +187,7 @@ serve(async (req: Request) => {
       html_body: string | null;
       text_body: string | null;
       reply_to: string | null;
+      metadata: Record<string, unknown> | null;
     }>;
 
     let sent = 0;
@@ -202,6 +203,63 @@ serve(async (req: Request) => {
           p_retry_in_seconds: secondsUntilNextMidnight(),
         });
         requeued++;
+        continue;
+      }
+
+      // ── Resend-template job ──
+      // The template carries its own subject + HTML; we send id + variables
+      // only (email-templates-migration.sql). email_sends is kept in sync for
+      // the audit trail / support traceability.
+      const meta = (job.metadata ?? {}) as Record<string, unknown>;
+      const templateId = typeof meta.template_id === 'string' ? meta.template_id : null;
+      if (templateId) {
+        const variables = (meta.variables ?? {}) as Record<string, string>;
+        const result = await sendViaResendTemplate({
+          apiKey: resendApiKey,
+          from,
+          to: job.recipient,
+          templateId,
+          variables,
+        });
+        if (result.ok) {
+          await adminClient.rpc('mark_email_sent', {
+            p_id: job.id,
+            p_provider_message_id: result.id ?? null,
+          });
+          await adminClient.rpc('mark_email_send_settled', {
+            p_queue_id: job.id,
+            p_ok: true,
+            p_message_id: result.id ?? null,
+          });
+          sent++;
+          remaining--;
+        } else if (result.rateLimited) {
+          // Provider throttled us — back off ~1h, don't burn an attempt.
+          await adminClient.rpc('mark_email_failed', {
+            p_id: job.id,
+            p_error: result.error ?? 'rate limited',
+            p_retry_in_seconds: 3600,
+          });
+          await adminClient.rpc('mark_email_send_settled', {
+            p_queue_id: job.id,
+            p_ok: false,
+            p_error: result.error ?? 'rate limited',
+          });
+          requeued++;
+        } else {
+          // Hard failure — increment attempts; RPC applies exponential backoff.
+          console.warn('[send-email] template send failed for job', job.id, result.error);
+          await adminClient.rpc('mark_email_failed', {
+            p_id: job.id,
+            p_error: result.error ?? 'unknown error',
+          });
+          await adminClient.rpc('mark_email_send_settled', {
+            p_queue_id: job.id,
+            p_ok: false,
+            p_error: result.error ?? 'unknown error',
+          });
+          failed++;
+        }
         continue;
       }
 

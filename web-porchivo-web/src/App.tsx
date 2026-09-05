@@ -27,6 +27,12 @@ const Settings = lazy(() => import("./pages/Settings"));
 const EmailPreview = lazy(() => import("./pages/EmailPreview"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const AuthFail = lazy(() => import("./pages/AuthFail"));
+const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
+const PartnersLanding = lazy(() => import("./pages/PartnersLanding"));
+const SafetyLanding = lazy(() => import("./pages/SafetyLanding"));
+const ReferralLanding = lazy(() => import("./pages/ReferralLanding"));
+const InviteLanding = lazy(() => import("./pages/InviteLanding"));
+const ReportDetail = lazy(() => import("./pages/ReportDetail"));
 
 // Manager portal — lazy so supabase-js stays out of the marketing bundle.
 // PortalAuthProvider is a default export purely for this lazy() import.
@@ -101,6 +107,12 @@ const App = () => (
               <Route path="/settings" element={<Settings />} />
               <Route path="/email-preview" element={<EmailPreview />} />
               <Route path="/auth-fail" element={<AuthFail />} />
+              <Route path="/unsubscribe" element={<Unsubscribe />} />
+              <Route path="/partners" element={<PartnersLanding />} />
+              <Route path="/safety" element={<SafetyLanding />} />
+              <Route path="/referral" element={<ReferralLanding />} />
+              <Route path="/invite" element={<InviteLanding />} />
+              <Route path="/reports/:id" element={<ReportDetail />} />
 
               {/* Expo web app — host catch-all can't serve /app/ directly */}
               <Route path="/app" element={<AppRedirect />} />

@@ -23,6 +23,60 @@ export interface ResendSendOptions {
   replyTo?: string | null;
 }
 
+export interface ResendTemplateSendOptions {
+  apiKey: string;
+  from: string;
+  to: string;
+  /** Published Resend template uuid. */
+  templateId: string;
+  /** Variables matching the template's {{variable}} placeholders. */
+  variables: Record<string, string>;
+}
+
+/**
+ * Send through a published Resend template: the template carries its own
+ * subject + HTML, we only supply id + variables. Signature confirmed against
+ * Resend's current docs (emails.send with a `template` object).
+ */
+export async function sendViaResendTemplate(
+  opts: ResendTemplateSendOptions,
+): Promise<ResendSendResult> {
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${opts.apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: opts.from,
+        to: opts.to,
+        template: { id: opts.templateId, variables: opts.variables },
+      }),
+    });
+
+    const status = res.status;
+    if (res.ok) {
+      const data = await res.json().catch(() => ({}));
+      return { ok: true, id: data?.id, status, rateLimited: false };
+    }
+    const errText = await res.text().catch(() => `HTTP ${status}`);
+    return {
+      ok: false,
+      status,
+      error: `Resend ${status}: ${errText}`,
+      rateLimited: status === 429,
+    };
+  } catch (e) {
+    return {
+      ok: false,
+      status: 0,
+      error: e instanceof Error ? e.message : String(e),
+      rateLimited: false,
+    };
+  }
+}
+
 export async function sendViaResend(opts: ResendSendOptions): Promise<ResendSendResult> {
   try {
     const payload: Record<string, unknown> = {

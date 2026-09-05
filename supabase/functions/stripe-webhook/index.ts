@@ -38,11 +38,13 @@ import Stripe from 'npm:stripe@16.12.0';
 import { createClient, SupabaseClient } from 'npm:@supabase/supabase-js@2';
 import { SECURITY_HEADERS, jsonResponse, logSecurityEvent } from '../_shared/security.ts';
 import { sendViaResend } from '../_shared/resend.ts';
+import { sendSubscriptionStarted, type SqlRpcClient } from '../_shared/emailService.ts';
 
 const ALLOWED_EVENTS = new Set([
   'invoice.paid',
   'invoice.payment_failed',
   'customer.subscription.deleted',
+  'customer.subscription.updated',
   'checkout.session.completed',
 ]);
 
@@ -136,6 +138,62 @@ function dunningMessage(
     pushTitle: 'Payment failed',
     pushBody: 'Your community payment failed. Residents are unaffected — update billing when you can.',
   };
+}
+
+/** Best-effort "Subscription Started / Upgraded" email through the Resend
+ *  template service (billing category — ignores email opt-outs). */
+async function notifySubscriptionEmail(
+  userId: string,
+  opts: {
+    eventName: string;
+    planName: string;
+    upgradeOrStart: string;
+    billingCycle: string;
+    amount: string;
+    nextBillingDate: string;
+  },
+): Promise<void> {
+  try {
+    const { data: profile } = await adminClient
+      .from('profiles')
+      .select('email, name')
+      .eq('id', userId)
+      .maybeSingle();
+    if (!profile?.email) return;
+    const name = (profile.name ?? '').trim();
+    await sendSubscriptionStarted(
+      adminClient as unknown as SqlRpcClient,
+      {
+        recipient: profile.email,
+        userId,
+        eventName: opts.eventName,
+        firstName: name.split(/\s+/)[0] || 'there',
+        planName: opts.planName,
+        upgradeOrStart: opts.upgradeOrStart,
+        billingCycle: opts.billingCycle,
+        amount: opts.amount,
+        nextBillingDate: opts.nextBillingDate,
+      },
+    );
+  } catch (e) {
+    console.warn(
+      '[stripe-webhook] subscription email failed:',
+      e instanceof Error ? e.message : 'unknown',
+    );
+  }
+}
+
+function fmtAmount(cents: number | null | undefined): string {
+  return typeof cents === 'number' ? `$${(cents / 100).toFixed(2)}` : '—';
+}
+
+function fmtDate(iso: string | null | undefined): string {
+  if (!iso) return '—';
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  }).format(new Date(iso));
 }
 
 /** Send the manager-only dunning email + push. Never throws — notification
@@ -414,6 +472,19 @@ Deno.serve(async (req: Request) => {
           eventId: event.id,
         });
         outcome = ok ? 'activated' : 'db_error';
+        if (ok) {
+          const tier = tierFromLookupKey(session.metadata?.lookup_key);
+          await notifySubscriptionEmail(userId, {
+            eventName: event.id,
+            planName: tier && tier !== 'free' ? tier : 'Premium',
+            upgradeOrStart: 'starting',
+            billingCycle: isLifetime
+              ? 'one-time'
+              : session.metadata?.billing_cycle ?? 'monthly',
+            amount: fmtAmount(session.amount_total),
+            nextBillingDate: isLifetime ? '—' : 'per your billing cycle',
+          });
+        }
         break;
       }
 
@@ -548,6 +619,45 @@ Deno.serve(async (req: Request) => {
           eventId: event.id,
         });
         outcome = ok ? 'expired' : 'db_error';
+        break;
+      }
+
+      case 'customer.subscription.updated': {
+        const updated = event.data.object as Stripe.Subscription;
+        // Org events: no personal email (managers already get dunning).
+        const updOrgId = await resolveOrgId(updated.metadata);
+        if (updOrgId) {
+          outcome = 'org_update_ignored';
+          break;
+        }
+        // Upgrade detection: plan items changed while the sub is active.
+        const prevAttrs = (
+          event.data as unknown as { previous_attributes?: Record<string, unknown> }
+        ).previous_attributes;
+        if (!prevAttrs || !('items' in prevAttrs) || updated.status !== 'active') {
+          outcome = 'ignored_update';
+          break;
+        }
+        const updUserId = await resolveUserId(updated.metadata, null);
+        if (!updUserId) {
+          outcome = 'user_not_found';
+          break;
+        }
+        const price = updated.items?.data?.[0]?.price;
+        const tier = tierFromLookupKey(price?.lookup_key ?? null);
+        await notifySubscriptionEmail(updUserId, {
+          eventName: event.id,
+          planName: tier && tier !== 'free' ? tier : 'Premium',
+          upgradeOrStart: 'upgrading to',
+          billingCycle: price?.recurring?.interval === 'year' ? 'yearly' : 'monthly',
+          amount: fmtAmount(price?.unit_amount ?? null),
+          nextBillingDate: fmtDate(
+            updated.current_period_end
+              ? new Date(updated.current_period_end * 1000).toISOString()
+              : null,
+          ),
+        });
+        outcome = 'upgrade_email_sent';
         break;
       }
     }
