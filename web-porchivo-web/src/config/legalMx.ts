@@ -14,13 +14,9 @@ export const MX_LEGAL = {
   /** General support contact referenced by the Términos. */
   supportEmail: "soporte@porchivo.com",
   /** Effective / last-updated date shown on both es-MX documents. */
-  effectiveDate: "5 de septiembre de 2026",
+  effectiveDate: "6 de septiembre de 2026",
   /** Contractual jurisdiction for the Términos (CDMX is the standard national default). */
   jurisdiction: "Ciudad de México",
-  /**
-   * Registered office (domicilio) — the single pending legal fact for the
-   * Mexican documents. Rendered in the identity sections only once set;
-   * intentionally empty until the founder confirms it.
-   */
-  domicilio: "",
+  /** Registered office (domicilio) — confirmed by the founder 2026-09-06. */
+  domicilio: "Indianapolis, Indiana, Estados Unidos de América",
 } as const;

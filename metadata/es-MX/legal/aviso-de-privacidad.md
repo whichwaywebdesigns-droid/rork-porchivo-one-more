@@ -1,22 +1,23 @@
 # AVISO DE PRIVACIDAD — PORCHIVO
 
-> **ESTADO: FINAL (2026-09-05) — listo para publicar.** Único dato pendiente:
-el domicilio registrado del titular (`[DOMICILIO REGISTRADO]` en la sección 1).
-Datos ya confirmados: entidad = WhichWay Web Labs LLC (la operadora de los
-avisos en inglés), DPO = privacidad@porchivo.com, jurisdicción contractual =
-Ciudad de México (predeterminado estándar; sustituible por Monterrey u otra
-ciudad si el titular decide lo contrario). Este aviso sigue los puntos
-centrales del consultor (LFPDPPP) y las reglas de compliance del proyecto: sin
-afirmaciones de auditoría certificada ("bajo estándares de la industria"),
-sin implicaciones de cobro automático de cuotas.
+> **ESTADO: FINAL (2026-09-06) — publicado; sin pendientes.** Todos los datos
+del responsable confirmados: entidad = WhichWay Web Labs LLC (la operadora de
+los avisos en inglés), domicilio = Indianapolis, Indiana, Estados Unidos de
+América, DPO = privacidad@porchivo.com, jurisdicción contractual = Ciudad de
+México (predeterminado estándar; sustituible por Monterrey u otra ciudad si el
+titular decide lo contrario). Este aviso sigue los puntos centrales del
+consultor (LFPDPPP) y las reglas de compliance del proyecto: sin afirmaciones
+de auditoría certificada ("bajo estándares de la industria"), sin implicaciones
+de cobro automático de cuotas.
 
-**Fecha de última actualización:** 5 de septiembre de 2026
+**Fecha de última actualización:** 6 de septiembre de 2026
 
 ## 1. Identidad del Responsable
 
 Porchivo, operado por **WhichWay Web Labs LLC**, sociedad de responsabilidad
 limitada constituida conforme a las leyes de los Estados Unidos de América,
-con domicilio registrado en [DOMICILIO REGISTRADO], es el responsable del
+con domicilio registrado en Indianapolis, Indiana, Estados Unidos de América,
+es el responsable del
 tratamiento de sus datos personales, en términos de la Ley Federal de
 Protección de Datos Personales en Posesión de los Particulares (LFPDPPP) y su
 Reglamento.

@@ -1,6 +1,6 @@
 # TÉRMINOS Y CONDICIONES — PORCHIVO
 
-> **ESTADO: FINAL (2026-09-05) — listo para publicar.** Datos confirmados:
+> **ESTADO: FINAL (2026-09-06) — publicado; sin pendientes.** Datos confirmados:
 entidad = WhichWay Web Labs LLC (la operadora de los términos en inglés),
 contacto = soporte@porchivo.com, jurisdicción = Ciudad de México
 (predeterminado estándar; sustituible por Monterrey u otra ciudad si el
@@ -8,7 +8,7 @@ titular decide lo contrario). Sigue los puntos centrales del consultor: escudo
 de responsabilidad de la red Porch Partners, límites explícitos del registro
 de pagos (sin función financiera), moderación de chat y jurisdicción mexicana.
 
-**Fecha de última actualización:** 5 de septiembre de 2026
+**Fecha de última actualización:** 6 de septiembre de 2026
 
 ## 1. Aceptación de los Términos
 
