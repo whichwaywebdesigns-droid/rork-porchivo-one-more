@@ -68,6 +68,8 @@ export const FOOTER_NAV: NavSection[] = [
     items: [
       { label: "Privacy Policy", href: "/privacy" },
       { label: "Terms of Service", href: "/terms" },
+      { label: "Aviso de Privacidad (ES)", href: "/es/privacidad" },
+      { label: "Términos en Español", href: "/es/terminos" },
       { label: "Security", href: "/privacy#security" },
     ],
   },
@@ -102,4 +104,6 @@ export const SITEMAP_PAGES = [
   { path: "/for-agents", priority: 0.7, changefreq: "monthly" },
   { path: "/privacy", priority: 0.5, changefreq: "yearly" },
   { path: "/terms", priority: 0.5, changefreq: "yearly" },
+  { path: "/es/privacidad", priority: 0.4, changefreq: "yearly" },
+  { path: "/es/terminos", priority: 0.4, changefreq: "yearly" },
 ] as const;
