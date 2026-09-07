@@ -7,9 +7,30 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+// Local release signing (OPTIONAL — for owner's manual Play uploads).
+// If android/keystore.properties exists, release builds are signed with the
+// keystore it points to; otherwise release falls back to the debug key so
+// CI/Rork builds keep working unchanged. keystore.properties and the keystore
+// file are gitignored — never commit them.
+val keystorePropsFile = rootProject.file("keystore.properties")
+val keystoreProps = Properties().apply {
+    if (keystorePropsFile.exists()) keystorePropsFile.inputStream().use { load(it) }
+}
+
 android {
     namespace = "com.rork.porchivo"
     compileSdk = 36
+
+    signingConfigs {
+        if (keystorePropsFile.exists()) {
+            create("release") {
+                storeFile = rootProject.file(keystoreProps.getProperty("storeFile"))
+                storePassword = keystoreProps.getProperty("storePassword")
+                keyAlias = keystoreProps.getProperty("keyAlias")
+                keyPassword = keystoreProps.getProperty("keyPassword")
+            }
+        }
+    }
 
     defaultConfig {
         applicationId = "com.whichwayweblabs.porchivo"
@@ -52,7 +73,11 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = if (keystorePropsFile.exists()) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
