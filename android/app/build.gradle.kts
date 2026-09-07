@@ -15,8 +15,8 @@ android {
         applicationId = "com.whichwayweblabs.porchivo"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1787757779
-        versionName = "1.0.8"
+        versionCode = 1788441600
+        versionName = "1.0.9"
 
         // Supabase credentials — read from local.properties, system env vars,
         // or the Expo .env file (EXPO_PUBLIC_ prefixed vars) as a final fallback.
