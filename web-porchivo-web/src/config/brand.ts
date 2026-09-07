@@ -28,7 +28,8 @@ export const BRAND = {
   playStoreUrl:
     "https://play.google.com/store/apps/details?id=com.whichwayweblabs.porchivo",
   supportEmail: "support@porchivo.com",
-  pressEmail: "press@porchivo.com",
+  // Press inquiries route to the live support mailbox (no press@ alias exists).
+  pressEmail: "support@porchivo.com",
   twitterHandle: "@porchivo",
   founded: "2025",
   country: "US",
