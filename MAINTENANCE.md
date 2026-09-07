@@ -600,6 +600,80 @@ noted inline so you can verify them without grepping history.
 
 ---
 
+## 📧 Email Pipeline — How All Templates Are Wired (Sept 2026)
+
+Every email Porchivo sends goes through one pipeline: a trigger (DB trigger,
+webhook, or scheduled job) **enqueues** a row in `email_queue` → a cron job
+(`drain-email-queue`, every minute) drains it → the `send-email` edge function
+sends it through **Resend as a template**. Nothing ever sends inline from a
+user action, so tapping a button never waits on email.
+
+| Safety rail | How it works |
+|------|-------------|
+| **Dedupe** | Every email has a unique `dedupe_key` — the same event twice = one email, guaranteed by the database |
+| **Traceability** | Every send gets a reference number like `PV-PACKAGEM-216B48` logged in `email_sends` — search Resend or the DB by reference when a user asks "did my email go out?" |
+| **Unsubscribe** | Per-category opt-outs in `email_preferences` (partners / packages / community / marketing) + a one-click `/unsubscribe?token=…` page. **Security (account deletion) and billing emails ignore opt-outs by design** |
+| **Daily cap** | `DAILY_EMAIL_CAP` env var on the `send-email` function (default **100**) — anything over cap stays queued and drains the next day |
+
+### Automatic triggers (13 — fire from real app events)
+
+| Event | Source |
+|------|--------|
+| Partner request received | DB trigger on partner connection insert |
+| Partner accepted / added-as-partner | DB trigger on pending → active |
+| Partner declined (with reason) | DB trigger on declined status |
+| Suspicious activity reported | DB trigger on suspicious-alert insert |
+| New member joined community | DB trigger on org-membership insert |
+| Subscription started / upgraded | `stripe-webhook` (checkout + plan-change) |
+| Admin invitation sent | invite-by-email flow |
+| Account deleted (confirmation) | 30-day purge flow, sent just before destruction |
+| Package picked up | assignment pickup trigger |
+| Package reported **missing** | incident insert trigger (neutral tone, 24h auto-escalates) |
+| Package confirmed **stolen** | incident update trigger — includes the **estimated item value** the user filed |
+| Theft resolved | incident status → resolved trigger |
+| Referral reward credited | referred user completes first verified activity |
+
+### Scheduled jobs (7 digests/alerts + support jobs)
+
+| Job (pg_cron) | Schedule | What it sends |
+|------|------|------|
+| `email-arriving-today` | every 2h | "Package arriving today" — watches Ship24's out-for-delivery flag |
+| `email-at-risk` | hourly | Delivered-but-unclaimed alerts (one re-alert later) |
+| `email-re-engagement` | daily 15:00 UTC | Come-back nudge after 30 days inactive |
+| `email-milestone` | daily 15:10 UTC | "10 / 50 / 100 packages protected" (once per milestone) |
+| `email-review-request` | daily 15:20 UTC | Review ask 3 days after a hand-off (skips if already reviewed) |
+| `email-risk-spike` | every 6h | Theft-spike warning vs neighborhood baseline |
+| `email-safety-digest` | Mon 14:00 UTC | Weekly Safety Digest per community |
+| `email-incident-escalation` | hourly :30 | Moves missing→confirmed-stolen after 24h (fires the stolen email) |
+| `drain-email-queue` | every minute | Sends queued email through Resend |
+
+### Manual sends (2 — staff-invoked)
+
+App Update / New Feature announcements and HOA Pilot Welcome go through the
+`admin-emails` edge function (single recipient or segment) — no UI; ask your AI
+assistant to fire one, or reuse the last broadcast pattern (`inbox-verify-20260906`).
+
+### When something looks wrong (2-minute check)
+
+1. **Did it send?** Supabase → Table Editor → `email_sends` — find the
+   recipient, check `status` and `reference_number`. Anything not `sent` failed.
+2. **Is it stuck?** `email_queue` — rows older than a few minutes in `pending`
+   usually mean the Resend template is missing/paused (the queue waits, retries
+   with backoff, then marks failed).
+3. **Everything landing in spam?** Check DMARC reports arriving at
+   `support@porchivo.com` (XML from Google) — DKIM/SPF/DMARC are fully set up,
+   so failures there mean a DNS record changed.
+
+> ⚠️ **DAILY_EMAIL_CAP is 100 (free-tier default).** Once real communities are
+> on-boarded, weekly digests will blow past this. Raise it in the Supabase
+> edge-function secrets for `send-email` (it only governs how many send per
+> day — the rest stays queued, nothing is lost).
+
+> ✅ **Verified live 2026-09-07:** all 11 cron jobs active · queue 12 sent /
+> 0 pending / 0 failed · all tables, triggers, and columns present.
+
+---
+
 ## Asking AI for Help
 
 
@@ -618,4 +692,4 @@ When using an AI coding assistant (like the one that built this app), include co
 
 ---
 
-*Last updated: May 2026*
+*Last updated: September 2026*
