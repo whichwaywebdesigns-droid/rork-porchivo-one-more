@@ -92,6 +92,12 @@ final class AppState {
         #endif
     }
 
+    // App Review demo account — the only email that uses the server-gated
+    // reviewer-access path (static demo code, no real email is sent).
+    static let reviewerEmail = "reviewer@porchivo.com"
+    /// True while the reviewer demo flow is active; LoginScreen adapts its hints.
+    var isReviewerFlow = false
+
     // Controls the splash-screen fade-out. Stays true until the authenticated
     // home dashboard has finished its initial data load so the user never sees
     // an empty dashboard behind a disappearing splash.
@@ -339,6 +345,27 @@ final class AppState {
     @MainActor
     func sendMagicLink(email: String) async -> Bool {
         authError = nil
+        let normalized = email.trimmingCharacters(in: .whitespaces).lowercased()
+        if normalized == Self.reviewerEmail {
+            // Reviewer demo path — no real email is sent; the edge function
+            // ensures the demo account + content exist, then the static demo
+            // code signs in (see verifyOtp).
+            isReviewerFlow = true
+            let result = await supabase.reviewerAccess(email: normalized, code: nil)
+            switch result {
+            case .success(let resp) where resp.ready == true:
+                return true
+            case .failure(let err):
+                authError = err.localizedDescription
+                Haptics.error()
+                return false
+            default:
+                authError = "Demo access is unavailable right now. Please try again."
+                Haptics.error()
+                return false
+            }
+        }
+        isReviewerFlow = false
         if !isSupabaseConfigured {
 #if DEBUG
             // Demo mode — pretend the link was sent.
@@ -434,6 +461,36 @@ final class AppState {
             authError = "Supabase isn't configured in this build."
             return false
 #endif
+        }
+        let normalized = email.trimmingCharacters(in: .whitespaces).lowercased()
+        if normalized == Self.reviewerEmail {
+            // Reviewer demo path — the edge function validates the static demo
+            // code server-side and returns a session to adopt.
+            let result = await supabase.reviewerAccess(
+                email: normalized,
+                code: token.trimmingCharacters(in: .whitespaces)
+            )
+            switch result {
+            case .success(let resp) where resp.ready == true:
+                guard let payload = resp.session, !payload.accessToken.isEmpty else {
+                    authError = "Demo sign-in failed. Please try again."
+                    Haptics.error()
+                    return false
+                }
+                let session = await supabase.adoptSession(payload)
+                authState = .authenticated(session.user?.id ?? "")
+                await loadInitialData(userId: session.user?.id ?? "")
+                flagBiometricEnrollment()
+                return true
+            case .failure(let err):
+                authError = err.localizedDescription
+                Haptics.error()
+                return false
+            default:
+                authError = "Invalid demo code. Use the code provided in the review notes."
+                Haptics.error()
+                return false
+            }
         }
         let result = await supabase.verifyOtp(
             email: email.trimmingCharacters(in: .whitespaces),

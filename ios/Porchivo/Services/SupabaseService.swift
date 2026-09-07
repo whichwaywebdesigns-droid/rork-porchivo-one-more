@@ -677,6 +677,48 @@ actor SupabaseService {
         }
     }
 
+    // MARK: - App Review demo access
+
+    nonisolated struct ReviewerAccessResponse: Decodable, Sendable {
+        let ready: Bool?
+        let error: String?
+        let session: AuthSession?
+    }
+
+    /// Calls the `reviewer-access` edge function (hard-gated server-side to the
+    /// App Review demo account). Without a code it ensures the demo account and
+    /// community content exist; with a code it mints a session server-side —
+    /// the demo password never leaves the server.
+    func reviewerAccess(email: String, code: String?) async -> Result<ReviewerAccessResponse, Error> {
+        var body: [String: Any] = ["email": email]
+        if let code { body["code"] = code }
+        let result = await invokeEdgeFunction("reviewer-access", body: body)
+        switch result {
+        case .success(let data):
+            do {
+                return .success(try decoder.decode(ReviewerAccessResponse.self, from: data))
+            } catch {
+                return .failure(error)
+            }
+        case .failure(let err):
+            return .failure(err)
+        }
+    }
+
+    /// Adopts a session minted server-side: computes the absolute expiry,
+    /// attaches the user record, and persists to Keychain.
+    func adoptSession(_ payload: AuthSession) async -> AuthSession {
+        var session = payload
+        if session.expiresAt == 0, session.expiresIn > 0 {
+            session.expiresAt = Date().timeIntervalSince1970 + session.expiresIn
+        }
+        if let user = try? await fetchUser(token: session.accessToken) {
+            session.user = user
+        }
+        await persist(session)
+        return session
+    }
+
     private func refreshSession(_ refreshToken: String) async -> AuthSession? {
         let body: [String: Any] = ["refresh_token": refreshToken]
         let result: Result<AuthSession, Error> = await authPost("token?grant_type=refresh_token", body: body) { [weak self] data in

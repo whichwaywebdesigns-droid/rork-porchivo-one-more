@@ -122,7 +122,9 @@ struct LoginScreen: View {
                 enabled: isValidEmail && !isSubmitting
             )
             if linkSent {
-                Text("Check your email for a 6-digit code.")
+                Text(appState.isReviewerFlow
+                     ? "Demo account ready — enter the review code."
+                     : "Check your email for a 6-digit code.")
                     .font(.system(size: 12, weight: .medium))
                     .foregroundStyle(c.textSecondary)
                     .multilineTextAlignment(.center)
@@ -171,7 +173,9 @@ struct LoginScreen: View {
 
     private var codePhase: some View {
         VStack(spacing: 24) {
-            Text("We sent a 6-digit code to \(email)")
+            Text(appState.isReviewerFlow
+                 ? "Enter the demo code from the review notes."
+                 : "We sent a 6-digit code to \(email)")
                 .font(.system(size: 13, weight: .medium))
                 .foregroundStyle(c.textSecondary)
                 .multilineTextAlignment(.center)
