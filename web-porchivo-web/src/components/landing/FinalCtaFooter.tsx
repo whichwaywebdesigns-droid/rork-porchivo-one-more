@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
-import { Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Reveal from "@/components/landing/Reveal";
 import AppStoreBadges from "@/components/AppStoreBadges";
 
-/** Final full-width call-to-action before the footer. */
+/** Final full-width call-to-action before the footer (B2B copy). */
 export function FinalCtaSection() {
   return (
     <section className="relative overflow-hidden border-t border-white/5 py-28">
@@ -14,9 +14,9 @@ export function FinalCtaSection() {
       />
       <Reveal className="relative mx-auto max-w-3xl px-4 text-center sm:px-6">
         <h2 className="font-display text-4xl font-bold tracking-tight text-white sm:text-6xl">
-          Secure your block.{" "}
+          Know before it&apos;s too late.{" "}
           <span className="bg-gradient-to-r from-pv-amber to-pv-electric bg-clip-text text-transparent">
-            Starting tonight.
+            Register your community in two minutes.
           </span>
         </h2>
         <div className="mt-10 flex flex-col items-center justify-center gap-5">
@@ -24,8 +24,8 @@ export function FinalCtaSection() {
             to="/download"
             className="inline-flex items-center gap-2 rounded-xl bg-pv-amber px-8 py-4 font-display text-lg font-bold text-pv-navy transition-transform hover:scale-[1.03] motion-safe:animate-glow-pulse"
           >
-            <Sparkles className="h-5 w-5" aria-hidden />
-            Start Free — 7 Days Premium
+            Register Your Community
+            <ArrowRight className="h-5 w-5" aria-hidden />
           </Link>
           <AppStoreBadges />
         </div>

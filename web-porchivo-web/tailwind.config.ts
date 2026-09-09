@@ -98,6 +98,11 @@ export default {
             light: "#FBBF24",
             dim: "#B45309",
           },
+          // Coral-red accent — risk/threat visuals only (per B2B spec)
+          coral: {
+            DEFAULT: "#E8573A",
+            light: "#F07B5F",
+          },
         },
       },
       fontFamily: {

@@ -79,7 +79,7 @@ export default function LandingNav() {
             to="/download"
             className="hidden rounded-xl bg-pv-amber px-5 py-2.5 font-display text-sm font-bold text-pv-navy transition-transform hover:scale-[1.04] sm:inline-flex"
           >
-            Get Started
+            Register Your Community
           </Link>
           {/* Mobile menu toggle */}
           <button
@@ -116,7 +116,7 @@ export default function LandingNav() {
               to="/download"
               className="mt-2 rounded-xl bg-pv-amber px-5 py-3 text-center font-display font-bold text-pv-navy"
             >
-              Get Started
+              Register Your Community
             </Link>
           </div>
         </div>

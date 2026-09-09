@@ -1,11 +1,8 @@
 import SEOHead from "@/components/SEOHead";
 import LandingNav from "@/components/landing/LandingNav";
 import HeroSection from "@/components/landing/HeroSection";
-import ProblemSection from "@/components/landing/ProblemSection";
 import HowItWorksSection from "@/components/landing/HowItWorksSection";
 import FeaturesSection from "@/components/landing/FeaturesSection";
-import ProofLockerSection from "@/components/landing/ProofLockerSection";
-import TestimonialsSection from "@/components/landing/TestimonialsSection";
 import PricingSection from "@/components/landing/PricingSection";
 import FaqSection from "@/components/landing/FaqSection";
 import { FinalCtaSection, LandingFooter } from "@/components/landing/FinalCtaFooter";
@@ -17,16 +14,17 @@ import {
   buildMobileAppSchema,
 } from "@/config/schema";
 
+// B2B meta per spec: title names the category; description is the hero subhead.
+const PAGE_TITLE = "Porchivo — Package Security & Resident Retention for Communities";
+const PAGE_DESCRIPTION =
+  "Real-time package risk scoring, instant alerts to residents and Porch Partners, and a neighbor-held delivery network — with no hardware or IT project required.";
+// Canonical URL comes from the shared SEO config; only title/description change.
 const seo = getPageSEO("home");
-// Immersive landing meta title (per redesign spec); description stays the
-// established home copy.
-const PAGE_TITLE = "Porchivo — Neighborhood Package Protection";
 
 /**
- * Immersive 3D landing page (porchivo.com):
- * Nav → Hero (video + 3D porch-shield) → Problem stats → How It Works
- * → Features → Proof Locker (3D vault) → Testimonials → Pricing → FAQ
- * → Final CTA → Footer.
+ * Immersive B2B 3D landing page (porchivo.com):
+ * Nav → Hero (video + community-shield 3D + stat bar) → How It Works
+ * → Features (incl. risk-vault wide card) → Pricing → FAQ → Final CTA → Footer.
  *
  * Self-contained navy design system (pv-* tokens) — independent of the
  * site's light/dark theme. 3D assets and the hero video lazy-load only
@@ -37,28 +35,25 @@ export default function IndexPage() {
     buildOrganizationSchema(),
     buildWebSiteSchema(),
     buildMobileAppSchema(),
-    buildWebPageSchema({ name: PAGE_TITLE, description: seo.description, url: seo.canonical }),
+    buildWebPageSchema({ name: PAGE_TITLE, description: PAGE_DESCRIPTION, url: seo.canonical }),
   ];
 
   return (
     <div className="min-h-screen bg-pv-navy font-body text-white antialiased">
       <SEOHead
         title={PAGE_TITLE}
-        description={seo.description}
+        description={PAGE_DESCRIPTION}
         canonical={seo.canonical}
         ogTitle={PAGE_TITLE}
-        ogDescription={seo.ogDescription}
+        ogDescription={PAGE_DESCRIPTION}
         schemas={schemas}
       />
 
       <LandingNav />
       <main>
         <HeroSection />
-        <ProblemSection />
         <HowItWorksSection />
         <FeaturesSection />
-        <ProofLockerSection />
-        <TestimonialsSection />
         <PricingSection />
         <FaqSection />
         <FinalCtaSection />

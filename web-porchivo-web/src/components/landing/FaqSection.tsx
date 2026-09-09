@@ -9,29 +9,29 @@ interface FaqItem {
 
 const FAQ_ITEMS: FaqItem[] = [
   {
-    question: "Is my data private? Who can see my deliveries?",
+    question: "Does Porchivo require cameras or hardware?",
     answer:
-      "Only you and the neighbors you explicitly invite. Your deliveries, photos, and proof locker are private to your home and your trusted circle — never public, never sold, and no ads. You can export or delete your data anytime.",
+      "No. Porchivo is pure software — no cameras, sensors, gates, or installation crews. Registration takes about five minutes, and risk scoring starts as soon as your residents join. If you already have cameras, Porchivo complements them: cameras record what happened, Porchivo works before it happens.",
   },
   {
-    question: "How do delivery alerts work?",
+    question: "How does risk scoring work?",
     answer:
-      "Porchivo watches your home zone and follows carrier activity, so you know the moment a package lands, lingers longer than usual, or needs attention. Alerts go to you — and to the neighbors you choose.",
+      "Every incoming package gets a real-time risk score based on timing, neighborhood activity, and theft history. Scores update continuously — so an unclaimed package that looked safe at noon can escalate by evening, and residents and Porch Partners are alerted the moment risk thresholds are crossed.",
   },
   {
-    question: "How do neighbor invites work?",
+    question: "What is a Porch Partner?",
     answer:
-      "Invite the neighbors you trust by name or email. They only see what you share — like pickup requests or porch-watch alerts — and you can remove them from your circle anytime. Every handoff is logged with full chain-of-custody.",
+      "Porch Partners are trusted neighbors who form a community-held delivery network. They accept handoffs, hold packages safely, and earn extra income while building neighborhood reputation. Every handoff is logged with full chain-of-custody, so managers always know where a package is and who has it.",
   },
   {
-    question: "What happens if a package goes missing?",
+    question: "How do residents join?",
     answer:
-      "Open your proof locker: every delivery is documented with a timestamped photo timeline and notes. Export an evidence report in one tap for carriers, police, or insurance — Porchivo organizes the proof so you don't have to.",
+      "Residents download the app and join with your community's invite code — always free, with full access. There are no in-app purchases, no premium tiers, and no upsells for residents. Free residents are what make the network strong: more members means more Porch Partners and faster responses.",
   },
   {
-    question: "Does Porchivo replace my doorbell camera?",
+    question: "What does the manager dashboard show?",
     answer:
-      "No — it completes it. A camera records a theft after it happens. Porchivo works before that, with risk-aware alerts, trusted neighbors who can step in, and documentation that makes recovery painless.",
+      "Managers see active risk zones, theft hotspots, and delivery congestion across the community in real time — plus resident adoption, package volume, and every chain-of-custody record. Community Insights surfaces patterns so you can act on problems before residents report them.",
   },
 ];
 
