@@ -79,6 +79,30 @@ export default {
           secondary: "var(--brand-text-secondary)",
           muted: "var(--brand-text-muted)",
         },
+        // ── Immersive landing palette (self-contained navy system — theme-independent) ──
+        pv: {
+          navy: {
+            DEFAULT: "#0A1128",
+            600: "#16224E",
+            700: "#111C40",
+            800: "#0D1633",
+            900: "#060B1D",
+          },
+          electric: {
+            DEFAULT: "#3B82F6",
+            light: "#60A5FA",
+            dim: "#1D4ED8",
+          },
+          amber: {
+            DEFAULT: "#F59E0B",
+            light: "#FBBF24",
+            dim: "#B45309",
+          },
+        },
+      },
+      fontFamily: {
+        display: ['"Space Grotesk"', 'Inter', 'system-ui', 'sans-serif'],
+        body: ['Inter', 'system-ui', 'sans-serif'],
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -86,6 +110,24 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       keyframes: {
+        // Immersive landing motion (all consumed via motion-safe utilities)
+        float: {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-12px)" },
+        },
+        "glow-pulse": {
+          "0%, 100%": { boxShadow: "0 0 24px -6px rgba(245, 158, 11, 0.55)" },
+          "50%": { boxShadow: "0 0 48px -2px rgba(245, 158, 11, 0.85)" },
+        },
+        "scroll-dot": {
+          "0%": { transform: "translateY(0)", opacity: "1" },
+          "70%": { transform: "translateY(14px)", opacity: "0" },
+          "100%": { transform: "translateY(0)", opacity: "0" },
+        },
+        "ring-pulse": {
+          "0%": { transform: "scale(0.85)", opacity: "0.7" },
+          "100%": { transform: "scale(1.5)", opacity: "0" },
+        },
         "accordion-down": {
           from: {
             height: "0",
@@ -106,6 +148,10 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        float: "float 6s ease-in-out infinite",
+        "glow-pulse": "glow-pulse 2.4s ease-in-out infinite",
+        "scroll-dot": "scroll-dot 1.8s ease-in-out infinite",
+        "ring-pulse": "ring-pulse 2.6s ease-out infinite",
       },
     },
   },
