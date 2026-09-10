@@ -9,29 +9,29 @@ interface FaqItem {
 
 const FAQ_ITEMS: FaqItem[] = [
   {
-    question: "Does Porchivo require cameras or hardware?",
+    question: "Does Porchivo require cameras or hardware installed in our community?",
     answer:
-      "No. Porchivo is pure software — no cameras, sensors, gates, or installation crews. Registration takes about five minutes, and risk scoring starts as soon as your residents join. If you already have cameras, Porchivo complements them: cameras record what happened, Porchivo works before it happens.",
+      "No. Porchivo is a software platform — there's no hardware to buy, no installation, and no IT project for your team. Residents use the phones they already have, and managers get a web dashboard. Most communities are fully registered and protecting deliveries in under five minutes.",
   },
   {
-    question: "How does risk scoring work?",
+    question: "How does package risk scoring actually work?",
     answer:
-      "Every incoming package gets a real-time risk score based on timing, neighborhood activity, and theft history. Scores update continuously — so an unclaimed package that looked safe at noon can escalate by evening, and residents and Porch Partners are alerted the moment risk thresholds are crossed.",
+      "Every incoming delivery is scored in real time based on timing patterns, neighborhood theft activity, and your community's delivery history. Packages crossing a risk threshold trigger instant alerts to the resident and nearby Porch Partners — trusted neighbors who've opted in to receive and hold deliveries safely. Every handoff is logged with a full chain-of-custody record.",
   },
   {
-    question: "What is a Porch Partner?",
+    question: "What is a Porch Partner, and how do residents become one?",
     answer:
-      "Porch Partners are trusted neighbors who form a community-held delivery network. They accept handoffs, hold packages safely, and earn extra income while building neighborhood reputation. Every handoff is logged with full chain-of-custody, so managers always know where a package is and who has it.",
+      "Porch Partners are residents who opt in to receive packages for neighbors when risk is high or no one's home. Partners earn extra income per secure handoff and build a neighborhood reputation score. It's opt-in only — no resident is ever obligated, and your board controls whether the network is enabled for your community.",
   },
   {
-    question: "How do residents join?",
+    question: "How do our residents get started?",
     answer:
-      "Residents download the app and join with your community's invite code — always free, with full access. There are no in-app purchases, no premium tiers, and no upsells for residents. Free residents are what make the network strong: more members means more Porch Partners and faster responses.",
+      "Residents download the app and join with your community's invite code — it takes about a minute. They always join free: no in-app purchases, no upsells, no cost to residents ever. Your management team just distributes the invite code through your existing email or resident portal.",
   },
   {
     question: "What does the manager dashboard show?",
     answer:
-      "Managers see active risk zones, theft hotspots, and delivery congestion across the community in real time — plus resident adoption, package volume, and every chain-of-custody record. Community Insights surfaces patterns so you can act on problems before residents report them.",
+      "Managers see active risk zones, theft hotspots, delivery congestion patterns, and chain-of-custody records for every protected handoff — plus resident engagement and satisfaction signals that help you spot renewal risk before it becomes a resignation letter. All exportable for board reports.",
   },
 ];
 
