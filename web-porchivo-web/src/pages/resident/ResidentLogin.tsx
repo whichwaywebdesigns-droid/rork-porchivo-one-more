@@ -12,7 +12,7 @@ import { Navigate, Link } from "react-router-dom";
 import { Loader2, MailCheck, ArrowLeft, ShieldCheck } from "lucide-react";
 
 import { isSupabaseConfigured } from "@/lib/supabase";
-import { useResidentAuth } from "@/providers/ResidentAuthProvider";
+import { isReviewerEmail, useResidentAuth } from "@/providers/ResidentAuthProvider";
 import { useResidentOrg } from "@/hooks/useResidentOrg";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
@@ -32,6 +32,10 @@ export default function ResidentLoginPage() {
   const [isVerifying, setIsVerifying] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [cooldown, setCooldown] = useState<number>(0);
+
+  // Reviewer demo flow: adapts the code-phase copy once the demo email is
+  // entered (no hint on the email step — release-safe, mirrors the iOS app).
+  const isReviewerFlow = isReviewerEmail(emailValue);
 
   // Auto-return once the visitor already has an active community session.
   if (session && !isLoadingSession && !isLoadingOrg && membership) {
@@ -154,12 +158,21 @@ export default function ResidentLoginPage() {
           ) : (
             <>
               <p className="label-header mb-2">Porchivo Resident Portal</p>
-              <h1 className="text-2xl font-bold text-brand-text-primary mb-2">Enter your code</h1>
-              <p className="text-sm text-brand-text-secondary leading-relaxed mb-6">
-                We sent a 6-digit code to{" "}
-                <span className="font-semibold text-brand-text-primary">{emailValue}</span>. It
-                expires shortly after it arrives.
-              </p>
+              <h1 className="text-2xl font-bold text-brand-text-primary mb-2">
+                {isReviewerFlow ? "Demo account ready" : "Enter your code"}
+              </h1>
+              {isReviewerFlow ? (
+                <p className="text-sm text-brand-text-secondary leading-relaxed mb-6">
+                  Signed in as the App Review demo account — enter the demo code
+                  from the review notes below.
+                </p>
+              ) : (
+                <p className="text-sm text-brand-text-secondary leading-relaxed mb-6">
+                  We sent a 6-digit code to{" "}
+                  <span className="font-semibold text-brand-text-primary">{emailValue}</span>. It
+                  expires shortly after it arrives.
+                </p>
+              )}
 
               <div className="flex flex-col items-center gap-5">
                 <InputOTP
@@ -176,6 +189,10 @@ export default function ResidentLoginPage() {
                     ))}
                   </InputOTPGroup>
                 </InputOTP>
+
+                {isReviewerFlow && (
+                  <p className="text-[12px] text-brand-text-muted">Enter the demo code from the review notes.</p>
+                )}
 
                 {error && (
                   <p className="text-[13px] text-red-600 text-center" role="alert">
