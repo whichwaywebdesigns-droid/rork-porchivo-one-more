@@ -7,6 +7,17 @@ import AppStoreBadges from "@/components/AppStoreBadges";
 export function FinalCtaSection() {
   return (
     <section className="relative overflow-hidden border-t border-white/5 py-28">
+      {/* Branded dome backdrop + navy wash */}
+      <div className="absolute inset-0" aria-hidden>
+        <img
+          src="/images/final-cta-dome.jpg"
+          alt=""
+          loading="lazy"
+          className="h-full w-full object-cover"
+        />
+        <div className="absolute inset-0 bg-pv-navy/80" />
+        <div className="absolute inset-0 bg-gradient-to-b from-pv-navy via-transparent to-pv-navy" />
+      </div>
       {/* Glow backdrop */}
       <div
         aria-hidden

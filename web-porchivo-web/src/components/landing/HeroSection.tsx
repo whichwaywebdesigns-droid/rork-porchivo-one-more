@@ -10,8 +10,10 @@ import { useInView } from "@/hooks/useInView";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 
 const HERO_VIDEO = "/assets/hero-loop.mp4";
-const HERO_POSTER = "/images/hero-porchivo-clean.png";
+const HERO_POSTER = "/images/hero-dusk-street.jpg";
 const SHIELD_MODEL = "/assets/community-shield.glb";
+// Still render shown wherever the community-shield 3D model can't run.
+const SHIELD_STILL = "/images/community-shield.jpg";
 
 /** Hero trust-bar stats — count up when scrolled into view. */
 interface Stat {
@@ -189,6 +191,7 @@ export default function HeroSection() {
                 <ModelFallback
                   icon={ShieldCheck}
                   label="A glowing protective shield over a neighborhood"
+                  image={SHIELD_STILL}
                   className="h-full w-full"
                 />
               }

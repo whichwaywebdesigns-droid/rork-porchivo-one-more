@@ -18,21 +18,21 @@ const FEATURES: Feature[] = [
   {
     title: "Real-Time Risk Scoring",
     copy: "Every incoming package is scored for theft risk before it lands.",
-    image: "/images/feature-scoring.png",
+    image: "/images/feature-scoring.jpg",
     imageAlt: "Illustration of a package receiving a live theft-risk score",
     icon: Gauge,
   },
   {
     title: "Porch Partner Network",
     copy: "Join the Porch Partner network — safer deliveries, extra income, and community reputation.",
-    image: "/images/feature-partners.png",
+    image: "/images/feature-partners.jpg",
     imageAlt: "Illustration of Porch Partners handing off packages safely",
     icon: Users,
   },
   {
     title: "Community Insights",
     copy: "Managers see active risk zones, theft hotspots, and delivery congestion.",
-    image: "/images/feature-insights.png",
+    image: "/images/feature-insights.jpg",
     imageAlt: "Illustration of a manager's community risk map",
     icon: BarChart3,
   },
@@ -182,6 +182,7 @@ export default function FeaturesSection() {
                   <ModelFallback
                     icon={Lock}
                     label="A secure package vault with chain-of-custody"
+                    image="/images/risk-vault.jpg"
                     className="h-full w-full"
                   />
                 }
