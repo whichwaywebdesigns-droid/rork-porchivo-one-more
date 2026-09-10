@@ -53,6 +53,11 @@ const ManageLedgerPage = lazy(() => import("./pages/portal/ManageLedger"));
 const ManageApiKeysPage = lazy(() => import("./pages/portal/ManageApiKeys"));
 const ManageBillingPage = lazy(() => import("./pages/portal/ManageBilling"));
 
+// Resident portal — lazy so supabase-js stays out of the marketing bundle.
+const ResidentAuthProvider = lazy(() => import("./providers/ResidentAuthProvider"));
+const ResidentLoginPage = lazy(() => import("./pages/resident/ResidentLogin"));
+const ResidentDashboardPage = lazy(() => import("./pages/resident/ResidentDashboard"));
+
 const queryClient = new QueryClient();
 
 function ScrollToTop() {
@@ -173,6 +178,24 @@ const App = () => (
                 <Route path="api" element={<ManageApiKeysPage />} />
                 <Route path="billing" element={<ManageBillingPage />} />
               </Route>
+
+              {/* ── Resident portal (email-OTP login, active-membership gated) ── */}
+              <Route
+                path="/resident/login"
+                element={
+                  <ResidentAuthProvider>
+                    <ResidentLoginPage />
+                  </ResidentAuthProvider>
+                }
+              />
+              <Route
+                path="/resident"
+                element={
+                  <ResidentAuthProvider>
+                    <ResidentDashboardPage />
+                  </ResidentAuthProvider>
+                }
+              />
 
               <Route path="*" element={<NotFound />} />
             </Routes>

@@ -141,3 +141,40 @@ export const ROLE_LABELS: Record<PortalRole, string> = {
   board_member: "Board Member",
   super_admin: "Super Admin",
 };
+
+/* ── Resident portal types ── */
+
+export type ResidentRole = PortalRole | "resident";
+
+export interface ResidentMembership {
+  orgId: string;
+  role: ResidentRole;
+  unitNumber: string | null;
+}
+
+export interface ResidentOrg {
+  id: string;
+  name: string;
+  type: string;
+  total_units: number | null;
+  plan_tier: string | null;
+}
+
+export const RESIDENT_ROLE_LABELS: Record<ResidentRole, string> = {
+  ...ROLE_LABELS,
+  resident: "Resident",
+};
+
+/** Columns the resident dashboard reads from `shipments` (RLS-scoped to the user). */
+export interface ResidentShipment {
+  id: string;
+  status: string;
+  carrier: string | null;
+  packages_expected: string | null;
+  delivery_status: string | null;
+  created_at: string;
+}
+
+export function isDeliveryComplete(deliveryStatus: string | null): boolean {
+  return deliveryStatus === "delivered" || deliveryStatus === "delivered_to_homeowner";
+}
