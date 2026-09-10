@@ -13,8 +13,10 @@
  * All other screens consume tokens only — no porch-light graphics.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
+  ActivityIndicator,
+  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -24,12 +26,16 @@ import {
   StatusBar,
 } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
+import { Image } from 'expo-image';
+import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Bell,
+  Camera,
   ChevronLeft,
   ChevronRight,
   FileText,
+  ImagePlus,
   Info,
   LifeBuoy,
   Lock,
@@ -38,11 +44,18 @@ import {
   Shield,
   Smartphone,
   Star,
+  Trash2,
   Truck,
+  User,
   HandHeart,
   MapPin,
   Volume2,
 } from 'lucide-react-native';
+import {
+  pickAvatarImage,
+  uploadAvatar,
+  removeAvatarAtPublicUrl,
+} from '@/lib/avatar';
 
 import { useTheme } from '@/hooks/useTheme';
 import { useSubscriptionGate } from '@/hooks/useSubscriptionGate';
@@ -254,6 +267,194 @@ function SectionHeader({ title, tokens }: { title: string; tokens: ThemeTokens }
   );
 }
 
+// ── Profile card: avatar upload / display / remove ───────────────────────────
+
+/**
+ * Resident profile picture management for dashboard settings. Uploads
+ * immediately on pick (unlike Edit Profile, which stages until Save) via the
+ * shared `lib/avatar` helpers, persists the public URL through AppContext,
+ * and best-effort removes the previous Storage object so uploads don't
+ * accumulate. Disabled during billing-grace read-only mode.
+ */
+function ProfileCard({ tokens }: { tokens: ThemeTokens }) {
+  const { user, updateUser } = useApp();
+  const { isResidentSettingsReadOnly } = useSubscriptionGate();
+  const [isUploading, setIsUploading] = useState<boolean>(false);
+  const router = useRouter();
+
+  const handlePickImage = useCallback(async () => {
+    if (!user || isUploading) return;
+    try {
+      const picked = await pickAvatarImage();
+      if (!picked) return;
+      setIsUploading(true);
+      const publicUrl = await uploadAvatar(user.id, picked.uri, picked.asset);
+      // Best-effort cleanup of the previously stored object (non-fatal).
+      if (user.avatarUrl) {
+        void removeAvatarAtPublicUrl(user.avatarUrl);
+      }
+      updateUser({ avatarUrl: publicUrl });
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch (e: any) {
+      const msg =
+        e?.message === 'photo-permission-denied'
+          ? 'Please allow photo library access to change your picture.'
+          : e?.message === 'avatar-too-large'
+          ? 'That photo is larger than 5 MB. Please choose a smaller image.'
+          : 'Could not upload your photo. Please try again.';
+      Alert.alert('Photo upload failed', msg);
+    } finally {
+      setIsUploading(false);
+    }
+  }, [user, isUploading, updateUser]);
+
+  const handleRemovePhoto = useCallback(() => {
+    if (!user) return;
+    const previousUrl = user.avatarUrl;
+    if (!previousUrl) return;
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Alert.alert(
+      'Remove photo?',
+      'Your profile picture will be removed and replaced with your initial.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Remove',
+          style: 'destructive' as const,
+          onPress: () => {
+            void removeAvatarAtPublicUrl(previousUrl);
+            updateUser({ avatarUrl: null });
+          },
+        },
+      ],
+    );
+  }, [user, updateUser]);
+
+  if (!user) return null;
+
+  const initial = user.name?.trim()?.[0]?.toUpperCase() ?? '?';
+  const disabled = isResidentSettingsReadOnly || isUploading;
+
+  return (
+    <View
+      style={[
+        styles.card,
+        styles.cardRows,
+        {
+          backgroundColor: tokens.card,
+          borderColor: tokens.border,
+          shadowColor: tokens.shadow,
+        },
+      ]}
+    >
+      <View style={styles.profileBody}>
+        <TouchableOpacity
+          style={styles.avatarTouch}
+          onPress={() => void handlePickImage()}
+          activeOpacity={0.8}
+          disabled={disabled}
+          accessibilityRole="imagebutton"
+          accessibilityLabel={
+            user.avatarUrl ? 'Change profile picture' : 'Upload profile picture'
+          }
+          testID="settings-avatar-press"
+        >
+          {user.avatarUrl ? (
+            <Image
+              source={{ uri: user.avatarUrl }}
+              style={styles.avatarImage}
+              contentFit="cover"
+              transition={200}
+            />
+          ) : (
+            <View
+              style={[styles.avatarPlaceholder, { backgroundColor: tokens.accentSoft }]}
+            >
+              <Text style={[styles.avatarInitial, { color: tokens.accent }]}>
+                {initial}
+              </Text>
+            </View>
+          )}
+          {isUploading && (
+            <View style={styles.avatarUploading}>
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            </View>
+          )}
+          {!isUploading && (
+            <View
+              style={[
+                styles.cameraBadge,
+                { backgroundColor: tokens.accent, borderColor: tokens.card },
+              ]}
+            >
+              <Camera size={11} color="#FFFFFF" strokeWidth={2.4} />
+            </View>
+          )}
+        </TouchableOpacity>
+
+        <View style={styles.profileInfo}>
+          <Text
+            style={[styles.profileName, { color: tokens.text }]}
+            numberOfLines={1}
+          >
+            {user.name || 'Your profile'}
+          </Text>
+          <Text
+            style={[styles.profileEmail, { color: tokens.textMuted }]}
+            numberOfLines={1}
+          >
+            {user.email}
+          </Text>
+
+          <View style={styles.profileActions}>
+            <TouchableOpacity
+              style={[styles.actionPill, { backgroundColor: tokens.accentSoft }]}
+              onPress={() => void handlePickImage()}
+              activeOpacity={0.7}
+              disabled={disabled}
+              testID="settings-change-photo"
+              accessibilityRole="button"
+              accessibilityLabel={
+                user.avatarUrl ? 'Change photo' : 'Upload photo'
+              }
+            >
+              <ImagePlus size={13} color={tokens.accent} strokeWidth={2.2} />
+              <Text style={[styles.actionPillText, { color: tokens.accent }]}>
+                {user.avatarUrl ? 'Change photo' : 'Upload photo'}
+              </Text>
+            </TouchableOpacity>
+            {user.avatarUrl ? (
+              <TouchableOpacity
+                style={[styles.actionPill, { backgroundColor: `${tokens.danger}14` }]}
+                onPress={handleRemovePhoto}
+                activeOpacity={0.7}
+                disabled={disabled}
+                testID="settings-remove-photo"
+                accessibilityRole="button"
+                accessibilityLabel="Remove photo"
+              >
+                <Trash2 size={13} color={tokens.danger} strokeWidth={2.2} />
+                <Text style={[styles.actionPillText, { color: tokens.danger }]}>
+                  Remove
+                </Text>
+              </TouchableOpacity>
+            ) : null}
+          </View>
+        </View>
+      </View>
+
+      <View style={[styles.divider, { backgroundColor: tokens.border }]} />
+      <SettingRow
+        icon={<User size={16} color={tokens.accent} strokeWidth={2} />}
+        label="Edit profile"
+        onPress={() => router.push('/edit-profile' as any)}
+        isLast
+        tokens={tokens}
+      />
+    </View>
+  );
+}
+
 // ── Main screen ───────────────────────────────────────────────────────────────
 
 export default function SettingsScreen() {
@@ -343,6 +544,11 @@ export default function SettingsScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
+        {/* ── Profile ── */}
+        <SectionHeader title="PROFILE" tokens={tokens} />
+
+        <ProfileCard tokens={tokens} />
+
         {/* ── Appearance ── */}
         <SectionHeader title="APPEARANCE" tokens={tokens} />
 
@@ -839,6 +1045,82 @@ const styles = StyleSheet.create({
     height: 1,
     marginVertical: 8,
     marginHorizontal: -4,
+  },
+
+  // ── Profile card ──────────────────────────────────────────────────────────
+  profileBody: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    gap: 14,
+    padding: 16,
+  },
+  avatarTouch: {
+    width: 72,
+    height: 72,
+  },
+  avatarImage: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+  },
+  avatarPlaceholder: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  },
+  avatarInitial: {
+    fontSize: 28,
+    fontWeight: '700' as const,
+  },
+  avatarUploading: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 36,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  },
+  cameraBadge: {
+    position: 'absolute' as const,
+    right: -2,
+    bottom: -2,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    borderWidth: 2,
+  },
+  profileInfo: {
+    flex: 1,
+  },
+  profileName: {
+    fontSize: 16,
+    fontWeight: '700' as const,
+    letterSpacing: -0.2,
+  },
+  profileEmail: {
+    fontSize: 13,
+    marginTop: 1,
+  },
+  profileActions: {
+    flexDirection: 'row' as const,
+    flexWrap: 'wrap' as const,
+    gap: 8,
+    marginTop: 10,
+  },
+  actionPill: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    gap: 5,
+    paddingHorizontal: 11,
+    paddingVertical: 6,
+    borderRadius: 14,
+  },
+  actionPillText: {
+    fontSize: 12,
+    fontWeight: '600' as const,
   },
 
   // ── Setting rows ─────────────────────────────────────────────────────────
