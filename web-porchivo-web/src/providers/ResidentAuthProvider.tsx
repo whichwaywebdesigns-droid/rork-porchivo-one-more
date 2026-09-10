@@ -69,7 +69,11 @@ async function callReviewerAccess(payload: {
   code?: string;
 }): Promise<ReviewerAccessResult> {
   const supabaseUrl = import.meta.env.EXPO_PUBLIC_SUPABASE_URL as string | undefined;
-  const apiKey = import.meta.env.EXPO_PUBLIC_SUPABASE_ANON_KEY as string | undefined;
+  // reviewer-access's key gate accepts the new publishable key (legacy JWT
+  // anon keys were disabled server-side 2026-07-12 and now 401).
+  const apiKey =
+    (import.meta.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY as string | undefined) ??
+    (import.meta.env.EXPO_PUBLIC_SUPABASE_ANON_KEY as string | undefined);
   if (!supabaseUrl || !apiKey) {
     return { ok: false, error: "The backend isn't configured in this deployment yet." };
   }

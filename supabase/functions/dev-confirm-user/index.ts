@@ -9,10 +9,15 @@
 //
 // Security:
 //   - Only operates on emails matching the QA test pattern (@porchivo.dev).
-//   - Requires a valid Supabase anon-key auth header.
+//   - Requires a valid public Supabase key header (legacy anon key OR the new
+//     sb_publishable_ key — legacy JWT keys were disabled 2026-07-12).
 //   - Uses the service role key server-side for all admin operations.
 //   - Returns { ready: true } on success.
 //   - Never returns tokens, user IDs, or internal user data.
+//
+// 2026-09-10 fix: user lookup moved from auth.admin.listUsers({perPage:1000})
+// (which 500'd "Could not look up user" in production) to a profiles-table
+// query by email, with a listUsers fallback if the profile row is missing.
 //
 // Deploy: supabase functions deploy dev-confirm-user --no-verify-jwt
 //
@@ -42,11 +47,19 @@ serve(async (req: Request) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
 
-    // ── 1. Require a valid anon-key header (light gate) ─────────────────────
+    // ── 1. Require a public Supabase key header (light gate — mirrors
+    //       reviewer-access). The platform may expose either the legacy JWT
+    //       anon key or the new sb_publishable_ key — accept either; if
+    //       neither env is injected, fall back to shape-checking the header.
     const apiKey = req.headers.get('apikey') ?? '';
-    if (!apiKey || apiKey !== supabaseAnonKey) {
+    const knownKeys = [
+      Deno.env.get('SUPABASE_ANON_KEY'),
+      Deno.env.get('SUPABASE_PUBLISHABLE_KEY'),
+    ].filter((k): k is string => !!k);
+    const looksPublic = apiKey.startsWith('sb_publishable_') || apiKey.startsWith('eyJ');
+    const keyOk = knownKeys.length > 0 ? knownKeys.includes(apiKey) : looksPublic;
+    if (!apiKey || !keyOk) {
       return json({ error: 'Unauthorized' }, 401);
     }
 
@@ -83,60 +96,69 @@ serve(async (req: Request) => {
       auth: { autoRefreshToken: false, persistSession: false },
     });
 
-    // ── 5. Find existing user by email ───────────────────────────────────────
-    const { data: listData, error: listError } = await adminClient.auth.admin.listUsers({
-      page: 1,
-      perPage: 1000,
-    });
+    // ── 5. Find the user id via the profiles table (created by the
+    //       handle_new_user trigger for every auth user).
+    const { data: profileRow, error: profileError } = await adminClient
+      .from('profiles')
+      .select('id')
+      .ilike('email', email)
+      .maybeSingle();
 
-    if (listError) {
-      console.error('[dev-confirm-user] listUsers error:', listError.message);
+    if (profileError) {
+      console.error('[dev-confirm-user] profiles lookup error:', profileError.message);
       return json({ error: 'Could not look up user' }, 500);
     }
 
-    const targetUser = listData.users.find(
-      (u: any) => (u.email ?? '').toLowerCase() === email,
-    );
-
-    // ── 6a. User not found → create with confirmed email + password ──────────
-    if (!targetUser) {
-      const { error: createError } = await adminClient.auth.admin.createUser({
-        email,
-        password,
-        email_confirm: true,
-        user_metadata: { name: 'QA Tester', full_name: 'QA Tester' },
-      });
-
-      if (createError) {
-        console.error('[dev-confirm-user] createUser error:', createError.message);
-        return json({ error: 'Could not create QA user' }, 500);
+    // ── 6a. Profile found → ensure confirmed + password matches ──────────────
+    if (profileRow?.id) {
+      const { error: updateError } = await adminClient.auth.admin.updateUserById(
+        profileRow.id,
+        { email_confirm: true, password },
+      );
+      if (updateError) {
+        console.error('[dev-confirm-user] updateUserById error:', updateError.message);
+        return json({ error: 'Could not update QA user' }, 500);
       }
-
-      console.log(`[dev-confirm-user] Created + confirmed QA account: ${email}`);
-      return json({ ready: true, created: true });
+      console.log(`[dev-confirm-user] Ensured QA account ready: ${email}`);
+      return json({ ready: true, already: true });
     }
 
-    // ── 6b. User exists → ensure confirmed + password matches ─────────────────
-    const updates: { email_confirm?: boolean; password?: string } = {};
+    // ── 6b. No profile → create the account (trigger creates the profile) ────
+    const { error: createError } = await adminClient.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+      user_metadata: { name: 'QA Tester', full_name: 'QA Tester' },
+    });
 
-    if (!targetUser.email_confirmed_at) {
-      updates.email_confirm = true;
+    if (createError) {
+      console.error('[dev-confirm-user] createUser error:', createError.message);
+      // Rare: an auth user exists without a profile row (e.g. trigger failure).
+      // Fall back to a small listUsers page to locate the id, then update.
+      const { data: listData, error: listError } = await adminClient.auth.admin.listUsers({
+        page: 1,
+        perPage: 200,
+      });
+      const found = listError
+        ? null
+        : (listData?.users ?? []).find((u: any) => (u.email ?? '').toLowerCase() === email);
+      if (found) {
+        const { error: updateError } = await adminClient.auth.admin.updateUserById(
+          found.id,
+          { email_confirm: true, password },
+        );
+        if (updateError) {
+          console.error('[dev-confirm-user] fallback updateUserById error:', updateError.message);
+          return json({ error: 'Could not update QA user' }, 500);
+        }
+        console.log(`[dev-confirm-user] Ensured QA account (fallback) ready: ${email}`);
+        return json({ ready: true, already: true });
+      }
+      return json({ error: 'Could not create QA user' }, 500);
     }
-    // Always set the password to ensure it matches what the client expects.
-    updates.password = password;
 
-    const { error: updateError } = await adminClient.auth.admin.updateUserById(
-      targetUser.id,
-      updates,
-    );
-
-    if (updateError) {
-      console.error('[dev-confirm-user] updateUserById error:', updateError.message);
-      return json({ error: 'Could not update QA user' }, 500);
-    }
-
-    console.log(`[dev-confirm-user] Ensured QA account ready: ${email}`);
-    return json({ ready: true, already: true });
+    console.log(`[dev-confirm-user] Created + confirmed QA account: ${email}`);
+    return json({ ready: true, created: true });
   } catch (e) {
     const msg = e instanceof Error ? e.message : 'Internal server error';
     console.error('[dev-confirm-user] Unhandled error:', msg);

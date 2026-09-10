@@ -66,7 +66,10 @@ android {
             } ?: ""
 
         buildConfigField("String", "SUPABASE_URL", "\"${envOrProp("SUPABASE_URL", "EXPO_PUBLIC_SUPABASE_URL")}\"")
-        buildConfigField("String", "SUPABASE_ANON_KEY", "\"${envOrProp("SUPABASE_ANON_KEY", "EXPO_PUBLIC_SUPABASE_ANON_KEY", "EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY")}\"")
+        // Publishable key FIRST — legacy JWT anon keys were disabled
+        // server-side (2026-07-12); the 1.0.8 AAB shipped with one and 401s
+        // on every Supabase call. SUPABASE_ANON_KEY stays as a manual override.
+        buildConfigField("String", "SUPABASE_ANON_KEY", "\"${envOrProp("EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "SUPABASE_ANON_KEY", "EXPO_PUBLIC_SUPABASE_ANON_KEY")}\"")
         buildConfigField("String", "REVENUECAT_ANDROID_API_KEY", "\"${envOrProp("EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY")}\"")
     }
 

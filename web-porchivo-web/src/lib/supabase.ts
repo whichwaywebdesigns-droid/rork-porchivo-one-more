@@ -8,7 +8,12 @@
 import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = import.meta.env.EXPO_PUBLIC_SUPABASE_URL as string | undefined;
-const supabaseAnonKey = import.meta.env.EXPO_PUBLIC_SUPABASE_ANON_KEY as string | undefined;
+// Prefer the new publishable key — legacy JWT anon keys were disabled
+// server-side (2026-07-12) and every request carrying one now 401s
+// ("Legacy API keys are disabled"). Mirrors expo/lib/supabase.ts (M-1).
+const supabaseAnonKey =
+  (import.meta.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY as string | undefined) ??
+  (import.meta.env.EXPO_PUBLIC_SUPABASE_ANON_KEY as string | undefined);
 
 export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
 
