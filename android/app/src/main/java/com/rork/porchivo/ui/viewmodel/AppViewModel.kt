@@ -95,6 +95,13 @@ class AppViewModel : ViewModel() {
         viewModelScope.launch { repo.updateRole(role) }
     }
 
+    /** Upload a new profile picture; returns the cache-busted public URL. */
+    suspend fun uploadAvatar(data: ByteArray, mime: String): Result<String> =
+        repo.uploadAvatar(data, mime)
+
+    /** Remove the profile picture. */
+    suspend fun removeAvatar(): Result<Unit> = repo.removeAvatar()
+
     fun setLocationConsent(granted: Boolean) {
         viewModelScope.launch { repo.setLocationConsent(granted) }
     }

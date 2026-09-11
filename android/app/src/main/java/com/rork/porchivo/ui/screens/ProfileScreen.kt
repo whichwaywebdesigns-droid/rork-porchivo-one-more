@@ -2,7 +2,12 @@ package com.rork.porchivo.ui.screens
 
 import android.content.Intent
 import androidx.core.net.toUri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,6 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.WorkspacePremium
+import androidx.compose.material.icons.outlined.AddAPhoto
 import androidx.compose.material.icons.outlined.Apartment
 import androidx.compose.material.icons.outlined.CardGiftcard
 import androidx.compose.material.icons.outlined.DarkMode
@@ -33,6 +39,7 @@ import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Phone
+import androidx.compose.material.icons.outlined.PhotoCamera
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.Shield
@@ -60,15 +67,20 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.foundation.clickable
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil3.compose.AsyncImage
 import com.rork.porchivo.config.AppConfig
 import com.rork.porchivo.data.AppLanguage
 import com.rork.porchivo.model.SubscriptionTier
@@ -77,6 +89,9 @@ import com.rork.porchivo.ui.navigation.Routes
 import com.rork.porchivo.ui.theme.PorchivoTheme
 import kotlinx.coroutines.launch
 import com.rork.porchivo.ui.viewmodel.AppViewModel
+
+/** Client-side avatar size limit; mirrors the `avatars` bucket file_size_limit. */
+private const val MAX_AVATAR_BYTES: Long = 5L * 1024 * 1024
 
 @Composable
 fun ProfileScreen(
@@ -102,6 +117,52 @@ fun ProfileScreen(
     var deleteError by remember { mutableStateOf<String?>(null) }
     var deleteSuccess by remember { mutableStateOf(false) }
 
+    // Profile picture state (parity with the Expo settings ProfileCard)
+    var isUploading by remember { mutableStateOf(false) }
+    var showRemoveConfirm by remember { mutableStateOf(false) }
+    var uploadError by remember { mutableStateOf<String?>(null) }
+    val haptics = LocalHapticFeedback.current
+
+    val pickAvatar = rememberLauncherForActivityResult(
+        ActivityResultContracts.PickVisualMedia(),
+    ) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+        scope.launch {
+            isUploading = true
+            try {
+                val resolver = context.contentResolver
+                val size = resolver.openAssetFileDescriptor(uri, "r")?.use { it.length } ?: -1L
+                if (size > MAX_AVATAR_BYTES) {
+                    uploadError = "That photo is larger than 5 MB. Please choose a smaller image."
+                } else {
+                    val data = resolver.openInputStream(uri)?.use { it.readBytes() }
+                    if (data == null) {
+                        uploadError = "Could not read that photo. Please try again."
+                    } else {
+                        val mime = resolver.getType(uri) ?: "image/jpeg"
+                        val result = appViewModel.uploadAvatar(data, mime)
+                        if (result.isSuccess) {
+                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                        } else {
+                            uploadError = "Could not upload your photo. Please try again."
+                        }
+                    }
+                }
+            } catch (_: Exception) {
+                uploadError = "Could not upload your photo. Please try again."
+            } finally {
+                isUploading = false
+            }
+        }
+    }
+
+    val launchAvatarPicker = {
+        pickAvatar.launch(
+            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+        )
+    }
+
     fun openUrl(url: String) {
         context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
     }
@@ -121,7 +182,8 @@ fun ProfileScreen(
             fontWeight = FontWeight.Black,
         )
 
-        // Avatar section
+        // Profile picture (avatar upload / display / remove — parity with the
+        // Expo settings ProfileCard)
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
@@ -135,17 +197,64 @@ fun ProfileScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Box(
-                    modifier = Modifier
-                        .size(72.dp)
-                        .background(c.accent, CircleShape),
+                    modifier = Modifier.size(76.dp),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text(
-                        text = user?.name?.take(1) ?: "?",
-                        color = c.onAccent,
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.Black,
-                    )
+                    Box(
+                        modifier = Modifier
+                            .size(72.dp)
+                            .clip(CircleShape)
+                            .background(c.accentSoft, CircleShape)
+                            .clickable(enabled = !isUploading) { launchAvatarPicker() },
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        if (user?.avatarUrl != null) {
+                            AsyncImage(
+                                model = user?.avatarUrl,
+                                contentDescription = "Profile picture",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize(),
+                            )
+                        } else {
+                            Text(
+                                text = user?.name?.take(1) ?: "?",
+                                color = c.accent,
+                                fontSize = 28.sp,
+                                fontWeight = FontWeight.Black,
+                            )
+                        }
+                        if (isUploading) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color.Black.copy(alpha = 0.45f)),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(22.dp),
+                                    strokeWidth = 2.dp,
+                                    color = Color.White,
+                                )
+                            }
+                        }
+                    }
+                    if (!isUploading) {
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .size(22.dp)
+                                .background(c.accent, CircleShape)
+                                .border(2.dp, c.surface, CircleShape),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.PhotoCamera,
+                                contentDescription = null,
+                                tint = c.onAccent,
+                                modifier = Modifier.size(11.dp),
+                            )
+                        }
+                    }
                 }
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
@@ -154,7 +263,68 @@ fun ProfileScreen(
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                 )
-                Spacer(modifier = Modifier.height(6.dp))
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = user?.email ?: "",
+                    color = c.textSecondary,
+                    fontSize = 13.sp,
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(999.dp))
+                            .background(c.accentSoft)
+                            .clickable(enabled = !isUploading) { launchAvatarPicker() }
+                            .padding(horizontal = 12.dp, vertical = 7.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(5.dp),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.AddAPhoto,
+                            contentDescription = null,
+                            tint = c.accent,
+                            modifier = Modifier.size(13.dp),
+                        )
+                        Text(
+                            text = if (user?.avatarUrl != null) "Change photo" else "Upload photo",
+                            color = c.accent,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
+                    if (user?.avatarUrl != null) {
+                        Row(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(999.dp))
+                                .background(c.dangerSoft)
+                                .clickable(enabled = !isUploading) {
+                                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    showRemoveConfirm = true
+                                }
+                                .padding(horizontal = 12.dp, vertical = 7.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(5.dp),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Delete,
+                                contentDescription = null,
+                                tint = c.danger,
+                                modifier = Modifier.size(13.dp),
+                            )
+                            Text(
+                                text = "Remove",
+                                color = c.danger,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                            )
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(12.dp))
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -559,6 +729,55 @@ fun ProfileScreen(
         }
 
         Spacer(modifier = Modifier.height(12.dp))
+    }
+
+    if (showRemoveConfirm) {
+        AlertDialog(
+            onDismissRequest = { showRemoveConfirm = false },
+            title = { Text("Remove photo?") },
+            text = {
+                Text(
+                    "Your profile picture will be removed and replaced with your initial.",
+                    fontSize = 14.sp,
+                    color = c.textSecondary,
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    showRemoveConfirm = false
+                    scope.launch {
+                        isUploading = true
+                        val result = appViewModel.removeAvatar()
+                        isUploading = false
+                        if (result.isSuccess) {
+                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                        } else {
+                            uploadError = "Could not remove your photo. Please try again."
+                        }
+                    }
+                }) { Text("Remove", color = c.danger) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showRemoveConfirm = false }) {
+                    Text("Cancel", color = c.accent)
+                }
+            },
+        )
+    }
+
+    uploadError?.let { err ->
+        AlertDialog(
+            onDismissRequest = { uploadError = null },
+            title = { Text("Photo upload failed") },
+            text = {
+                Text(err, fontSize = 14.sp, color = c.textSecondary)
+            },
+            confirmButton = {
+                TextButton(onClick = { uploadError = null }) {
+                    Text("OK", color = c.accent)
+                }
+            },
+        )
     }
 
     if (showDeleteConfirm) {

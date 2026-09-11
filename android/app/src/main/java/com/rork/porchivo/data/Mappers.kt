@@ -58,6 +58,7 @@ object Mappers {
         email = p.email,
         role = parseUserRole(p.role),
         address = p.address,
+        avatarUrl = p.avatarUrl,
         hasLocationConsent = p.hasLocationConsent,
         isOnboarded = p.isOnboarded,
     )

@@ -713,6 +713,75 @@ class SupabaseClient(
         Result.failure(e)
     }
 
+    // ── Storage (avatars) ───────────────────────────────────────────────
+
+    /**
+     * Upload avatar bytes to the public-read `avatars` bucket under
+     * `<userId>/<timestamp>.<ext>` and return the cache-busted public URL.
+     * Mirrors expo/lib/avatar.ts uploadAvatar.
+     */
+    suspend fun uploadAvatarObject(userId: String, data: ByteArray, mime: String): Result<String> = try {
+        val ext = when (mime) {
+            "image/png" -> "png"
+            "image/webp" -> "webp"
+            "image/gif" -> "gif"
+            else -> "jpg"
+        }
+        val path = "$userId/${System.currentTimeMillis()}.$ext"
+        val response = httpClient.post("$supabaseUrl/storage/v1/object/avatars/$path") {
+            authHeaders().forEach { (k, v) -> header(k, v) }
+            contentType(ContentType.parse(mime))
+            header("x-upsert", "true")
+            setBody(data)
+        }
+        if (response.status.isSuccess()) {
+            Result.success("$supabaseUrl/storage/v1/object/public/avatars/$path?t=${System.currentTimeMillis()}")
+        } else {
+            Result.failure(Exception("Upload failed (${response.status.value})"))
+        }
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    /** Best-effort delete of an avatar object extracted from a public URL (non-fatal). */
+    suspend fun deleteAvatarObject(publicUrl: String) {
+        try {
+            val marker = "/object/public/avatars/"
+            val start = publicUrl.indexOf(marker)
+            if (start < 0) return
+            val path = publicUrl.substring(start + marker.length).substringBefore('?')
+            if (path.isBlank()) return
+            httpClient.delete("$supabaseUrl/storage/v1/object/avatars/$path") {
+                authHeaders().forEach { (k, v) -> header(k, v) }
+            }
+        } catch (_: Exception) {
+            // Profile row is the source of truth; an orphaned object is harmless.
+        }
+    }
+
+    /**
+     * PATCH a profile column to explicit SQL NULL. Used for avatar removal —
+     * Map-based bodies go through kotlinx serialization, which can drop null
+     * map entries, so the JSON body is built literally here.
+     */
+    suspend fun clearProfileField(userId: String, field: String): Result<DbProfile> = try {
+        val response = httpClient.patch("$restBase/profiles?id=eq.$userId") {
+            authHeaders().forEach { (k, v) -> header(k, v) }
+            contentType(ContentType.Application.Json)
+            header("Prefer", "return=representation")
+            setBody("""{"$field":null}""")
+        }
+        if (response.status.isSuccess()) {
+            val list: List<DbProfile> = response.body()
+            if (list.isNotEmpty()) Result.success(list.first())
+            else Result.failure(Exception("Update returned no rows"))
+        } else {
+            Result.failure(Exception("Update failed: ${response.status}"))
+        }
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
     /** Best-effort delete of a bucket object (non-fatal if it fails). */
     suspend fun deleteOrgDocObject(path: String): Boolean = try {
         val response = httpClient.delete("$supabaseUrl/storage/v1/object/org-documents/$path") {

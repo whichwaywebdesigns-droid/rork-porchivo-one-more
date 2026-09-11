@@ -8,6 +8,7 @@ data class User(
     val email: String,
     val role: UserRole,
     val address: String,
+    val avatarUrl: String? = null,
     val hasLocationConsent: Boolean = false,
     val isOnboarded: Boolean = false,
 )

@@ -20,6 +20,9 @@ struct SettingsScreen: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 18) {
+                section("Profile") {
+                    SettingsProfileCard()
+                }
                 section("Appearance") {
                     themePicker
                 }

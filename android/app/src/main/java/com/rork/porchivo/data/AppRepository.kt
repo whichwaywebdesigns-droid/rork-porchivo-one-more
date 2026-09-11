@@ -605,6 +605,40 @@ class AppRepository(context: Context) {
         }
     }
 
+    /**
+     * Upload a new avatar to the `avatars` bucket, persist avatar_url on the
+     * profile, best-effort delete the previous object, and update the cached
+     * user. Mirrors expo/lib/avatar.ts + AppContext.updateUser.
+     */
+    suspend fun uploadAvatar(data: ByteArray, mime: String): Result<String> {
+        val client = supabase ?: return Result.failure(Exception("Backend not configured"))
+        val currentUser = _user.value ?: return Result.failure(Exception("Not signed in"))
+        val previousUrl = currentUser.avatarUrl
+        val publicUrl = client.uploadAvatarObject(currentUser.id, data, mime).getOrElse {
+            return Result.failure(it)
+        }
+        val saved = client.updateProfile(currentUser.id, mapOf("avatar_url" to publicUrl))
+        if (saved.isFailure) {
+            return Result.failure(saved.exceptionOrNull() ?: Exception("Could not save your profile"))
+        }
+        if (previousUrl != null) client.deleteAvatarObject(previousUrl)
+        _user.value = currentUser.copy(avatarUrl = publicUrl)
+        return Result.success(publicUrl)
+    }
+
+    /** Remove the avatar: clears avatar_url and best-effort deletes the object. */
+    suspend fun removeAvatar(): Result<Unit> {
+        val client = supabase ?: return Result.failure(Exception("Backend not configured"))
+        val currentUser = _user.value ?: return Result.failure(Exception("Not signed in"))
+        val saved = client.clearProfileField(currentUser.id, "avatar_url")
+        if (saved.isFailure) {
+            return Result.failure(saved.exceptionOrNull() ?: Exception("Could not update your profile"))
+        }
+        currentUser.avatarUrl?.let { client.deleteAvatarObject(it) }
+        _user.value = currentUser.copy(avatarUrl = null)
+        return Result.success(Unit)
+    }
+
     suspend fun setLocationConsent(granted: Boolean) {
         val client = supabase ?: return
         val currentUser = _user.value ?: return
