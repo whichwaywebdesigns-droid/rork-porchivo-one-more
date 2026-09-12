@@ -15,6 +15,7 @@ struct SettingsScreen: View {
     @State private var notificationsEnabled = true
     @State private var showDeleteConfirm = false
     @State private var showDeleteSheet = false
+    @State private var showSignOutConfirm = false
     @State private var blockedUsers: [DbBlockedUser] = []
 
     var body: some View {
@@ -123,6 +124,21 @@ struct SettingsScreen: View {
                         }
                         .padding(.horizontal, 14).padding(.vertical, 12)
                     }.buttonStyle(.plain)
+                    Divider().overlay(c.border).padding(.leading, 14)
+                    Button {
+                        Haptics.light()
+                        showSignOutConfirm = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "arrow.right.square.fill")
+                                .foregroundStyle(c.textMuted).frame(width: 22)
+                            Text("Sign out")
+                                .font(.system(size: 15, weight: .semibold))
+                                .foregroundStyle(c.textPrimary)
+                            Spacer()
+                        }
+                        .padding(.horizontal, 14).padding(.vertical, 12)
+                    }.buttonStyle(.plain)
                 }
                 Text("Porchivo v1.0.0")
                     .font(.system(size: 11, weight: .medium))
@@ -146,6 +162,15 @@ struct SettingsScreen: View {
         .sheet(isPresented: $showDeleteSheet) {
             DeleteAccountSheet()
                 .environment(appState)
+        }
+        .confirmationDialog("Sign out of Porchivo?", isPresented: $showSignOutConfirm) {
+            Button("Sign out", role: .destructive) {
+                Haptics.medium()
+                Task { await appState.signOut() }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("You'll need to sign in again the next time you open Porchivo.")
         }
         .task {
             await loadBlocked()
