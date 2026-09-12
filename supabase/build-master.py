@@ -62,6 +62,7 @@ ORDER = [
     "delete-account-procedure.sql",           # references most tables — run last
     "add_apns_token.sql",                    # native iOS APNS token column on profiles
     "add_is_volunteer.sql",                  # volunteer partner flag + stats view rebuild
+    "email-spanish-templates-migration.sql",  # profiles.preferred_language (en|es) + resend_template_es_alias + locale-aware enqueue_template_email (es → published '-espanol' aliases; English fallback)
 ]
 
 POLICY_RE = re.compile(
