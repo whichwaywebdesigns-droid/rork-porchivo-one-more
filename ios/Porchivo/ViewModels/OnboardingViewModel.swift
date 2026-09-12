@@ -20,8 +20,15 @@ final class OnboardingViewModel {
     var isCompleting = false
     var welcomeSlideIndex = 0
     
-    let welcomeSlideNames = ["OnboardingSlide1", "OnboardingSlide2", "OnboardingSlide3", "OnboardingSlide4"]
+    private let welcomeSlideNames = ["OnboardingSlide1", "OnboardingSlide2", "OnboardingSlide3", "OnboardingSlide4"]
+    private let welcomeSlideNamesES = ["OnboardingSlide1ES", "OnboardingSlide2ES", "OnboardingSlide3ES", "OnboardingSlide4ES"]
     let welcomeSlideCount = 4
+    
+    /// Carousel image for the given index, selected by the active app language
+    /// (Spanish artwork carries baked-in Spanish copy, mirroring the Expo pre-auth carousel).
+    func welcomeSlideName(at index: Int, isSpanish: Bool) -> String {
+        isSpanish ? welcomeSlideNamesES[index] : welcomeSlideNames[index]
+    }
     
     func advanceWelcomeSlide() {
         withAnimation(.easeInOut(duration: 0.4)) {

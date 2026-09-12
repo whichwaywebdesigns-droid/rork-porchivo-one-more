@@ -73,7 +73,7 @@ struct OnboardingFlowView: View {
             // Auto-advancing image carousel (4 slides)
             ZStack {
                 ForEach(0..<viewModel.welcomeSlideCount, id: \.self) { i in
-                    Image(viewModel.welcomeSlideNames[i])
+                    Image(viewModel.welcomeSlideName(at: i, isSpanish: appState.languageManager.current == .es))
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .clipShape(.rect(cornerRadius: Radius.lg))
