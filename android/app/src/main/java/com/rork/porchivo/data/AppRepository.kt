@@ -572,6 +572,13 @@ class AppRepository(context: Context) {
         orgJob.await()
         communityJob.await()
 
+        // One-time email-locale sync: push the locally-saved language so choices
+        // made before sign-in — or before this sync shipped — reach
+        // profiles.preferred_language. Runs once per app start / sign-in.
+        if (_user.value != null) {
+            syncLanguagePreference(_language.value.code)
+        }
+
         // If org membership changed after network refresh, re-fetch feed with new orgId
         val networkOrgId = _orgMembership.value?.orgId
         if (networkOrgId != null && networkOrgId != cachedOrgId) {
@@ -1008,8 +1015,12 @@ class AppRepository(context: Context) {
      * Best-effort sync of the email-locale preference to
      * profiles.preferred_language so Resend templates resolve to the user's
      * language. Silent on failure — the local preference always works.
+     * The DB column constrains values to en|es — other UI languages are
+     * skipped (they'd fail the check constraint and the profile would keep
+     * its previous value).
      */
     private fun syncLanguagePreference(code: String) {
+        if (code != "en" && code != "es") return
         val client = supabase ?: return
         val userId = _user.value?.id ?: return
         queueScope.launch {

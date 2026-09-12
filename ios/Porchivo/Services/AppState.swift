@@ -673,6 +673,14 @@ final class AppState {
         }
 
         loadLocalPackages()
+
+        // One-time email-locale sync: push the locally-saved language so choices
+        // made before sign-in — or before this sync shipped — reach
+        // profiles.preferred_language. Runs once per app start / sign-in.
+        if user != nil {
+            syncLanguagePreference(languageManager.current.rawValue)
+        }
+
         isReadyToShowUI = true
     }
 
@@ -1484,7 +1492,11 @@ final class AppState {
     /// Best-effort sync of the email-locale preference to
     /// profiles.preferred_language so Resend templates resolve to the user's
     /// language. Silent on failure — the local preference always works.
+    /// The DB column constrains values to en|es — other UI languages are
+    /// skipped (they'd fail the check constraint and the profile would keep
+    /// its previous value).
     private func syncLanguagePreference(_ code: String) {
+        guard code == "en" || code == "es" else { return }
         guard let userId = currentUserId else { return }
         Task {
             _ = await supabase.updateProfile(userId: userId, ["preferred_language": code])

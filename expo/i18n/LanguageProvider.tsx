@@ -33,9 +33,12 @@ import {
 /**
  * Best-effort sync of the language choice to profiles.preferred_language so
  * transactional emails (Resend templates) use the user's locale. No-op when
- * signed out; failures are logged, never surfaced to the user.
+ * signed out; failures are logged, never surfaced to the user. The DB column
+ * constrains values to en|es — other UI languages are skipped (they'd fail
+ * the check constraint and the profile would keep its previous value).
  */
 async function syncProfileLanguage(code: string): Promise<void> {
+  if (code !== 'en' && code !== 'es') return;
   try {
     const {
       data: { session },
@@ -122,6 +125,25 @@ export const [LanguageProvider, useLanguage] = createContextHook(
         i18n.off('languageChanged', handler);
       };
     }, []);
+
+    // One-time email-locale sync: whenever a session exists (app start with a
+    // restored session, or a fresh sign-in), push the locally-saved language so
+    // choices made while signed out — or before this sync shipped — reach
+    // profiles.preferred_language. Reads i18n.language at event time so the
+    // resolved preference (not the pre-bootstrap default) is what gets synced.
+    useEffect(() => {
+      if (!isReady) return;
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange((event) => {
+        if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN') {
+          void syncProfileLanguage(i18n.language);
+        }
+      });
+      return () => {
+        subscription.unsubscribe();
+      };
+    }, [isReady]);
 
     const setLanguage = useCallback(async (code: string) => {
       if (isTransitioning) return;
