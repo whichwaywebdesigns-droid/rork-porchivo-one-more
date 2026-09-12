@@ -49,6 +49,7 @@ export type FunnelEvent =
   | 'billing_restore_tap'
   | 'billing_upgrade_tap'
   | 'billing_resubscribe_tap'
+  | 'billing_fee_resume_tap'
   | 'partner_payout_setup_view'
   | 'partner_identity_verify_start'
   | 'partner_identity_verify_redirected'

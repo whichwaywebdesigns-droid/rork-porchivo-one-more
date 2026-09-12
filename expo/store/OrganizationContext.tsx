@@ -132,6 +132,18 @@ interface OrgCachePayload {
   cachedAt: number;
 }
 
+/**
+ * Onboarding-fee state for the community the user administers.
+ * `pending` + a persisted checkout URL means the one-time fee (MXN MSI) can be
+ * resumed from the Billing screen.
+ */
+export interface OnboardingFeeStatus {
+  orgId: string;
+  orgName: string;
+  status: 'not_required' | 'pending' | 'paid';
+  checkoutUrl: string | null;
+}
+
 // ─── Context ──────────────────────────────────────────────────────────────────
 
 export const [OrganizationProvider, useOrganization] = createContextHook(() => {
@@ -1116,6 +1128,41 @@ export const [OrganizationProvider, useOrganization] = createContextHook(() => {
     return submitMaintenanceMutation.mutateAsync(params);
   }, [isOnline, enqueue, activeOrg?.id, submitMaintenanceMutation]);
 
+  // ── Onboarding-fee status (resume a fee left pending after signup) ─────────
+  // The MXN onboarding fee lives on its own payment-mode Checkout session whose
+  // URL is persisted on the org row (see create-org-checkout). Residents are
+  // excluded: only the org row the user administers is read.
+  const orgFeeQuery = useQuery({
+    queryKey: ['org-onboarding-fee', userId],
+    queryFn: async (): Promise<OnboardingFeeStatus | null> => {
+      if (!userId) return null;
+      const { data, error } = await supabase
+        .from('organizations')
+        .select('id, name, onboarding_payment_status, onboarding_checkout_url')
+        .eq('admin_user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) {
+        warn('[OrgContext] Onboarding fee fetch error:', error.code);
+        return null;
+      }
+      if (!data) return null;
+      return {
+        orgId: data.id as string,
+        orgName: (data.name as string) ?? '',
+        status: ((data.onboarding_payment_status as string) ?? 'not_required') as OnboardingFeeStatus['status'],
+        checkoutUrl: (data.onboarding_checkout_url as string | null) ?? null,
+      };
+    },
+    enabled: !!userId,
+    staleTime: 1000 * 60 * 2,
+  });
+
+  const refreshOrgFeeStatus = useCallback(async () => {
+    await queryClient.invalidateQueries({ queryKey: ['org-onboarding-fee', userId] });
+  }, [queryClient, userId]);
+
   const updateMaintenanceStatusWithOffline = useCallback(async (
     params: {
       requestId: string;
@@ -1218,6 +1265,9 @@ export const [OrganizationProvider, useOrganization] = createContextHook(() => {
       isCancellingCalendarEvent: cancelCalendarEventMutation.isPending,
       upsertEventRsvp: upsertEventRsvpMutation.mutateAsync,
       isUpsertingRsvp: upsertEventRsvpMutation.isPending,
+      // Onboarding fee (MXN one-time fee resume)
+      onboardingFee: orgFeeQuery.data ?? null,
+      refreshOrgFeeStatus,
       refreshOrgContext,
     }),
     [
@@ -1288,6 +1338,8 @@ export const [OrganizationProvider, useOrganization] = createContextHook(() => {
       cancelCalendarEventMutation.isPending,
       upsertEventRsvpMutation.mutateAsync,
       upsertEventRsvpMutation.isPending,
+      orgFeeQuery.data,
+      refreshOrgFeeStatus,
       refreshOrgContext,
     ]
   );

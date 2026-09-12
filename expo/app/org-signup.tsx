@@ -47,6 +47,7 @@ import {
 import { useColors, getColors } from '@/constants/colors';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '@/lib/supabase';
+import { parseCheckoutRedirect as parseRedirectUrl } from '@/lib/orgFee';
 import { useOrganization } from '@/store/OrganizationContext';
 import { log, warn } from '@/lib/logger';
 import type { OrgType } from '@/types/organization';
@@ -67,34 +68,6 @@ const MXN_PLANS: Record<string, { monthly: number; annual: number; setupFee: num
 
 function formatPrice(amount: number, currency: 'usd' | 'mxn'): string {
   return currency === 'mxn' ? `$${amount.toLocaleString('en-US')} MXN` : `$${amount}`;
-}
-
-/**
- * Parse session_id and org_id from the Stripe redirect URL.
- * Format: porchivo://org-signup/success?session_id={CHECKOUT_SESSION_ID}&org_id={orgId}
- * The onboarding-fee session (payment mode, MSI) appends &fee=1.
- * Falls back to the cached values from the checkout response if parsing fails.
- */
-function parseRedirectUrl(url: string | undefined | null): { sessionId: string | null; orgId: string | null; isFee: boolean } {
-  if (!url) return { sessionId: null, orgId: null, isFee: false };
-  try {
-    const parsed = new URL(url);
-    const sessionId = parsed.searchParams.get('session_id');
-    const orgId = parsed.searchParams.get('org_id');
-    const isFee = parsed.searchParams.get('fee') === '1';
-    return { sessionId, orgId, isFee };
-  } catch {
-    // URL constructor may fail on some platforms for custom schemes;
-    // fall back to manual parsing
-    const qIndex = url.indexOf('?');
-    if (qIndex === -1) return { sessionId: null, orgId: null, isFee: false };
-    const params = new URLSearchParams(url.slice(qIndex + 1));
-    return {
-      sessionId: params.get('session_id'),
-      orgId: params.get('org_id'),
-      isFee: params.get('fee') === '1',
-    };
-  }
 }
 
 // ─── Plan definitions (must match edge function + pricing page) ───────────────

@@ -53,14 +53,22 @@ import {
   Wifi,
 } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
+import * as WebBrowser from 'expo-web-browser';
 import { palette, space, radius, type as typeSizes, tabularNums } from '@/constants/theme';
 import { useApp } from '@/store/AppContext';
+import { useOrganization } from '@/store/OrganizationContext';
 import DarkRailHeader from '@/components/DarkRailHeader';
 import RailBackButton from '@/components/RailBackButton';
 import { SubscriptionStatus } from '@/types/database';
 import { SubscriptionTier } from '@/lib/tiers';
 import { useAnalytics } from '@/store/AnalyticsContext';
 import { useToast } from '@/hooks/useToast';
+import {
+  FEE_SUCCESS_REDIRECT,
+  FEE_CANCEL_REDIRECT,
+  parseCheckoutRedirect,
+  confirmOnboardingFee,
+} from '@/lib/orgFee';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -373,9 +381,17 @@ export default function BillingScreen() {
     syncEntitlement,
     restorePurchase,
   } = useApp();
+  const { onboardingFee, refreshOrgFeeStatus } = useOrganization();
 
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [isRestoring, setIsRestoring] = useState<boolean>(false);
+  const [isPayingFee, setIsPayingFee] = useState<boolean>(false);
+
+  // MXN one-time onboarding fee left pending after signup — resume from here.
+  const feeCheckoutUrl = onboardingFee?.checkoutUrl ?? null;
+  const feePending = onboardingFee?.status === 'pending' && !!feeCheckoutUrl;
+  // Guards against confirming the same fee session twice (browser result + deep link).
+  const handledFeeSessionRef = useRef<string | null>(null);
 
   // Derive clean billing state
   const billingState: BillingState = resolveBillingState({
@@ -506,6 +522,72 @@ export default function BillingScreen() {
     track('billing_resubscribe_tap');
     router.push('/org-signup' as any);
   }, [router, track]);
+
+  // ── Onboarding-fee resume (MXN one-time fee left pending after signup) ──────
+  const handleFeeConfirmed = useCallback(async (sid: string, oid: string) => {
+    if (handledFeeSessionRef.current === sid) return;
+    handledFeeSessionRef.current = sid;
+    try {
+      const result = await confirmOnboardingFee(sid, oid);
+      if (result.feePaid) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+        toast.success('Onboarding fee paid — your community is fully set up.');
+      } else {
+        // Org is already live; an async OXXO/SPEI payment may still be
+        // processing. Never dead-end — the webhook flips status when it clears.
+        toast.info('Payment still processing. Your status will update automatically.', { duration: 4500 });
+      }
+    } catch {
+      toast.info('Payment still processing. Your status will update automatically.', { duration: 4500 });
+    } finally {
+      handledFeeSessionRef.current = null;
+      void refreshOrgFeeStatus();
+    }
+  }, [toast, refreshOrgFeeStatus]);
+
+  const handlePayFee = useCallback(async () => {
+    if (isPayingFee || !feeCheckoutUrl) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+    track('billing_fee_resume_tap', { status: onboardingFee?.status ?? null });
+    setIsPayingFee(true);
+    try {
+      const result = await WebBrowser.openAuthSessionAsync(
+        feeCheckoutUrl,
+        FEE_SUCCESS_REDIRECT,
+        { showInRecents: false, preferEphemeralSession: false },
+      );
+      if (result.type === 'success' && 'url' in result) {
+        const { sessionId, orgId } = parseCheckoutRedirect(result.url);
+        if (sessionId && orgId) {
+          await handleFeeConfirmed(sessionId, orgId);
+        } else {
+          void refreshOrgFeeStatus();
+        }
+      } else {
+        // Dismissed — status may have still updated (webhook), refresh quietly.
+        void refreshOrgFeeStatus();
+      }
+    } catch {
+      toast.error('Couldn\u2019t open the payment page. Please try again.');
+      void refreshOrgFeeStatus();
+    } finally {
+      setIsPayingFee(false);
+    }
+  }, [isPayingFee, feeCheckoutUrl, onboardingFee?.status, track, handleFeeConfirmed, refreshOrgFeeStatus, toast]);
+
+  // Deep-link safety net: on Android the auth session can fully leave the app
+  // and return via the porchivo:// scheme without openAuthSessionAsync seeing it.
+  useEffect(() => {
+    const sub = Linking.addEventListener('url', ({ url }: { url: string }) => {
+      if (url.startsWith(FEE_SUCCESS_REDIRECT)) {
+        const { sessionId, orgId } = parseCheckoutRedirect(url);
+        if (sessionId && orgId) void handleFeeConfirmed(sessionId, orgId);
+      } else if (url.startsWith(FEE_CANCEL_REDIRECT)) {
+        void refreshOrgFeeStatus();
+      }
+    });
+    return () => sub.remove();
+  }, [handleFeeConfirmed, refreshOrgFeeStatus]);
 
   // ── Render helpers ──────────────────────────────────────────────────────────
 
@@ -652,6 +734,33 @@ export default function BillingScreen() {
   const renderActions = () => (
     <Animated.View style={[styles.actionsSection, { opacity: sectionAnim }]}>
       <Text style={styles.sectionLabel}>MANAGE</Text>
+
+      {/* Onboarding fee pending — resume the MXN one-time fee checkout */}
+      {feePending && (
+        <TouchableOpacity
+          style={[styles.actionRowPrimary, styles.feeRowGlow]}
+          onPress={handlePayFee}
+          activeOpacity={0.82}
+          disabled={isPayingFee}
+        >
+          <View style={styles.actionLeft}>
+            <View style={[styles.actionIconWrap, styles.feeIconWrap]}>
+              {isPayingFee ? (
+                <ActivityIndicator size="small" color={palette.gold} />
+              ) : (
+                <HandCoins size={18} color={palette.gold} />
+              )}
+            </View>
+            <View style={styles.actionTextWrap}>
+              <Text style={[styles.actionTitle, { color: palette.gold }]}>Pay onboarding fee</Text>
+              <Text style={styles.actionSub} numberOfLines={2}>
+                One-time community onboarding — installment plans (meses sin intereses) available
+              </Text>
+            </View>
+          </View>
+          <ChevronRight size={18} color={palette.gold} />
+        </TouchableOpacity>
+      )}
 
       {/* Primary action — varies by state */}
       {(billingState === 'active' || billingState === 'lifetime' || billingState === 'trial' || billingState === 'cancelling') && (
@@ -1081,6 +1190,16 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '400' as const,
     marginTop: 2,
+  },
+  actionTextWrap: {
+    flex: 1,
+  },
+  feeRowGlow: {
+    borderColor: 'rgba(200, 148, 30, 0.45)',
+    backgroundColor: 'rgba(200, 148, 30, 0.07)',
+  },
+  feeIconWrap: {
+    backgroundColor: 'rgba(200, 148, 30, 0.16)',
   },
 
   // Upgrade / reactivate CTA
