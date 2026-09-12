@@ -1475,7 +1475,20 @@ final class AppState {
     // MARK: - Language
 
     func setLanguage(_ language: AppLanguage) {
+        let changed = languageManager.current != language
         languageManager.setLanguage(language)
+        guard changed else { return }
+        syncLanguagePreference(language.rawValue)
+    }
+
+    /// Best-effort sync of the email-locale preference to
+    /// profiles.preferred_language so Resend templates resolve to the user's
+    /// language. Silent on failure — the local preference always works.
+    private func syncLanguagePreference(_ code: String) {
+        guard let userId = currentUserId else { return }
+        Task {
+            _ = await supabase.updateProfile(userId: userId, ["preferred_language": code])
+        }
     }
 
     var currentLanguage: AppLanguage { languageManager.current }

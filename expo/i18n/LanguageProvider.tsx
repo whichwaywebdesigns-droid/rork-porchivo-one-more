@@ -21,6 +21,7 @@ import i18n, {
   changeLanguage as persistLanguageChange,
   LANGUAGE_STORAGE_KEY,
 } from './index';
+import { supabase } from '../lib/supabase';
 import {
   DEFAULT_LANGUAGE,
   LANGUAGES,
@@ -28,6 +29,32 @@ import {
   isRTL as checkIsRTL,
   type LanguageMeta,
 } from './languages';
+
+/**
+ * Best-effort sync of the language choice to profiles.preferred_language so
+ * transactional emails (Resend templates) use the user's locale. No-op when
+ * signed out; failures are logged, never surfaced to the user.
+ */
+async function syncProfileLanguage(code: string): Promise<void> {
+  try {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session?.user) return;
+    const { error } = await supabase
+      .from('profiles')
+      .update({ preferred_language: code })
+      .eq('id', session.user.id);
+    if (error) {
+      console.warn('[language] profile sync failed:', error.message);
+    }
+  } catch (e) {
+    console.warn(
+      '[language] profile sync error:',
+      e instanceof Error ? e.message : String(e),
+    );
+  }
+}
 
 /** Fade-out duration in ms. */
 const FADE_OUT_MS = 200;
@@ -114,6 +141,8 @@ export const [LanguageProvider, useLanguage] = createContextHook(
       await persistLanguageChange(code);
       setLanguageState(code);
       setFromSystem(false);
+      // Fire-and-forget: keep the email-locale preference in sync (DB).
+      void syncProfileLanguage(code);
 
       // Brief hold so the new text is fully settled before fading in.
       await new Promise((resolve) => setTimeout(resolve, HOLD_MS));

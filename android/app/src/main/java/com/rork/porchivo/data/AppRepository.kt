@@ -993,11 +993,28 @@ class AppRepository(context: Context) {
     fun setLanguage(language: AppLanguage) {
         languageManager.setLanguage(language)
         _language.value = language
+        syncLanguagePreference(language.code)
     }
 
     fun setLanguage(code: String) {
         languageManager.setLanguage(code)
-        AppLanguage.fromCode(code)?.let { _language.value = it }
+        AppLanguage.fromCode(code)?.let {
+            _language.value = it
+            syncLanguagePreference(it.code)
+        }
+    }
+
+    /**
+     * Best-effort sync of the email-locale preference to
+     * profiles.preferred_language so Resend templates resolve to the user's
+     * language. Silent on failure — the local preference always works.
+     */
+    private fun syncLanguagePreference(code: String) {
+        val client = supabase ?: return
+        val userId = _user.value?.id ?: return
+        queueScope.launch {
+            runCatching { client.updateProfile(userId, mapOf("preferred_language" to code)) }
+        }
     }
 
     // ── Org membership (Free vs Community tier) ────────────────────────
