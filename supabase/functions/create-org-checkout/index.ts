@@ -305,10 +305,14 @@ serve(async (req: Request) => {
     );
     checkoutParams.set('line_items[0][price_data][recurring][interval]', interval);
 
-    // One-time onboarding fee — charged on the same checkout session's first
-    // invoice alongside the subscription (Stripe supports mixed one-time and
-    // recurring line items in subscription mode).
-    if (onboardingFeeCents > 0) {
+    // One-time onboarding fee. MXN checkouts split it onto a SEPARATE
+    // payment-mode session with card installments (meses sin intereses)
+    // enabled below — Stripe only offers MSI in payment mode ("Installments
+    // only works with payment mode, not setup or subscription mode"), so a
+    // mixed session would make the fee un-financeable. USD keeps the mixed
+    // session (MSI is MXN-only; fee rides the subscription's first invoice).
+    const feeOwnSession = mxnPricing !== null && onboardingFeeCents > 0;
+    if (onboardingFeeCents > 0 && !feeOwnSession) {
       checkoutParams.set('line_items[1][quantity]', '1');
       checkoutParams.set('line_items[1][price_data][currency]', currency);
       checkoutParams.set('line_items[1][price_data][unit_amount]', String(onboardingFeeCents));
@@ -336,10 +340,70 @@ serve(async (req: Request) => {
     const checkoutUrl: string = checkoutData.url;
     const sessionId: string = checkoutData.id;
 
+    // ── 9b. Onboarding-fee session (payment mode, MSI-enabled) ───────────
+    // Separate Stripe Checkout session so the one-time fee can be paid in
+    // installments; the subscription session above stays subscription-mode
+    // (MSI structurally excluded from subscriptions). Dashboard amount
+    // thresholds still filter which installment plans Stripe offers.
+    let feeCheckoutUrl: string | null = null;
+    let feeSessionId: string | null = null;
+    if (feeOwnSession) {
+      const feeParams = new URLSearchParams();
+      feeParams.set('mode', 'payment');
+      feeParams.set('customer', stripeCustomerId);
+      feeParams.set('success_url', `${returnUrl}?session_id={CHECKOUT_SESSION_ID}&org_id=${orgId}&fee=1`);
+      feeParams.set('cancel_url', `porchivo://org-signup/cancelled?org_id=${orgId}&fee=1`);
+      feeParams.set('metadata[org_id]', orgId);
+      feeParams.set('metadata[user_id]', user.id);
+      feeParams.set('metadata[plan_tier]', planTier);
+      feeParams.set('metadata[kind]', 'onboarding_fee');
+      // Product-level MSI control: installments ON for THIS session only —
+      // subscriptions are exempt by Stripe's own payment-mode rule.
+      feeParams.set('payment_method_options[card][installments][enabled]', 'true');
+      feeParams.set('line_items[0][quantity]', '1');
+      feeParams.set('line_items[0][price_data][currency]', currency);
+      feeParams.set('line_items[0][price_data][unit_amount]', String(onboardingFeeCents));
+      feeParams.set('line_items[0][price_data][product_data][name]', `Porchivo Onboarding — ${plan.name.replace('Porchivo ', '')}`);
+      feeParams.set('line_items[0][price_data][product_data][description]', `One-time onboarding fee, ${MXN_NOTE}`);
+
+      const feeRes = await fetch('https://api.stripe.com/v1/checkout/sessions', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${stripeSecretKey}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: feeParams.toString(),
+      });
+
+      const feeData = await feeRes.json();
+      if (!feeRes.ok) {
+        console.error('[create-org-checkout] Fee session error:', feeData?.error?.message);
+        // Clean up the pending org (same failure contract as the subscription session)
+        await adminClient.from('organizations').delete().eq('id', orgId);
+        return json({ error: 'Could not create onboarding-fee checkout: ' + (feeData?.error?.message ?? 'Stripe error') }, 500);
+      }
+
+      feeCheckoutUrl = feeData.url as string;
+      feeSessionId = feeData.id as string;
+
+      // Persist for resume/audit — payment state must survive app restarts
+      await adminClient
+        .from('organizations')
+        .update({
+          onboarding_payment_status: 'pending',
+          onboarding_checkout_session_id: feeSessionId,
+          onboarding_checkout_url: feeCheckoutUrl,
+        })
+        .eq('id', orgId);
+    }
+
     return json({
       checkoutUrl,
       sessionId,
       orgId,
+      feeRequired: feeOwnSession,
+      feeCheckoutUrl,
+      feeSessionId,
       plan: { name: plan.name, price: unitAmount, interval, onboardingFeeCents, currency },
     });
 

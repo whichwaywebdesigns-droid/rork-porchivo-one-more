@@ -72,24 +72,27 @@ function formatPrice(amount: number, currency: 'usd' | 'mxn'): string {
 /**
  * Parse session_id and org_id from the Stripe redirect URL.
  * Format: porchivo://org-signup/success?session_id={CHECKOUT_SESSION_ID}&org_id={orgId}
+ * The onboarding-fee session (payment mode, MSI) appends &fee=1.
  * Falls back to the cached values from the checkout response if parsing fails.
  */
-function parseRedirectUrl(url: string | undefined | null): { sessionId: string | null; orgId: string | null } {
-  if (!url) return { sessionId: null, orgId: null };
+function parseRedirectUrl(url: string | undefined | null): { sessionId: string | null; orgId: string | null; isFee: boolean } {
+  if (!url) return { sessionId: null, orgId: null, isFee: false };
   try {
     const parsed = new URL(url);
     const sessionId = parsed.searchParams.get('session_id');
     const orgId = parsed.searchParams.get('org_id');
-    return { sessionId, orgId };
+    const isFee = parsed.searchParams.get('fee') === '1';
+    return { sessionId, orgId, isFee };
   } catch {
     // URL constructor may fail on some platforms for custom schemes;
     // fall back to manual parsing
     const qIndex = url.indexOf('?');
-    if (qIndex === -1) return { sessionId: null, orgId: null };
+    if (qIndex === -1) return { sessionId: null, orgId: null, isFee: false };
     const params = new URLSearchParams(url.slice(qIndex + 1));
     return {
       sessionId: params.get('session_id'),
       orgId: params.get('org_id'),
+      isFee: params.get('fee') === '1',
     };
   }
 }
@@ -222,6 +225,9 @@ export default function OrgSignupScreen() {
 
   // Checkout state
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
+  // Onboarding-fee session (payment mode, MSI-enabled) — MXN Professional only
+  const [feeCheckoutUrl, setFeeCheckoutUrl] = useState<string | null>(null);
+  const [feePending, setFeePending] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [orgId, setOrgId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -229,6 +235,8 @@ export default function OrgSignupScreen() {
   // Refs mirroring sessionId/orgId for the deep link listener (avoids stale closures)
   const sessionIdRef = useRef<string | null>(null);
   const orgIdRef = useRef<string | null>(null);
+  // Ref mirroring feeCheckoutUrl for the post-confirm fee flow (avoids stale closures)
+  const feeCheckoutUrlRef = useRef<string | null>(null);
 
   // Success state
   const [inviteCode, setInviteCode] = useState<string | null>(null);
@@ -253,6 +261,17 @@ export default function OrgSignupScreen() {
 
   // ── Auto-navigation timer ref (cleared on unmount) ──────────────────────
   const autoNavTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Schedule the post-success auto-navigation (clears any pending timer first)
+  const scheduleAutoNav = useCallback(() => {
+    if (autoNavTimerRef.current) {
+      clearTimeout(autoNavTimerRef.current);
+    }
+    autoNavTimerRef.current = setTimeout(() => {
+      log('[OrgSignup] Auto-navigating to community dashboard after 200');
+      router.replace('/(tabs)/(home)' as any);
+    }, 4000);
+  }, []);
 
   // ── Validate details step ──────────────────────────────────────────────────
   // State allows 2–5 chars so Mexican states (e.g. JAL, NLE) work alongside US.
@@ -290,6 +309,9 @@ export default function OrgSignupScreen() {
       }
 
       setCheckoutUrl(data.checkoutUrl);
+      feeCheckoutUrlRef.current = data.feeCheckoutUrl ?? null;
+      setFeeCheckoutUrl(data.feeCheckoutUrl ?? null);
+      setFeePending(false);
       setSessionId(data.sessionId);
       setOrgId(data.orgId);
       sessionIdRef.current = data.sessionId;
@@ -319,6 +341,41 @@ export default function OrgSignupScreen() {
         // Verify the payment via confirm-org-signup edge function
         setStep('confirming');
         await handleConfirmSignup(finalSid, finalOid);
+
+        // MXN Professional: subscription is active — collect the one-time
+        // onboarding fee on its own payment-mode session (meses sin intereses
+        // available). The org is live either way; dismissal just leaves the
+        // fee pending on the success screen.
+        const feeUrl = feeCheckoutUrlRef.current;
+        if (feeUrl) {
+          const feeResult = await WebBrowser.openAuthSessionAsync(
+            feeUrl,
+            SUCCESS_REDIRECT,
+            { showInRecents: false, preferEphemeralSession: false },
+          );
+          if (feeResult.type === 'success') {
+            const { sessionId: feeSid, orgId: feeOid } = parseRedirectUrl(
+              'url' in feeResult ? (feeResult as { url?: string }).url : null,
+            );
+            const finalFeeSid = feeSid ?? data.feeSessionId;
+            const finalFeeOid = feeOid ?? finalOid;
+            if (finalFeeSid && finalFeeOid) {
+              sessionIdRef.current = finalFeeSid;
+              orgIdRef.current = finalFeeOid;
+              log('[OrgSignup] Fee redirect callback received', { finalFeeSid });
+              setStep('confirming');
+              await handleConfirmSignup(finalFeeSid, finalFeeOid, true);
+            } else {
+              setFeePending(true);
+              setStep('success');
+              scheduleAutoNav();
+            }
+          } else {
+            setFeePending(true);
+            setStep('success');
+            scheduleAutoNav();
+          }
+        }
       } else {
         // User dismissed the browser before completing
         setStep('cancelled');
@@ -332,7 +389,7 @@ export default function OrgSignupScreen() {
   }, [orgName, orgType, address, city, stateField, zip, totalUnits, selectedPlan, billingCycle, currency]);
 
   // ── Confirm signup after Stripe redirect ───────────────────────────────────
-  const handleConfirmSignup = useCallback(async (sid: string, oid: string) => {
+  const handleConfirmSignup = useCallback(async (sid: string, oid: string, isFee = false) => {
     setError(null);
 
     try {
@@ -349,6 +406,7 @@ export default function OrgSignupScreen() {
       }
 
       if (data?.success) {
+        if (data.feePaid) setFeePending(false);
         setInviteCode(data.org?.inviteCode ?? null);
         setCreatedOrgName(data.org?.name ?? createdOrgName);
         // Refresh org context so the tab layout switches to community tier
@@ -356,20 +414,26 @@ export default function OrgSignupScreen() {
         setStep('success');
         // Auto-navigate to the community dashboard after a brief delay
         // so the user can see their invite code before being redirected.
-        autoNavTimerRef.current = setTimeout(() => {
-          log('[OrgSignup] Auto-navigating to community dashboard after 200');
-          router.replace('/(tabs)/(home)' as any);
-        }, 4000);
+        scheduleAutoNav();
       } else {
         throw new Error(data?.error ?? 'Payment verification failed');
       }
     } catch (e: any) {
       const msg = e?.message ?? 'Could not verify your payment. Contact support if you were charged.';
       warn('[OrgSignup] Confirm error:', msg);
+      if (isFee) {
+        // Org is already active — don't dead-end on a fee-confirmation hiccup
+        // (e.g. an async OXXO/SPEI payment still processing).
+        setError(null);
+        setFeePending(true);
+        setStep('success');
+        scheduleAutoNav();
+        return;
+      }
       setError(msg);
       setStep('cancelled');
     }
-  }, [createdOrgName, refreshOrgContext]);
+  }, [createdOrgName, refreshOrgContext, scheduleAutoNav]);
 
   // ── Retry confirmation (if user returns from Stripe manually) ──────────────
   const handleRetryConfirm = useCallback(() => {
@@ -379,6 +443,26 @@ export default function OrgSignupScreen() {
     }
   }, [sessionId, orgId, handleConfirmSignup]);
 
+  // Resume the pending onboarding-fee checkout from the success screen
+  const handlePayFeeNow = useCallback(async () => {
+    const feeUrl = feeCheckoutUrlRef.current;
+    if (!feeUrl) return;
+    const feeResult = await WebBrowser.openAuthSessionAsync(
+      feeUrl,
+      SUCCESS_REDIRECT,
+      { showInRecents: false, preferEphemeralSession: false },
+    );
+    if (feeResult.type === 'success') {
+      const { sessionId: feeSid, orgId: feeOid } = parseRedirectUrl(
+        'url' in feeResult ? (feeResult as { url?: string }).url : null,
+      );
+      if (feeSid && feeOid) {
+        setStep('confirming');
+        await handleConfirmSignup(feeSid, feeOid, true);
+      }
+    }
+  }, [handleConfirmSignup]);
+
   // ── Deep link listener (safety net for cases where ─────────────────────────
   // openAuthSessionAsync doesn't intercept the redirect, e.g. on Android
   // when the browser fully leaves the app and returns via intent).
@@ -386,12 +470,12 @@ export default function OrgSignupScreen() {
     const handleDeepLink = ({ url }: { url: string }) => {
       log('[OrgSignup] Deep link received:', url);
       if (url.startsWith(SUCCESS_REDIRECT)) {
-        const { sessionId: dlSid, orgId: dlOid } = parseRedirectUrl(url);
+        const { sessionId: dlSid, orgId: dlOid, isFee: dlIsFee } = parseRedirectUrl(url);
         if (dlSid && dlOid && (dlSid !== sessionIdRef.current || dlOid !== orgIdRef.current)) {
           sessionIdRef.current = dlSid;
           orgIdRef.current = dlOid;
           setStep('confirming');
-          void handleConfirmSignup(dlSid, dlOid);
+          void handleConfirmSignup(dlSid, dlOid, dlIsFee);
         }
       } else if (url.startsWith(CANCEL_REDIRECT)) {
         setStep('cancelled');
@@ -818,6 +902,25 @@ export default function OrgSignupScreen() {
           </View>
         )}
 
+        {feePending && (
+          <View style={[styles.feePendingCard, { backgroundColor: Colors.goldSoft, borderColor: Colors.gold }]}>
+            <Text style={[styles.feePendingTitle, { color: Colors.slate }]}>Onboarding fee pending</Text>
+            <Text style={[styles.feePendingBody, { color: Colors.slateLight }]}>
+              Your community is live. Pay the one-time onboarding fee any time — installment plans (meses sin intereses) are available at checkout.
+            </Text>
+          </View>
+        )}
+        {feePending && feeCheckoutUrl && (
+          <TouchableOpacity
+            style={[styles.primaryBtn, { backgroundColor: Colors.gold, marginTop: 12 }]}
+            onPress={handlePayFeeNow}
+            activeOpacity={0.85}
+          >
+            <CreditCard size={18} color="#fff" />
+            <Text style={styles.primaryBtnText}>Pay onboarding fee now</Text>
+          </TouchableOpacity>
+        )}
+
         <View style={[styles.nextStepsCard, { backgroundColor: Colors.surface, borderColor: Colors.border }]}>
           <Text style={[styles.nextStepsTitle, { color: Colors.slate }]}>What's next?</Text>
           <View style={styles.nextStepRow}>
@@ -1238,6 +1341,16 @@ const styles = StyleSheet.create({
   },
   inviteCode: { fontSize: 32, fontWeight: '800' as const, letterSpacing: 4 },
   inviteCodeHint: { fontSize: 12, marginTop: 8, textAlign: 'center', lineHeight: 17 },
+
+  feePendingCard: {
+    width: '100%',
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 16,
+    marginTop: 16,
+  },
+  feePendingTitle: { fontSize: 15, fontWeight: '700' as const, marginBottom: 4 },
+  feePendingBody: { fontSize: 13, lineHeight: 18 },
 
   nextStepsCard: {
     width: '100%',

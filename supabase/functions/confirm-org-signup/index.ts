@@ -72,20 +72,6 @@ serve(async (req: Request) => {
     if (orgError || !org) return json({ error: 'Organization not found' }, 404);
     if (org.admin_user_id !== user.id) return json({ error: 'Not authorized for this organization' }, 403);
 
-    // Already activated (idempotent — return success)
-    if (org.subscription_status === 'active' && org.is_active) {
-      return json({
-        success: true,
-        alreadyActive: true,
-        org: {
-          id: org.id,
-          name: org.name,
-          inviteCode: org.invite_code,
-          planTier: org.plan_tier,
-        },
-      });
-    }
-
     // ── 5. Retrieve the Stripe Checkout Session ──────────────────────────────
     const sessionRes = await fetch(
       `https://api.stripe.com/v1/checkout/sessions/${sessionId}`,
@@ -110,6 +96,51 @@ serve(async (req: Request) => {
         paymentStatus,
         detail: 'Your payment has not been processed yet. Please try again or contact support.',
       }, 402);
+    }
+
+    // ── 6b. Onboarding-fee session (payment mode, MSI-enabled) ─────────────
+    // A second confirm call after the fee checkout completes. Marks the fee
+    // paid and returns success — org subscription columns are untouched, and
+    // the call is idempotent (already-paid fee just re-marks 'paid').
+    if (mode === 'payment') {
+      if (sessionData.metadata?.kind !== 'onboarding_fee' || sessionData.metadata?.org_id !== orgId) {
+        return json({ error: 'Invalid payment session' }, 400);
+      }
+      const { error: feeError } = await adminClient
+        .from('organizations')
+        .update({ onboarding_payment_status: 'paid', updated_at: new Date().toISOString() })
+        .eq('id', orgId);
+      if (feeError) {
+        console.error('[confirm-org-signup] Fee update error:', feeError.message);
+        return json({ error: 'Could not record onboarding payment: ' + feeError.message }, 500);
+      }
+      return json({
+        success: true,
+        feePaid: true,
+        org: {
+          id: org.id,
+          name: org.name,
+          inviteCode: org.invite_code,
+          planTier: org.plan_tier,
+          billingCycle: org.billing_cycle,
+        },
+      });
+    }
+
+    // Already activated (idempotent — return success). Only short-circuits
+    // subscription confirmations — a payment-mode fee session must still be
+    // recorded above even when the org is already active.
+    if (org.subscription_status === 'active' && org.is_active) {
+      return json({
+        success: true,
+        alreadyActive: true,
+        org: {
+          id: org.id,
+          name: org.name,
+          inviteCode: org.invite_code,
+          planTier: org.plan_tier,
+        },
+      });
     }
 
     // Extract subscription and customer IDs

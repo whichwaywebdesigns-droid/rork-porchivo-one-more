@@ -63,6 +63,7 @@ ORDER = [
     "add_apns_token.sql",                    # native iOS APNS token column on profiles
     "add_is_volunteer.sql",                  # volunteer partner flag + stats view rebuild
     "email-spanish-templates-migration.sql",  # profiles.preferred_language (en|es) + resend_template_es_alias + locale-aware enqueue_template_email (es → published '-espanol' aliases; English fallback)
+    "onboarding-fee-msi-migration.sql",       # organizations.onboarding_payment_status/session/url — MXN onboarding fee split onto a payment-mode Checkout session (MSI-enabled; subscriptions exempt)
 ]
 
 POLICY_RE = re.compile(

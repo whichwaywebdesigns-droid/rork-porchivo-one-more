@@ -440,6 +440,19 @@ Deno.serve(async (req: Request) => {
         const session = event.data.object as Stripe.Checkout.Session;
         // Org (property) checkout — update the org, not a personal subscription
         const orgId = await resolveOrgId(session.metadata);
+        // Onboarding-fee session (payment mode, MSI-enabled) — record the fee
+        // as paid on the org; must NOT touch subscription columns.
+        if (orgId && session.metadata?.kind === 'onboarding_fee') {
+          const { error } = await adminClient
+            .from('organizations')
+            .update({
+              onboarding_payment_status: 'paid',
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', orgId);
+          outcome = error ? 'db_error' : 'org_fee_paid';
+          break;
+        }
         if (orgId) {
           const { error } = await adminClient
             .from('organizations')
