@@ -26,14 +26,23 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAnalytics } from '@/store/AnalyticsContext';
+import { useLanguage } from '@/i18n/LanguageProvider';
 
 const HAS_SEEN_SLIDES_KEY = 'porchivo_pre_auth_slides_seen';
 
-const SLIDES = [
+const ENGLISH_SLIDES = [
   { image: require('@/assets/images/onboarding-1.png') },
   { image: require('@/assets/images/onboarding-2.png') },
   { image: require('@/assets/images/onboarding-3.png') },
   { image: require('@/assets/images/onboarding-4.png') },
+];
+
+/** Spanish variants with baked-in Spanish copy — swapped in when language is 'es'. */
+const SPANISH_SLIDES = [
+  { image: require('@/assets/images/onboarding-1-es.jpg') },
+  { image: require('@/assets/images/onboarding-2-es.jpg') },
+  { image: require('@/assets/images/onboarding-3-es.jpg') },
+  { image: require('@/assets/images/onboarding-4-es.jpg') },
 ];
 
 const FADE_DURATION = 350;
@@ -51,6 +60,8 @@ export default function OnboardingScreen(): React.ReactElement {
   const { width, height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const { track } = useAnalytics();
+  const { language } = useLanguage();
+  const slides = language === 'es' ? SPANISH_SLIDES : ENGLISH_SLIDES;
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [nextIndex, setNextIndex] = useState<number | null>(null);
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
@@ -73,10 +84,10 @@ export default function OnboardingScreen(): React.ReactElement {
     hasInteracted.current = true;
     cancelAnimation(pulse);
     pulse.value = 0;
-    track('onboarding_completed', { slides_shown: SLIDES.length });
+    track('onboarding_completed', { slides_shown: slides.length });
     await AsyncStorage.setItem(HAS_SEEN_SLIDES_KEY, 'true');
     router.replace('/tracking-onboarding' as any);
-  }, [router, track]);
+  }, [router, track, slides.length]);
 
   const finishRef = useRef(finish);
   useEffect(() => {
@@ -84,7 +95,7 @@ export default function OnboardingScreen(): React.ReactElement {
   }, [finish]);
 
   const goNext = useCallback(() => {
-    if (isAnimatingRef.current || currentIndexRef.current >= SLIDES.length - 1) {
+    if (isAnimatingRef.current || currentIndexRef.current >= slides.length - 1) {
       return;
     }
     hasInteracted.current = true;
@@ -104,13 +115,13 @@ export default function OnboardingScreen(): React.ReactElement {
           runOnJS(setIsAnimating)(false);
           runOnJS(track)('onboarding_carousel_slide', {
             slide_index: next,
-            total_slides: SLIDES.length,
+            total_slides: slides.length,
           });
           progress.value = 0;
         }
       }
     );
-  }, [progress, track]);
+  }, [progress, track, slides.length]);
 
   const goNextRef = useRef(goNext);
   useEffect(() => {
@@ -138,7 +149,7 @@ export default function OnboardingScreen(): React.ReactElement {
           runOnJS(setIsAnimating)(false);
           runOnJS(track)('onboarding_carousel_slide', {
             slide_index: previous,
-            total_slides: SLIDES.length,
+            total_slides: slides.length,
           });
           progress.value = 0;
         }
@@ -172,7 +183,7 @@ export default function OnboardingScreen(): React.ReactElement {
         .onEnd((event) => {
           if (isAnimatingRef.current) return;
           if (event.translationX < -50) {
-            if (currentIndexRef.current < SLIDES.length - 1) {
+            if (currentIndexRef.current < slides.length - 1) {
               runOnJS(goNextRef.current)();
             } else {
               runOnJS(finishRef.current)();
@@ -181,7 +192,7 @@ export default function OnboardingScreen(): React.ReactElement {
             runOnJS(goPreviousRef.current)();
           }
         }),
-    []
+    [slides.length]
   );
 
   const outgoingStyle = useAnimatedStyle(() => ({
@@ -202,7 +213,7 @@ export default function OnboardingScreen(): React.ReactElement {
     };
   });
 
-  const isLastSlide = currentIndex === SLIDES.length - 1;
+  const isLastSlide = currentIndex === slides.length - 1;
 
   return (
     <SafeAreaView style={styles.root} testID="onboarding-screen">
@@ -230,7 +241,7 @@ export default function OnboardingScreen(): React.ReactElement {
               pointerEvents={nextIndex !== null ? 'none' : 'auto'}
             >
               <Image
-                source={SLIDES[currentIndex].image}
+                source={slides[currentIndex].image}
                 style={styles.image}
                 resizeMode="contain"
                 accessible={false}
@@ -246,7 +257,7 @@ export default function OnboardingScreen(): React.ReactElement {
                 ]}
               >
                 <Image
-                  source={SLIDES[nextIndex].image}
+                  source={slides[nextIndex].image}
                   style={styles.image}
                   resizeMode="contain"
                   accessible={false}
@@ -268,7 +279,7 @@ export default function OnboardingScreen(): React.ReactElement {
 
         <View style={styles.footer}>
           <View style={styles.dots}>
-            {SLIDES.map((_, index) => (
+            {slides.map((_, index) => (
               <View
                 key={index}
                 style={[
