@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.outlined.Campaign
 import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.outlined.Inventory2
+import androidx.compose.material.icons.outlined.People
 import androidx.compose.material.icons.outlined.Pool
 import androidx.compose.material.icons.outlined.Receipt
 import androidx.compose.material.icons.outlined.Settings
@@ -193,6 +194,10 @@ fun MoreScreen(
                     Column {
                         LinkRow(icon = Icons.Outlined.Receipt, tint = c.gold, label = "Payments Ledger") {
                             navController.navigate(Routes.ORG_LEDGER)
+                        }
+                        HorizontalDivider(color = c.border)
+                        LinkRow(icon = Icons.Outlined.People, tint = c.warmOrange, label = "Pending Members") {
+                            navController.navigate(Routes.PENDING_MEMBERS)
                         }
                     }
                 }

@@ -56,6 +56,7 @@ import com.rork.porchivo.ui.screens.OrgDocumentsScreen
 import com.rork.porchivo.ui.screens.OrgAmenitiesScreen
 import com.rork.porchivo.ui.screens.OrgLedgerScreen
 import com.rork.porchivo.ui.screens.OrgSignupScreen
+import com.rork.porchivo.ui.screens.PendingMembersScreen
 import com.rork.porchivo.ui.screens.RequestsScreen
 import com.rork.porchivo.ui.screens.SafetyScreen
 import com.rork.porchivo.ui.screens.FileIncidentScreen
@@ -83,6 +84,7 @@ object Routes {
     const val ORG_DOCUMENTS = "org-documents"
     const val ORG_AMENITIES = "org-amenities"
     const val ORG_LEDGER = "org-ledger"
+    const val PENDING_MEMBERS = "pending-members"
     const val PACKAGE_DETAIL = "package-detail/{id}"
     const val SHIPMENT_DETAIL = "shipment-detail/{id}"
 
@@ -202,6 +204,7 @@ fun AppNavigation() {
             composable(Routes.ORG_DOCUMENTS) { OrgDocumentsScreen(navController) }
             composable(Routes.ORG_AMENITIES) { OrgAmenitiesScreen(navController) }
             composable(Routes.ORG_LEDGER) { OrgLedgerScreen(navController) }
+            composable(Routes.PENDING_MEMBERS) { PendingMembersScreen(navController) }
             composable(
                 route = Routes.PACKAGE_DETAIL,
                 arguments = listOf(navArgument("id") { type = NavType.StringType }),

@@ -13,6 +13,7 @@ import com.rork.porchivo.data.dto.DbOrgAmenity
 import com.rork.porchivo.data.dto.DbOrgAmenityReservation
 import com.rork.porchivo.data.dto.DbOrgDocument
 import com.rork.porchivo.data.dto.DbOrgPayment
+import com.rork.porchivo.data.dto.DbPendingMember
 import com.rork.porchivo.data.dto.RiskScoreResponse
 import com.rork.porchivo.model.Announcement
 import com.rork.porchivo.model.MaintenanceRequest
@@ -263,6 +264,21 @@ class AppViewModel : ViewModel() {
 
     suspend fun confirmOrgSignup(sessionId: String, orgId: String): Result<OrgConfirmResponse> {
         return repo.confirmOrgSignup(sessionId, orgId)
+    }
+
+    /** Lists pending join requests; see [AppRepository.fetchPendingMembers]. */
+    suspend fun fetchPendingMembers(orgId: String): Result<List<DbPendingMember>> {
+        return repo.fetchPendingMembers(orgId)
+    }
+
+    /** Approves a pending membership; see [AppRepository.approvePendingMember]. */
+    suspend fun approvePendingMember(membershipId: String, orgId: String): Result<Unit> {
+        return repo.approvePendingMember(membershipId, orgId)
+    }
+
+    /** Denies a pending membership; see [AppRepository.denyPendingMember]. */
+    suspend fun denyPendingMember(membershipId: String, orgId: String): Result<Unit> {
+        return repo.denyPendingMember(membershipId, orgId)
     }
 
     fun markOnboardingComplete() {

@@ -11,6 +11,7 @@ import com.rork.porchivo.data.dto.DbOrgAmenityReservation
 import com.rork.porchivo.data.dto.DbOrgContextRow
 import com.rork.porchivo.data.dto.DbOrgDocument
 import com.rork.porchivo.data.dto.DbOrgPayment
+import com.rork.porchivo.data.dto.DbPendingMember
 import com.rork.porchivo.data.dto.DbProfile
 import com.rork.porchivo.data.dto.DbShipment
 import com.rork.porchivo.data.dto.SlotTakenException
@@ -989,6 +990,23 @@ class AppRepository(context: Context) {
             body,
             OrgConfirmResponse.serializer(),
         )
+    }
+
+    // ── Pending members (org admin) ──────────────────────────────────
+
+    suspend fun fetchPendingMembers(orgId: String): Result<List<DbPendingMember>> {
+        val client = supabase ?: return Result.failure(Exception("Backend not configured"))
+        return client.fetchPendingMembers(orgId)
+    }
+
+    suspend fun approvePendingMember(membershipId: String, orgId: String): Result<Unit> {
+        val client = supabase ?: return Result.failure(Exception("Backend not configured"))
+        return client.approveOrgMembership(membershipId, orgId)
+    }
+
+    suspend fun denyPendingMember(membershipId: String, orgId: String): Result<Unit> {
+        val client = supabase ?: return Result.failure(Exception("Backend not configured"))
+        return client.denyOrgMembership(membershipId, orgId)
     }
 
     // ── Theme ───────────────────────────────────────────────────────────

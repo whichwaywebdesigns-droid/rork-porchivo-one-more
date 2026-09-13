@@ -11,6 +11,7 @@ import com.rork.porchivo.data.dto.DbOrgAmenityReservation
 import com.rork.porchivo.data.dto.DbOrgContextRow
 import com.rork.porchivo.data.dto.DbOrgDocument
 import com.rork.porchivo.data.dto.DbOrgPayment
+import com.rork.porchivo.data.dto.DbPendingMember
 import com.rork.porchivo.data.dto.DbPlanTierRow
 import com.rork.porchivo.data.dto.DbProfile
 import com.rork.porchivo.data.dto.DbShipment
@@ -538,6 +539,52 @@ class SupabaseClient(
         }
     } catch (e: Exception) {
         Result.success(emptyList())
+    }
+
+    /**
+     * List pending join requests for the caller's org via `get_pending_members`
+     * (security-definer; admin/staff enforced server-side).
+     */
+    suspend fun fetchPendingMembers(orgId: String): Result<List<DbPendingMember>> = try {
+        val response = httpClient.post("$restBase/rpc/get_pending_members") {
+            authHeaders().forEach { (k, v) -> header(k, v) }
+            contentType(ContentType.Application.Json)
+            setBody(mapOf("p_org_id" to orgId))
+        }
+        if (response.status.isSuccess()) {
+            val list: List<DbPendingMember> = response.body()
+            Result.success(list)
+        } else {
+            Result.failure(Exception("Failed to load pending members: ${response.status}"))
+        }
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    /** Approve a pending membership via `approve_org_membership`. */
+    suspend fun approveOrgMembership(membershipId: String, orgId: String): Result<Unit> = try {
+        val response = httpClient.post("$restBase/rpc/approve_org_membership") {
+            authHeaders().forEach { (k, v) -> header(k, v) }
+            contentType(ContentType.Application.Json)
+            setBody(mapOf("p_membership_id" to membershipId, "p_org_id" to orgId))
+        }
+        if (response.status.isSuccess()) Result.success(Unit)
+        else Result.failure(Exception("Failed to approve member: ${response.status}"))
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    /** Deny a pending membership via `deny_org_membership` (row → status `removed`). */
+    suspend fun denyOrgMembership(membershipId: String, orgId: String): Result<Unit> = try {
+        val response = httpClient.post("$restBase/rpc/deny_org_membership") {
+            authHeaders().forEach { (k, v) -> header(k, v) }
+            contentType(ContentType.Application.Json)
+            setBody(mapOf("p_membership_id" to membershipId, "p_org_id" to orgId))
+        }
+        if (response.status.isSuccess()) Result.success(Unit)
+        else Result.failure(Exception("Failed to deny member: ${response.status}"))
+    } catch (e: Exception) {
+        Result.failure(e)
     }
 
     /**
