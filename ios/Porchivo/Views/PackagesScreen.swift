@@ -6,6 +6,8 @@
 //  status events, package detail nav. Reached from MoreScreen's
 //  "See all N packages" link via Route.packages — pushes run on the
 //  CALLER's NavigationStack through the shared `path` binding.
+//  Cards carry a status color strip + pill, and the list sorts by
+//  newest/oldest arrival (parity with the Expo packages list).
 //
 
 import SwiftUI
@@ -14,6 +16,7 @@ struct PackagesScreen: View {
     @Environment(AppState.self) private var appState
     @Environment(\.porchivo) private var c
     @Binding var path: NavigationPath
+    @State private var newestFirst = true
 
     private func isFinished(_ pkg: TrackedPackage) -> Bool {
         switch pkg.currentStatus {
@@ -58,7 +61,8 @@ struct PackagesScreen: View {
                             ctaLabel: "Add a package"
                         ) { path.append(Route.addPackage) }
                     } else {
-                        ForEach(appState.packages) { pkg in
+                        sortRow
+                        ForEach(displayPackages) { pkg in
                             NavigationLink(value: Route.packageDetail(pkg.id)) {
                                 packageCard(pkg)
                             }
@@ -162,8 +166,15 @@ struct PackagesScreen: View {
                         .foregroundStyle(c.textMuted)
                 }
                 Spacer()
-                if let priority {
-                    PriorityPill(text: priority.text, tint: priority.tint, softTint: priority.softTint)
+                VStack(alignment: .trailing, spacing: 4) {
+                    PriorityPill(
+                        text: pkg.currentStatus.label,
+                        tint: statusColors(pkg.currentStatus).tint,
+                        softTint: statusColors(pkg.currentStatus).soft
+                    )
+                    if let priority {
+                        PriorityPill(text: priority.text, tint: priority.tint, softTint: priority.softTint)
+                    }
                 }
             }
             HStack(spacing: 12) {
@@ -183,7 +194,65 @@ struct PackagesScreen: View {
         }
         .padding(Space.md)
         .background(c.surface, in: .rect(cornerRadius: Radius.lg))
+        .clipShape(.rect(cornerRadius: Radius.lg))
+        .overlay(alignment: .leading) {
+            UnevenRoundedRectangle(topLeadingRadius: Radius.lg, bottomLeadingRadius: Radius.lg)
+                .fill(statusColors(pkg.currentStatus).tint)
+                .frame(width: 4)
+                .allowsHitTesting(false)
+        }
         .shadow(color: c.textPrimary.opacity(0.05), radius: 6, y: 2)
+    }
+
+    // MARK: - Status colors + arrival sort (parity with the Expo packages list)
+
+    private func statusColors(_ status: PackageTrackingStatus) -> (tint: Color, soft: Color) {
+        switch status {
+        case .delivered, .pickedUp: return (c.success, c.successSoft)
+        case .outForDelivery: return (c.warmOrange, c.warmOrangeSoft)
+        case .shipped: return (c.accent, c.accentSoft)
+        case .returned: return (c.danger, c.dangerSoft)
+        case .ordered: return (c.textSecondary, c.elevated)
+        }
+    }
+
+    /// Actual arrival once delivered (from status history), otherwise the expected date.
+    private func arrivalDate(_ pkg: TrackedPackage) -> Date {
+        pkg.statusHistory.first { $0.status == .delivered }?.timestamp ?? pkg.expectedDeliveryDate
+    }
+
+    private var displayPackages: [TrackedPackage] {
+        newestFirst
+            ? appState.packages.sorted { arrivalDate($0) > arrivalDate($1) }
+            : appState.packages.sorted { arrivalDate($0) < arrivalDate($1) }
+    }
+
+    private var sortRow: some View {
+        HStack(spacing: 8) {
+            Text("Arrival")
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(c.textMuted)
+                .textCase(.uppercase)
+            Spacer()
+            arrivalChip("Newest", isActive: newestFirst) { newestFirst = true }
+            arrivalChip("Oldest", isActive: !newestFirst) { newestFirst = false }
+        }
+    }
+
+    private func arrivalChip(_ title: String, isActive: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(title)
+                .font(.system(size: 12, weight: .bold))
+                .foregroundStyle(isActive ? c.accent : c.textSecondary)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(isActive ? c.accentSoft : c.surface, in: .rect(cornerRadius: Radius.pill))
+                .overlay(
+                    RoundedRectangle(cornerRadius: Radius.pill)
+                        .strokeBorder(isActive ? c.accent.opacity(0.35) : c.border, lineWidth: 1)
+                )
+        }
+        .buttonStyle(.plain)
     }
 
     private func priorityBadge(for pkg: TrackedPackage) -> PriorityBadge? {

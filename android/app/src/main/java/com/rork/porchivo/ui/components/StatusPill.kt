@@ -34,16 +34,22 @@ fun StatusPill(
     )
 }
 
+/** Tint + soft background for a package tracking status — shared by the pill and the package-card status strip. */
 @Composable
-fun PackageStatusPill(status: PackageTrackingStatus, modifier: Modifier = Modifier) {
+fun packageStatusColors(status: PackageTrackingStatus): Pair<Color, Color> {
     val c = PorchivoTheme.colors
-    val (tint, soft) = when (status) {
+    return when (status) {
         PackageTrackingStatus.DELIVERED, PackageTrackingStatus.PICKED_UP -> c.success to c.successSoft
         PackageTrackingStatus.OUT_FOR_DELIVERY -> c.warmOrange to c.warmOrangeSoft
         PackageTrackingStatus.SHIPPED -> c.accent to c.accentSoft
         PackageTrackingStatus.RETURNED -> c.danger to c.dangerSoft
         PackageTrackingStatus.ORDERED -> c.textSecondary to c.elevated
     }
+}
+
+@Composable
+fun PackageStatusPill(status: PackageTrackingStatus, modifier: Modifier = Modifier) {
+    val (tint, soft) = packageStatusColors(status)
     StatusPill(label = status.label, tint = tint, softTint = soft, modifier = modifier)
 }
 

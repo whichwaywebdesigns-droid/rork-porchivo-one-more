@@ -1,15 +1,21 @@
 package com.rork.porchivo.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -25,8 +31,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -34,11 +44,13 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.rork.porchivo.model.PackageTrackingStatus
 import com.rork.porchivo.model.TrackedPackage
 import com.rork.porchivo.ui.components.CarrierIcon
 import com.rork.porchivo.ui.components.EmptyState
 import com.rork.porchivo.ui.components.PackageStatusPill
 import com.rork.porchivo.ui.components.DeliveryCountdown
+import com.rork.porchivo.ui.components.packageStatusColors
 import com.rork.porchivo.ui.navigation.Routes
 import com.rork.porchivo.ui.theme.PorchivoTheme
 import com.rork.porchivo.ui.viewmodel.PackagesViewModel
@@ -52,6 +64,11 @@ fun PackagesScreen(
 ) {
     val c = PorchivoTheme.colors
     val packages by packagesViewModel.packages.collectAsStateWithLifecycle()
+    var newestFirst by remember { mutableStateOf(true) }
+    val sortedPackages = remember(packages, newestFirst) {
+        if (newestFirst) packages.sortedByDescending { arrivalTimestamp(it) }
+        else packages.sortedBy { arrivalTimestamp(it) }
+    }
 
     Box(
         modifier = modifier
@@ -85,7 +102,26 @@ fun PackagesScreen(
                         fontWeight = FontWeight.Black,
                     )
                 }
-                items(packages, key = { it.id }) { pkg ->
+                item {
+                    // Arrival-order toggle — parity with the Expo packages list.
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Text(
+                            text = "ARRIVAL",
+                            color = c.textMuted,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Medium,
+                            letterSpacing = 0.5.sp,
+                            modifier = Modifier.weight(1f),
+                        )
+                        SortChip(label = "Newest", active = newestFirst) { newestFirst = true }
+                        SortChip(label = "Oldest", active = !newestFirst) { newestFirst = false }
+                    }
+                }
+                items(sortedPackages, key = { it.id }) { pkg ->
                     PackageCard(
                         pkg = pkg,
                         onClick = { navController.navigate(Routes.packageDetail(pkg.id)) },
@@ -117,12 +153,22 @@ private fun PackageCard(
 
     Card(
         onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp)),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = c.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Row(modifier = Modifier.height(IntrinsicSize.Min)) {
+            // Status color strip down the leading edge — same tint as the status pill.
+            Box(
+                modifier = Modifier
+                    .width(4.dp)
+                    .fillMaxHeight()
+                    .background(packageStatusColors(pkg.currentStatus).first),
+            )
+            Column(modifier = Modifier.weight(1f).padding(16.dp)) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -194,6 +240,37 @@ private fun PackageCard(
                         .size(18.dp),
                 )
             }
+            }
         }
     }
+}
+
+/** Actual arrival once delivered (from status history), otherwise the expected delivery date. */
+private fun arrivalTimestamp(pkg: TrackedPackage): Long =
+    pkg.statusHistory
+        .firstOrNull { it.status == PackageTrackingStatus.DELIVERED && it.timestamp != null }
+        ?.timestamp
+        ?: pkg.expectedDeliveryDate
+
+@Composable
+private fun SortChip(
+    label: String,
+    active: Boolean,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+) {
+    val c = PorchivoTheme.colors
+    val shape = RoundedCornerShape(50)
+    Text(
+        text = label,
+        color = if (active) c.accent else c.textSecondary,
+        fontSize = 12.sp,
+        fontWeight = FontWeight.Bold,
+        modifier = modifier
+            .clip(shape)
+            .background(if (active) c.accentSoft else c.surface)
+            .border(1.dp, if (active) c.accent.copy(alpha = 0.35f) else c.border, shape)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+    )
 }
