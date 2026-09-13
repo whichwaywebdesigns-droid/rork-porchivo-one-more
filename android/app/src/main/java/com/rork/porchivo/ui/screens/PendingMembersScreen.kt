@@ -77,6 +77,7 @@ fun PendingMembersScreen(
     var loadError by remember { mutableStateOf<String?>(null) }
     var processingId by remember { mutableStateOf<String?>(null) }
     var memberToDeny by remember { mutableStateOf<DbPendingMember?>(null) }
+    var memberToApprove by remember { mutableStateOf<DbPendingMember?>(null) }
     var actionError by remember { mutableStateOf<String?>(null) }
 
     fun load() {
@@ -202,7 +203,7 @@ fun PendingMembersScreen(
                         isProcessing = processingId == member.membershipId,
                         busy = processingId != null,
                         onDeny = { memberToDeny = member },
-                        onApprove = { decide(member, approve = true) },
+                        onApprove = { memberToApprove = member },
                     )
                 }
             }
@@ -227,6 +228,30 @@ fun PendingMembersScreen(
             },
             dismissButton = {
                 TextButton(onClick = { memberToDeny = null }) {
+                    Text("Cancel")
+                }
+            },
+        )
+    }
+
+    memberToApprove?.let { target ->
+        AlertDialog(
+            onDismissRequest = { memberToApprove = null },
+            containerColor = c.surface,
+            titleContentColor = c.textPrimary,
+            textContentColor = c.textSecondary,
+            title = { Text("Approve request?") },
+            text = { Text("Approve ${target.displayName}'s request to join your community?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    memberToApprove = null
+                    decide(target, approve = true)
+                }) {
+                    Text("Approve", color = c.success, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { memberToApprove = null }) {
                     Text("Cancel")
                 }
             },

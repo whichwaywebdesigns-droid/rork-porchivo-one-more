@@ -18,7 +18,8 @@ struct PendingMembersScreen: View {
     @State private var isLoading = true
     @State private var loadError: String? = nil
     @State private var processingId: String? = nil
-    @State private var memberToDeny: SupabaseService.PendingMemberRow? = nil
+    @State private var memberToConfirm: SupabaseService.PendingMemberRow? = nil
+    @State private var confirmingApprove = false
     @State private var actionError: String? = nil
 
     var body: some View {
@@ -60,19 +61,29 @@ struct PendingMembersScreen: View {
         .task { await load() }
         .refreshable { await load() }
         .confirmationDialog(
-            denyPrompt,
+            confirmPrompt,
             isPresented: Binding(
-                get: { memberToDeny != nil },
-                set: { if !$0 { memberToDeny = nil } }
+                get: { memberToConfirm != nil },
+                set: { if !$0 { memberToConfirm = nil } }
             ),
             titleVisibility: .visible
         ) {
-            Button("Deny request", role: .destructive) {
-                let target = memberToDeny
-                memberToDeny = nil
-                if let target { Task { await decide(target, approve: false) } }
+            if confirmingApprove {
+                Button("Approve request") {
+                    let target = memberToConfirm
+                    memberToConfirm = nil
+                    if let target { Task { await decide(target, approve: true) } }
+                }
+            } else {
+                Button("Deny request", role: .destructive) {
+                    let target = memberToConfirm
+                    memberToConfirm = nil
+                    if let target { Task { await decide(target, approve: false) } }
+                }
             }
             Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("\(memberToConfirm?.displayName ?? "This resident") will get an email once you confirm.")
         }
         .alert("Something went wrong", isPresented: Binding(
             get: { actionError != nil },
@@ -84,8 +95,9 @@ struct PendingMembersScreen: View {
         }
     }
 
-    private var denyPrompt: String {
-        "Deny \(memberToDeny?.displayName ?? "this request")?"
+    private var confirmPrompt: String {
+        let name = memberToConfirm?.displayName ?? "this request"
+        return confirmingApprove ? "Approve \(name)?" : "Deny \(name)?"
     }
 
     // MARK: - Row
@@ -124,7 +136,8 @@ struct PendingMembersScreen: View {
 
             HStack(spacing: 10) {
                 Button {
-                    memberToDeny = member
+                    confirmingApprove = false
+                    memberToConfirm = member
                 } label: {
                     Text("Deny")
                         .font(.system(size: 14, weight: .bold))
@@ -136,7 +149,8 @@ struct PendingMembersScreen: View {
                 .disabled(isProcessing(member))
 
                 Button {
-                    Task { await decide(member, approve: true) }
+                    confirmingApprove = true
+                    memberToConfirm = member
                 } label: {
                     Group {
                         if isProcessing(member) {
