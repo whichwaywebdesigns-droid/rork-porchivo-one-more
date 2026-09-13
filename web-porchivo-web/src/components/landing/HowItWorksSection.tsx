@@ -1,37 +1,38 @@
 import { Building2, Gauge, BellRing, UserPlus } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import Reveal from "@/components/landing/Reveal";
 
 interface Step {
   n: string;
-  title: string;
-  body: string;
+  titleKey: string;
+  bodyKey: string;
   icon: LucideIcon;
 }
 
 const STEPS: Step[] = [
   {
     n: "01",
-    title: "Register your community",
-    body: "Sign up your HOA or property in five minutes. No hardware, no installation, no IT integration.",
+    titleKey: "landing.how.s1.title",
+    bodyKey: "landing.how.s1.body",
     icon: Building2,
   },
   {
     n: "02",
-    title: "Residents join free",
-    body: "Residents download the app and join with your invite code — and can join the Porch Partner network for safer deliveries, extra income, and neighborhood reputation.",
+    titleKey: "landing.how.s2.title",
+    bodyKey: "landing.how.s2.body",
     icon: UserPlus,
   },
   {
     n: "03",
-    title: "Risk scores update continuously",
-    body: "Every incoming package gets a real-time risk score based on timing, neighborhood activity, and theft history.",
+    titleKey: "landing.how.s3.title",
+    bodyKey: "landing.how.s3.body",
     icon: Gauge,
   },
   {
     n: "04",
-    title: "Alerts trigger action",
-    body: "Residents and Porch Partners are notified instantly when risk thresholds are crossed, with a full chain-of-custody for every handoff.",
+    titleKey: "landing.how.s4.title",
+    bodyKey: "landing.how.s4.body",
     icon: BellRing,
   },
 ];
@@ -41,6 +42,7 @@ const STEPS: Step[] = [
  * connected by a glowing connector line on desktop, scroll-staggered reveal.
  */
 export default function HowItWorksSection() {
+  const { t } = useTranslation();
   return (
     <section
       id="how-it-works"
@@ -55,11 +57,10 @@ export default function HowItWorksSection() {
       <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <Reveal className="text-center">
           <h2 className="font-display text-4xl font-bold tracking-tight text-white sm:text-5xl">
-            How Porchivo works for your community
+            {t("landing.how.title")}
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-white/60">
-            No hardware. No IT project. Protect every resident&apos;s deliveries
-            in four simple steps.
+            {t("landing.how.sub")}
           </p>
         </Reveal>
 
@@ -88,8 +89,8 @@ export default function HowItWorksSection() {
                     <step.icon className="h-5 w-5 text-pv-amber" aria-hidden />
                   </div>
                 </div>
-                <h3 className="font-display text-xl font-semibold text-white">{step.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-white/60">{step.body}</p>
+                <h3 className="font-display text-xl font-semibold text-white">{t(step.titleKey)}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-white/60">{t(step.bodyKey)}</p>
               </div>
             </Reveal>
           ))}

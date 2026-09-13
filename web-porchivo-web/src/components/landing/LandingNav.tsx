@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import LanguagePill from "@/components/LanguagePill";
 
 const NAV_LINKS = [
@@ -9,6 +10,14 @@ const NAV_LINKS = [
   { label: "Pricing", hash: "#pricing" },
   { label: "FAQ", hash: "#faq" },
 ] as const;
+
+/** Maps landing nav hashes to the shared chrome nav.* translation keys. */
+const NAV_LABEL_KEYS: Record<string, string> = {
+  "#how-it-works": "nav.howItWorks",
+  "#features": "nav.features",
+  "#pricing": "nav.pricing",
+  "#faq": "nav.faq",
+};
 
 /** Smooth-scrolls to a section anchor, honoring reduced-motion. */
 export function scrollToHash(hash: string): void {
@@ -23,6 +32,9 @@ export function scrollToHash(hash: string): void {
 export default function LandingNav() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const { t } = useTranslation();
+  const navLabel = (link: (typeof NAV_LINKS)[number]) =>
+    NAV_LABEL_KEYS[link.hash] ? t(NAV_LABEL_KEYS[link.hash]) : link.label;
 
   useEffect(() => {
     const onScroll = (): void => setScrolled(window.scrollY > 24);
@@ -70,7 +82,7 @@ export default function LandingNav() {
               onClick={onNavClick(link.hash)}
               className="text-sm font-medium text-white/70 transition-colors hover:text-white"
             >
-              {link.label}
+              {navLabel(link)}
             </a>
           ))}
         </div>
@@ -82,7 +94,7 @@ export default function LandingNav() {
             to="/download"
             className="hidden rounded-xl bg-pv-amber px-5 py-2.5 font-display text-sm font-bold text-pv-navy transition-transform hover:scale-[1.04] sm:inline-flex"
           >
-            Register Your Community
+            {t("landing.cta.register")}
           </Link>
           {/* Mobile menu toggle */}
           <button
@@ -112,14 +124,14 @@ export default function LandingNav() {
                 onClick={onNavClick(link.hash)}
                 className="rounded-lg px-3 py-2.5 text-base font-medium text-white/80 hover:bg-white/5 hover:text-white"
               >
-                {link.label}
+                {navLabel(link)}
               </a>
             ))}
             <Link
               to="/download"
               className="mt-2 rounded-xl bg-pv-amber px-5 py-3 text-center font-display font-bold text-pv-navy"
             >
-              Register Your Community
+              {t("landing.cta.register")}
             </Link>
           </div>
         </div>

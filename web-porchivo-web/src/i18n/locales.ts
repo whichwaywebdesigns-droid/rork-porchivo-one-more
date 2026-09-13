@@ -45,6 +45,102 @@ const en = {
   "settings.preview.title": "Live preview",
   "settings.preview.sampleDate": "Today's date",
   "settings.preview.sampleNumber": "Packages protected",
+
+  "nav.faq": "FAQ",
+
+  "landing.cta.register": "Register Your Community",
+
+  "landing.hero.tagline": "Package Security & Resident Retention for Communities",
+  "landing.hero.title1": "Know before it's",
+  "landing.hero.title2": "too late.",
+  "landing.hero.subtitle":
+    "Real-time package risk scoring, instant alerts to residents and Porch Partners, and a neighbor-held delivery network — with no hardware or IT project required.",
+  "landing.hero.subline":
+    "Porchivo reduces management workload, surfaces community insights, and keeps residents satisfied — so they renew.",
+  "landing.hero.ctaJoin": "Residents Join Free",
+  "landing.hero.trust": "Built to work in 190+ countries worldwide",
+  "landing.hero.stat1": "packages stolen in the US every year",
+  "landing.hero.stat2": "of delivered packages are stolen from porches",
+  "landing.hero.stat3": "to register a community and start protecting deliveries",
+  "landing.hero.modelAlt": "3D model of a neighborhood protected by a glowing shield",
+
+  "landing.how.title": "How Porchivo works for your community",
+  "landing.how.sub":
+    "No hardware. No IT project. Protect every resident's deliveries in four simple steps.",
+  "landing.how.s1.title": "Register your community",
+  "landing.how.s1.body":
+    "Sign up your HOA or property in five minutes. No hardware, no installation, no IT integration.",
+  "landing.how.s2.title": "Residents join free",
+  "landing.how.s2.body":
+    "Residents download the app and join with your invite code — and can join the Porch Partner network for safer deliveries, extra income, and neighborhood reputation.",
+  "landing.how.s3.title": "Risk scores update continuously",
+  "landing.how.s3.body":
+    "Every incoming package gets a real-time risk score based on timing, neighborhood activity, and theft history.",
+  "landing.how.s4.title": "Alerts trigger action",
+  "landing.how.s4.body":
+    "Residents and Porch Partners are notified instantly when risk thresholds are crossed, with a full chain-of-custody for every handoff.",
+
+  "landing.features.title":
+    "Everything your community needs to protect deliveries and retain residents",
+  "landing.features.sub":
+    "Real-time scoring, alerts, Porch Partner handoffs, and manager insights — all in one app.",
+  "landing.features.f1.title": "Real-Time Risk Scoring",
+  "landing.features.f1.copy": "Every incoming package is scored for theft risk before it lands.",
+  "landing.features.f1.alt": "Illustration of a package receiving a live theft-risk score",
+  "landing.features.f2.title": "Porch Partner Network",
+  "landing.features.f2.copy":
+    "Join the Porch Partner network — safer deliveries, extra income, and community reputation.",
+  "landing.features.f2.alt": "Illustration of Porch Partners handing off packages safely",
+  "landing.features.f3.title": "Community Insights",
+  "landing.features.f3.copy": "Managers see active risk zones, theft hotspots, and delivery congestion.",
+  "landing.features.f3.alt": "Illustration of a manager's community risk map",
+  "landing.features.badge": "Zero-touch deployment",
+  "landing.features.setupTitle": "Five-Minute Community Setup",
+  "landing.features.setupCopy": "No hardware, no IT project, no installation.",
+  "landing.features.vaultAlt": "3D model of a secure package vault showing chain-of-custody",
+  "landing.features.vaultFallback": "A secure package vault with chain-of-custody",
+
+  "landing.pricing.title": "Residents join free. Communities subscribe from $99/mo.",
+  "landing.pricing.sub":
+    "HOAs and property managers pay one simple subscription. Residents get full access at no cost — no in-app purchases, no upsells.",
+  "landing.pricing.t1.tagline": "For single communities getting started",
+  "landing.pricing.t1.f1": "Real-time risk scoring for every package",
+  "landing.pricing.t1.f2": "Instant alerts to residents & Porch Partners",
+  "landing.pricing.t1.f3": "Porch Partner delivery network",
+  "landing.pricing.t1.f4": "Full chain-of-custody for every handoff",
+  "landing.pricing.t2.tagline": "For communities that want the full picture",
+  "landing.pricing.t2.f1": "Everything in Essential",
+  "landing.pricing.t2.f2": "Community insights — risk zones, theft hotspots, delivery congestion",
+  "landing.pricing.t2.f3": "Manager dashboard with live community activity",
+  "landing.pricing.t2.f4": "Priority support & guided onboarding",
+  "landing.pricing.t3.tagline": "For portfolios and multi-property operators",
+  "landing.pricing.t3.f1": "Everything in Professional",
+  "landing.pricing.t3.f2": "Multi-property portfolio management",
+  "landing.pricing.t3.f3": "Custom reporting & data export",
+  "landing.pricing.t3.f4": "Dedicated success manager",
+  "landing.pricing.popular": "Most popular",
+  "landing.pricing.perMonth": "/mo",
+  "landing.pricing.footnote": "Residents always join free.",
+
+  "landing.faq.title": "Questions, answered",
+  "landing.faq.q1": "Does Porchivo require cameras or hardware installed in our community?",
+  "landing.faq.a1":
+    "No. Porchivo is a software platform — there's no hardware to buy, no installation, and no IT project for your team. Residents use the phones they already have, and managers get a web dashboard. Most communities are fully registered and protecting deliveries in under five minutes.",
+  "landing.faq.q2": "How does package risk scoring actually work?",
+  "landing.faq.a2":
+    "Every incoming delivery is scored in real time based on timing patterns, neighborhood theft activity, and your community's delivery history. Packages crossing a risk threshold trigger instant alerts to the resident and nearby Porch Partners — trusted neighbors who've opted in to receive and hold deliveries safely. Every handoff is logged with a full chain-of-custody record.",
+  "landing.faq.q3": "What is a Porch Partner, and how do residents become one?",
+  "landing.faq.a3":
+    "Porch Partners are residents who opt in to receive packages for neighbors when risk is high or no one's home. Partners earn extra income per secure handoff and build a neighborhood reputation score. It's opt-in only — no resident is ever obligated, and your board controls whether the network is enabled for your community.",
+  "landing.faq.q4": "How do our residents get started?",
+  "landing.faq.a4":
+    "Residents download the app and join with your community's invite code — it takes about a minute. They always join free: no in-app purchases, no upsells, no cost to residents ever. Your management team just distributes the invite code through your existing email or resident portal.",
+  "landing.faq.q5": "What does the manager dashboard show?",
+  "landing.faq.a5":
+    "Managers see active risk zones, theft hotspots, delivery congestion patterns, and chain-of-custody records for every protected handoff — plus resident engagement and satisfaction signals that help you spot renewal risk before it becomes a resignation letter. All exportable for board reports.",
+
+  "landing.final.title1": "Know before it's too late.",
+  "landing.final.title2": "Register your community in two minutes.",
 };
 
 /** Translation keys with string values (en is the canonical key set). */
@@ -87,6 +183,104 @@ const es: Partial<TranslationKeys> = {
   "settings.preview.title": "Vista previa en vivo",
   "settings.preview.sampleDate": "Fecha de hoy",
   "settings.preview.sampleNumber": "Paquetes protegidos",
+
+  "nav.faq": "Preguntas",
+
+  "landing.cta.register": "Registra tu comunidad",
+
+  "landing.hero.tagline": "Seguridad de paquetes y retención de residentes para comunidades",
+  "landing.hero.title1": "Entérate antes de que",
+  "landing.hero.title2": "sea demasiado tarde.",
+  "landing.hero.subtitle":
+    "Puntaje de riesgo de paquetes en tiempo real, alertas instantáneas a residentes y Porch Partners, y una red de entregas sostenida por vecinos — sin hardware ni proyectos de TI.",
+  "landing.hero.subline":
+    "Porchivo reduce la carga operativa, revela información de tu comunidad y mantiene satisfechos a los residentes — para que renueven.",
+  "landing.hero.ctaJoin": "Únete gratis como residente",
+  "landing.hero.trust": "Diseñado para funcionar en más de 190 países",
+  "landing.hero.stat1": "paquetes robados al año en EE. UU.",
+  "landing.hero.stat2": "de los paquetes entregados se roban del porche",
+  "landing.hero.stat3": "para registrar una comunidad y empezar a proteger entregas",
+  "landing.hero.modelAlt": "Modelo 3D de un vecindario protegido por un escudo luminoso",
+
+  "landing.how.title": "Cómo funciona Porchivo en tu comunidad",
+  "landing.how.sub":
+    "Sin hardware. Sin proyectos de TI. Protege las entregas de cada residente en cuatro pasos sencillos.",
+  "landing.how.s1.title": "Registra tu comunidad",
+  "landing.how.s1.body":
+    "Da de alta tu asociación o propiedad en cinco minutos. Sin hardware, sin instalación, sin integración de TI.",
+  "landing.how.s2.title": "Los residentes se unen gratis",
+  "landing.how.s2.body":
+    "Los residentes descargan la app y se unen con tu código de invitación — y pueden sumarse a la red de Porch Partners para entregas más seguras, ingresos extra y reputación en el vecindario.",
+  "landing.how.s3.title": "El nivel de riesgo se actualiza constantemente",
+  "landing.how.s3.body":
+    "Cada paquete entrante recibe un puntaje de riesgo en tiempo real según horarios, actividad del vecindario e historial de robos.",
+  "landing.how.s4.title": "Las alertas activan acciones",
+  "landing.how.s4.body":
+    "Residentes y Porch Partners reciben notificaciones al instante cuando se cruzan los umbrales de riesgo, con una cadena de custodia completa en cada entrega.",
+
+  "landing.features.title":
+    "Todo lo que tu comunidad necesita para proteger entregas y retener residentes",
+  "landing.features.sub":
+    "Puntajes en tiempo real, alertas, entregas de Porch Partners e información para administradores — todo en una sola app.",
+  "landing.features.f1.title": "Puntaje de riesgo en tiempo real",
+  "landing.features.f1.copy": "Cada paquete entrante se evalúa por riesgo de robo antes de llegar.",
+  "landing.features.f1.alt": "Ilustración de un paquete recibiendo un puntaje de riesgo de robo en vivo",
+  "landing.features.f2.title": "Red de Porch Partners",
+  "landing.features.f2.copy":
+    "Únete a la red de Porch Partners — entregas más seguras, ingresos extra y reputación comunitaria.",
+  "landing.features.f2.alt": "Ilustración de Porch Partners entregando paquetes de forma segura",
+  "landing.features.f3.title": "Perspectivas de la comunidad",
+  "landing.features.f3.copy":
+    "Los administradores ven zonas de riesgo activas, puntos críticos de robo y congestión de entregas.",
+  "landing.features.f3.alt": "Ilustración del mapa de riesgo comunitario de un administrador",
+  "landing.features.badge": "Implementación sin fricción",
+  "landing.features.setupTitle": "Configura tu comunidad en cinco minutos",
+  "landing.features.setupCopy": "Sin hardware, sin proyectos de TI, sin instalación.",
+  "landing.features.vaultAlt": "Modelo 3D de una bóveda segura de paquetes con cadena de custodia",
+  "landing.features.vaultFallback": "Una bóveda segura de paquetes con cadena de custodia",
+
+  "landing.pricing.title": "Los residentes se unen gratis. Las comunidades tienen planes desde $99/mes.",
+  "landing.pricing.sub":
+    "Las asociaciones y administradores de propiedades pagan una sola suscripción. Los residentes tienen acceso completo sin costo — sin compras dentro de la app ni ventas adicionales.",
+  "landing.pricing.t1.tagline": "Para comunidades individuales que están comenzando",
+  "landing.pricing.t1.f1": "Puntaje de riesgo en tiempo real para cada paquete",
+  "landing.pricing.t1.f2": "Alertas instantáneas a residentes y Porch Partners",
+  "landing.pricing.t1.f3": "Red de entregas de Porch Partners",
+  "landing.pricing.t1.f4": "Cadena de custodia completa en cada entrega",
+  "landing.pricing.t2.tagline": "Para comunidades que quieren ver el panorama completo",
+  "landing.pricing.t2.f1": "Todo lo de Essential",
+  "landing.pricing.t2.f2":
+    "Perspectivas comunitarias: zonas de riesgo, puntos críticos de robo y congestión de entregas",
+  "landing.pricing.t2.f3": "Panel de administración con actividad comunitaria en vivo",
+  "landing.pricing.t2.f4": "Soporte prioritario e incorporación guiada",
+  "landing.pricing.t3.tagline": "Para portafolios y operadores de múltiples propiedades",
+  "landing.pricing.t3.f1": "Todo lo de Professional",
+  "landing.pricing.t3.f2": "Administración de portafolio de múltiples propiedades",
+  "landing.pricing.t3.f3": "Reportes personalizados y exportación de datos",
+  "landing.pricing.t3.f4": "Gerente de éxito dedicado",
+  "landing.pricing.popular": "El más popular",
+  "landing.pricing.perMonth": "/mes",
+  "landing.pricing.footnote": "Los residentes siempre se unen gratis.",
+
+  "landing.faq.title": "Preguntas, respondidas",
+  "landing.faq.q1": "¿Porchivo requiere cámaras o hardware instalado en nuestra comunidad?",
+  "landing.faq.a1":
+    "No. Porchivo es una plataforma de software — no hay hardware que comprar, ni instalación, ni proyectos de TI para tu equipo. Los residentes usan los teléfonos que ya tienen y los administradores obtienen un panel web. La mayoría de las comunidades están registradas y protegiendo entregas en menos de cinco minutos.",
+  "landing.faq.q2": "¿Cómo funciona realmente el puntaje de riesgo de paquetes?",
+  "landing.faq.a2":
+    "Cada entrega entrante se evalúa en tiempo real según patrones de horarios, actividad de robo en el vecindario y el historial de entregas de tu comunidad. Los paquetes que cruzan un umbral de riesgo activan alertas instantáneas al residente y a los Porch Partners cercanos — vecinos de confianza que optaron por recibir y resguardar entregas de forma segura. Cada entrega queda registrada con una cadena de custodia completa.",
+  "landing.faq.q3": "¿Qué es un Porch Partner y cómo se convierten los residentes en uno?",
+  "landing.faq.a3":
+    "Los Porch Partners son residentes que optan por recibir paquetes de sus vecinos cuando el riesgo es alto o no hay nadie en casa. Los partners ganan ingresos extra por cada entrega segura y construyen un puntaje de reputación en el vecindario. Es completamente voluntario — ningún residente está obligado, y tu mesa directiva controla si la red está activada para tu comunidad.",
+  "landing.faq.q4": "¿Cómo empiezan nuestros residentes?",
+  "landing.faq.a4":
+    "Los residentes descargan la app y se unen con el código de invitación de tu comunidad — toma alrededor de un minuto. Siempre se unen gratis: sin compras dentro de la app, sin ventas adicionales y sin costo para los residentes. Tu equipo de administración solo distribuye el código de invitación por el correo o portal de residentes que ya usan.",
+  "landing.faq.q5": "¿Qué muestra el panel de administración?",
+  "landing.faq.a5":
+    "Los administradores ven zonas de riesgo activas, puntos críticos de robo, patrones de congestión de entregas y registros de cadena de custodia de cada entrega protegida — además de señales de participación y satisfacción de los residentes que te ayudan a detectar el riesgo de no renovación a tiempo. Todo es exportable para los reportes de la mesa directiva.",
+
+  "landing.final.title1": "Entérate antes de que sea demasiado tarde.",
+  "landing.final.title2": "Registra tu comunidad en dos minutos.",
 };
 
 const fr: Partial<TranslationKeys> = {

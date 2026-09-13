@@ -1,12 +1,13 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, Check, Sparkles } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import Reveal from "@/components/landing/Reveal";
 
 interface Tier {
   name: string;
   price: string;
-  tagline: string;
-  features: readonly string[];
+  taglineKey: string;
+  featureKeys: readonly string[];
   highlighted?: boolean;
 }
 
@@ -14,35 +15,35 @@ const TIERS: Tier[] = [
   {
     name: "Essential",
     price: "$99",
-    tagline: "For single communities getting started",
-    features: [
-      "Real-time risk scoring for every package",
-      "Instant alerts to residents & Porch Partners",
-      "Porch Partner delivery network",
-      "Full chain-of-custody for every handoff",
+    taglineKey: "landing.pricing.t1.tagline",
+    featureKeys: [
+      "landing.pricing.t1.f1",
+      "landing.pricing.t1.f2",
+      "landing.pricing.t1.f3",
+      "landing.pricing.t1.f4",
     ],
   },
   {
     name: "Professional",
     price: "$499",
-    tagline: "For communities that want the full picture",
+    taglineKey: "landing.pricing.t2.tagline",
     highlighted: true,
-    features: [
-      "Everything in Essential",
-      "Community insights — risk zones, theft hotspots, delivery congestion",
-      "Manager dashboard with live community activity",
-      "Priority support & guided onboarding",
+    featureKeys: [
+      "landing.pricing.t2.f1",
+      "landing.pricing.t2.f2",
+      "landing.pricing.t2.f3",
+      "landing.pricing.t2.f4",
     ],
   },
   {
     name: "Enterprise",
     price: "$1,499",
-    tagline: "For portfolios and multi-property operators",
-    features: [
-      "Everything in Professional",
-      "Multi-property portfolio management",
-      "Custom reporting & data export",
-      "Dedicated success manager",
+    taglineKey: "landing.pricing.t3.tagline",
+    featureKeys: [
+      "landing.pricing.t3.f1",
+      "landing.pricing.t3.f2",
+      "landing.pricing.t3.f3",
+      "landing.pricing.t3.f4",
     ],
   },
 ];
@@ -52,16 +53,16 @@ const TIERS: Tier[] = [
  * a "Register Your Community" CTA. Residents always join free (footnote).
  */
 export default function PricingSection() {
+  const { t } = useTranslation();
   return (
     <section id="pricing" className="scroll-mt-24 border-y border-white/5 bg-pv-navy-800/60 py-24">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <Reveal className="text-center">
           <h2 className="font-display text-4xl font-bold tracking-tight text-white sm:text-5xl">
-            Residents join free. Communities subscribe from $99/mo.
+            {t("landing.pricing.title")}
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-white/60">
-            HOAs and property managers pay one simple subscription. Residents
-            get full access at no cost — no in-app purchases, no upsells.
+            {t("landing.pricing.sub")}
           </p>
         </Reveal>
 
@@ -78,17 +79,17 @@ export default function PricingSection() {
                 {tier.highlighted && (
                   <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-pv-amber px-4 py-1 font-display text-xs font-bold tracking-wide text-pv-navy">
                     <Sparkles className="mr-1 inline h-3.5 w-3.5" aria-hidden />
-                    Most popular
+                    {t("landing.pricing.popular")}
                   </div>
                 )}
                 <h3 className="font-display text-lg font-semibold text-white">{tier.name}</h3>
                 <div className="mt-4 flex items-baseline gap-1">
                   <span className="font-display text-5xl font-bold text-white">{tier.price}</span>
-                  <span className="text-white/50">/mo</span>
+                  <span className="text-white/50">{t("landing.pricing.perMonth")}</span>
                 </div>
-                <p className="mt-2 text-sm text-white/50">{tier.tagline}</p>
+                <p className="mt-2 text-sm text-white/50">{t(tier.taglineKey)}</p>
                 <ul className="mt-7 flex-1 space-y-3">
-                  {tier.features.map((feature) => (
+                  {tier.featureKeys.map((feature) => (
                     <li
                       key={feature}
                       className={`flex items-start gap-2.5 text-sm ${
@@ -101,7 +102,7 @@ export default function PricingSection() {
                         }`}
                         aria-hidden
                       />
-                      {feature}
+                      {t(feature)}
                     </li>
                   ))}
                 </ul>
@@ -113,7 +114,7 @@ export default function PricingSection() {
                       : "mt-8 inline-flex items-center justify-center gap-2 rounded-xl border border-white/20 px-6 py-3.5 font-display font-semibold text-white transition-colors hover:border-pv-electric/50 hover:bg-pv-electric/10"
                   }
                 >
-                  Register Your Community
+                  {t("landing.cta.register")}
                   <ArrowRight className="h-4 w-4" aria-hidden />
                 </Link>
               </div>
@@ -122,7 +123,9 @@ export default function PricingSection() {
         </div>
 
         <Reveal delay={200}>
-          <p className="mt-10 text-center text-sm text-white/50">Residents always join free.</p>
+          <p className="mt-10 text-center text-sm text-white/50">
+            {t("landing.pricing.footnote")}
+          </p>
         </Reveal>
       </div>
     </section>

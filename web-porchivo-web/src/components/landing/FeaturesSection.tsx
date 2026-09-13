@@ -1,39 +1,40 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BarChart3, Gauge, Lock, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import Reveal from "@/components/landing/Reveal";
 import LazyModelViewer from "@/components/landing/LazyModelViewer";
 import ModelFallback from "@/components/landing/ModelFallback";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 
 interface Feature {
-  title: string;
-  copy: string;
+  titleKey: string;
+  copyKey: string;
   image: string;
-  imageAlt: string;
+  altKey: string;
   icon: LucideIcon;
 }
 
 const FEATURES: Feature[] = [
   {
-    title: "Real-Time Risk Scoring",
-    copy: "Every incoming package is scored for theft risk before it lands.",
+    titleKey: "landing.features.f1.title",
+    copyKey: "landing.features.f1.copy",
     image: "/images/feature-scoring.jpg",
-    imageAlt: "Illustration of a package receiving a live theft-risk score",
+    altKey: "landing.features.f1.alt",
     icon: Gauge,
   },
   {
-    title: "Porch Partner Network",
-    copy: "Join the Porch Partner network — safer deliveries, extra income, and community reputation.",
+    titleKey: "landing.features.f2.title",
+    copyKey: "landing.features.f2.copy",
     image: "/images/feature-partners.jpg",
-    imageAlt: "Illustration of Porch Partners handing off packages safely",
+    altKey: "landing.features.f2.alt",
     icon: Users,
   },
   {
-    title: "Community Insights",
-    copy: "Managers see active risk zones, theft hotspots, and delivery congestion.",
+    titleKey: "landing.features.f3.title",
+    copyKey: "landing.features.f3.copy",
     image: "/images/feature-insights.jpg",
-    imageAlt: "Illustration of a manager's community risk map",
+    altKey: "landing.features.f3.alt",
     icon: BarChart3,
   },
 ];
@@ -42,6 +43,7 @@ const VAULT_MODEL = "/assets/risk-vault.glb";
 
 /** Feature illustration with an icon-panel fallback if the asset is missing. */
 function FeatureImage({ feature }: { feature: Feature }) {
+  const { t } = useTranslation();
   const [failed, setFailed] = useState(false);
   const Icon = feature.icon;
 
@@ -50,7 +52,7 @@ function FeatureImage({ feature }: { feature: Feature }) {
       <div
         className="flex h-40 items-center justify-center rounded-2xl border border-pv-electric/20 bg-gradient-to-br from-pv-electric/15 to-pv-amber/10"
         role="img"
-        aria-label={feature.imageAlt}
+        aria-label={t(feature.altKey)}
       >
         <Icon className="h-12 w-12 text-pv-amber" strokeWidth={1.5} />
       </div>
@@ -60,7 +62,7 @@ function FeatureImage({ feature }: { feature: Feature }) {
   return (
     <img
       src={feature.image}
-      alt={feature.imageAlt}
+      alt={t(feature.altKey)}
       loading="lazy"
       className="h-40 w-full rounded-2xl border border-white/10 object-cover"
       onError={() => setFailed(true)}
@@ -125,6 +127,7 @@ function TiltCard({ children }: { children: React.ReactNode }) {
  * card with the risk-vault 3D model as a side visual (lazy-loaded).
  */
 export default function FeaturesSection() {
+  const { t } = useTranslation();
   return (
     <section
       id="features"
@@ -133,25 +136,24 @@ export default function FeaturesSection() {
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <Reveal className="text-center">
           <h2 className="font-display text-4xl font-bold tracking-tight text-white sm:text-5xl">
-            Everything your community needs to protect deliveries and retain residents
+            {t("landing.features.title")}
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-white/60">
-            Real-time scoring, alerts, Porch Partner handoffs, and manager
-            insights — all in one app.
+            {t("landing.features.sub")}
           </p>
         </Reveal>
 
         {/* Three tilt cards */}
         <div className="mt-14 grid grid-cols-1 gap-6 md:grid-cols-3">
           {FEATURES.map((feature, index) => (
-            <Reveal key={feature.title} delay={index * 130}>
+            <Reveal key={feature.titleKey} delay={index * 130}>
               <TiltCard>
                 <div className="h-full rounded-3xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur-xl transition-colors duration-300 hover:border-pv-electric/40">
                   <FeatureImage feature={feature} />
                   <h3 className="mt-6 font-display text-xl font-semibold text-white">
-                    {feature.title}
+                    {t(feature.titleKey)}
                   </h3>
-                  <p className="mt-2 text-sm leading-relaxed text-white/60">{feature.copy}</p>
+                  <p className="mt-2 text-sm leading-relaxed text-white/60">{t(feature.copyKey)}</p>
                 </div>
               </TiltCard>
             </Reveal>
@@ -164,24 +166,24 @@ export default function FeaturesSection() {
             <div>
               <div className="inline-flex items-center gap-2 rounded-full border border-pv-amber/30 bg-pv-amber/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-pv-amber">
                 <Lock className="h-3.5 w-3.5" aria-hidden />
-                Zero-touch deployment
+                {t("landing.features.badge")}
               </div>
               <h3 className="mt-4 font-display text-2xl font-bold text-white sm:text-3xl">
-                Five-Minute Community Setup
+                {t("landing.features.setupTitle")}
               </h3>
               <p className="mt-3 max-w-md text-base leading-relaxed text-white/65">
-                No hardware, no IT project, no installation.
+                {t("landing.features.setupCopy")}
               </p>
             </div>
             <div className="h-[260px] sm:h-[300px]">
               <LazyModelViewer
                 src={VAULT_MODEL}
-                alt="3D model of a secure package vault showing chain-of-custody"
+                alt={t("landing.features.vaultAlt")}
                 cameraOrbit="25deg 70deg auto"
                 fallback={
                   <ModelFallback
                     icon={Lock}
-                    label="A secure package vault with chain-of-custody"
+                    label={t("landing.features.vaultFallback")}
                     image="/images/risk-vault.jpg"
                     className="h-full w-full"
                   />

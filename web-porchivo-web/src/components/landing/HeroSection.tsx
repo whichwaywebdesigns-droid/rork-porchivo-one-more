@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ArrowRight, Globe, ShieldCheck, UserPlus } from "lucide-react";
 import LazyModelViewer from "@/components/landing/LazyModelViewer";
 import ModelFallback from "@/components/landing/ModelFallback";
 import Reveal from "@/components/landing/Reveal";
+import HeroLanguageSwitch from "@/components/landing/HeroLanguageSwitch";
 import { scrollToHash } from "@/components/landing/LandingNav";
 import { useAnimatedNumber } from "@/hooks/useAnimatedNumber";
 import { useInView } from "@/hooks/useInView";
@@ -19,19 +21,20 @@ const SHIELD_STILL = "/images/community-shield.jpg";
 interface Stat {
   end: number;
   suffix: string;
-  label: string;
+  labelKey: string;
   /** Coral = threat data; amber = Porchivo value. */
   tone: "coral" | "amber";
 }
 
 const STATS: Stat[] = [
-  { end: 52, suffix: "M", label: "packages stolen in the US every year", tone: "coral" },
-  { end: 9, suffix: "%", label: "of delivered packages are stolen from porches", tone: "coral" },
-  { end: 2, suffix: " min", label: "to register a community and start protecting deliveries", tone: "amber" },
+  { end: 52, suffix: "M", labelKey: "landing.hero.stat1", tone: "coral" },
+  { end: 9, suffix: "%", labelKey: "landing.hero.stat2", tone: "coral" },
+  { end: 2, suffix: " min", labelKey: "landing.hero.stat3", tone: "amber" },
 ];
 
 /** Single count-up stat with a glowing coral/amber number. */
 function HeroStat({ stat }: { stat: Stat }) {
+  const { t } = useTranslation();
   const { ref, inView } = useInView<HTMLDivElement>({ threshold: 0.4 });
   const count = useAnimatedNumber(stat.end, { start: inView });
   const toneClass = stat.tone === "coral" ? "text-pv-coral" : "text-pv-amber";
@@ -42,7 +45,7 @@ function HeroStat({ stat }: { stat: Stat }) {
         {count.toLocaleString()}
         {stat.suffix}
       </div>
-      <div className="mt-1.5 text-xs leading-snug text-white/60 sm:text-sm">{stat.label}</div>
+      <div className="mt-1.5 text-xs leading-snug text-white/60 sm:text-sm">{t(stat.labelKey)}</div>
     </div>
   );
 }
@@ -54,6 +57,7 @@ function HeroStat({ stat }: { stat: Stat }) {
  * animated stat bar.
  */
 export default function HeroSection() {
+  const { t } = useTranslation();
   const reducedMotion = usePrefersReducedMotion();
   const modelWrapRef = useRef<HTMLDivElement | null>(null);
   const rafRef = useRef<number | null>(null);
@@ -126,28 +130,25 @@ export default function HeroSection() {
           <div className="order-1 text-center lg:order-2 lg:text-left">
             <Reveal>
               <p className="font-display text-xs font-semibold uppercase tracking-[0.22em] text-pv-electric-light sm:text-sm">
-                Package Security &amp; Resident Retention for Communities
+                {t("landing.hero.tagline")}
               </p>
             </Reveal>
 
             <Reveal delay={90}>
               <h1 className="mt-4 font-display text-5xl font-bold leading-[1.02] tracking-tight text-white sm:text-6xl xl:text-7xl">
-                Know before it&apos;s{" "}
+                {t("landing.hero.title1")}{" "}
                 <span className="bg-gradient-to-r from-pv-amber via-pv-amber-light to-pv-electric bg-clip-text text-transparent">
-                  too late.
+                  {t("landing.hero.title2")}
                 </span>
               </h1>
             </Reveal>
 
             <Reveal delay={180}>
               <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-white/75 sm:text-xl lg:mx-0">
-                Real-time package risk scoring, instant alerts to residents and
-                Porch Partners, and a neighbor-held delivery network — with no
-                hardware or IT project required.
+                {t("landing.hero.subtitle")}
               </p>
               <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-white/55 lg:mx-0">
-                Porchivo reduces management workload, surfaces community
-                insights, and keeps residents satisfied — so they renew.
+                {t("landing.hero.subline")}
               </p>
             </Reveal>
 
@@ -157,7 +158,7 @@ export default function HeroSection() {
                   to="/download"
                   className="inline-flex items-center gap-2 rounded-xl bg-pv-amber px-8 py-4 font-display text-lg font-bold text-pv-navy transition-transform hover:scale-[1.03] motion-safe:animate-glow-pulse"
                 >
-                  Register Your Community
+                  {t("landing.cta.register")}
                   <ArrowRight className="h-5 w-5" aria-hidden />
                 </Link>
                 <Link
@@ -165,15 +166,22 @@ export default function HeroSection() {
                   className="inline-flex items-center gap-2 rounded-xl border border-white/25 px-8 py-4 font-display text-lg font-semibold text-white transition-colors hover:border-pv-electric/60 hover:bg-pv-electric/10"
                 >
                   <UserPlus className="h-5 w-5" aria-hidden />
-                  Residents Join Free
+                  {t("landing.hero.ctaJoin")}
                 </Link>
+              </div>
+            </Reveal>
+
+            {/* Prominent EN/ES swap control — US/Mexico launch */}
+            <Reveal delay={300}>
+              <div className="mt-8 flex justify-center lg:justify-start">
+                <HeroLanguageSwitch />
               </div>
             </Reveal>
 
             <Reveal delay={330}>
               <div className="mt-9 flex items-center justify-center gap-3 text-sm text-white/60 lg:justify-start">
                 <Globe className="h-4 w-4 text-pv-electric-light" aria-hidden />
-                <span>Built to work in 190+ countries worldwide</span>
+                <span>{t("landing.hero.trust")}</span>
               </div>
             </Reveal>
           </div>
@@ -185,7 +193,7 @@ export default function HeroSection() {
           >
             <LazyModelViewer
               src={SHIELD_MODEL}
-              alt="3D model of a neighborhood protected by a glowing shield"
+              alt={t("landing.hero.modelAlt")}
               cameraOrbit="35deg 74deg auto"
               fallback={
                 <ModelFallback
@@ -204,7 +212,7 @@ export default function HeroSection() {
         <Reveal delay={200}>
           <div className="mt-12 grid grid-cols-1 gap-6 rounded-2xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur-xl sm:grid-cols-3 sm:gap-4 lg:mt-16 lg:p-8">
             {STATS.map((stat) => (
-              <HeroStat key={stat.label} stat={stat} />
+              <HeroStat key={stat.labelKey} stat={stat} />
             ))}
           </div>
         </Reveal>
