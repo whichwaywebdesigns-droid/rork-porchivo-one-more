@@ -24,7 +24,7 @@ import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material.icons.outlined.Campaign
 import androidx.compose.material.icons.outlined.GppMaybe
 import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material.icons.outlined.Paid
+import androidx.compose.material.icons.outlined.ReportProblem
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Card
@@ -110,7 +110,7 @@ fun HomeScreen(
         }
 
         item {
-            PartnerUpsellBanner(onClick = { pressHaptic(); navController.navigate(Routes.CREATE) })
+            CreateEntryBanner(onClick = { pressHaptic(); navController.navigate(Routes.CREATE) })
         }
 
         item {
@@ -178,11 +178,11 @@ fun HomeScreen(
                     onClick = { pressHaptic(); navController.navigate(Routes.ADD_PACKAGE) },
                 )
                 QuickLink(
-                    label = "Porch Risk",
-                    icon = Icons.Outlined.GppMaybe,
+                    label = "Incident",
+                    icon = Icons.Outlined.ReportProblem,
                     tint = c.warmOrange,
                     softTint = c.warmOrangeSoft,
-                    onClick = { pressHaptic(); navController.navigate(Routes.SAFETY) },
+                    onClick = { pressHaptic(); navController.navigate(Routes.FILE_INCIDENT) },
                 )
             }
         }
@@ -255,7 +255,11 @@ private fun TheftFactCard(fact: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun PartnerUpsellBanner(onClick: () -> Unit, modifier: Modifier = Modifier) {
+private fun CreateEntryBanner(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    // Home → CREATE route, which on Android is the New Shipment form (no
+    // 4-card menu like iOS). Copy matches that destination exactly — an
+    // earlier version said "Create / Log activity for your block or
+    // building", which didn't describe a shipment-posting form.
     val c = PorchivoTheme.colors
     Card(
         onClick = onClick,
@@ -274,25 +278,25 @@ private fun PartnerUpsellBanner(onClick: () -> Unit, modifier: Modifier = Modifi
             Box(
                 modifier = Modifier
                     .size(30.dp)
-                    .background(c.successSoft, CircleShape),
+                    .background(c.accentSoft, CircleShape),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
-                    imageVector = Icons.Outlined.Paid,
+                    imageVector = Icons.Filled.Add,
                     contentDescription = null,
-                    tint = c.success,
+                    tint = c.accent,
                     modifier = Modifier.size(15.dp),
                 )
             }
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Earn $80–$250/mo on your schedule",
+                    text = "Post a shipment",
                     color = c.textPrimary,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
                 )
                 Text(
-                    text = "Hold packages for neighbors · Keep 85% · 2-day payout",
+                    text = "Let a Porch Partner protect your delivery",
                     color = c.textSecondary,
                     fontSize = 11.sp,
                 )
@@ -300,7 +304,7 @@ private fun PartnerUpsellBanner(onClick: () -> Unit, modifier: Modifier = Modifi
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                 contentDescription = null,
-                tint = c.success,
+                tint = c.accent,
                 modifier = Modifier.size(16.dp),
             )
         }

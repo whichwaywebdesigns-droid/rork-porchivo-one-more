@@ -9,6 +9,7 @@ import SwiftUI
 
 enum Route: Hashable {
     case create
+    case packages
     case safety
     case alerts
     case addPackage
@@ -30,7 +31,7 @@ enum Route: Hashable {
 
     static func == (lhs: Route, rhs: Route) -> Bool {
         switch (lhs, rhs) {
-        case (.create, .create), (.safety, .safety),
+        case (.create, .create), (.packages, .packages), (.safety, .safety),
              (.alerts, .alerts), (.addPackage, .addPackage),
              (.residentDirectory, .residentDirectory),
              (.editProfile, .editProfile), (.settings, .settings),
@@ -55,6 +56,7 @@ enum Route: Hashable {
     func hash(into hasher: inout Hasher) {
         switch self {
         case .create: hasher.combine(0)
+        case .packages: hasher.combine(1)
         case .safety: hasher.combine(2)
         case .alerts: hasher.combine(3)
         case .addPackage: hasher.combine(4)
@@ -85,6 +87,7 @@ struct RouteView: View {
     var body: some View {
         switch route {
         case .create:        CreateScreen()
+        case .packages:      PackagesScreen(path: $path)
         case .safety:        SafetyScreen()
         case .alerts:        AlertsScreen()
         case .addPackage:    AddPackageScreen()

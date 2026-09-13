@@ -2,7 +2,7 @@
 //  HomeScreen.swift
 //  Porchivo
 //
-//  Home tab — greeting, daily theft fact, partner upsell, today's porch risk,
+//  Home tab — greeting, daily theft fact, create entry, today's porch risk,
 //  quick links, and my shipments list. No IAP/winback banner — the hybrid
 //  model uses org membership for tier switching, not in-app purchases.
 //
@@ -30,7 +30,7 @@ struct HomeScreen: View {
                     }
 
                     NavigationLink(value: Route.create) {
-                        partnerUpsell
+                        createEntry
                     }
                     .buttonStyle(.plain)
 
@@ -61,8 +61,8 @@ struct HomeScreen: View {
                         quickLink("Add Pkg", "plus", c.success, c.successSoft) {
                             path.append(Route.addPackage)
                         }
-                        quickLink("Risk", "shield.lefthalf.filled", c.warmOrange, c.warmOrangeSoft) {
-                            path.append(Route.safety)
+                        quickLink("Incident", "exclamationmark.shield.fill", c.warmOrange, c.warmOrangeSoft) {
+                            path.append(Route.fileIncident)
                         }
                     }
 
@@ -112,26 +112,30 @@ struct HomeScreen: View {
         .frame(width: 30, height: 30)
     }
 
-    private var partnerUpsell: some View {
+    /// Home → Create action menu. Reads as a create entry, not an earnings
+    /// pitch — the partner earnings promise lives on CreateScreen's Porch
+    /// Partner card instead (this card used to say "Earn $80–$250/mo…" while
+    /// opening the create menu, which was confusing).
+    private var createEntry: some View {
         HStack(spacing: 10) {
             ZStack {
-                Circle().fill(c.successSoft)
-                Image(systemName: "dollarsign.circle.fill")
-                    .foregroundStyle(c.success)
+                Circle().fill(c.accentSoft)
+                Image(systemName: "plus.circle.fill")
+                    .foregroundStyle(c.accent)
             }
             .frame(width: 30, height: 30)
             VStack(alignment: .leading, spacing: 1) {
-                Text("Earn $80–$250/mo on your schedule")
+                Text("Create")
                     .font(.system(size: 13, weight: .bold))
                     .foregroundStyle(c.textPrimary)
-                Text("Hold packages for neighbors · Keep 85% · 2-day payout")
+                Text("Log activity for your block or building.")
                     .font(.system(size: 11))
                     .foregroundStyle(c.textSecondary)
             }
             Spacer()
             Image(systemName: "chevron.right")
                 .font(.system(size: 13, weight: .bold))
-                .foregroundStyle(c.success)
+                .foregroundStyle(c.accent)
         }
         .padding(12)
         .background(c.surface, in: .rect(cornerRadius: Radius.lg))

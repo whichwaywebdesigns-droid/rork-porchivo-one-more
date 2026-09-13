@@ -42,6 +42,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.rork.porchivo.ui.screens.HomeScreen
+import com.rork.porchivo.ui.screens.ActivityScreen
 import com.rork.porchivo.ui.screens.AddPackageScreen
 import com.rork.porchivo.ui.screens.CreateScreen
 import com.rork.porchivo.ui.screens.PackageDetailScreen
@@ -184,6 +185,7 @@ fun AppNavigation() {
                 .alpha(contentAlpha),
         ) {
             composable(Routes.HOME) { HomeScreen(navController) }
+            composable(Routes.ACTIVITY) { ActivityScreen(navController) }
             composable(Routes.PACKAGES) { PackagesScreen(navController) }
             composable(Routes.CREATE) { CreateScreen(navController) }
             composable(Routes.PORCH_PARTNER) { PorchPartnerScreen(navController) }

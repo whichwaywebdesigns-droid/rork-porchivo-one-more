@@ -11,21 +11,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.outlined.Apartment
-import androidx.compose.material.icons.outlined.Build
-import androidx.compose.material.icons.outlined.CalendarMonth
-import androidx.compose.material.icons.outlined.ChevronRight
-import androidx.compose.material.icons.outlined.CreditCard
+import androidx.compose.material.icons.outlined.Campaign
 import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.outlined.Inventory2
-import androidx.compose.material.icons.outlined.Person3
 import androidx.compose.material.icons.outlined.Pool
 import androidx.compose.material.icons.outlined.Receipt
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.outlined.Campaign
 import androidx.compose.material.icons.outlined.HelpOutline
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.ReportProblem
@@ -48,18 +43,24 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.rork.porchivo.config.AppConfig
 import com.rork.porchivo.ui.components.EmptyState
+import com.rork.porchivo.ui.components.ShipmentCard
+import com.rork.porchivo.ui.components.rememberPressHaptic
 import com.rork.porchivo.ui.navigation.Routes
 import com.rork.porchivo.ui.theme.PorchivoTheme
 import com.rork.porchivo.ui.viewmodel.AppViewModel
+import com.rork.porchivo.ui.viewmodel.ShipmentsViewModel
 
 @Composable
 fun MoreScreen(
     navController: NavController,
     modifier: Modifier = Modifier,
     appViewModel: AppViewModel = viewModel(),
+    shipmentsViewModel: ShipmentsViewModel = viewModel(),
 ) {
     val c = PorchivoTheme.colors
+    val pressHaptic = rememberPressHaptic()
     val orgMembership by appViewModel.orgMembership.collectAsStateWithLifecycle()
+    val myShipments by shipmentsViewModel.myShipments.collectAsStateWithLifecycle()
 
     LazyColumn(
         modifier = modifier
@@ -86,14 +87,25 @@ fun MoreScreen(
                 fontWeight = FontWeight.Bold,
             )
         }
-        item {
-            EmptyState(
-                icon = Icons.Outlined.Inventory2,
-                title = "No packages tracked",
-                body = "Add a package to start tracking deliveries.",
-                ctaLabel = "Add package",
-                onCta = { navController.navigate(Routes.ADD_PACKAGE) },
-            )
+        if (myShipments.isEmpty()) {
+            item {
+                EmptyState(
+                    icon = Icons.Outlined.Inventory2,
+                    title = "No packages tracked",
+                    body = "Add a package to start tracking deliveries.",
+                    ctaLabel = "Add package",
+                    onCta = { navController.navigate(Routes.ADD_PACKAGE) },
+                )
+            }
+        } else {
+            // Real shipment rows (top 3) — this section used to always show the
+            // "No packages tracked" empty state, even with shipments on the way.
+            items(myShipments.take(3), key = { it.id }) { shipment ->
+                ShipmentCard(
+                    shipment = shipment,
+                    onClick = { pressHaptic(); navController.navigate(Routes.shipmentDetail(shipment.id)) },
+                )
+            }
         }
         item {
             Text(
@@ -124,12 +136,6 @@ fun MoreScreen(
                             navController.navigate(Routes.ORG_AMENITIES)
                         }
                     }
-                    HorizontalDivider(color = c.border)
-                    LinkRow(icon = Icons.Outlined.CalendarMonth, tint = c.accent, label = "Calendar") { }
-                    HorizontalDivider(color = c.border)
-                    LinkRow(icon = Icons.Outlined.Build, tint = c.success, label = "Maintenance") { }
-                    HorizontalDivider(color = c.border)
-                    LinkRow(icon = Icons.Outlined.Person3, tint = c.accent, label = "Resident Directory") { }
                 }
             }
         }
@@ -149,7 +155,7 @@ fun MoreScreen(
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
             ) {
                 Column {
-                    LinkRow(icon = Icons.Outlined.Settings, tint = c.textSecondary, label = "Settings") {
+                    LinkRow(icon = Icons.Outlined.Settings, tint = c.textSecondary, label = "Account & Settings") {
                         navController.navigate(Routes.PROFILE)
                     }
                     HorizontalDivider(color = c.border)
@@ -188,12 +194,6 @@ fun MoreScreen(
                         LinkRow(icon = Icons.Outlined.Receipt, tint = c.gold, label = "Payments Ledger") {
                             navController.navigate(Routes.ORG_LEDGER)
                         }
-                        HorizontalDivider(color = c.border)
-                        LinkRow(icon = Icons.Outlined.CreditCard, tint = c.gold, label = "Manage Subscription") { }
-                        HorizontalDivider(color = c.border)
-                        LinkRow(icon = Icons.Outlined.Apartment, tint = c.accent, label = "Invite Code") { }
-                        HorizontalDivider(color = c.border)
-                        LinkRow(icon = Icons.Outlined.Person3, tint = c.warmOrange, label = "Pending Members") { }
                     }
                 }
             }

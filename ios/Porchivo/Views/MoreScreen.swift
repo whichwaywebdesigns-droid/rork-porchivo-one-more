@@ -59,7 +59,7 @@ struct MoreScreen: View {
                     .buttonStyle(.plain)
                 }
                 if appState.packages.count > 3 {
-                    NavigationLink(value: Route.create) {
+                    NavigationLink(value: Route.packages) {
                         Text("See all \(appState.packages.count) packages")
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundStyle(c.accent)
@@ -111,10 +111,6 @@ struct MoreScreen: View {
                     Divider().overlay(c.border).padding(.leading, 54)
                     linkRow("Amenities", "figure.pool.swim", c.accent) { path.append(Route.orgAmenities) }
                 }
-                Divider().overlay(c.border).padding(.leading, 54)
-                linkRow("Calendar", "calendar.fill", c.accent) { }
-                Divider().overlay(c.border).padding(.leading, 54)
-                linkRow("Maintenance", "wrench.and.screwdriver.fill", c.success) { }
                 Divider().overlay(c.border).padding(.leading, 54)
                 linkRow("Resident Directory", "person.3.fill", c.accent) {
                     path.append(Route.residentDirectory)

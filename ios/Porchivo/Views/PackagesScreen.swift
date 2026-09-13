@@ -2,8 +2,10 @@
 //  PackagesScreen.swift
 //  Porchivo
 //
-//  Packages tab — tracked packages list (local), free-tier limit gating,
-//  status events, package detail nav.
+//  Full tracked-packages list (local), free-tier limit gating,
+//  status events, package detail nav. Reached from MoreScreen's
+//  "See all N packages" link via Route.packages — pushes run on the
+//  CALLER's NavigationStack through the shared `path` binding.
 //
 
 import SwiftUI
@@ -11,7 +13,7 @@ import SwiftUI
 struct PackagesScreen: View {
     @Environment(AppState.self) private var appState
     @Environment(\.porchivo) private var c
-    @State private var path = NavigationPath()
+    @Binding var path: NavigationPath
 
     private func isFinished(_ pkg: TrackedPackage) -> Bool {
         switch pkg.currentStatus {
@@ -21,25 +23,24 @@ struct PackagesScreen: View {
     }
 
     var body: some View {
-        NavigationStack(path: $path) {
-            ScrollView {
-                VStack(spacing: 14) {
-                    HStack {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("My Packages")
-                                .font(.system(size: 26, weight: .black))
-                                .foregroundStyle(c.textPrimary)
-                            Text("\(appState.packages.count) tracked")
-                                .font(.system(size: 13))
-                                .foregroundStyle(c.textSecondary)
-                        }
-                        Spacer()
-                        NavigationLink(value: Route.addPackage) {
-                            Image(systemName: "plus.circle.fill")
-                                .font(.system(size: 28))
-                                .foregroundStyle(c.accent)
-                        }
+        ScrollView {
+            VStack(spacing: 14) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("My Packages")
+                            .font(.system(size: 26, weight: .black))
+                            .foregroundStyle(c.textPrimary)
+                        Text("\(appState.packages.count) tracked")
+                            .font(.system(size: 13))
+                            .foregroundStyle(c.textSecondary)
                     }
+                    Spacer()
+                    NavigationLink(value: Route.addPackage) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.system(size: 28))
+                            .foregroundStyle(c.accent)
+                    }
+                }
 
                     if !appState.packages.isEmpty {
                         packageSummaryHeader
@@ -64,17 +65,14 @@ struct PackagesScreen: View {
                             .buttonStyle(.plain)
                         }
                     }
-                }
-                .padding(.horizontal, 16)
-                .padding(.top, 16)
-                .padding(.bottom, 24)
             }
-            .background(c.background.ignoresSafeArea())
-            .navigationTitle("")
-            .navigationDestination(for: Route.self) { route in
-                RouteView(route: route, path: $path)
-            }
+            .padding(.horizontal, 16)
+            .padding(.top, 16)
+            .padding(.bottom, 24)
         }
+        .background(c.background.ignoresSafeArea())
+        .navigationTitle("")
+        .navigationBarTitleDisplayMode(.inline)
     }
 
     private var packageSummaryHeader: some View {
@@ -252,5 +250,12 @@ struct PriorityPill: View {
 }
 
 #Preview {
-    PackagesScreen().environment(AppState())
+    PackagesScreenPreview()
+}
+
+private struct PackagesScreenPreview: View {
+    @State private var path = NavigationPath()
+    var body: some View {
+        PackagesScreen(path: $path).environment(AppState())
+    }
 }

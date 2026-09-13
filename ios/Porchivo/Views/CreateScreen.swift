@@ -39,24 +39,29 @@ struct CreateScreen: View {
                         "shippingbox.fill", c.accent, c.accentSoft
                     ) { path.append(Route.addPackage) }
 
-                    actionCard(
-                        "File a porch incident",
-                        "Report a theft or suspicious activity to warn neighbors.",
-                        "exclamationmark.shield.fill", c.danger, c.dangerSoft
-                    ) { path.append(Route.fileIncident) }
+                    // Incident filing + announcements are org-scoped server-side
+                    // (file_org_incident / org_announcements) — hide both cards
+                    // for free-tier users instead of letting the submit fail.
+                    if appState.isOrgMember {
+                        actionCard(
+                            "File a porch incident",
+                            "Report a theft or suspicious activity to warn neighbors.",
+                            "exclamationmark.shield.fill", c.danger, c.dangerSoft
+                        ) { path.append(Route.fileIncident) }
 
-                    actionCard(
-                        "Post a block announcement",
-                        "Send a note to everyone in your building or block.",
-                        "megaphone.fill", c.warmOrange, c.warmOrangeSoft
-                    ) {
-                        Haptics.light()
-                        showAnnouncement = true
+                        actionCard(
+                            "Post a block announcement",
+                            "Send a note to everyone in your building or block.",
+                            "megaphone.fill", c.warmOrange, c.warmOrangeSoft
+                        ) {
+                            Haptics.light()
+                            showAnnouncement = true
+                        }
                     }
 
                     actionCard(
                         "Become a Porch Partner",
-                        "Hold packages for neighbors and earn $80–$250/mo.",
+                        "Earn $80–$250/mo holding packages for neighbors on your schedule.",
                         "dollarsign.circle.fill", c.success, c.successSoft
                     ) {
                         if let url = URL(string: AppConfig.Support.websiteURL + "/partner") {
