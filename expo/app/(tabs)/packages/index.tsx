@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Stack } from 'expo-router';
-import { Plus, Package, ChevronRight, PackageCheck, Clock3, LayoutGrid, Search, X, Filter, AlertTriangle, ArrowDownWideNarrow, CalendarClock, Zap } from 'lucide-react-native';
+import { Plus, Package, ChevronRight, PackageCheck, Clock3, LayoutGrid, Search, X, Filter, AlertTriangle, ArrowDownWideNarrow, ArrowUpNarrowWide, CalendarClock, Zap } from 'lucide-react-native';
 import { useColors, AppColors } from '@/constants/colors';
 import { palette, radius, space, elevation, tabularNums } from '@/constants/theme';
 import { usePackages } from '@/store/PackagesContext';
@@ -20,13 +20,14 @@ import CarrierIcon from '@/components/CarrierIcon';
 import { ListSkeleton } from '@/components/SkeletonLoader';
 import { useQueryClient } from '@tanstack/react-query';
 import StatusPill from '@/components/ui/StatusPill';
+import { getStatusToken } from '@/lib/statusTokens';
 import EmptyState from '@/components/ui/EmptyState';
 import SegmentedControl from '@/components/ui/SegmentedControl';
 import { DeliveryCountdown } from '@/components/DeliveryCountdown';
 import { log } from "@/lib/logger";
 
 export type PackageFilter = 'all' | 'pending' | 'delivered';
-export type PackageSortMode = 'urgent' | 'arriving' | 'recent';
+export type PackageSortMode = 'urgent' | 'arriving' | 'recent' | 'newest' | 'oldest';
 
 const DELIVERED_STATUSES: PackageTrackingStatus[] = ['delivered', 'picked_up', 'returned'];
 
@@ -65,6 +66,24 @@ function sortByArrivingMode(a: TrackedPackage, b: TrackedPackage): number {
 /** Recent sort: newest created package first. */
 function sortByRecentMode(a: TrackedPackage, b: TrackedPackage): number {
   return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+}
+
+/**
+ * Arrival date for a package: the actual delivery time once delivered,
+ * otherwise the expected delivery date for packages still on the way.
+ */
+function getArrivalTimestamp(pkg: TrackedPackage): number {
+  return new Date(pkg.deliveredTimestamp ?? pkg.expectedDeliveryDate).getTime();
+}
+
+/** Arrival sort, newest first: most recent (or soonest-upcoming) arrival at the top. */
+function sortByArrivalNewest(a: TrackedPackage, b: TrackedPackage): number {
+  return getArrivalTimestamp(b) - getArrivalTimestamp(a);
+}
+
+/** Arrival sort, oldest first: earliest (or furthest-out) arrival at the top. */
+function sortByArrivalOldest(a: TrackedPackage, b: TrackedPackage): number {
+  return getArrivalTimestamp(a) - getArrivalTimestamp(b);
 }
 
 function formatDeliveryDate(dateStr: string): string {
@@ -126,6 +145,7 @@ function PackageCard({ pkg, onPress }: { pkg: TrackedPackage; onPress: () => voi
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const scaleAnim = useRef(new Animated.Value(1)).current;
+  const statusToken = getStatusToken(pkg.currentStatus, true);
 
   const handlePressIn = () => {
     Animated.spring(scaleAnim, { toValue: 0.97, useNativeDriver: true, speed: 50, bounciness: 4 }).start();
@@ -144,6 +164,7 @@ function PackageCard({ pkg, onPress }: { pkg: TrackedPackage; onPress: () => voi
         activeOpacity={1}
         testID={`package-card-${pkg.id}`}
       >
+        <View style={[styles.statusStrip, { backgroundColor: statusToken.fg }]} />
         <View style={styles.cardTop}>
           <CarrierIcon carrier={pkg.carrier} size={42} />
           <View style={styles.cardInfo}>
@@ -262,6 +283,8 @@ export default function PackagesScreen() {
     const sorted = [...searched];
     if (sortMode === 'arriving') sorted.sort(sortByArrivingMode);
     else if (sortMode === 'recent') sorted.sort(sortByRecentMode);
+    else if (sortMode === 'newest') sorted.sort(sortByArrivalNewest);
+    else if (sortMode === 'oldest') sorted.sort(sortByArrivalOldest);
     else sorted.sort(sortByUrgentMode);
     return sorted;
   }, [packages, filter, searchQuery, sortMode]);
@@ -280,6 +303,8 @@ export default function PackagesScreen() {
       { value: 'urgent', label: 'Urgent', icon: <Zap size={12} color={sortMode === 'urgent' ? colors.primary : colors.slateLighter} strokeWidth={2.4} /> },
       { value: 'arriving', label: 'Arriving', icon: <CalendarClock size={12} color={sortMode === 'arriving' ? colors.primary : colors.slateLighter} strokeWidth={2.2} /> },
       { value: 'recent', label: 'Recent', icon: <ArrowDownWideNarrow size={12} color={sortMode === 'recent' ? colors.primary : colors.slateLighter} strokeWidth={2.2} /> },
+      { value: 'newest', label: 'Newest', icon: <ArrowDownWideNarrow size={12} color={sortMode === 'newest' ? colors.primary : colors.slateLighter} strokeWidth={2.2} /> },
+      { value: 'oldest', label: 'Oldest', icon: <ArrowUpNarrowWide size={12} color={sortMode === 'oldest' ? colors.primary : colors.slateLighter} strokeWidth={2.2} /> },
     ],
     [colors, sortMode],
   );
@@ -502,10 +527,7 @@ function createStyles(colors: AppColors) {
     sortRowWrap: {
       paddingHorizontal: space.lg,
       paddingBottom: 8,
-      flexDirection: 'row' as const,
-      alignItems: 'center' as const,
-      justifyContent: 'space-between' as const,
-      gap: 8,
+      gap: 6,
     },
     sortLabelRow: {
       flexDirection: 'row' as const,
@@ -521,6 +543,8 @@ function createStyles(colors: AppColors) {
     },
     sortChips: {
       flexDirection: 'row' as const,
+      flexWrap: 'wrap' as const,
+      rowGap: 6,
       gap: 6,
     },
     sortChip: {
@@ -657,7 +681,15 @@ function createStyles(colors: AppColors) {
       marginHorizontal: space.lg,
       marginBottom: space.md,
       padding: space.lg,
+      overflow: 'hidden' as const,
       ...elevation.low,
+    },
+    statusStrip: {
+      position: 'absolute' as const,
+      left: 0,
+      top: 0,
+      bottom: 0,
+      width: 4,
     },
     cardTop: {
       flexDirection: 'row',
