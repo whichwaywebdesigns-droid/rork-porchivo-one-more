@@ -5,6 +5,7 @@ import { Menu, X, HelpCircle, ChevronRight, Smartphone } from "lucide-react";
 import { PRIMARY_NAV } from "@/config/navigation";
 import { BRAND } from "@/config/brand";
 import LanguageSelector from "./LanguageSelector";
+import LanguagePill from "./LanguagePill";
 import ThemeToggle from "./ThemeToggle";
 
 /** Maps nav hrefs to translation keys so labels stay localized. */
@@ -190,6 +191,7 @@ export default function SiteHeader() {
               >
                 <Smartphone className="w-5 h-5" />
               </a>
+              <LanguagePill />
               <ThemeToggle />
               <button
                 className="p-2.5 rounded-xl text-brand-text-muted hover:text-brand-text-primary hover:bg-brand-navy-600/50 transition-colors"

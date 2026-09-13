@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
+import LanguagePill from "@/components/LanguagePill";
 
 const NAV_LINKS = [
   { label: "How It Works", hash: "#how-it-works" },
@@ -75,6 +76,8 @@ export default function LandingNav() {
         </div>
 
         <div className="flex items-center gap-3">
+          {/* EN/ES quick toggle — US/Mexico launch visibility */}
+          <LanguagePill />
           <Link
             to="/download"
             className="hidden rounded-xl bg-pv-amber px-5 py-2.5 font-display text-sm font-bold text-pv-navy transition-transform hover:scale-[1.04] sm:inline-flex"

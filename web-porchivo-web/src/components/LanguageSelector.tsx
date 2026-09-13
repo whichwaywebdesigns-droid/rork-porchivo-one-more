@@ -24,7 +24,7 @@ import { changeLanguageWithTransition } from "@/i18n";
  * values to en|es — other UI languages are skipped (they'd fail the check
  * constraint and the profile would keep its previous value).
  */
-async function syncProfileLanguage(code: string): Promise<void> {
+export async function syncProfileLanguage(code: string): Promise<void> {
   if (code !== "en" && code !== "es") return;
   try {
     const {
