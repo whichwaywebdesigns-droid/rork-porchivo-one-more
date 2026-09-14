@@ -141,6 +141,24 @@ const en = {
 
   "landing.final.title1": "Know before it's too late.",
   "landing.final.title2": "Register your community in two minutes.",
+
+  "landing.videos.sectionAria": "Porchivo videos",
+  "landing.videos.eyebrow": "From the channel",
+  "landing.videos.title1": "See Porchivo",
+  "landing.videos.title2": "in action",
+  "landing.videos.play": "Play video: {{title}}",
+  "landing.videos.prev": "Previous video",
+  "landing.videos.next": "Next video",
+  "landing.videos.goTo": "Go to video {{index}}",
+  "landing.videos.v1.title": "Don't Have a Wonderful Day in the Neighborhood — For a Porch Pirate",
+  "landing.videos.v1.desc":
+    "Our signature short film: a porch pirate's perfect day takes a turn when the whole block is watching. See what happens when neighbors stop being easy targets.",
+  "landing.videos.v2.title": "The App That's Making HOA Mailrooms Chaos-Free",
+  "landing.videos.v2.desc":
+    "A 60-second look at how communities replace overflowing mailroom chaos with tracked, claimed, and protected package hand-offs.",
+  "landing.videos.v3.title": "Neighbors Protecting Neighbors — Stopping Porch Pirates for Good",
+  "landing.videos.v3.desc":
+    "The idea behind Porchivo: real neighbors, real accountability, and a delivery network that makes your porch the safest spot on the street.",
 };
 
 /** Translation keys with string values (en is the canonical key set). */
@@ -281,6 +299,24 @@ const es: Partial<TranslationKeys> = {
 
   "landing.final.title1": "Entérate antes de que sea demasiado tarde.",
   "landing.final.title2": "Registra tu comunidad en dos minutos.",
+
+  "landing.videos.sectionAria": "Videos de Porchivo",
+  "landing.videos.eyebrow": "Del canal",
+  "landing.videos.title1": "Mira Porchivo",
+  "landing.videos.title2": "en acción",
+  "landing.videos.play": "Reproducir video: {{title}}",
+  "landing.videos.prev": "Video anterior",
+  "landing.videos.next": "Video siguiente",
+  "landing.videos.goTo": "Ir al video {{index}}",
+  "landing.videos.v1.title": "No tengas un maravilloso día en el vecindario — si eres pirata de porches",
+  "landing.videos.v1.desc":
+    "Nuestro cortometraje: el día perfecto de un pirata de porches da un giro cuando todo el vecindario está atento. Descubre qué pasa cuando los vecinos dejan de ser objetivos fáciles.",
+  "landing.videos.v2.title": "La app que está eliminando el caos en los cuartos de correo",
+  "landing.videos.v2.desc":
+    "Un vistazo de 60 segundos a cómo las comunidades reemplazan el caos de los cuartos de paquetes con entregas rastreadas, reclamadas y protegidas.",
+  "landing.videos.v3.title": "Vecinos protegiendo vecinos — acabando con los piratas de porches para siempre",
+  "landing.videos.v3.desc":
+    "La idea detrás de Porchivo: vecinos reales, responsabilidad real y una red de entregas que hace de tu porche el lugar más seguro de la calle.",
 };
 
 const fr: Partial<TranslationKeys> = {

@@ -1,51 +1,37 @@
 import { useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ChevronLeft, ChevronRight, Play } from "lucide-react";
 import Reveal from "@/components/landing/Reveal";
 
 type CarouselVideo = {
   /** YouTube video id */
   id: string;
-  title: string;
-  description: string;
   /** Vertical (Shorts) videos render in a centered 9:16 stage */
   vertical: boolean;
 };
 
 const VIDEOS: CarouselVideo[] = [
-  {
-    id: "Ct7ihuOOMXk",
-    title: "Don't Have a Wonderful Day in the Neighborhood — For a Porch Pirate",
-    description:
-      "Our signature short film: a porch pirate's perfect day takes a turn when the whole block is watching. See what happens when neighbors stop being easy targets.",
-    vertical: false,
-  },
-  {
-    id: "WYgMACEgrd8",
-    title: "The App That's Making HOA Mailrooms Chaos-Free",
-    description:
-      "A 60-second look at how communities replace overflowing mailroom chaos with tracked, claimed, and protected package hand-offs.",
-    vertical: true,
-  },
-  {
-    id: "LE6PIjZypDY",
-    title: "Neighbors Protecting Neighbors — Stopping Porch Pirates for Good",
-    description:
-      "The idea behind Porchivo: real neighbors, real accountability, and a delivery network that makes your porch the safest spot on the street.",
-    vertical: true,
-  },
+  { id: "Ct7ihuOMXk", vertical: false },
+  { id: "WYgMACEgrd8", vertical: true },
+  { id: "LE6PIjZypDY", vertical: true },
 ];
 
 /**
  * Simple YouTube video carousel for the landing page (channel videos).
  * Embeds are click-to-play — nothing is fetched from YouTube until the
  * visitor taps play, so the section costs one thumbnail per video.
+ * All copy is i18n-managed (see `landing.videos.*` in locales.ts).
  */
 export default function VideoCarousel() {
+  const { t } = useTranslation();
   const [active, setActive] = useState(0);
   const [playing, setPlaying] = useState(false);
 
   const video = VIDEOS[active];
   if (!video) return null;
+
+  const title = t(`landing.videos.v${active + 1}.title`);
+  const description = t(`landing.videos.v${active + 1}.desc`);
 
   const goTo = useCallback((index: number) => {
     setPlaying(false);
@@ -59,7 +45,7 @@ export default function VideoCarousel() {
   return (
     <section
       id="videos"
-      aria-label="Porchivo videos"
+      aria-label={t("landing.videos.sectionAria")}
       className="relative overflow-hidden border-t border-white/5 py-24 sm:py-28"
     >
       <div
@@ -69,12 +55,12 @@ export default function VideoCarousel() {
       <div className="relative mx-auto max-w-5xl px-4 sm:px-6">
         <Reveal className="text-center">
           <p className="font-display text-sm font-semibold uppercase tracking-[0.2em] text-pv-amber">
-            From the channel
+            {t("landing.videos.eyebrow")}
           </p>
           <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-white sm:text-5xl">
-            See Porchivo{" "}
+            {t("landing.videos.title1")}{" "}
             <span className="bg-gradient-to-r from-pv-amber to-pv-electric bg-clip-text text-transparent">
-              in action
+              {t("landing.videos.title2")}
             </span>
           </h2>
         </Reveal>
@@ -89,7 +75,7 @@ export default function VideoCarousel() {
                   key={video.id}
                   className="h-full w-full"
                   src={`https://www.youtube-nocookie.com/embed/${video.id}?autoplay=1&rel=0&modestbranding=1`}
-                  title={video.title}
+                  title={title}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
                 />
@@ -98,7 +84,7 @@ export default function VideoCarousel() {
                   type="button"
                   onClick={() => setPlaying(true)}
                   className="group relative block h-full w-full cursor-pointer"
-                  aria-label={`Play video: ${video.title}`}
+                  aria-label={t("landing.videos.play", { title })}
                 >
                   <img
                     src={`https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`}
@@ -119,7 +105,7 @@ export default function VideoCarousel() {
               <button
                 type="button"
                 onClick={() => goTo(active - 1)}
-                aria-label="Previous video"
+                aria-label={t("landing.videos.prev")}
                 className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/80 transition-colors hover:border-pv-amber/50 hover:text-pv-amber"
               >
                 <ChevronLeft className="h-5 w-5" aria-hidden />
@@ -130,7 +116,7 @@ export default function VideoCarousel() {
                     key={v.id}
                     type="button"
                     onClick={() => goTo(i)}
-                    aria-label={`Go to video ${i + 1}: ${v.title}`}
+                    aria-label={t("landing.videos.goTo", { index: i + 1 })}
                     aria-current={i === active}
                     className={`h-2.5 rounded-full transition-all duration-300 ${
                       i === active
@@ -143,7 +129,7 @@ export default function VideoCarousel() {
               <button
                 type="button"
                 onClick={() => goTo(active + 1)}
-                aria-label="Next video"
+                aria-label={t("landing.videos.next")}
                 className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/80 transition-colors hover:border-pv-amber/50 hover:text-pv-amber"
               >
                 <ChevronRight className="h-5 w-5" aria-hidden />
@@ -155,10 +141,10 @@ export default function VideoCarousel() {
         {/* Descriptor */}
         <Reveal className="mx-auto mt-8 max-w-2xl text-center" delay={0.15}>
           <h3 className="font-display text-lg font-bold text-white sm:text-xl">
-            {video.title}
+            {title}
           </h3>
           <p className="mt-2 text-sm leading-relaxed text-white/60 sm:text-base">
-            {video.description}
+            {description}
           </p>
         </Reveal>
       </div>
