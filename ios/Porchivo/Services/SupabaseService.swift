@@ -656,12 +656,20 @@ actor SupabaseService {
     }
 
     /// Verifies the 6-digit OTP code Supabase emailed and establishes a session.
-    /// On success the session is persisted to Keychain and returned.
+    /// Existing accounts receive a magiclink token; brand-new accounts receive a
+    /// signup-confirmation token — both are tried before giving up. On success
+    /// the session is persisted to Keychain and returned.
     func verifyOtp(email: String, token: String) async -> Result<AuthSession, Error> {
+        let magicResult = await verifyOtpGrant(email: email, token: token, type: "magiclink")
+        if case .success = magicResult { return magicResult }
+        return await verifyOtpGrant(email: email, token: token, type: "signup")
+    }
+
+    private func verifyOtpGrant(email: String, token: String, type: String) async -> Result<AuthSession, Error> {
         let body: [String: Any] = [
             "email": email,
             "token": token,
-            "type": "magiclink",
+            "type": type,
         ]
         return await authPost("token?grant_type=otp", body: body) { [weak self] data in
             guard let self else { throw URLError(.cannotConnectToHost) }

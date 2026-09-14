@@ -60,8 +60,8 @@ export default function ResetPasswordScreen() {
           const { error: exchangeErr } = await supabase.auth.exchangeCodeForSession(params.code);
           if (exchangeErr) {
             log('[ResetPassword] PKCE exchange error:', exchangeErr.message);
-          } else if (params.type === 'magiclink') {
-            // Magic link sign-in — go straight to the app
+          } else if (params.type === 'magiclink' || params.type === 'signup') {
+            // Magic link / signup confirmation sign-in — go straight to the app
             router.replace('/(tabs)' as any);
           }
         } catch (e) {
@@ -78,7 +78,7 @@ export default function ResetPasswordScreen() {
         });
         if (sessionErr) {
           log('[ResetPassword] setSession error:', sessionErr.message);
-        } else if (params.type === 'magiclink') {
+        } else if (params.type === 'magiclink' || params.type === 'signup') {
           router.replace('/(tabs)' as any);
         }
       } catch (e) {

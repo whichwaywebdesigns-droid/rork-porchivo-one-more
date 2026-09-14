@@ -162,9 +162,17 @@ class SupabaseClient(
     }
 
     /**
-     * Verify the 6-digit OTP from the magic-link email and establish a session.
+     * Verify the 6-digit OTP from the sign-in email and establish a session.
+     * Existing accounts receive a magiclink token; brand-new accounts receive a
+     * signup-confirmation token — both are tried before giving up.
      */
-    suspend fun verifyOtp(email: String, token: String): Result<AuthSession> = try {
+    suspend fun verifyOtp(email: String, token: String): Result<AuthSession> {
+        val magicResult = verifyOtpGrant(email, token, "magiclink")
+        if (magicResult.isSuccess) return magicResult
+        return verifyOtpGrant(email, token, "signup")
+    }
+
+    private suspend fun verifyOtpGrant(email: String, token: String, type: String): Result<AuthSession> = try {
         val response = httpClient.post("$authBase/token?grant_type=otp") {
             header(HttpHeaders.ContentType, "application/json")
             header("apikey", anonKey)
@@ -172,7 +180,7 @@ class SupabaseClient(
                 mapOf(
                     "email" to email,
                     "token" to token,
-                    "type" to "magiclink",
+                    "type" to type,
                 )
             )
         }
