@@ -191,6 +191,21 @@ serve(async (req: Request) => {
       return json({ received: true });
     }
 
+    // ── 2b. Ignore events from RC's Stripe web apps ─────────────────────────
+    // The RC project also tracks the same live Stripe account (web-sandbox-beta /
+    // web-prod apps) that drives B2B org subscriptions via the dedicated
+    // stripe-webhook function. Those events carry Stripe price ids (which would
+    // hit the 'premium' fallback) and app_user_ids that are not Supabase user
+    // ids — double-writing them here would corrupt the single-writer contract.
+    // B2B subscription state is Stripe-webhook-authoritative; RC Stripe events
+    // are acknowledged (200) so RC does not retry, but never mutate state.
+    if ((store || '').toLowerCase() === 'stripe') {
+      console.log(
+        `[revenuecat-webhook] Stripe-store event (${eventType}) ignored — B2B state is stripe-webhook-authoritative`
+      );
+      return json({ received: true, ignored: 'stripe-store' });
+    }
+
     if (!rcEventId) {
       // Unusual: RC events should always have an id. Log and proceed without dedup.
       console.warn('[revenuecat-webhook] Missing event.id — cannot deduplicate this event');
