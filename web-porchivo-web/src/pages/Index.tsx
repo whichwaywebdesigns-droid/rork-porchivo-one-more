@@ -5,6 +5,7 @@ import HowItWorksSection from "@/components/landing/HowItWorksSection";
 import FeaturesSection from "@/components/landing/FeaturesSection";
 import PricingSection from "@/components/landing/PricingSection";
 import FaqSection from "@/components/landing/FaqSection";
+import VideoCarousel from "@/components/landing/VideoCarousel";
 import { FinalCtaSection, LandingFooter } from "@/components/landing/FinalCtaFooter";
 import { getPageSEO } from "@/config/seo";
 import {
@@ -56,6 +57,7 @@ export default function IndexPage() {
         <FeaturesSection />
         <PricingSection />
         <FaqSection />
+        <VideoCarousel />
         <FinalCtaSection />
       </main>
       <LandingFooter />
