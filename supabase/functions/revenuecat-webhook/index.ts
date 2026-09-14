@@ -85,9 +85,16 @@ const HARD_DEACTIVATION_EVENT_TYPES = new Set([
 const PRODUCT_ID_TIER_MAP: Record<string, string> = {
   premium_monthly: 'premium',
   premium_annual: 'premium',
+  // Play Store base-plan identifiers — RC stores these WITH the ":<basePlan>"
+  // suffix on Android; without them family purchases fall through to the
+  // 'premium' fallback and get silently downgraded server-side.
+  'premium_monthly:monthly': 'premium',
+  'premium_annual:annual': 'premium',
   'com.porchivo.premium.family': 'family', // legacy family-monthly id (H-1); keep until renamed in RC + stores
   family_monthly: 'family', // future canonical id once H-1 rename lands
   family_annual: 'family',
+  'family_monthly:monthly': 'family', // Play base-plan form (RC product store_identifier)
+  'family_annual:annual': 'family',
   enterprise_monthly: 'enterprise',
   enterprise_annual: 'enterprise',
   porchivo_lifetime: 'lifetime',
