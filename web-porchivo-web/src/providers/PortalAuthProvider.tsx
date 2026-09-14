@@ -73,9 +73,17 @@ export function PortalAuthProvider({ children }: { children: ReactNode }) {
     try {
       const { error } = await supabase.auth.signInWithOtp({
         email,
-        options: { emailRedirectTo: `${window.location.origin}/manage` },
+        options: {
+          // Security: never bootstrap accounts from the portal login — manager
+          // accounts are created through the paid org-signup flow only.
+          shouldCreateUser: false,
+          emailRedirectTo: `${window.location.origin}/manage`,
+        },
       });
       if (error) {
+        if (/otp_disabled|signups? not allowed|not registered|not found/i.test(error.message)) {
+          return { ok: false, error: "No Porchivo manager account exists for that email. Create your HOA account in the Porchivo app first." };
+        }
         return { ok: false, error: "Couldn't send the link. Check the address and try again." };
       }
       return { ok: true, message: `Check ${email} — your sign-in link is on its way.` };
