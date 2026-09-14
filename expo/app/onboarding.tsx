@@ -27,6 +27,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAnalytics } from '@/store/AnalyticsContext';
 import { useLanguage } from '@/i18n/LanguageProvider';
+import { useTranslation } from 'react-i18next';
 
 const HAS_SEEN_SLIDES_KEY = 'porchivo_pre_auth_slides_seen';
 
@@ -60,8 +61,9 @@ export default function OnboardingScreen(): React.ReactElement {
   const { width, height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const { track } = useAnalytics();
-  const { language } = useLanguage();
-  const slides = language === 'es' ? SPANISH_SLIDES : ENGLISH_SLIDES;
+  const { languageMeta } = useLanguage();
+  const { t } = useTranslation();
+  const slides = languageMeta.baseLanguage === 'es' ? SPANISH_SLIDES : ENGLISH_SLIDES;
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [nextIndex, setNextIndex] = useState<number | null>(null);
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
@@ -224,9 +226,9 @@ export default function OnboardingScreen(): React.ReactElement {
             onPress={finishRef.current}
             style={[styles.skipButton, { top: 16 + insets.top }]}
             activeOpacity={0.7}
-            accessibilityLabel="Skip onboarding"
+            accessibilityLabel={t('onboarding.skipA11y')}
           >
-            <Text style={styles.skipText}>Skip</Text>
+            <Text style={styles.skipText}>{t('onboarding.skip')}</Text>
           </TouchableOpacity>
         )}
 
@@ -273,7 +275,7 @@ export default function OnboardingScreen(): React.ReactElement {
             pointerEvents="none"
           >
             <ChevronLeft size={28} color={COLORS.primary} strokeWidth={2.5} />
-            <Text style={styles.swipeHintText}>Swipe</Text>
+            <Text style={styles.swipeHintText}>{t('onboarding.swipe')}</Text>
           </Animated.View>
         )}
 
@@ -295,18 +297,18 @@ export default function OnboardingScreen(): React.ReactElement {
               onPress={finishRef.current}
               style={styles.getStartedButton}
               activeOpacity={0.85}
-              accessibilityLabel="Get started"
+              accessibilityLabel={t('onboarding.getStartedA11y')}
             >
-              <Text style={styles.getStartedText}>Get Started</Text>
+              <Text style={styles.getStartedText}>{t('onboarding.getStarted')}</Text>
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
               onPress={goNextRef.current}
               style={styles.nextButton}
               activeOpacity={0.85}
-              accessibilityLabel="Next slide"
+              accessibilityLabel={t('onboarding.nextA11y')}
             >
-              <Text style={styles.nextText}>Next</Text>
+              <Text style={styles.nextText}>{t('onboarding.next')}</Text>
             </TouchableOpacity>
           )}
         </View>

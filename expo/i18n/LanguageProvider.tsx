@@ -2,18 +2,26 @@
  * Porchivo — Language Provider (Expo / React Native).
  *
  * Wraps the i18n init with a context hook that:
- * 1. On first launch, auto-detects the device's system language and sets it.
- * 2. On subsequent launches, restores the user's saved preference.
- * 3. Exposes `setLanguage(code)` to change the language and persist the choice.
- * 4. Applies a smooth fade-out → swap → fade-in transition when switching languages.
+ * 1. On mount, resolves the language (saved manual preference → device
+ *    locale → en-US) behind a short invisible gate so no wrong-language
+ *    text ever paints (see the gate in LanguageRootContent).
+ * 2. On sign-in / session restore, reconciles with the user's profile:
+ *    - A saved profile preference WINS over the local device choice.
+ *    - With no profile preference, the local selection is pushed to
+ *      `profiles.preferred_language` (powers Spanish Resend emails).
+ * 3. Exposes `setLanguage(code)` — manual selections apply immediately
+ *    (smooth fade-out → swap → fade-in) and persist to both storage and
+ *    profile.
  *
- * Persisted via AsyncStorage — the user's manual selection always wins
- * over system detection on future launches.
+ * Profile values are folded to the DB's canonical 'en' | 'es' (check
+ * constraint shared with the email pipeline) via ./localeRegistry mappers —
+ * no schema change, no competing column.
  */
 
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { Animated, Easing, Platform } from 'react-native';
+import { Animated, Easing, Platform, View } from 'react-native';
 import { I18nextProvider } from 'react-i18next';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import createContextHook from '@nkzw/create-context-hook';
 
 import i18n, {
@@ -21,24 +29,29 @@ import i18n, {
   changeLanguage as persistLanguageChange,
   LANGUAGE_STORAGE_KEY,
 } from './index';
-import { supabase } from '../lib/supabase';
 import {
-  DEFAULT_LANGUAGE,
-  LANGUAGES,
-  getLanguageMeta,
-  isRTL as checkIsRTL,
-  type LanguageMeta,
-} from './languages';
+  DEFAULT_LOCALE,
+  ENABLED_LOCALES,
+  getLocaleMeta,
+  isRTLLocale,
+  localeToProfileValue,
+  profileValueToLocale,
+  type EnabledLocale,
+  type LocaleMeta,
+} from './localeRegistry';
+import { supabase } from '../lib/supabase';
 
-/**
- * Best-effort sync of the language choice to profiles.preferred_language so
- * transactional emails (Resend templates) use the user's locale. No-op when
- * signed out; failures are logged, never surfaced to the user. The DB column
- * constrains values to en|es — other UI languages are skipped (they'd fail
- * the check constraint and the profile would keep its previous value).
- */
-async function syncProfileLanguage(code: string): Promise<void> {
-  if (code !== 'en' && code !== 'es') return;
+/** Fade-out duration in ms. */
+const FADE_OUT_MS = 200;
+/** Pause while invisible before fading back in, in ms. */
+const HOLD_MS = 60;
+/** Fade-in duration in ms. */
+const FADE_IN_MS = 280;
+
+/** Best-effort push of the current locale to profiles.preferred_language. */
+async function syncProfileLanguage(locale: string): Promise<void> {
+  const value = localeToProfileValue(locale);
+  if (!value) return;
   try {
     const {
       data: { session },
@@ -46,7 +59,7 @@ async function syncProfileLanguage(code: string): Promise<void> {
     if (!session?.user) return;
     const { error } = await supabase
       .from('profiles')
-      .update({ preferred_language: code })
+      .update({ preferred_language: value })
       .eq('id', session.user.id);
     if (error) {
       console.warn('[language] profile sync failed:', error.message);
@@ -59,43 +72,75 @@ async function syncProfileLanguage(code: string): Promise<void> {
   }
 }
 
-/** Fade-out duration in ms. */
-const FADE_OUT_MS = 200;
-/** Pause while invisible before fading back in, in ms. */
-const HOLD_MS = 60;
-/** Fade-in duration in ms. */
-const FADE_IN_MS = 280;
+/**
+ * Profile-wins reconciliation at sign-in / session restore. A valid profile
+ * preference is adopted (and mirrored locally); without one, the local
+ * choice is pushed to the profile so choices made while signed out survive.
+ */
+async function reconcileWithProfile(current: string): Promise<EnabledLocale | null> {
+  try {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session?.user) return null;
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('preferred_language')
+      .eq('id', session.user.id)
+      .maybeSingle();
+    if (error) {
+      console.warn('[language] profile read failed:', error.message);
+      return null;
+    }
+    const stored = typeof data?.preferred_language === 'string' ? data.preferred_language : '';
+    const fromProfile = stored ? profileValueToLocale(stored) : null;
+    if (fromProfile) {
+      if (fromProfile !== current) {
+        await persistLanguageChange(fromProfile);
+      }
+      return fromProfile;
+    }
+    void syncProfileLanguage(current);
+    return null;
+  } catch (e) {
+    console.warn(
+      '[language] profile reconcile error:',
+      e instanceof Error ? e.message : String(e),
+    );
+    return null;
+  }
+}
 
 interface LanguageContextValue {
-  /** Current language code (e.g. 'en', 'es'). */
-  language: string;
-  /** Language metadata for the current language. */
-  languageMeta: LanguageMeta;
-  /** All supported languages. */
-  languages: LanguageMeta[];
-  /** Whether the current language is RTL. */
+  /** Current enabled locale (e.g. 'en-US', 'es-US'). */
+  language: EnabledLocale;
+  /** Metadata for the current language. */
+  languageMeta: LocaleMeta;
+  /** Enabled languages only — planned locales never render in the picker. */
+  languages: readonly LocaleMeta[];
+  /** Whether the current language is RTL (always false today). */
   rtl: boolean;
   /** Whether the initial language resolution is still loading. */
   isReady: boolean;
-  /** True if the current language was auto-detected from the system (not manually chosen). */
+  /** True if the current language was auto-detected from the system. */
   fromSystem: boolean;
   /** Whether a language transition (fade) is in progress. */
   isTransitioning: boolean;
   /** Animated opacity value — drive a wrapping Animated.View with this. */
   fadeAnim: Animated.Value;
-  /** Change the language and persist the choice. Triggers a fade transition. */
-  setLanguage: (code: string) => Promise<void>;
+  /** Change the language, persist locally + to the profile. Fades globally. */
+  setLanguage: (code: EnabledLocale) => Promise<void>;
 }
 
 export const [LanguageProvider, useLanguage] = createContextHook(
   (): LanguageContextValue => {
-    const [language, setLanguageState] = useState<string>(DEFAULT_LANGUAGE);
+    const [language, setLanguageState] = useState<EnabledLocale>(DEFAULT_LOCALE);
     const [isReady, setIsReady] = useState(false);
     const [fromSystem, setFromSystem] = useState(false);
     const [isTransitioning, setIsTransitioning] = useState(false);
     const fadeAnim = useRef(new Animated.Value(1)).current;
 
-    // Resolve the initial language on mount.
+    // Resolve the initial language on mount (saved → device → default).
     useEffect(() => {
       let mounted = true;
       void (async () => {
@@ -103,7 +148,6 @@ export const [LanguageProvider, useLanguage] = createContextHook(
         if (!mounted) return;
         setLanguageState(code);
         setFromSystem(detected);
-        // Sync i18next with the resolved language.
         if (i18n.language !== code) {
           await i18n.changeLanguage(code);
         }
@@ -114,10 +158,11 @@ export const [LanguageProvider, useLanguage] = createContextHook(
       };
     }, []);
 
-    // Listen for language changes from other sources (e.g. language selector).
+    // Track language changes initiated elsewhere (kept for safety).
     useEffect(() => {
       const handler = (lng: string) => {
-        setLanguageState(lng);
+        const mapped = getLocaleMeta(lng);
+        if (mapped) setLanguageState(mapped.code);
         setFromSystem(false);
       };
       i18n.on('languageChanged', handler);
@@ -126,18 +171,17 @@ export const [LanguageProvider, useLanguage] = createContextHook(
       };
     }, []);
 
-    // One-time email-locale sync: whenever a session exists (app start with a
-    // restored session, or a fresh sign-in), push the locally-saved language so
-    // choices made while signed out — or before this sync shipped — reach
-    // profiles.preferred_language. Reads i18n.language at event time so the
-    // resolved preference (not the pre-bootstrap default) is what gets synced.
+    // Profile reconciliation — runs once per auth session, AFTER bootstrap,
+    // so the resolved preference (not the pre-bootstrap default) reconciles.
     useEffect(() => {
       if (!isReady) return;
       const {
         data: { subscription },
       } = supabase.auth.onAuthStateChange((event) => {
         if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN') {
-          void syncProfileLanguage(i18n.language);
+          void reconcileWithProfile(i18n.language).then((adopted) => {
+            if (adopted) setLanguageState(adopted);
+          });
         }
       });
       return () => {
@@ -145,49 +189,51 @@ export const [LanguageProvider, useLanguage] = createContextHook(
       };
     }, [isReady]);
 
-    const setLanguage = useCallback(async (code: string) => {
-      if (isTransitioning) return;
-      setIsTransitioning(true);
+    const setLanguage = useCallback(
+      async (code: EnabledLocale) => {
+        if (isTransitioning) return;
+        setIsTransitioning(true);
 
-      // Phase 1 — fade out.
-      await new Promise<void>((resolve) => {
+        // Phase 1 — fade out.
+        await new Promise<void>((resolve) => {
+          Animated.timing(fadeAnim, {
+            toValue: 0,
+            duration: FADE_OUT_MS,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: Platform.OS !== 'web',
+          }).start(() => resolve());
+        });
+
+        // Phase 2 — swap language while invisible.
+        await persistLanguageChange(code);
+        setLanguageState(code);
+        setFromSystem(false);
+        // Manual choice: mirror to the profile (fire-and-forget).
+        void syncProfileLanguage(code);
+
+        // Brief hold so the new text is fully settled before fading in.
+        await new Promise((resolve) => setTimeout(resolve, HOLD_MS));
+
+        // Phase 3 — fade back in.
         Animated.timing(fadeAnim, {
-          toValue: 0,
-          duration: FADE_OUT_MS,
-          easing: Easing.inOut(Easing.ease),
+          toValue: 1,
+          duration: FADE_IN_MS,
+          easing: Easing.out(Easing.ease),
           useNativeDriver: Platform.OS !== 'web',
-        }).start(() => resolve());
-      });
+        }).start(() => {
+          setIsTransitioning(false);
+        });
+      },
+      [fadeAnim, isTransitioning],
+    );
 
-      // Phase 2 — swap language while invisible.
-      await persistLanguageChange(code);
-      setLanguageState(code);
-      setFromSystem(false);
-      // Fire-and-forget: keep the email-locale preference in sync (DB).
-      void syncProfileLanguage(code);
-
-      // Brief hold so the new text is fully settled before fading in.
-      await new Promise((resolve) => setTimeout(resolve, HOLD_MS));
-
-      // Phase 3 — fade back in.
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: FADE_IN_MS,
-        easing: Easing.out(Easing.ease),
-        useNativeDriver: Platform.OS !== 'web',
-      }).start(() => {
-        setIsTransitioning(false);
-      });
-    }, [fadeAnim, isTransitioning]);
-
-    const meta = getLanguageMeta(language);
-    const rtl = checkIsRTL(language);
+    const meta = getLocaleMeta(language) ?? getLocaleMeta(DEFAULT_LOCALE)!;
 
     return {
       language,
       languageMeta: meta,
-      languages: LANGUAGES,
-      rtl,
+      languages: ENABLED_LOCALES,
+      rtl: isRTLLocale(language),
       isReady,
       fromSystem,
       isTransitioning,
@@ -214,12 +260,23 @@ export function LanguageRootProvider({ children }: { children: React.ReactNode }
 }
 
 /**
- * Inner component that reads the fade animation value from the language
- * context and wraps the app tree in an Animated.View so the opacity
- * transition is applied globally.
+ * Gate + transition host. While the initial language resolves (a single
+ * AsyncStorage read — typically a few ms) the tree stays mounted but fully
+ * transparent with touches disabled: no wrong-language first paint, and no
+ * remount of the provider stack once resolution lands.
  */
 function LanguageRootContent({ children }: { children: React.ReactNode }) {
-  const { fadeAnim } = useLanguage();
+  const { fadeAnim, isReady } = useLanguage();
+
+  if (!isReady) {
+    return (
+      <I18nextProvider i18n={i18n}>
+        <View style={{ flex: 1, opacity: 0 }} pointerEvents="none">
+          {children}
+        </View>
+      </I18nextProvider>
+    );
+  }
 
   return (
     <I18nextProvider i18n={i18n}>

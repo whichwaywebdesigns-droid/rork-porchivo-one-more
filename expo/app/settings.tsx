@@ -35,6 +35,7 @@ import {
   ChevronLeft,
   ChevronRight,
   FileText,
+  Globe,
   ImagePlus,
   Info,
   LifeBuoy,
@@ -58,6 +59,8 @@ import {
 } from '@/lib/avatar';
 
 import { useTheme } from '@/hooks/useTheme';
+import { useTranslation } from 'react-i18next';
+import { useLanguage } from '@/i18n/LanguageProvider';
 import { useSubscriptionGate } from '@/hooks/useSubscriptionGate';
 import { ReadOnlyNotice } from '@/components/BillingGraceBanner';
 import { manualRequestReview } from '@/lib/storeReview';
@@ -71,11 +74,7 @@ import { PorchLightHero } from '@/components/settings/PorchLightHero';
 
 // ── Preference options ────────────────────────────────────────────────────────
 
-const PREF_OPTIONS: { label: string; value: ThemePreference }[] = [
-  { label: 'Light', value: 'light' },
-  { label: 'System', value: 'system' },
-  { label: 'Dark', value: 'dark' },
-];
+const PREF_VALUES: ThemePreference[] = ['light', 'system', 'dark'];
 
 // ── Segmented preference selector ─────────────────────────────────────────────
 
@@ -86,6 +85,12 @@ interface SegmentedPrefProps {
 }
 
 function SegmentedPref({ preference, onSelect, tokens }: SegmentedPrefProps) {
+  const { t } = useTranslation();
+  const labelFor: Record<ThemePreference, string> = {
+    light: t('settings.themeLight'),
+    system: t('settings.themeSystem'),
+    dark: t('settings.themeDark'),
+  };
   return (
     <View
       style={[
@@ -96,7 +101,8 @@ function SegmentedPref({ preference, onSelect, tokens }: SegmentedPrefProps) {
         },
       ]}
     >
-      {PREF_OPTIONS.map(({ label, value }) => {
+      {PREF_VALUES.map((value) => {
+        const label = labelFor[value];
         const active = preference === value;
         return (
           <Pressable
@@ -111,7 +117,7 @@ function SegmentedPref({ preference, onSelect, tokens }: SegmentedPrefProps) {
             ]}
             onPress={() => onSelect(value)}
             accessibilityRole="radio"
-            accessibilityLabel={`${label} theme preference`}
+            accessibilityLabel={t('settings.themePrefA11y', { label })}
             accessibilityState={{ checked: active }}
           >
             {value === 'system' && (
@@ -277,6 +283,7 @@ function SectionHeader({ title, tokens }: { title: string; tokens: ThemeTokens }
  * accumulate. Disabled during billing-grace read-only mode.
  */
 function ProfileCard({ tokens }: { tokens: ThemeTokens }) {
+  const { t } = useTranslation();
   const { user, updateUser } = useApp();
   const { isResidentSettingsReadOnly } = useSubscriptionGate();
   const [isUploading, setIsUploading] = useState<boolean>(false);
@@ -298,11 +305,11 @@ function ProfileCard({ tokens }: { tokens: ThemeTokens }) {
     } catch (e: any) {
       const msg =
         e?.message === 'photo-permission-denied'
-          ? 'Please allow photo library access to change your picture.'
+          ? t('settings.photoPermissionDenied')
           : e?.message === 'avatar-too-large'
-          ? 'That photo is larger than 5 MB. Please choose a smaller image.'
-          : 'Could not upload your photo. Please try again.';
-      Alert.alert('Photo upload failed', msg);
+          ? t('settings.photoTooLarge')
+          : t('settings.photoUploadFailed');
+      Alert.alert(t('settings.photoUploadFailedTitle'), msg);
     } finally {
       setIsUploading(false);
     }
@@ -314,12 +321,12 @@ function ProfileCard({ tokens }: { tokens: ThemeTokens }) {
     if (!previousUrl) return;
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     Alert.alert(
-      'Remove photo?',
-      'Your profile picture will be removed and replaced with your initial.',
+      t('settings.removePhotoTitle'),
+      t('settings.removePhotoMessage'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Remove',
+          text: t('common.remove'),
           style: 'destructive' as const,
           onPress: () => {
             void removeAvatarAtPublicUrl(previousUrl);
@@ -355,7 +362,9 @@ function ProfileCard({ tokens }: { tokens: ThemeTokens }) {
           disabled={disabled}
           accessibilityRole="imagebutton"
           accessibilityLabel={
-            user.avatarUrl ? 'Change profile picture' : 'Upload profile picture'
+            user.avatarUrl
+              ? t('settings.changeProfilePictureA11y')
+              : t('settings.uploadProfilePictureA11y')
           }
           testID="settings-avatar-press"
         >
@@ -397,7 +406,7 @@ function ProfileCard({ tokens }: { tokens: ThemeTokens }) {
             style={[styles.profileName, { color: tokens.text }]}
             numberOfLines={1}
           >
-            {user.name || 'Your profile'}
+            {user.name || t('settings.yourProfile')}
           </Text>
           <Text
             style={[styles.profileEmail, { color: tokens.textMuted }]}
@@ -415,12 +424,12 @@ function ProfileCard({ tokens }: { tokens: ThemeTokens }) {
               testID="settings-change-photo"
               accessibilityRole="button"
               accessibilityLabel={
-                user.avatarUrl ? 'Change photo' : 'Upload photo'
+                user.avatarUrl ? t('settings.changePhoto') : t('settings.uploadPhoto')
               }
             >
               <ImagePlus size={13} color={tokens.accent} strokeWidth={2.2} />
               <Text style={[styles.actionPillText, { color: tokens.accent }]}>
-                {user.avatarUrl ? 'Change photo' : 'Upload photo'}
+                {user.avatarUrl ? t('settings.changePhoto') : t('settings.uploadPhoto')}
               </Text>
             </TouchableOpacity>
             {user.avatarUrl ? (
@@ -431,11 +440,11 @@ function ProfileCard({ tokens }: { tokens: ThemeTokens }) {
                 disabled={disabled}
                 testID="settings-remove-photo"
                 accessibilityRole="button"
-                accessibilityLabel="Remove photo"
+                accessibilityLabel={t('settings.removePhotoA11y')}
               >
                 <Trash2 size={13} color={tokens.danger} strokeWidth={2.2} />
                 <Text style={[styles.actionPillText, { color: tokens.danger }]}>
-                  Remove
+                  {t('common.remove')}
                 </Text>
               </TouchableOpacity>
             ) : null}
@@ -446,7 +455,7 @@ function ProfileCard({ tokens }: { tokens: ThemeTokens }) {
       <View style={[styles.divider, { backgroundColor: tokens.border }]} />
       <SettingRow
         icon={<User size={16} color={tokens.accent} strokeWidth={2} />}
-        label="Edit profile"
+        label={t('settings.editProfile')}
         onPress={() => router.push('/edit-profile' as any)}
         isLast
         tokens={tokens}
@@ -460,6 +469,8 @@ function ProfileCard({ tokens }: { tokens: ThemeTokens }) {
 export default function SettingsScreen() {
   const { preference, setPreference, resolvedTheme, isDark, tokens } =
     useTheme();
+  const { t } = useTranslation();
+  const { languageMeta } = useLanguage();
   const { signOut } = useApp();
   const { expoPushToken } = useNotifications();
   const { prefs, loaded: prefsLoaded, togglePref, setDeliverySound } = useNotificationPreferences();
@@ -515,7 +526,7 @@ export default function SettingsScreen() {
           onPress={() => router.back()}
           hitSlop={10}
           accessibilityRole="button"
-          accessibilityLabel="Go back"
+          accessibilityLabel={t('common.goBack')}
         >
           <ChevronLeft size={24} color={tokens.text} strokeWidth={2} />
         </TouchableOpacity>
@@ -523,14 +534,16 @@ export default function SettingsScreen() {
         {/* Hero title — anchored to bottom of hero */}
         <View style={styles.heroFooter}>
           <Text style={[styles.heroTitle, { color: tokens.text }]}>
-            Settings
+            {t('settings.title')}
           </Text>
           <Text style={[styles.heroSubtitle, { color: tokens.textMuted }]}>
             {preference === 'system'
-              ? `Following device · ${isDark ? 'dark' : 'light'} now`
+              ? t('settings.subtitleSystem', {
+                  mode: isDark ? t('settings.modeDark') : t('settings.modeLight'),
+                })
               : isDark
-              ? 'Dark mode is on'
-              : 'Light mode is on'}
+              ? t('settings.subtitleDark')
+              : t('settings.subtitleLight')}
           </Text>
         </View>
       </View>
@@ -545,12 +558,12 @@ export default function SettingsScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* ── Profile ── */}
-        <SectionHeader title="PROFILE" tokens={tokens} />
+        <SectionHeader title={t('settings.sectionProfile')} tokens={tokens} />
 
         <ProfileCard tokens={tokens} />
 
         {/* ── Appearance ── */}
-        <SectionHeader title="APPEARANCE" tokens={tokens} />
+        <SectionHeader title={t('settings.sectionAppearance')} tokens={tokens} />
 
         <View
           style={[
@@ -563,10 +576,10 @@ export default function SettingsScreen() {
           ]}
         >
           <Text style={[styles.cardTitle, { color: tokens.text }]}>
-            Display theme
+            {t('settings.themeCardTitle')}
           </Text>
           <Text style={[styles.cardSubtitle, { color: tokens.textMuted }]}>
-            Flip the switch or choose a preference below.
+            {t('settings.themeCardSubtitle')}
           </Text>
 
           {/* ── Single rocker switch: ON = light, OFF = dark ── */}
@@ -574,7 +587,7 @@ export default function SettingsScreen() {
             <DoorFlipSwitch
               value={switchIsOn}
               onPress={handleSwitchPress}
-              label={switchIsOn ? 'Light on' : 'Dark on'}
+              label={switchIsOn ? t('settings.themeLightOn') : t('settings.themeDarkOn')}
               tokens={tokens}
               testID="theme-switch-main"
             />
@@ -604,14 +617,38 @@ export default function SettingsScreen() {
                 style={{ marginRight: 6 }}
               />
               <Text style={[styles.systemNoteText, { color: tokens.accent }]}>
-                Switch reflects device appearance automatically.
+                {t('settings.themeSystemNote')}
               </Text>
             </View>
           )}
         </View>
 
+        {/* ── Language ── */}
+        <SectionHeader title={t('settings.sectionLanguage')} tokens={tokens} />
+
+        <View
+          style={[
+            styles.card,
+            styles.cardRows,
+            {
+              backgroundColor: tokens.card,
+              borderColor: tokens.border,
+              shadowColor: tokens.shadow,
+            },
+          ]}
+        >
+          <SettingRow
+            icon={<Globe size={16} color={tokens.accent} strokeWidth={2} />}
+            label={t('settings.languageRow')}
+            value={languageMeta.nativeName}
+            onPress={() => router.push('/language' as any)}
+            isLast
+            tokens={tokens}
+          />
+        </View>
+
         {/* ── Support ── */}
-        <SectionHeader title="SUPPORT" tokens={tokens} />
+        <SectionHeader title={t('settings.sectionSupport')} tokens={tokens} />
 
         <View
           style={[
@@ -626,13 +663,13 @@ export default function SettingsScreen() {
         >
           <SettingRow
             icon={<LifeBuoy size={16} color={tokens.accent} strokeWidth={2} />}
-            label="Contact support"
+            label={t('settings.contactSupport')}
             onPress={() => router.push('/contact-support' as any)}
             tokens={tokens}
           />
           <SettingRow
             icon={<Star size={16} color={tokens.accent} strokeWidth={2} />}
-            label="Rate Porchivo"
+            label={t('settings.ratePorchivo')}
             onPress={() => void manualRequestReview()}
             isLast
             tokens={tokens}
@@ -640,7 +677,7 @@ export default function SettingsScreen() {
         </View>
 
         {/* ── Notifications ── */}
-        <SectionHeader title="NOTIFICATIONS" tokens={tokens} />
+        <SectionHeader title={t('settings.sectionNotifications')} tokens={tokens} />
 
         <View
           style={[
@@ -653,10 +690,10 @@ export default function SettingsScreen() {
           ]}
         >
           <Text style={[styles.cardTitle, { color: tokens.text }]}>
-            Delivery alerts
+            {t('settings.notifCardTitle')}
           </Text>
           <Text style={[styles.cardSubtitle, { color: tokens.textMuted }]}>
-            Choose which push notifications you receive about your packages.
+            {t('settings.notifCardSubtitle')}
           </Text>
 
           <ReadOnlyNotice />
@@ -665,8 +702,8 @@ export default function SettingsScreen() {
             <>
               <PrefToggle
                 icon={<Truck size={16} color={tokens.accent} strokeWidth={2} />}
-                label="Out for delivery"
-                description="Get pinged when your package leaves the truck."
+                label={t('settings.notifOutForDelivery')}
+                description={t('settings.notifOutForDeliveryDesc')}
                 value={prefs.outForDeliveryAlerts}
                 onToggle={() => togglePref('outForDeliveryAlerts')}
                 disabled={isResidentSettingsReadOnly}
@@ -674,8 +711,8 @@ export default function SettingsScreen() {
               />
               <PrefToggle
                 icon={<PackageCheck size={16} color={tokens.accent} strokeWidth={2} />}
-                label="Package delivered"
-                description="Get pinged the moment your package arrives at your porch."
+                label={t('settings.notifDelivered')}
+                description={t('settings.notifDeliveredDesc')}
                 value={prefs.deliveredAlerts}
                 onToggle={() => togglePref('deliveredAlerts')}
                 disabled={isResidentSettingsReadOnly}
@@ -683,8 +720,8 @@ export default function SettingsScreen() {
               />
               <PrefToggle
                 icon={<HandHeart size={16} color={tokens.accent} strokeWidth={2} />}
-                label="Porch Partner updates"
-                description="Pickup, handoff, and completed notifications."
+                label={t('settings.notifPartnerUpdates')}
+                description={t('settings.notifPartnerUpdatesDesc')}
                 value={prefs.partnerPickupAlerts}
                 onToggle={() => togglePref('partnerPickupAlerts')}
                 disabled={isResidentSettingsReadOnly}
@@ -692,8 +729,8 @@ export default function SettingsScreen() {
               />
               <PrefToggle
                 icon={<MapPin size={16} color={tokens.accent} strokeWidth={2} />}
-                label="Neighborhood alerts"
-                description="Theft warnings and community activity nearby."
+                label={t('settings.notifNeighborhood')}
+                description={t('settings.notifNeighborhoodDesc')}
                 value={prefs.communityAlerts}
                 onToggle={() => togglePref('communityAlerts')}
                 disabled={isResidentSettingsReadOnly}
@@ -707,10 +744,10 @@ export default function SettingsScreen() {
                 </View>
                 <View style={styles.notifPrefText}>
                   <Text style={[styles.notifPrefLabel, { color: tokens.text }]}>
-                    Delivery sound
+                    {t('settings.soundTitle')}
                   </Text>
                   <Text style={[styles.notifPrefDesc, { color: tokens.textMuted }]}>
-                    Choose the sound played for delivery status updates.
+                    {t('settings.soundSubtitle')}
                   </Text>
                 </View>
               </View>
@@ -719,9 +756,9 @@ export default function SettingsScreen() {
                 {(['default', 'chime', 'silent'] as DeliverySound[]).map((sound) => {
                   const active = prefs.deliverySound === sound;
                   const labels: Record<DeliverySound, string> = {
-                    default: 'Default',
-                    chime: 'Chime',
-                    silent: 'Silent',
+                    default: t('settings.soundDefault'),
+                    chime: t('settings.soundChime'),
+                    silent: t('settings.soundSilent'),
                   };
                   return (
                     <TouchableOpacity
@@ -737,7 +774,7 @@ export default function SettingsScreen() {
                       activeOpacity={0.7}
                       disabled={isResidentSettingsReadOnly}
                       accessibilityRole="radio"
-                      accessibilityLabel={`${labels[sound]} delivery sound`}
+                      accessibilityLabel={t('settings.soundA11y', { label: labels[sound] })}
                       accessibilityState={{ selected: active }}
                     >
                       <Text
@@ -760,7 +797,7 @@ export default function SettingsScreen() {
 
           {!prefsLoaded && (
             <Text style={[styles.cardSubtitle, { color: tokens.textMuted }]}>
-              Loading preferences...
+              {t('settings.notifLoading')}
             </Text>
           )}
 
@@ -768,14 +805,14 @@ export default function SettingsScreen() {
 
           <SettingRow
             icon={<Bell size={16} color={tokens.accent} strokeWidth={2} />}
-            label="All notifications"
+            label={t('settings.notifAll')}
             onPress={() => router.push('/notifications' as any)}
             tokens={tokens}
           />
         </View>
 
         {/* ── Privacy & Security ── */}
-        <SectionHeader title="PRIVACY & SECURITY" tokens={tokens} />
+        <SectionHeader title={t('settings.sectionPrivacy')} tokens={tokens} />
 
         <View
           style={[
@@ -790,19 +827,19 @@ export default function SettingsScreen() {
         >
           <SettingRow
             icon={<Lock size={16} color={tokens.accent} strokeWidth={2} />}
-            label="Privacy policy"
+            label={t('settings.privacyPolicy')}
             onPress={() => router.push('/privacy-policy' as any)}
             tokens={tokens}
           />
           <SettingRow
             icon={<FileText size={16} color={tokens.accent} strokeWidth={2} />}
-            label="Terms of service"
+            label={t('settings.termsOfService')}
             onPress={() => router.push('/terms-of-service' as any)}
             tokens={tokens}
           />
           <SettingRow
             icon={<Shield size={16} color={tokens.accent} strokeWidth={2} />}
-            label="Community guidelines"
+            label={t('settings.communityGuidelines')}
             onPress={() => router.push('/community-guidelines' as any)}
             isLast
             tokens={tokens}
@@ -810,7 +847,7 @@ export default function SettingsScreen() {
         </View>
 
         {/* ── About ── */}
-        <SectionHeader title="ABOUT" tokens={tokens} />
+        <SectionHeader title={t('settings.sectionAbout')} tokens={tokens} />
 
         <View
           style={[
@@ -825,13 +862,13 @@ export default function SettingsScreen() {
         >
           <SettingRow
             icon={<Info size={16} color={tokens.accent} strokeWidth={2} />}
-            label="App version"
+            label={t('settings.appVersion')}
             value="1.0.6"
             tokens={tokens}
           />
           <SettingRow
             icon={<LogOut size={16} color={tokens.danger} strokeWidth={2} />}
-            label="Sign out"
+            label={t('settings.signOut')}
             onPress={async () => {
               try {
                 await signOut();

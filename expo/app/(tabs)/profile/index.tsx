@@ -4,7 +4,8 @@ import { Stack } from 'expo-router';
 import { Image } from 'expo-image';
 import { MapPin, Mail, Phone, Home, Shield, Bell, UserPlus, ChevronRight, FileText, Pencil, Send, LogOut, HelpCircle, CheckCircle, Trash2, Moon, Sun, ArrowRight, Handshake, BookOpen, Star, Building2, MailOpen, Globe } from 'lucide-react-native';
 import { sendSMSInvite, shareInvite } from '@/utils/invite';
-import { LanguagePicker } from '@/components/LanguagePicker';
+import { useTranslation } from 'react-i18next';
+import { useLanguage } from '@/i18n/LanguageProvider';
 import { COPY } from '@/config/copy';
 import { useColors, getColors } from '@/constants/colors';
 import { useTheme } from '@/store/ThemeContext';
@@ -43,6 +44,8 @@ export default function ProfileScreen() {
   const Colors = useColors();
   const { isDark, toggleTheme } = useTheme();
   const router = useRouter();
+  const { t } = useTranslation();
+  const { languageMeta } = useLanguage();
   const [inviting, setInviting] = React.useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -277,16 +280,23 @@ export default function ProfileScreen() {
 
           <View style={[styles.infoRowDivider, { backgroundColor: Colors.borderLight }]} />
 
-          {/* Language picker */}
-          <View style={styles.settingRow}>
+          {/* Language — dedicated selection screen */}
+          <TouchableOpacity
+            style={styles.settingRow}
+            onPress={() => router.push('/language' as any)}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel={`${t('settings.languageRow')}: ${languageMeta.nativeName}`}
+          >
             <View style={styles.settingLeft}>
               <Globe size={18} color={Colors.primary} />
-              <Text style={[styles.settingText, { color: Colors.slate }]}>Language</Text>
+              <Text style={[styles.settingText, { color: Colors.slate }]}>{t('settings.languageRow')}</Text>
+              <Text style={{ color: Colors.slateLighter, fontSize: 12.5 }}>
+                {languageMeta.nativeName}
+              </Text>
             </View>
-          </View>
-          <View style={{ paddingHorizontal: 14, paddingBottom: 14 }}>
-            <LanguagePicker />
-          </View>
+            <ChevronRight size={18} color={Colors.slateLighter} />
+          </TouchableOpacity>
 
           <View style={[styles.infoRowDivider, { backgroundColor: Colors.borderLight }]} />
 

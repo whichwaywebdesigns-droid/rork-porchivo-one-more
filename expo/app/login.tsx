@@ -47,6 +47,8 @@ import {
   PorchLightStatus,
 } from '@/components/onboarding';
 import type { PorchLightStage } from '@/components/onboarding';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
 
@@ -59,12 +61,12 @@ type ScreenState = 'init' | 'returning' | 'auth';
 type AuthMode = 'signin' | 'signup';
 type CredentialPath = 'biometric' | 'magiclink' | 'password';
 
-function getTimeGreeting(): string {
+function getTimeGreeting(t: TFunction<'translation', undefined>): string {
   const h = new Date().getHours();
-  if (h >= 5 && h < 12) return 'Good morning,';
-  if (h >= 12 && h < 17) return 'Good afternoon,';
-  if (h >= 17 && h < 21) return 'Good evening,';
-  return 'Good night,';
+  if (h >= 5 && h < 12) return t('login.greetingMorning');
+  if (h >= 12 && h < 17) return t('login.greetingAfternoon');
+  if (h >= 17 && h < 21) return t('login.greetingEvening');
+  return t('login.greetingNight');
 }
 
 /**
@@ -74,11 +76,12 @@ function getTimeGreeting(): string {
  * flicker the logo.
  */
 function LogoBlock() {
+  const { t } = useTranslation();
   return (
     <View style={styles.logoBlock}>
       <Image source={require('@/assets/images/icon.png')} style={styles.logoImage} />
       <Text style={styles.logoTitle}>Porchivo</Text>
-      <Text style={styles.logoTagline}>When porch pirates lurk, neighbors go to work.</Text>
+      <Text style={styles.logoTagline}>{t('login.tagline')}</Text>
     </View>
   );
 }
@@ -87,6 +90,7 @@ export default function LoginScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ mode?: string }>();
+  const { t } = useTranslation();
 
   const [screenState, setScreenState] = useState<ScreenState>('init');
   const [authMode, setAuthMode] = useState<AuthMode>('signin');
@@ -250,10 +254,10 @@ export default function LoginScreen() {
 
     try {
       const result = await LocalAuthentication.authenticateAsync({
-        promptMessage: 'Unlock Porchivo',
-        fallbackLabel: 'Use email instead',
+        promptMessage: t('login.biometricPrompt'),
+        fallbackLabel: t('login.biometricFallback'),
         disableDeviceFallback: false,
-        cancelLabel: 'Cancel',
+        cancelLabel: t('common.cancel'),
       });
 
       if (result.success) {
@@ -262,49 +266,49 @@ export default function LoginScreen() {
           triggerSuccessAndRoute(() => router.replace('/(tabs)/(home)' as any));
         } else {
           Alert.alert(
-            'Session Expired',
-            'Your session has expired. Sign in with your email to continue — no password needed.',
-            [{ text: 'Continue', onPress: () => switchToAuth('signin') }]
+            t('login.sessionExpiredTitle'),
+            t('login.sessionExpiredMessage'),
+            [{ text: t('common.continue'), onPress: () => switchToAuth('signin') }]
           );
         }
       }
     } catch {}
     setIsBiometricLoading(false);
-  }, [isBiometricLoading, bioButtonScale, router, switchToAuth, triggerSuccessAndRoute]);
+  }, [isBiometricLoading, bioButtonScale, router, switchToAuth, triggerSuccessAndRoute, t]);
 
   const validateEmail = (email: string): boolean => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const validateMagicLink = useCallback((): boolean => {
     const errs: typeof errors = {};
-    if (!identifier.trim()) errs.identifier = 'Email is required';
-    else if (!validateEmail(identifier.trim())) errs.identifier = 'Enter a valid email address';
-    if (authMode === 'signup' && !name.trim()) errs.name = 'Full name is required';
-    if (authMode === 'signup' && !acceptedTerms) errs.terms = 'You must accept the Terms of Service and Privacy Policy';
+    if (!identifier.trim()) errs.identifier = t('login.emailRequired');
+    else if (!validateEmail(identifier.trim())) errs.identifier = t('login.invalidEmail');
+    if (authMode === 'signup' && !name.trim()) errs.name = t('login.nameRequired');
+    if (authMode === 'signup' && !acceptedTerms) errs.terms = t('login.termsRequired');
     setErrors(errs);
     return Object.keys(errs).length === 0;
-  }, [identifier, name, authMode, acceptedTerms]);
+  }, [identifier, name, authMode, acceptedTerms, t]);
 
   const validatePassword = useCallback((): boolean => {
     const errs: typeof errors = {};
-    if (!identifier.trim()) errs.identifier = 'Email is required';
-    else if (!validateEmail(identifier.trim())) errs.identifier = 'Enter a valid email address';
-    if (!password.trim()) errs.password = 'Password is required';
-    else if (password.length < 8) errs.password = 'Password must be at least 8 characters';
-    if (authMode === 'signup' && !name.trim()) errs.name = 'Full name is required';
-    if (authMode === 'signup' && !acceptedTerms) errs.terms = 'You must accept the Terms of Service and Privacy Policy';
+    if (!identifier.trim()) errs.identifier = t('login.emailRequired');
+    else if (!validateEmail(identifier.trim())) errs.identifier = t('login.invalidEmail');
+    if (!password.trim()) errs.password = t('login.passwordRequired');
+    else if (password.length < 8) errs.password = t('login.passwordTooShortValidation');
+    if (authMode === 'signup' && !name.trim()) errs.name = t('login.nameRequired');
+    if (authMode === 'signup' && !acceptedTerms) errs.terms = t('login.termsRequired');
     setErrors(errs);
     return Object.keys(errs).length === 0;
-  }, [identifier, password, name, authMode, acceptedTerms]);
+  }, [identifier, password, name, authMode, acceptedTerms, t]);
 
   const getSupabaseErrorMessage = (error: string): string => {
-    if (error.includes('Invalid login credentials')) return 'Incorrect email or password. Please try again.';
-    if (error.includes('Email not confirmed')) return 'Please confirm your email before signing in.';
-    if (error.includes('User already registered')) return 'An account with this email already exists. Try signing in.';
-    if (error.includes('Password should be at least')) return 'Password must be at least 8 characters.';
-    if (error.includes('rate limit')) return 'Too many attempts. Please wait a moment and try again.';
-    if (error.includes('Signups not allowed')) return 'Sign ups are currently disabled. Please contact support.';
-    if (error.includes('Legacy API') || error.includes('legacy_api')) return 'Authentication service configuration issue. Please contact support@porchivo.com.';
-    return 'Something went wrong. Please try again.';
+    if (error.includes('Invalid login credentials')) return t('login.incorrectCredentials');
+    if (error.includes('Email not confirmed')) return t('login.emailNotConfirmed');
+    if (error.includes('User already registered')) return t('login.userAlreadyRegistered');
+    if (error.includes('Password should be at least')) return t('login.passwordTooShort');
+    if (error.includes('rate limit')) return t('login.rateLimited');
+    if (error.includes('Signups not allowed')) return t('login.signupsDisabled');
+    if (error.includes('Legacy API') || error.includes('legacy_api')) return t('login.authConfigIssue');
+    return t('errors.generic');
   };
 
   const persistReturningUser = useCallback(async (displayName: string, email: string) => {
@@ -333,7 +337,7 @@ export default function LoginScreen() {
 
     try {
       if (!isSupabaseConfigured) {
-        Alert.alert('Setup Required', 'The app backend is not configured yet.');
+        Alert.alert(t('login.setupRequiredTitle'), t('login.setupRequiredMessage'));
         setIsSubmitting(false);
         return;
       }
@@ -356,7 +360,7 @@ export default function LoginScreen() {
           router.push('/auth-fail' as any);
           return;
         }
-        Alert.alert('Could not send link', getSupabaseErrorMessage(error.message));
+        Alert.alert(t('login.couldNotSendLinkTitle'), getSupabaseErrorMessage(error.message));
         setIsSubmitting(false);
         return;
       }
@@ -371,7 +375,7 @@ export default function LoginScreen() {
     } catch {
       const probe = await pingSupabase();
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert('Connection Error', !probe.ok ? 'Server unreachable. Check your internet connection.' : 'Something went wrong. Please try again.');
+      Alert.alert(t('login.connectionErrorTitle'), !probe.ok ? t('login.serverUnreachable') : t('errors.generic'));
     } finally {
       setIsSubmitting(false);
     }
@@ -393,7 +397,7 @@ export default function LoginScreen() {
 
     try {
       if (!isSupabaseConfigured) {
-        Alert.alert('Setup Required', 'The app backend is not configured yet.');
+        Alert.alert(t('login.setupRequiredTitle'), t('login.setupRequiredMessage'));
         setIsSubmitting(false);
         return;
       }
@@ -406,14 +410,14 @@ export default function LoginScreen() {
         });
 
         if (error) {
-          Alert.alert('Sign Up Failed', getSupabaseErrorMessage(error.message));
+          Alert.alert(t('login.signUpFailedTitle'), getSupabaseErrorMessage(error.message));
           setIsSubmitting(false);
           return;
         }
 
         if (data.user && !data.session) {
-          Alert.alert('Check Your Email', 'We sent a confirmation link to your email. Please confirm your account, then sign in.', [
-            { text: 'OK', onPress: () => setAuthMode('signin') },
+          Alert.alert(t('login.checkEmailTitle'), t('login.checkEmailMessage'), [
+            { text: t('common.ok'), onPress: () => setAuthMode('signin') },
           ]);
           setIsSubmitting(false);
           return;
@@ -435,7 +439,7 @@ export default function LoginScreen() {
             router.push('/auth-fail' as any);
             return;
           }
-          Alert.alert('Sign In Failed', getSupabaseErrorMessage(error.message));
+          Alert.alert(t('login.signInFailedTitle'), getSupabaseErrorMessage(error.message));
           setIsSubmitting(false);
           return;
         }
@@ -461,9 +465,9 @@ export default function LoginScreen() {
     } catch (err: any) {
       const msg = (err?.message ?? '').toLowerCase();
       if (msg.includes('network') || msg.includes('fetch') || msg.includes('timeout')) {
-        Alert.alert('Connection Error', 'Unable to reach the server. Check your internet connection.');
+        Alert.alert(t('login.connectionErrorTitle'), t('login.unreachableGeneric'));
       } else {
-        Alert.alert('Error', 'Something went wrong. Please try again.');
+        Alert.alert(t('common.errorTitle'), t('errors.generic'));
       }
     } finally {
       setIsSubmitting(false);
@@ -486,10 +490,10 @@ export default function LoginScreen() {
   const handleForgotPassword = useCallback(() => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     if (identifier.trim() && validateEmail(identifier.trim())) {
-      Alert.alert('Reset Password', `We'll send a reset link to ${identifier.trim()}.`, [
-        { text: 'Cancel', style: 'cancel' },
+      Alert.alert(t('login.resetPasswordTitle'), t('login.resetPasswordMessage', { email: identifier.trim() }), [
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Send Reset Link',
+          text: t('login.sendResetLink'),
           onPress: async () => {
             try {
               const redirectTo = Platform.OS === 'web' && typeof window !== 'undefined'
@@ -498,23 +502,23 @@ export default function LoginScreen() {
               const { error } = await supabase.auth.resetPasswordForEmail(identifier.trim(), {
                 redirectTo,
               });
-              if (error) Alert.alert('Error', getSupabaseErrorMessage(error.message));
-              else Alert.alert('Email Sent', 'Check your inbox for a password reset link.');
+              if (error) Alert.alert(t('common.errorTitle'), getSupabaseErrorMessage(error.message));
+              else Alert.alert(t('login.emailSentTitle'), t('login.emailSentMessage'));
             } catch {
-              Alert.alert('Error', 'Could not send reset email. Please try again.');
+              Alert.alert(t('common.errorTitle'), t('login.couldNotSendReset'));
             }
           },
         },
       ]);
     } else {
-      Alert.alert('Reset Password', 'Enter your email address above, then tap "Forgot?".');
+      Alert.alert(t('login.resetPasswordTitle'), t('login.resetPasswordInstruction'));
     }
-  }, [identifier]);
+  }, [identifier, t]);
 
   const handleGoogleSignIn = useCallback(() => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    Alert.alert('Google Sign In', 'Google authentication is coming soon.');
-  }, []);
+    Alert.alert(t('login.googleTitle'), t('login.googleComingSoon'));
+  }, [t]);
 
   const getQaCredentials = useCallback((): { email: string; password: string } => ({
     email: process.env.EXPO_PUBLIC_QA_EMAIL ?? 'qa@porchivo.dev',
@@ -559,7 +563,7 @@ export default function LoginScreen() {
 
     try {
       if (!isSupabaseConfigured) {
-        Alert.alert('Setup Required', 'The app backend is not configured yet.');
+        Alert.alert(t('login.setupRequiredTitle'), t('login.setupRequiredMessage'));
         return;
       }
 
@@ -692,7 +696,7 @@ export default function LoginScreen() {
           }}
           activeOpacity={0.8}
         >
-          <Text style={[styles.modeToggleText, authMode === 'signin' && styles.modeToggleTextActive]}>Sign In</Text>
+          <Text style={[styles.modeToggleText, authMode === 'signin' && styles.modeToggleTextActive]}>{t('login.signIn')}</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.modeToggleBtn}
@@ -701,7 +705,7 @@ export default function LoginScreen() {
           }}
           activeOpacity={0.8}
         >
-          <Text style={[styles.modeToggleText, authMode === 'signup' && styles.modeToggleTextActive]}>Create Account</Text>
+          <Text style={[styles.modeToggleText, authMode === 'signup' && styles.modeToggleTextActive]}>{t('login.createAccount')}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -743,7 +747,7 @@ export default function LoginScreen() {
       {authMode === 'signup' && (
         <TouchableOpacity style={styles.securityPill} onPress={() => setSheet('encryption')} activeOpacity={0.7}>
           <Lock size={12} color="#1B3A6B" />
-          <Text style={styles.securityPillText}>Your data is encrypted from sign-up</Text>
+          <Text style={styles.securityPillText}>{t('login.securityPill')}</Text>
           <ChevronRight size={12} color="rgba(27,58,107,0.5)" />
         </TouchableOpacity>
       )}
@@ -755,11 +759,11 @@ export default function LoginScreen() {
           <View style={styles.magicSentIcon}>
             <Check size={30} color="#1B3A6B" strokeWidth={3} />
           </View>
-          <Text style={styles.magicSentTitle}>Check your email</Text>
+          <Text style={styles.magicSentTitle}>{t('login.magicSentTitle')}</Text>
           <Text style={styles.magicSentSub}>
-            We sent a secure sign-in link to{'\n'}
+            {t('login.magicSentIntro')}{'\n'}
             <Text style={styles.magicSentEmail}>{identifier.trim()}</Text>
-            {'\n\n'}Tap the link on your device to continue — no password needed.
+            {'\n\n'}{t('login.magicSentOutro')}
           </Text>
           <TouchableOpacity
             style={styles.magicSentResendBtn}
@@ -769,7 +773,7 @@ export default function LoginScreen() {
             }}
             activeOpacity={0.7}
           >
-            <Text style={styles.magicSentResendText}>Use a different email</Text>
+            <Text style={styles.magicSentResendText}>{t('login.useDifferentEmail')}</Text>
           </TouchableOpacity>
         </View>
       ) : (
@@ -780,8 +784,8 @@ export default function LoginScreen() {
                 {biometricType === 'face' ? <ScanFace size={20} color="#1B3A6B" /> : <Fingerprint size={20} color="#1B3A6B" />}
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={styles.biometricQuickTitle}>{biometricType === 'face' ? 'Use Face ID' : 'Use Touch ID'}</Text>
-                <Text style={styles.biometricQuickSub}>Fastest way back in</Text>
+                <Text style={styles.biometricQuickTitle}>{biometricType === 'face' ? t('login.useFaceId') : t('login.useTouchId')}</Text>
+                <Text style={styles.biometricQuickSub}>{t('login.fastestWayBack')}</Text>
               </View>
               <ChevronRight size={16} color="rgba(27,58,107,0.5)" />
             </TouchableOpacity>
@@ -790,26 +794,26 @@ export default function LoginScreen() {
           {authMode === 'signup' &&
             renderInput(
               <User size={18} color="#7A5533" />,
-              'Full Name',
+              t('login.fullName'),
               name,
               (t) => {
                 setName(t);
                 if (errors.name) setErrors((p) => ({ ...p, name: undefined }));
               },
-              'Your full name',
+              t('login.fullNamePlaceholder'),
               { autoCapitalize: 'words', returnKeyType: 'next', onSubmitEditing: () => passwordRef.current?.focus(), testID: 'name-input' },
               errors.name
             )}
 
           {renderInput(
             <Mail size={18} color="#7A5533" />,
-            'Email Address',
+            t('login.emailAddress'),
             identifier,
-            (t) => {
-              setIdentifier(t);
+            (text) => {
+              setIdentifier(text);
               // Real-time email validation: show error as user types if invalid
-              if (t.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t.trim())) {
-                setErrors((p) => ({ ...p, identifier: 'Enter a valid email address' }));
+              if (text.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(text.trim())) {
+                setErrors((p) => ({ ...p, identifier: t('login.invalidEmail') }));
               } else {
                 setErrors((p) => ({ ...p, identifier: undefined }));
               }
@@ -832,10 +836,10 @@ export default function LoginScreen() {
           {credentialPath === 'password' && (
             <View style={styles.inputGroup}>
               <View style={styles.passwordLabelRow}>
-                <Text style={styles.inputLabel}>Password</Text>
+                <Text style={styles.inputLabel}>{t('login.password')}</Text>
                 {authMode === 'signin' && (
                   <TouchableOpacity onPress={handleForgotPassword} activeOpacity={0.7} testID="forgot-password">
-                    <Text style={styles.forgotText}>Forgot?</Text>
+                    <Text style={styles.forgotText}>{t('login.forgot')}</Text>
                   </TouchableOpacity>
                 )}
               </View>
@@ -846,7 +850,7 @@ export default function LoginScreen() {
                 <TextInput
                   ref={passwordRef}
                   style={[styles.textInput, { paddingRight: 44 }]}
-                  placeholder={authMode === 'signup' ? 'Create a strong password' : 'Enter your password'}
+                  placeholder={authMode === 'signup' ? t('login.passwordPlaceholderSignUp') : t('login.passwordPlaceholderSignIn')}
                   placeholderTextColor="rgba(101, 66, 35, 0.45)"
                   value={password}
                   onChangeText={(t) => {
@@ -878,7 +882,7 @@ export default function LoginScreen() {
               <View style={[styles.rememberCheckbox, rememberMe && styles.rememberCheckboxChecked]}>
                 {rememberMe && <Check size={11} color="#fff" strokeWidth={3} />}
               </View>
-              <Text style={styles.rememberText}>Keep me signed in</Text>
+              <Text style={styles.rememberText}>{t('login.keepSignedIn')}</Text>
             </TouchableOpacity>
           )}
 
@@ -899,13 +903,13 @@ export default function LoginScreen() {
                   {acceptedTerms && <Check size={11} color="#fff" strokeWidth={3} />}
                 </View>
                 <Text style={styles.termsText}>
-                  I agree to the{' '}
+                  {t('login.agreePrefix')}{' '}
                   <Text style={styles.termsLink} onPress={() => setSheet('terms')}>
-                    Terms of Service
+                    {t('settings.termsOfService')}
                   </Text>{' '}
-                  and{' '}
+                  {t('login.agreeAnd')}{' '}
                   <Text style={styles.termsLink} onPress={() => setSheet('privacy')}>
-                    Privacy Policy
+                    {t('settings.privacyPolicy')}
                   </Text>
                 </Text>
               </TouchableOpacity>
@@ -933,14 +937,14 @@ export default function LoginScreen() {
               {credentialPath !== 'password' && !isSubmitting && <Wand2 size={18} color="#fff" strokeWidth={2.4} />}
               <Text style={styles.submitBtnText}>
                 {isSubmitting
-                  ? 'Sending link…'
+                  ? t('login.sendingLink')
                   : credentialPath === 'password'
                   ? authMode === 'signin'
-                    ? 'Sign In'
-                    : 'Create Account'
+                    ? t('login.signIn')
+                    : t('login.createAccount')
                   : authMode === 'signin'
-                  ? 'Send me a sign-in link'
-                  : 'Send me a setup link'}
+                  ? t('login.sendSignInLink')
+                  : t('login.sendSetupLink')}
               </Text>
             </LinearGradient>
           </TouchableOpacity>
@@ -959,7 +963,7 @@ export default function LoginScreen() {
           testID="use-password-fallback"
         >
           <Lock size={12} color="rgba(27,58,107,0.55)" />
-          <Text style={styles.fallbackToggleText}>Prefer a password? Use password instead</Text>
+          <Text style={styles.fallbackToggleText}>{t('login.preferPassword')}</Text>
         </TouchableOpacity>
       )}
       {!magicLinkSent && credentialPath === 'password' && (
@@ -974,13 +978,13 @@ export default function LoginScreen() {
           activeOpacity={0.7}
         >
           <Wand2 size={12} color="rgba(27,58,107,0.55)" />
-          <Text style={styles.fallbackToggleText}>Go back to passwordless sign-in</Text>
+          <Text style={styles.fallbackToggleText}>{t('login.backToPasswordless')}</Text>
         </TouchableOpacity>
       )}
 
       <View style={styles.dividerRow}>
         <View style={styles.dividerLine} />
-        <Text style={styles.dividerText}>OR</Text>
+        <Text style={styles.dividerText}>{t('login.or')}</Text>
         <View style={styles.dividerLine} />
       </View>
 
@@ -988,13 +992,13 @@ export default function LoginScreen() {
         <View style={styles.googleIcon}>
           <Text style={styles.googleIconText}>G</Text>
         </View>
-        <Text style={styles.googleBtnText}>Continue with Google</Text>
+        <Text style={styles.googleBtnText}>{t('login.continueWithGoogle')}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.switchModeBtn} onPress={toggleAuthMode} activeOpacity={0.7} testID="switch-mode">
         <Text style={styles.switchModeText}>
-          {authMode === 'signin' ? "Don't have an account? " : 'Already have an account? '}
-          <Text style={styles.switchModeLink}>{authMode === 'signin' ? 'Sign up' : 'Sign in'}</Text>
+          {authMode === 'signin' ? t('login.noAccount') : t('login.haveAccount')}
+          <Text style={styles.switchModeLink}>{authMode === 'signin' ? t('login.signUpLink') : t('login.signInLink')}</Text>
         </Text>
       </TouchableOpacity>
 
@@ -1008,22 +1012,22 @@ export default function LoginScreen() {
         testID="guest-mode"
       >
         <Sparkles size={12} color="rgba(27,58,107,0.7)" />
-        <Text style={styles.guestText}>Just looking? Browse a demo neighborhood</Text>
+        <Text style={styles.guestText}>{t('login.guestBrowse')}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
         style={styles.supportBtn}
         onPress={() => {
-          Alert.alert('Support', 'Contact us at support@porchivo.com', [
-            { text: 'Cancel', style: 'cancel' },
-            { text: 'Email Support', onPress: () => Linking.openURL('mailto:support@porchivo.com?subject=Porchivo%20Support') },
+          Alert.alert(t('login.supportTitle'), t('login.supportMessage'), [
+            { text: t('common.cancel'), style: 'cancel' },
+            { text: t('login.emailSupport'), onPress: () => Linking.openURL('mailto:support@porchivo.com?subject=Porchivo%20Support') },
           ]);
         }}
         activeOpacity={0.7}
         testID="support-link"
       >
         <HelpCircle size={13} color="rgba(27,58,107,0.5)" />
-        <Text style={styles.supportText}>Need help? Contact support</Text>
+        <Text style={styles.supportText}>{t('login.needHelp')}</Text>
       </TouchableOpacity>
 
       {__DEV__ && (
@@ -1065,7 +1069,7 @@ export default function LoginScreen() {
               ]}
             >
               <View style={styles.returningMark}>
-                <Text style={styles.returningEyebrow}>Neighborhood watch, reimagined</Text>
+                <Text style={styles.returningEyebrow}>{t('login.returningEyebrow')}</Text>
                 <Text style={styles.wordmark}>Porchivo</Text>
               </View>
 
@@ -1078,7 +1082,7 @@ export default function LoginScreen() {
                 </View>
 
                 <View style={styles.greetingBlock}>
-                  <Text style={styles.greetingTime}>{getTimeGreeting()}</Text>
+                  <Text style={styles.greetingTime}>{getTimeGreeting(t)}</Text>
                   <Text style={styles.greetingName}>{returningName}</Text>
                 </View>
 
@@ -1088,12 +1092,12 @@ export default function LoginScreen() {
                       <TouchableOpacity style={styles.bioButton} onPress={handleBiometricAuth} disabled={isBiometricLoading} activeOpacity={0.9}>
                         <LinearGradient colors={['#1B3A6B', '#2C5299']} style={styles.bioButtonGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
                           {isBiometricLoading ? (
-                            <Text style={styles.bioButtonText}>{porchStage === 'verified' ? 'Verified' : 'Checking Face ID…'}</Text>
+                            <Text style={styles.bioButtonText}>{porchStage === 'verified' ? t('login.verified') : t('login.checkingBiometric')}</Text>
                           ) : (
                             <>
                               {biometricType === 'face' ? <ScanFace size={22} color="#fff" /> : <Fingerprint size={22} color="#fff" />}
                               <Text style={styles.bioButtonText}>
-                                {biometricType === 'face' ? 'Continue with Face ID' : 'Continue with Touch ID'}
+                                {biometricType === 'face' ? t('login.continueFaceId') : t('login.continueTouchId')}
                               </Text>
                             </>
                           )}
@@ -1103,31 +1107,31 @@ export default function LoginScreen() {
 
                     <View style={styles.porchDividerRow}>
                       <View style={styles.porchDividerLine} />
-                      <Text style={styles.porchDividerText}>OR</Text>
+                      <Text style={styles.porchDividerText}>{t('login.or')}</Text>
                       <View style={styles.porchDividerLine} />
                     </View>
 
                     <TouchableOpacity style={styles.porchEmailBtn} onPress={() => switchToAuth('signin')} activeOpacity={0.85}>
                       <Mail size={16} color="#1B3A6B" />
-                      <Text style={styles.porchEmailBtnText}>Continue with email</Text>
+                      <Text style={styles.porchEmailBtnText}>{t('login.continueEmail')}</Text>
                     </TouchableOpacity>
                   </>
                 ) : (
                   <TouchableOpacity style={styles.bioButton} onPress={() => switchToAuth('signin')} activeOpacity={0.9}>
                     <LinearGradient colors={['#1B3A6B', '#2C5299']} style={styles.bioButtonGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
                       <Mail size={20} color="#fff" />
-                      <Text style={styles.bioButtonText}>Continue with email</Text>
+                      <Text style={styles.bioButtonText}>{t('login.continueEmail')}</Text>
                     </LinearGradient>
                   </TouchableOpacity>
                 )}
               </View>
 
               <Text style={styles.trustLineText}>
-                Encrypted end-to-end. Your address is only ever shared with your verified neighbors.
+                {t('login.trustLine')}
               </Text>
 
               <TouchableOpacity style={styles.notMeBtn} onPress={() => switchToAuth('signin')} activeOpacity={0.7}>
-                <Text style={styles.notMeText}>Not {returningName}?</Text>
+                <Text style={styles.notMeText}>{t('login.notMe', { name: returningName })}</Text>
                 <ChevronRight size={13} color="rgba(27,58,107,0.5)" />
               </TouchableOpacity>
             </View>

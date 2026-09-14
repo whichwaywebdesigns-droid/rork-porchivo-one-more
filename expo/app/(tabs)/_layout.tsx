@@ -4,6 +4,7 @@ import { Tabs } from 'expo-router';
 import { Home, CreditCard, Wrench, MoreHorizontal, Package, Handshake, User, Building2 } from 'lucide-react-native';
 import { useColors } from '@/constants/colors';
 import { useOrganization } from '@/store/OrganizationContext';
+import { useTranslation } from 'react-i18next';
 import { isEnabled } from '@/lib/featureFlags';
 import { TabShellSkeleton } from '@/components/SkeletonLoader';
 
@@ -19,6 +20,7 @@ import { TabShellSkeleton } from '@/components/SkeletonLoader';
 export default function TabLayout() {
   const Colors = useColors();
   const { isOrgMember, isLoading: isOrgLoading } = useOrganization();
+  const { t } = useTranslation();
   const showPorchPartners = isEnabled('PORCH_PARTNERS');
 
   const tabOptions = {
@@ -51,7 +53,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="(home)"
           options={{
-            title: 'Home',
+            title: t('tab.home'),
             tabBarIcon: ({ color, focused }) => (
               <Home size={22} color={color} fill={focused ? color : 'transparent'} />
             ),
@@ -60,7 +62,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="payments"
           options={{
-            title: 'Payments',
+            title: t('tab.payments'),
             tabBarIcon: ({ color, focused }) => (
               <CreditCard size={22} color={color} fill={focused ? color : 'transparent'} />
             ),
@@ -69,7 +71,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="requests"
           options={{
-            title: 'Requests',
+            title: t('tab.requests'),
             tabBarIcon: ({ color, focused }) => (
               <Wrench size={22} color={color} fill={focused ? color : 'transparent'} />
             ),
@@ -78,7 +80,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="more"
           options={{
-            title: 'More',
+            title: t('tab.more'),
             tabBarIcon: ({ color, focused }) => (
               <MoreHorizontal size={22} color={color} fill={focused ? color : 'transparent'} />
             ),
@@ -101,7 +103,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="packages"
         options={{
-          title: 'Deliveries',
+          title: t('tab.deliveries'),
           tabBarIcon: ({ color, focused }) => (
             <Package size={22} color={color} fill={focused ? color : 'transparent'} />
           ),
@@ -110,7 +112,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="porch-partner"
         options={{
-          title: 'Porch Partner',
+          title: t('tab.porchPartner'),
           href: showPorchPartners ? undefined : null,
           tabBarIcon: ({ color, focused }) => (
             <Handshake size={22} color={color} fill={focused ? color : 'transparent'} />
@@ -120,7 +122,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Account',
+          title: t('tab.account'),
           tabBarIcon: ({ color, focused }) => (
             <User size={22} color={color} fill={focused ? color : 'transparent'} />
           ),
