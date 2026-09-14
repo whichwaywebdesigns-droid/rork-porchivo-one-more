@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ChevronLeft, ChevronRight, Play } from "lucide-react";
+import { ChevronLeft, ChevronRight, ExternalLink, Play } from "lucide-react";
 import Reveal from "@/components/landing/Reveal";
 
 type CarouselVideo = {
@@ -20,6 +20,8 @@ const VIDEOS: CarouselVideo[] = [
  * Simple YouTube video carousel for the landing page (channel videos).
  * Embeds are click-to-play — nothing is fetched from YouTube until the
  * visitor taps play, so the section costs one thumbnail per video.
+ * A "Watch on YouTube" fallback link guarantees the videos stay reachable
+ * even where cross-origin iframes are blocked (preview panes, extensions).
  * All copy is i18n-managed (see `landing.videos.*` in locales.ts).
  */
 export default function VideoCarousel() {
@@ -27,16 +29,17 @@ export default function VideoCarousel() {
   const [active, setActive] = useState(0);
   const [playing, setPlaying] = useState(false);
 
+  // Hooks must run unconditionally — no early returns above this line.
+  const goTo = useCallback((index: number) => {
+    setPlaying(false);
+    setActive(((index % VIDEOS.length) + VIDEOS.length) % VIDEOS.length);
+  }, []);
+
   const video = VIDEOS[active];
   if (!video) return null;
 
   const title = t(`landing.videos.v${active + 1}.title`);
   const description = t(`landing.videos.v${active + 1}.desc`);
-
-  const goTo = useCallback((index: number) => {
-    setPlaying(false);
-    setActive(((index % VIDEOS.length) + VIDEOS.length) % VIDEOS.length);
-  }, []);
 
   const stage = video.vertical
     ? "mx-auto aspect-[9/16] w-full max-w-[320px]"
@@ -74,10 +77,11 @@ export default function VideoCarousel() {
                 <iframe
                   key={video.id}
                   className="h-full w-full"
-                  src={`https://www.youtube-nocookie.com/embed/${video.id}?autoplay=1&rel=0&modestbranding=1`}
+                  src={`https://www.youtube.com/embed/${video.id}?autoplay=1&playsinline=1&rel=0`}
                   title={title}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
+                  referrerPolicy="strict-origin-when-cross-origin"
                 />
               ) : (
                 <button
@@ -146,6 +150,15 @@ export default function VideoCarousel() {
           <p className="mt-2 text-sm leading-relaxed text-white/60 sm:text-base">
             {description}
           </p>
+          <a
+            href={`https://www.youtube.com/watch?v=${video.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-3 inline-flex items-center gap-1.5 text-sm text-white/50 underline-offset-4 transition-colors hover:text-pv-amber hover:underline"
+          >
+            {t("landing.videos.watchOnYoutube")}
+            <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+          </a>
         </Reveal>
       </div>
     </section>

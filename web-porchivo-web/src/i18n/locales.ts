@@ -159,6 +159,7 @@ const en = {
   "landing.videos.v3.title": "Neighbors Protecting Neighbors — Stopping Porch Pirates for Good",
   "landing.videos.v3.desc":
     "The idea behind Porchivo: real neighbors, real accountability, and a delivery network that makes your porch the safest spot on the street.",
+  "landing.videos.watchOnYoutube": "Watch on YouTube",
 };
 
 /** Translation keys with string values (en is the canonical key set). */
@@ -317,6 +318,7 @@ const es: Partial<TranslationKeys> = {
   "landing.videos.v3.title": "Vecinos protegiendo vecinos — acabando con los piratas de porches para siempre",
   "landing.videos.v3.desc":
     "La idea detrás de Porchivo: vecinos reales, responsabilidad real y una red de entregas que hace de tu porche el lugar más seguro de la calle.",
+  "landing.videos.watchOnYoutube": "Ver en YouTube",
 };
 
 const fr: Partial<TranslationKeys> = {
