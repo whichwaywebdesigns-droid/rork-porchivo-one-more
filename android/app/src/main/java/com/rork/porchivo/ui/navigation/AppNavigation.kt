@@ -34,6 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -144,12 +145,20 @@ fun AppNavigation() {
                         NavigationBarItem(
                             selected = selected,
                             onClick = {
-                                navController.navigate(tab.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
+                                // Re-tapping the current tab returns to its root instead
+                                // of restoring a saved pushed screen (e.g. Pending Members).
+                                val inThisTab = navController.currentBackStackEntry?.destination?.hierarchy
+                                    ?.any { it.route == tab.route } == true
+                                if (inThisTab) {
+                                    navController.popBackStack(tab.route, inclusive = false)
+                                } else {
+                                    navController.navigate(tab.route) {
+                                        popUpTo(navController.graph.findStartDestination().id) {
+                                            saveState = true
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
                                     }
-                                    launchSingleTop = true
-                                    restoreState = true
                                 }
                             },
                             icon = {

@@ -52,6 +52,7 @@ import com.rork.porchivo.ui.theme.PorchivoTheme
 import com.rork.porchivo.ui.viewmodel.AppViewModel
 import java.text.SimpleDateFormat
 import java.util.Locale
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
@@ -112,6 +113,10 @@ fun PendingMembersScreen(
             if (result.isSuccess) {
                 members = members?.filterNot { it.membershipId == member.membershipId }
                 if (approve) haptic()
+                // Let the removal land visually, then return to the More menu —
+                // the tab stack used to stay parked on this screen (mirrors iOS).
+                delay(500)
+                navController.popBackStack()
             } else {
                 actionError = result.exceptionOrNull()?.message?.takeIf { it.isNotBlank() }
                     ?: "Something went wrong. Please try again."

@@ -13,6 +13,7 @@ import SwiftUI
 struct PendingMembersScreen: View {
     @Environment(AppState.self) private var appState
     @Environment(\.porchivo) private var c
+    @Environment(\.dismiss) private var dismiss
 
     @State private var members: [SupabaseService.PendingMemberRow] = []
     @State private var isLoading = true
@@ -222,6 +223,10 @@ struct PendingMembersScreen: View {
                 members.removeAll { $0.membershipId == member.membershipId }
             }
             Haptics.success()
+            // Let the removal land visually, then return to the More menu —
+            // the tab stack used to stay parked on this screen.
+            try? await Task.sleep(for: .milliseconds(500))
+            dismiss()
         case .failure(let err):
             actionError = Self.friendlyMessage(err)
             Haptics.error()

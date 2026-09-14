@@ -83,8 +83,19 @@ enum Route: Hashable {
 struct RouteView: View {
     let route: Route
     @Binding var path: NavigationPath
+    @Environment(\.pvTabIndex) private var tabIndex
 
     var body: some View {
+        destination
+            // Re-tap of the current tab pops its stack back to the root
+            // (recorded by MainTabView — see TabReselectMonitor).
+            .onChange(of: TabReselectMonitor.shared.stamp(for: tabIndex ?? -1)) { _, _ in
+                path = NavigationPath()
+            }
+    }
+
+    @ViewBuilder
+    private var destination: some View {
         switch route {
         case .create:        CreateScreen()
         case .packages:      PackagesScreen(path: $path)
