@@ -136,11 +136,13 @@ fun LoginScreen(
                     scope.launch {
                         val ok = appViewModel.verifyOtp(email, otpCode)
                         if (!ok) {
+                            // AuthFail only for errors that clearly mean "no account
+                            // exists" — timeouts, rate limits, and server hiccups must
+                            // not dead-end on "we couldn't find an account".
                             val err = appViewModel.authError.value ?: ""
-                            val isCodeError = err.contains("invalid", ignoreCase = true) ||
-                                err.contains("expired", ignoreCase = true) ||
-                                err.contains("code", ignoreCase = true)
-                            if (!isCodeError) {
+                            val accountMissing = err.contains("not found", ignoreCase = true) ||
+                                err.contains("no account", ignoreCase = true)
+                            if (accountMissing) {
                                 appViewModel.setShowAuthFail(true)
                             }
                         }

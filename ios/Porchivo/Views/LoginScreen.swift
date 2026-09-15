@@ -349,13 +349,14 @@ struct LoginScreen: View {
             if ok {
                 Haptics.success()
             } else {
-                // If the error suggests the user doesn't have an account,
-                // show the oops screen instead of an inline error.
-                let err = appState.authError ?? ""
-                if err.lowercased().contains("invalid") || err.lowercased().contains("expired") || err.lowercased().contains("code") {
-                    // Wrong/expired code — keep inline error
-                } else {
+                // Inline error by default — AuthFailScreen only for errors that
+                // clearly mean "no account exists". Timeouts, rate limits, and
+                // server hiccups must not dead-end on "we couldn't find an account".
+                let err = (appState.authError ?? "").lowercased()
+                if err.contains("not found") || err.contains("no account") {
                     showAuthFail = true
+                } else if (appState.authError ?? "").isEmpty {
+                    appState.authError = "Couldn't verify the code. Please try again."
                 }
             }
             // On success, RootView picks up authState change automatically.
