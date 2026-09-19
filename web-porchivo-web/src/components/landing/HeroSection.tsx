@@ -31,7 +31,7 @@ const STATS: Stat[] = [
 ];
 
 /** Single count-up stat with a glowing coral/amber number. */
-function HeroStat({ stat }: { stat: Stat }) {
+function HeroStat({ stat, index }: { stat: Stat; index: number }) {
   const { t } = useTranslation();
   const { ref, inView } = useInView<HTMLDivElement>({ threshold: 0.4 });
   const count = useAnimatedNumber(stat.end, { start: inView });
@@ -39,7 +39,12 @@ function HeroStat({ stat }: { stat: Stat }) {
 
   return (
     <div ref={ref} className="text-center lg:text-left">
-      <div className={`font-display text-2xl font-bold tabular-nums sm:text-4xl ${toneClass}`}>
+      <div
+        className={`font-display text-2xl font-bold tabular-nums sm:text-4xl ${toneClass}${
+          inView ? " motion-safe:animate-stat-glow" : ""
+        }`}
+        style={inView ? { animationDelay: `${index * 120}ms` } : undefined}
+      >
         {count.toLocaleString()}
         {stat.suffix}
       </div>
@@ -220,8 +225,8 @@ export default function HeroSection() {
         {/* ── Animated stat bar ── */}
         <Reveal delay={200} className="w-full">
           <div className="mt-12 grid grid-cols-3 gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-xl sm:gap-4 sm:p-6 lg:mt-16 lg:p-8">
-            {STATS.map((stat) => (
-              <HeroStat key={stat.labelKey} stat={stat} />
+            {STATS.map((stat, index) => (
+              <HeroStat key={stat.labelKey} stat={stat} index={index} />
             ))}
           </div>
         </Reveal>

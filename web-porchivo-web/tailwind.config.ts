@@ -126,6 +126,13 @@ export default {
           "0%, 100%": { boxShadow: "0 0 24px -6px rgba(52, 211, 153, 0.55)" },
           "50%": { boxShadow: "0 0 48px -2px rgba(52, 211, 153, 0.85)" },
         },
+        // One-shot attention glow for the hero stat numbers — drop-shadow
+        // without a color uses currentColor, so coral and emerald tones
+        // each glow in their own hue.
+        "stat-glow": {
+          "0%, 100%": { filter: "drop-shadow(0 0 0px rgba(0, 0, 0, 0))" },
+          "50%": { filter: "drop-shadow(0 0 12px currentColor)" },
+        },
         "scroll-dot": {
           "0%": { transform: "translateY(0)", opacity: "1" },
           "70%": { transform: "translateY(14px)", opacity: "0" },
@@ -157,6 +164,7 @@ export default {
         "accordion-up": "accordion-up 0.2s ease-out",
         float: "float 6s ease-in-out infinite",
         "glow-pulse": "glow-pulse 2.4s ease-in-out infinite",
+        "stat-glow": "stat-glow 1.1s ease-in-out 2",
         "scroll-dot": "scroll-dot 1.8s ease-in-out infinite",
         "ring-pulse": "ring-pulse 2.6s ease-out infinite",
       },
