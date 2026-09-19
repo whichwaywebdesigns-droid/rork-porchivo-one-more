@@ -104,4 +104,48 @@
     <priority>0.4</priority>
   </url>
 
+  <url>
+    <loc>https://porchivo.com/register-your-community.html</loc>
+    <lastmod>2026-09-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://porchivo.com/invite-code.jpg</image:loc>
+      <image:title>Porchivo app — invite code screen for a registered community</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://porchivo.com/residents-join-free.html</loc>
+    <lastmod>2026-09-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://porchivo.com/porch-handoff.jpg</image:loc>
+      <image:title>Porchivo — neighbor porch handoff</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://porchivo.com/risk-scoring.html</loc>
+    <lastmod>2026-09-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://porchivo.com/hoa-office.jpg</image:loc>
+      <image:title>Porchivo — real-time package risk scoring</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://porchivo.com/alerts-trigger-action.html</loc>
+    <lastmod>2026-09-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://porchivo.com/file-incident.jpg</image:loc>
+      <image:title>Porchivo app — file an incident screen</image:title>
+    </image:image>
+  </url>
+
 </urlset>
