@@ -1,37 +1,40 @@
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ChevronLeft, ChevronRight, ExternalLink, Play } from "lucide-react";
+import { ChevronLeft, ChevronRight, Play } from "lucide-react";
 import Reveal from "@/components/landing/Reveal";
 
 type CarouselVideo = {
-  /** YouTube video id */
-  id: string;
+  /** Self-hosted video file (public/videos) */
+  src: string;
+  /** Poster frame shown before playback */
+  poster: string;
   /** Vertical (Shorts) videos render in a centered 9:16 stage */
   vertical: boolean;
 };
 
 const VIDEOS: CarouselVideo[] = [
-  { id: "Ct7ihuOMXk", vertical: false },
-  { id: "WYgMACEgrd8", vertical: true },
-  { id: "LE6PIjZypDY", vertical: true },
+  { src: "/videos/porch-pirate.mp4", poster: "/images/porch-pirate-poster.jpg", vertical: false },
+  { src: "/videos/mailroom-shorts.mp4", poster: "/images/mailroom-shorts-poster.jpg", vertical: true },
+  { src: "/videos/neighbors-shorts.mp4", poster: "/images/neighbors-shorts-poster.jpg", vertical: true },
 ];
 
 /**
- * Simple YouTube video carousel for the landing page (channel videos).
- * Embeds are click-to-play — nothing is fetched from YouTube until the
- * visitor taps play, so the section costs one thumbnail per video.
- * A "Watch on YouTube" fallback link guarantees the videos stay reachable
- * even where cross-origin iframes are blocked (preview panes, extensions).
- * All copy is i18n-managed (see `landing.videos.*` in locales.ts).
+ * Self-hosted video carousel for the landing page — no YouTube embeds.
+ * Click-to-play: only the poster jpg is fetched until the visitor taps
+ * play, then a native <video> player mounts with sound and controls.
+ * Works in every environment (preview iframes, extensions) since nothing
+ * is cross-origin. All copy is i18n-managed (`landing.videos.*`).
  */
 export default function VideoCarousel() {
   const { t } = useTranslation();
   const [active, setActive] = useState(0);
   const [playing, setPlaying] = useState(false);
+  const [videoFailed, setVideoFailed] = useState(false);
 
   // Hooks must run unconditionally — no early returns above this line.
   const goTo = useCallback((index: number) => {
     setPlaying(false);
+    setVideoFailed(false);
     setActive(((index % VIDEOS.length) + VIDEOS.length) % VIDEOS.length);
   }, []);
 
@@ -73,25 +76,33 @@ export default function VideoCarousel() {
             <div
               className={`overflow-hidden rounded-2xl border border-white/10 bg-pv-navy-900 shadow-2xl shadow-black/40 ${stage}`}
             >
-              {playing ? (
-                <iframe
-                  key={video.id}
-                  className="h-full w-full"
-                  src={`https://www.youtube.com/embed/${video.id}?autoplay=1&playsinline=1&rel=0`}
+              {playing && !videoFailed ? (
+                <video
+                  key={video.src}
+                  className="h-full w-full bg-black"
+                  src={video.src}
                   title={title}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                  referrerPolicy="strict-origin-when-cross-origin"
+                  controls
+                  autoPlay
+                  playsInline
+                  preload="metadata"
+                  onError={() => {
+                    setPlaying(false);
+                    setVideoFailed(true);
+                  }}
                 />
               ) : (
                 <button
                   type="button"
-                  onClick={() => setPlaying(true)}
+                  onClick={() => {
+                    setVideoFailed(false);
+                    setPlaying(true);
+                  }}
                   className="group relative block h-full w-full cursor-pointer"
                   aria-label={t("landing.videos.play", { title })}
                 >
                   <img
-                    src={`https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`}
+                    src={video.poster}
                     alt=""
                     loading="lazy"
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
@@ -117,7 +128,7 @@ export default function VideoCarousel() {
               <div className="flex items-center gap-2.5">
                 {VIDEOS.map((v, i) => (
                   <button
-                    key={v.id}
+                    key={v.src}
                     type="button"
                     onClick={() => goTo(i)}
                     aria-label={t("landing.videos.goTo", { index: i + 1 })}
@@ -150,15 +161,6 @@ export default function VideoCarousel() {
           <p className="mt-2 text-sm leading-relaxed text-white/60 sm:text-base">
             {description}
           </p>
-          <a
-            href={`https://www.youtube.com/watch?v=${video.id}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-3 inline-flex items-center gap-1.5 text-sm text-white/50 underline-offset-4 transition-colors hover:text-pv-amber hover:underline"
-          >
-            {t("landing.videos.watchOnYoutube")}
-            <ExternalLink className="h-3.5 w-3.5" aria-hidden />
-          </a>
         </Reveal>
       </div>
     </section>
