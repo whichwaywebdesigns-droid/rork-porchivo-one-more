@@ -124,7 +124,7 @@ export default function HeroSection() {
       </div>
 
       {/* ── Content: shield video left, copy right (stacked copy-first on mobile) ── */}
-      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 items-center px-4 pt-28 sm:px-6 lg:px-8">
+      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col items-center justify-center px-4 pt-28 sm:px-6 lg:px-8">
         <div className="grid w-full items-center gap-10 lg:grid-cols-2 lg:gap-8">
           {/* Copy */}
           <div className="order-1 text-center lg:order-2 lg:text-left">
@@ -218,7 +218,7 @@ export default function HeroSection() {
         </div>
 
         {/* ── Animated stat bar ── */}
-        <Reveal delay={200}>
+        <Reveal delay={200} className="w-full">
           <div className="mt-12 grid grid-cols-3 gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-xl sm:gap-4 sm:p-6 lg:mt-16 lg:p-8">
             {STATS.map((stat) => (
               <HeroStat key={stat.labelKey} stat={stat} />
