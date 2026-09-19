@@ -1,9 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowRight, Globe, ShieldCheck, UserPlus } from "lucide-react";
-import LazyModelViewer from "@/components/landing/LazyModelViewer";
-import ModelFallback from "@/components/landing/ModelFallback";
+import { ArrowRight, Globe, UserPlus } from "lucide-react";
 import Reveal from "@/components/landing/Reveal";
 import HeroLanguageSwitch from "@/components/landing/HeroLanguageSwitch";
 import { scrollToHash } from "@/components/landing/LandingNav";
@@ -13,9 +11,9 @@ import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 
 const HERO_VIDEO = "/assets/hero-loop.mp4";
 const HERO_POSTER = "/images/hero-dusk-street.jpg";
-const SHIELD_MODEL = "/assets/community-shield.glb";
-// Still render shown wherever the community-shield 3D model can't run.
-const SHIELD_STILL = "/images/community-shield.jpg";
+// Owner-supplied shield showcase video — fills the hero's model column.
+const SHIELD_VIDEO = "/assets/hero-shield-loop.mp4";
+const SHIELD_VIDEO_POSTER = "/images/hero-shield-poster.jpg";
 
 /** Hero trust-bar stats — count up when scrolled into view. */
 interface Stat {
@@ -52,7 +50,7 @@ function HeroStat({ stat }: { stat: Stat }) {
 
 /**
  * Fullscreen B2B hero: ambient community-dusk video under a 70% navy
- * overlay, the community-shield 3D model (pointer-parallax, auto-rotate),
+ * overlay, the shield showcase video in a glass frame (pointer-parallax),
  * the enterprise headline + dual CTAs, the worldwide trust line, and the
  * animated stat bar.
  */
@@ -62,6 +60,7 @@ export default function HeroSection() {
   const modelWrapRef = useRef<HTMLDivElement | null>(null);
   const rafRef = useRef<number | null>(null);
   const [videoFailed, setVideoFailed] = useState(false);
+  const [shieldVideoFailed, setShieldVideoFailed] = useState(false);
 
   // Subtle pointer parallax on the 3D model — mouse only, rAF-throttled.
   const onPointerMove = useCallback(
@@ -90,6 +89,7 @@ export default function HeroSection() {
   );
 
   const showVideo = !reducedMotion && !videoFailed;
+  const showShieldVideo = !reducedMotion && !shieldVideoFailed;
 
   return (
     <section
@@ -123,7 +123,7 @@ export default function HeroSection() {
         <div className="absolute inset-0 bg-[radial-gradient(60%_50%_at_30%_38%,rgba(56,189,248,0.16),transparent_70%)]" />
       </div>
 
-      {/* ── Content: 3D model left, copy right (stacked copy-first on mobile) ── */}
+      {/* ── Content: shield video left, copy right (stacked copy-first on mobile) ── */}
       <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 items-center px-4 pt-28 sm:px-6 lg:px-8">
         <div className="grid w-full items-center gap-10 lg:grid-cols-2 lg:gap-8">
           {/* Copy */}
@@ -186,25 +186,34 @@ export default function HeroSection() {
             </Reveal>
           </div>
 
-          {/* ── 3D community-shield model (pointer-parallax wrapper) ── */}
+          {/* ── Shield showcase video in a glass frame (pointer-parallax wrapper) ── */}
           <div
             ref={modelWrapRef}
-            className="order-2 mx-auto h-[320px] w-full max-w-md transition-transform duration-300 ease-out will-change-transform sm:h-[440px] lg:order-1 lg:h-[560px]"
+            className="order-2 mx-auto h-[320px] w-[320px] transition-transform duration-300 ease-out will-change-transform sm:h-[440px] sm:w-[440px] lg:order-1 lg:h-[560px] lg:w-[560px]"
           >
-            <LazyModelViewer
-              src={SHIELD_MODEL}
-              alt={t("landing.hero.modelAlt")}
-              cameraOrbit="35deg 74deg auto"
-              fallback={
-                <ModelFallback
-                  icon={ShieldCheck}
-                  label="A glowing protective shield over a neighborhood"
-                  image={SHIELD_STILL}
-                  className="h-full w-full"
+            <div className="relative h-full w-full overflow-hidden rounded-3xl border border-white/15 shadow-[0_0_90px_-20px_rgba(56,189,248,0.4)]">
+              {showShieldVideo ? (
+                <video
+                  className="h-full w-full object-cover"
+                  src={SHIELD_VIDEO}
+                  poster={SHIELD_VIDEO_POSTER}
+                  aria-label={t("landing.hero.modelAlt")}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                  onError={() => setShieldVideoFailed(true)}
                 />
-              }
-              className="h-full w-full"
-            />
+              ) : (
+                <img
+                  src={SHIELD_VIDEO_POSTER}
+                  alt={t("landing.hero.modelAlt")}
+                  className="h-full w-full object-cover"
+                />
+              )}
+              <div className="pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-inset ring-white/10" />
+            </div>
           </div>
         </div>
 
