@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Residents and Porch Partners are notified instantly when risk thresholds are crossed — with a full chain-of-custody for every handoff.">
+<meta name="theme-color" content="#0a0f1e">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="canonical" href="https://porchivo.com/alerts-trigger-action.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Porchivo">
+<meta property="og:title" content="Instant Package Theft Alerts — Porchivo">
+<meta property="og:description" content="Residents and Porch Partners are notified instantly when risk thresholds are crossed — with a full chain-of-custody for every handoff.">
+<meta property="og:url" content="https://porchivo.com/alerts-trigger-action.html">
+<meta property="og:image" content="https://porchivo.com/file-incident.jpg">
+<meta property="og:image:alt" content="Porchivo app — file an incident screen with delivery issue categories">
+<meta name="twitter:image" content="https://porchivo.com/file-incident.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Instant Package Theft Alerts — Porchivo">
+<meta name="twitter:description" content="Residents and Porch Partners are notified instantly when risk thresholds are crossed — with a full chain-of-custody for every handoff.">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Organization", "name": "Porchivo", "url": "https://porchivo.com/", "email": "support@porchivo.com", "address": {"@type": "PostalAddress", "streetAddress": "800 Sycamore #329", "addressLocality": "Evansville", "addressRegion": "IN", "postalCode": "47708", "addressCountry": "US"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Product", "name": "Porchivo", "description": "Real-time package risk scoring, instant alerts, and a neighbor-held delivery network for HOAs and apartment communities. No hardware required.", "brand": {"@type": "Brand", "name": "Porchivo"}, "offers": {"@type": "Offer", "price": "99", "priceCurrency": "USD", "availability": "https://schema.org/InStock", "description": "Communities subscribe from $99/mo. Residents always join free."}}</script>
+<title>Instant Package Theft Alerts — Porchivo</title>
+<meta name="description" content="Residents and Porch Partners are notified instantly when risk thresholds are crossed — with a full chain-of-custody for every handoff.">
+<link rel="stylesheet" href="porchivo.css">
+<style>
+ :root{
+ --eyebrow-bg:rgba(248,113,113,.12); --eyebrow-border:rgba(248,113,113,.3); --eyebrow-color:#f87171; --eyebrow-glow:#f87171;
+ --grad-from:#f87171; --grad-to:var(--accent);
+ --edge-1:rgba(248,113,113,.35); --edge-2:rgba(52,211,153,.25);
+ --badge-bg:rgba(248,113,113,.12); --badge-border:rgba(248,113,113,.3); --badge-color:#f87171;
+ --hero-glow-1:rgba(248,113,113,.13); --hero-glow-2:rgba(52,211,153,.1); --hero-glow-x:72%;
+ --card-hover-border:rgba(248,113,113,.45);
+ --icon-bg:rgba(248,113,113,.12); --icon-border:rgba(248,113,113,.3); --icon-stroke:#f87171;
+ --stat-color:#f87171; --cta-glow:rgba(248,113,113,.11);
+ --red:#f87171; --amber:#fbbf24;
+ }
+ .eyebrow .dot,.hc-badge{animation:pulse 1.6s infinite;}
+ @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+ .alert-item{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid rgba(30,42,69,.8);}
+ .alert-item:last-child{border-bottom:none;}
+ .alert-icon{width:36px;height:36px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+ .a-red{background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.35);}
+ .a-green{background:var(--accent-soft);border:1px solid rgba(52,211,153,.35);}
+ .a-amber{background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.35);}
+ .alert-item h4{font-size:.88rem;font-weight:700;}
+ .alert-item p{font-size:.78rem;color:var(--muted);}
+ .alert-item .time{margin-left:auto;font-size:.72rem;color:var(--muted);white-space:nowrap;flex-shrink:0;}
+ .custody-strip{margin-top:18px;background:#0b1120;border:1px solid rgba(52,211,153,.25);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:10px;font-size:.8rem;color:var(--muted);}
+ .custody-strip strong{color:var(--accent);}
+ .custody-strip svg{flex-shrink:0;}
+ .insight-panel{background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius);padding:26px;}
+ .insight-panel h4{font-size:.9rem;font-weight:700;margin-bottom:18px;}
+ .zone-row{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+ .zone-row:last-child{margin-bottom:0;}
+ .zone-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;}
+ .zone-name{flex:1;font-size:.85rem;color:#d7deee;}
+ .zone-bar{width:120px;height:6px;border-radius:99px;background:#1a2440;overflow:hidden;flex-shrink:0;}
+ .zone-bar .z{height:100%;border-radius:99px;}
+ .zone-val{font-size:.78rem;font-weight:700;width:32px;text-align:right;flex-shrink:0;}
+ .steps-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+ @media(max-width:900px){.steps-strip{grid-template-columns:1fr 1fr;}}
+ @media(max-width:560px){.steps-strip{grid-template-columns:1fr;}}
+ .step-chip{background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius);padding:22px;opacity:.55;transition:opacity .2s,border-color .2s;}
+ .step-chip.active{opacity:1;border-color:rgba(248,113,113,.5);box-shadow:0 0 30px rgba(248,113,113,.08);}
+ .step-chip .num{font-size:.75rem;font-weight:800;letter-spacing:.1em;color:var(--muted);margin-bottom:8px;display:block;}
+ .step-chip.active .num{color:var(--red);}
+ .step-chip h3{font-size:.95rem;font-weight:700;margin-bottom:5px;}
+ .step-chip p{font-size:.8rem;color:var(--muted);}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+ <div class="container nav-inner">
+ <a class="logo" href="https://porchivo.com/"><span class="logo-mark"><img src="logo.png" alt="Porchivo logo"></span>Porchivo</a>
+ <div class="nav-links">
+ <a href="#alerts">How alerts work</a>
+ <a href="#insights">Manager insights</a>
+ <a href="#recap">The full loop</a>
+ <a href="https://porchivo.com/" class="btn btn-primary nav-cta">Register Your Community</a>
+ </div>
+ </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+ <div class="container hero-grid">
+ <div>
+ <span class="eyebrow"><span class="dot"></span>Step 04 — Alerts Trigger Action</span>
+ <h1>When risk crosses the line, <span class="grad">the neighborhood moves.</span></h1>
+ <p class="hero-sub">The moment a package crosses your risk threshold, residents and nearby Porch Partners are notified instantly — trusted neighbors ready to receive and hold deliveries safely. Every handoff is logged with a full chain-of-custody, so nothing vanishes into thin air.</p>
+ <div class="hero-ctas">
+ <a href="https://porchivo.com/" class="btn btn-primary">Register Your Community →</a>
+ <a href="#alerts" class="btn btn-ghost">See alerts in action</a>
+ </div>
+ <div class="hero-proof">
+ <span class="proof-item"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Instant threshold alerts</span>
+ <span class="proof-item"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Porch Partners on standby</span>
+ <span class="proof-item"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Chain-of-custody logged</span>
+ </div>
+ </div>
+
+ <!-- Live alert feed visual -->
+ <div class="hero-card">
+ <div class="hc-head">
+ <span class="hc-title">Community Alert Feed</span>
+ <span class="hc-badge">● ALERT ACTIVE</span>
+ </div>
+ <img class="hero-shot" src="file-incident.jpg" alt="Porchivo app — file an incident screen with delivery issue categories">
+ <div class="alert-item">
+ <div class="alert-icon a-red"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+ <div><h4>Risk threshold crossed — Package #4821</h4><p>Resident + 3 nearby Porch Partners notified</p></div>
+ <span class="time">now</span>
+ </div>
+ <div class="alert-item">
+ <div class="alert-icon a-green"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+ <div><h4>Amara S. accepted the handoff</h4><p>Porch Partner · Unit 12C · reputation 4.9</p></div>
+ <span class="time">1m</span>
+ </div>
+ <div class="alert-item">
+ <div class="alert-icon a-amber"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/></svg></div>
+ <div><h4>Package received and logged</h4><p>Chain-of-custody updated · photos attached</p></div>
+ <span class="time">4m</span>
+ </div>
+ <div class="alert-item">
+ <div class="alert-icon a-green"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+ <div><h4>Handoff complete — resident notified</h4><p>Marta R. confirmed pickup at Unit 4B</p></div>
+ <span class="time">26m</span>
+ </div>
+ <div class="custody-strip">
+ <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+ <span><strong>Chain-of-custody complete</strong> · 4 events · 0 gaps · exportable</span>
+ </div>
+ </div>
+ </div>
+</header>
+
+<!-- STATS -->
+<div class="stats">
+ <div class="container stats-grid">
+ <div class="stat"><div class="stat-num">Instant</div><div class="stat-label">alerts to residents and nearby Porch Partners the moment thresholds are crossed</div></div>
+ <div class="stat"><div class="stat-num">4%</div><div class="stat-label">of delivered packages are stolen from porches — alerts close the window pirates need</div></div>
+ <div class="stat"><div class="stat-num">100%</div><div class="stat-label">of protected handoffs logged with a full, exportable chain-of-custody</div></div>
+ </div>
+</div>
+
+<!-- HOW ALERTS WORK -->
+<section id="alerts">
+ <div class="container">
+ <div class="section-head">
+ <span class="section-tag">From score to action</span>
+ <h2>What happens when the threshold is crossed</h2>
+ <p class="section-sub">No dashboards to babysit. No phone trees. The alert does the coordinating — neighbors do the protecting.</p>
+ </div>
+ <div class="cards">
+ <div class="card">
+ <div class="card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+ <h3>Resident alerted instantly</h3>
+ <p>The resident knows their package is at risk before the driver even pulls away — with options to redirect, reschedule, or call in a Partner.</p>
+ </div>
+ <div class="card">
+ <div class="card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+ <h3>Nearby Partners pinged</h3>
+ <p>Opted-in Porch Partners within range get the alert too. The first to accept takes the handoff — earning income and reputation.</p>
+ </div>
+ <div class="card">
+ <div class="card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+ <h3>Every handoff on record</h3>
+ <p>Acceptance, receipt, photos, and final pickup — all logged. If a claim ever happens, the paper trail already exists.</p>
+ </div>
+ </div>
+ </div>
+</section>
+
+<!-- MANAGER INSIGHTS -->
+<section id="insights" style="background:var(--bg-2);border-top:1px solid var(--card-border);border-bottom:1px solid var(--card-border);">
+ <div class="container split">
+ <div>
+ <span class="section-tag">For managers &amp; boards</span>
+ <h2>See the whole picture — not just the alerts</h2>
+ <p>Managers see <strong>active risk zones, theft hotspots, and delivery congestion</strong> across the community, plus chain-of-custody records for every protected handoff.</p>
+ <p>Resident engagement and satisfaction signals help you <strong>spot renewal risk before it becomes a resignation letter.</strong> Everything is exportable for board reports.</p>
+ <a href="https://porchivo.com/" class="btn btn-primary" style="margin-top:8px;">See Manager Insights →</a>
+ </div>
+ <div class="insight-panel">
+ <h4>Live community risk map — this week</h4>
+ <div class="zone-row"><span class="zone-dot" style="background:var(--red);box-shadow:0 0 8px var(--red);"></span><span class="zone-name">Maple Ct. — Building A</span><span class="zone-bar"><span class="z" style="width:82%;background:var(--red);"></span></span><span class="zone-val" style="color:var(--red);">82</span></div>
+ <div class="zone-row"><span class="zone-dot" style="background:var(--amber);"></span><span class="zone-name">Sycamore Row — Porch cluster</span><span class="zone-bar"><span class="z" style="width:57%;background:var(--amber);"></span></span><span class="zone-val" style="color:var(--amber);">57</span></div>
+ <div class="zone-row"><span class="zone-dot" style="background:var(--accent);"></span><span class="zone-name">Front desk — Lobby holds</span><span class="zone-bar"><span class="z" style="width:24%;background:var(--accent);"></span></span><span class="zone-val" style="color:var(--accent);">24</span></div>
+ <div class="zone-row"><span class="zone-dot" style="background:var(--accent);"></span><span class="zone-name">Elm Dr. — Partner zone</span><span class="zone-bar"><span class="z" style="width:18%;background:var(--accent);"></span></span><span class="zone-val" style="color:var(--accent);">18</span></div>
+ <div class="custody-strip" style="margin-top:20px;">
+ <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+ <span><strong>Export ready</strong> · board report · CSV · 1 click</span>
+ </div>
+ </div>
+ </div>
+</section>
+
+<!-- FULL LOOP RECAP -->
+<section id="recap">
+ <div class="container">
+ <div class="section-head">
+ <span class="section-tag">The complete loop</span>
+ <h2>Four steps. Zero hardware. One protected neighborhood.</h2>
+ <p class="section-sub">That's the entire system — from registration to resolved handoff.</p>
+ </div>
+ <div class="steps-strip">
+ <div class="step-chip"><span class="num">STEP 01</span><h3>Register your community</h3><p>Five minutes. No hardware, no IT.</p></div>
+ <div class="step-chip"><span class="num">STEP 02</span><h3>Residents join free</h3><p>One invite code. About a minute.</p></div>
+ <div class="step-chip"><span class="num">STEP 03</span><h3>Risk scores update</h3><p>Real-time scoring on every package.</p></div>
+ <div class="step-chip active"><span class="num">STEP 04 — YOU ARE HERE</span><h3>Alerts trigger action</h3><p>Neighbors move. Handoffs are logged.</p></div>
+ </div>
+ </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-cta">
+ <div class="container">
+ <span class="section-tag">Know before it's too late</span>
+ <h2>Your community could be protected by tonight.</h2>
+ <p class="section-sub">Register in about five minutes. Residents join free. Alerts start working the moment your first package is at risk.</p>
+ <a href="https://porchivo.com/" class="btn btn-primary" style="padding:16px 36px;font-size:1.02rem;">Register Your Community →</a>
+ <p class="fineprint">Questions? Email <a href="mailto:support@porchivo.com">support@porchivo.com</a> — a human replies, fast.</p>
+ </div>
+</section>
+
+<footer>
+ <div class="container footer-inner">
+ <a class="logo" href="https://porchivo.com/" style="font-size:1rem;"><span class="logo-mark" style="width:30px;height:30px;"><img src="logo.png" alt="Porchivo logo"></span>Porchivo</a>
+ <p>© 2026 Porchivo · 800 Sycamore #329, Evansville, IN 47708</p>
+ </div>
+</footer>
+
+</body>
+</html>

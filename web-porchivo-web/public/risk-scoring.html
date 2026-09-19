@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Every incoming package gets a real-time risk score based on timing, neighborhood activity, and theft history — before it lands.">
+<meta name="theme-color" content="#0a0f1e">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="canonical" href="https://porchivo.com/risk-scoring.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Porchivo">
+<meta property="og:title" content="Real-Time Package Risk Scoring — Porchivo">
+<meta property="og:description" content="Every incoming package gets a real-time risk score based on timing, neighborhood activity, and theft history — before it lands.">
+<meta property="og:url" content="https://porchivo.com/risk-scoring.html">
+<meta property="og:image" content="https://porchivo.com/hoa-office.jpg">
+<meta property="og:image:alt" content="HOA management team at their community office">
+<meta name="twitter:image" content="https://porchivo.com/hoa-office.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Real-Time Package Risk Scoring — Porchivo">
+<meta name="twitter:description" content="Every incoming package gets a real-time risk score based on timing, neighborhood activity, and theft history — before it lands.">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Organization", "name": "Porchivo", "url": "https://porchivo.com/", "email": "support@porchivo.com", "address": {"@type": "PostalAddress", "streetAddress": "800 Sycamore #329", "addressLocality": "Evansville", "addressRegion": "IN", "postalCode": "47708", "addressCountry": "US"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Product", "name": "Porchivo", "description": "Real-time package risk scoring, instant alerts, and a neighbor-held delivery network for HOAs and apartment communities. No hardware required.", "brand": {"@type": "Brand", "name": "Porchivo"}, "offers": {"@type": "Offer", "price": "99", "priceCurrency": "USD", "availability": "https://schema.org/InStock", "description": "Communities subscribe from $99/mo. Residents always join free."}}</script>
+<title>Real-Time Package Risk Scoring — Porchivo</title>
+<meta name="description" content="Every incoming package gets a real-time risk score based on timing, neighborhood activity, and theft history — before it lands.">
+<link rel="stylesheet" href="porchivo.css">
+<style>
+ :root{
+ --eyebrow-bg:rgba(251,191,36,.12); --eyebrow-border:rgba(251,191,36,.3); --eyebrow-color:var(--amber); --eyebrow-glow:var(--amber);
+ --grad-from:var(--amber); --grad-to:var(--accent);
+ --edge-1:rgba(251,191,36,.35); --edge-2:rgba(52,211,153,.25);
+ --badge-bg:rgba(251,191,36,.12); --badge-border:rgba(251,191,36,.3); --badge-color:var(--amber);
+ --hero-glow-1:rgba(251,191,36,.12); --hero-glow-2:rgba(52,211,153,.1); --hero-glow-x:70%;
+ --card-hover-border:rgba(251,191,36,.45);
+ --icon-bg:rgba(251,191,36,.12); --icon-border:rgba(251,191,36,.3); --icon-stroke:var(--amber);
+ --stat-color:var(--amber); --cta-glow:rgba(251,191,36,.12);
+ --amber:#fbbf24;
+ }
+ .score-gauge{text-align:center;padding:10px 0 20px;}
+ .gauge-ring{width:150px;height:150px;border-radius:50%;margin:0 auto 14px;position:relative;background:conic-gradient(#f87171 0 22%,var(--amber) 22% 58%,var(--accent) 58% 100%);display:flex;align-items:center;justify-content:center;}
+ .gauge-ring::before{content:"";position:absolute;inset:11px;border-radius:50%;background:#0d1425;}
+ .gauge-inner{position:relative;text-align:center;}
+ .gauge-inner .score{font-size:2.3rem;font-weight:800;color:var(--amber);letter-spacing:-.02em;line-height:1;}
+ .gauge-inner .of{font-size:.7rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:4px;}
+ .score-gauge p{font-size:.82rem;color:var(--muted);}
+ .factor-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid rgba(30,42,69,.8);}
+ .factor-row:last-child{border-bottom:none;}
+ .factor-row .fname{font-size:.85rem;color:#d7deee;flex:1;}
+ .factor-bar{width:110px;height:6px;border-radius:99px;background:#1a2440;overflow:hidden;flex-shrink:0;}
+ .factor-bar .f{height:100%;border-radius:99px;}
+ .factor-val{font-size:.78rem;font-weight:700;width:34px;text-align:right;flex-shrink:0;}
+ .f-high{background:#f87171;}.f-med{background:var(--amber);}.f-low{background:var(--accent);}
+ .c-high{color:#f87171;}.c-med{color:var(--amber);}.c-low{color:var(--accent);}
+ .flow{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+ @media(max-width:900px){.flow{grid-template-columns:1fr 1fr;}}
+ @media(max-width:560px){.flow{grid-template-columns:1fr;}}
+ .flow-step{background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius);padding:26px 22px;}
+ .flow-step .num{font-size:2rem;font-weight:800;color:rgba(251,191,36,.35);letter-spacing:-.02em;margin-bottom:12px;}
+ .flow-step h3{font-size:1rem;font-weight:700;margin-bottom:8px;}
+ .flow-step p{font-size:.86rem;color:var(--muted);}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+ <div class="container nav-inner">
+ <a class="logo" href="https://porchivo.com/"><span class="logo-mark"><img src="logo.png" alt="Porchivo logo"></span>Porchivo</a>
+ <div class="nav-links">
+ <a href="#factors">How scoring works</a>
+ <a href="#flow">Score lifecycle</a>
+ <a href="#chain">Chain of custody</a>
+ <a href="https://porchivo.com/" class="btn btn-primary nav-cta">Register Your Community</a>
+ </div>
+ </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+ <div class="container hero-grid">
+ <div>
+ <span class="eyebrow"><span class="dot"></span>Step 03 — Risk Scores Update Continuously</span>
+ <h1>Every package scored <span class="grad">before it lands.</span></h1>
+ <p class="hero-sub">Every incoming delivery gets a real-time risk score based on timing patterns, neighborhood theft activity, and your community's delivery history. When a package crosses a risk threshold, alerts fire instantly — so porch pirates never get a head start.</p>
+ <div class="hero-ctas">
+ <a href="https://porchivo.com/" class="btn btn-primary">Register Your Community →</a>
+ <a href="#factors" class="btn btn-ghost">See how scoring works</a>
+ </div>
+ <div class="hero-proof">
+ <span class="proof-item"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Real-time scoring</span>
+ <span class="proof-item"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Instant threshold alerts</span>
+ <span class="proof-item"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Full chain-of-custody</span>
+ </div>
+ </div>
+
+ <!-- Live risk score visual -->
+ <div class="hero-card">
+ <div class="hc-head">
+ <span class="hc-title">Package Risk Score</span>
+ <span class="hc-badge">LIVE SCORING</span>
+ </div>
+ <img class="hero-shot photo" src="hoa-office.jpg" alt="HOA management team at their community office">
+ <div class="score-gauge">
+ <div class="gauge-ring">
+ <div class="gauge-inner">
+ <div class="score">62</div>
+ <div class="of">/ 100 risk</div>
+ </div>
+ </div>
+ <p>Package #4821 · Porch drop · ETA 14 min</p>
+ </div>
+ <div class="factor-row">
+ <span class="fname">Delivery timing pattern</span>
+ <span class="factor-bar"><span class="f f-high" style="width:78%"></span></span>
+ <span class="factor-val c-high">78</span>
+ </div>
+ <div class="factor-row">
+ <span class="fname">Neighborhood theft activity</span>
+ <span class="factor-bar"><span class="f f-med" style="width:54%"></span></span>
+ <span class="factor-val c-med">54</span>
+ </div>
+ <div class="factor-row">
+ <span class="fname">Community delivery history</span>
+ <span class="factor-bar"><span class="f f-low" style="width:31%"></span></span>
+ <span class="factor-val c-low">31</span>
+ </div>
+ </div>
+ </div>
+</header>
+
+<!-- STATS -->
+<div class="stats">
+ <div class="container stats-grid">
+ <div class="stat"><div class="stat-num">21M</div><div class="stat-label">packages stolen in the US every year — 4% of everything delivered</div></div>
+ <div class="stat"><div class="stat-num">Real-time</div><div class="stat-label">scores that update continuously as conditions change</div></div>
+ <div class="stat"><div class="stat-num">Instant</div><div class="stat-label">alerts the moment a package crosses your risk threshold</div></div>
+ </div>
+</div>
+
+<!-- HOW SCORING WORKS -->
+<section id="factors">
+ <div class="container">
+ <div class="section-head">
+ <span class="section-tag">Under the hood</span>
+ <h2>Three signals. One score. Zero guesswork.</h2>
+ <p class="section-sub">Porchivo continuously weighs the factors that actually predict porch theft — no cameras, no sensors, no guesswork required.</p>
+ </div>
+ <div class="cards">
+ <div class="card">
+ <div class="card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+ <h3>Timing patterns</h3>
+ <p>When the package lands matters. Deliveries arriving during high-theft windows — mid-day, when porches sit empty — score higher automatically.</p>
+ </div>
+ <div class="card">
+ <div class="card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+ <h3>Neighborhood activity</h3>
+ <p>Live theft activity around your community feeds the score. A quiet week lowers it; a spike nearby raises it — before the next truck arrives.</p>
+ </div>
+ <div class="card">
+ <div class="card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div>
+ <h3>Your delivery history</h3>
+ <p>Your community's own patterns refine every score. Congestion, past incidents, and handoff trends make predictions sharper over time.</p>
+ </div>
+ </div>
+ </div>
+</section>
+
+<!-- SCORE LIFECYCLE -->
+<section id="flow" style="background:var(--bg-2);border-top:1px solid var(--card-border);border-bottom:1px solid var(--card-border);">
+ <div class="container">
+ <div class="section-head">
+ <span class="section-tag">Continuous, not one-and-done</span>
+ <h2>The lifecycle of a risk score</h2>
+ <p class="section-sub">Scores aren't set when the label prints. They update continuously until the package is safely in hand.</p>
+ </div>
+ <div class="flow">
+ <div class="flow-step"><div class="num">01</div><h3>Shipment detected</h3><p>Carrier scan or resident notification creates a package record in your community.</p></div>
+ <div class="flow-step"><div class="num">02</div><h3>Baseline score</h3><p>Timing, neighborhood activity, and history combine into an initial risk score.</p></div>
+ <div class="flow-step"><div class="num">03</div><h3>Continuous updates</h3><p>Conditions change — the score re-evaluates in real time as delivery approaches.</p></div>
+ <div class="flow-step"><div class="num">04</div><h3>Threshold triggers action</h3><p>Cross the line and residents and Porch Partners are alerted instantly.</p></div>
+ </div>
+ </div>
+</section>
+
+<!-- CHAIN OF CUSTODY -->
+<section id="chain">
+ <div class="container">
+ <div class="section-head">
+ <span class="section-tag">Proof, not promises</span>
+ <h2>A full chain-of-custody for every handoff</h2>
+ <p class="section-sub">Every protected handoff is logged end-to-end — who received it, when, and where it went next. Disputes disappear when the record is automatic.</p>
+ </div>
+ <ul class="checklist">
+ <li><span class="ck"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Every handoff timestamped and attributed</li>
+ <li><span class="ck"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Resident and Partner identity verified in-app</li>
+ <li><span class="ck"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Full log exportable for board reports and claims</li>
+ <li><span class="ck"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Zero hardware required to maintain the record</li>
+ </ul>
+ </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-cta">
+ <div class="container">
+ <span class="section-tag">Know before it's too late</span>
+ <h2>Stop guessing which packages are at risk.</h2>
+ <p class="section-sub">Register your community and start scoring every delivery in real time — no hardware, no IT project, no cameras.</p>
+ <a href="https://porchivo.com/" class="btn btn-primary" style="padding:16px 36px;font-size:1.02rem;">Register Your Community →</a>
+ <p class="fineprint">Questions? Email <a href="mailto:support@porchivo.com">support@porchivo.com</a> — a human replies, fast.</p>
+ </div>
+</section>
+
+<footer>
+ <div class="container footer-inner">
+ <a class="logo" href="https://porchivo.com/" style="font-size:1rem;"><span class="logo-mark" style="width:30px;height:30px;"><img src="logo.png" alt="Porchivo logo"></span>Porchivo</a>
+ <p>© 2026 Porchivo · 800 Sycamore #329, Evansville, IN 47708</p>
+ </div>
+</footer>
+
+</body>
+</html>
