@@ -1,4 +1,4 @@
-import { Building2, Gauge, BellRing, UserPlus } from "lucide-react";
+import { Building2, Gauge, BellRing, UserPlus, ArrowRight } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import Reveal from "@/components/landing/Reveal";
@@ -8,6 +8,8 @@ interface Step {
   titleKey: string;
   bodyKey: string;
   icon: LucideIcon;
+  /** Static deep-dive page for this step (served from /public). */
+  href: string;
 }
 
 const STEPS: Step[] = [
@@ -16,30 +18,35 @@ const STEPS: Step[] = [
     titleKey: "landing.how.s1.title",
     bodyKey: "landing.how.s1.body",
     icon: Building2,
+    href: "/register-your-community.html",
   },
   {
     n: "02",
     titleKey: "landing.how.s2.title",
     bodyKey: "landing.how.s2.body",
     icon: UserPlus,
+    href: "/residents-join-free.html",
   },
   {
     n: "03",
     titleKey: "landing.how.s3.title",
     bodyKey: "landing.how.s3.body",
     icon: Gauge,
+    href: "/risk-scoring.html",
   },
   {
     n: "04",
     titleKey: "landing.how.s4.title",
     bodyKey: "landing.how.s4.body",
     icon: BellRing,
+    href: "/alerts-trigger-action.html",
   },
 ];
 
 /**
  * How-it-works: four floating glass cards (gentle staggered hover-float)
  * connected by a glowing connector line on desktop, scroll-staggered reveal.
+ * Each card is a full-card link to its static deep-dive page.
  */
 export default function HowItWorksSection() {
   const { t } = useTranslation();
@@ -73,7 +80,7 @@ export default function HowItWorksSection() {
         <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:mt-0">
           {STEPS.map((step, index) => (
             <Reveal key={step.n} delay={index * 130}>
-              <div className="group relative h-full overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur-xl transition-all duration-300 hover:-translate-y-2 hover:border-pv-electric/40 hover:shadow-2xl hover:shadow-pv-electric/20 motion-safe:hover:animate-none motion-safe:animate-float [animation-delay:calc(var(--step-index)*0.7s)]"
+              <a href={step.href} className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur-xl transition-all duration-300 hover:-translate-y-2 hover:border-pv-electric/40 hover:shadow-2xl hover:shadow-pv-electric/20 motion-safe:hover:animate-none motion-safe:animate-float [animation-delay:calc(var(--step-index)*0.7s)]"
                 style={{ "--step-index": index } as React.CSSProperties}
               >
                 {/* Corner glow on hover */}
@@ -91,7 +98,14 @@ export default function HowItWorksSection() {
                 </div>
                 <h3 className="font-display text-xl font-semibold text-white">{t(step.titleKey)}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-white/60">{t(step.bodyKey)}</p>
-              </div>
+                <span className="mt-auto inline-flex items-center gap-1.5 pt-4 text-sm font-semibold text-pv-electric-light opacity-80 transition-opacity duration-300 group-hover:opacity-100">
+                  {t("landing.how.more")}
+                  <ArrowRight
+                    className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
+                    aria-hidden
+                  />
+                </span>
+              </a>
             </Reveal>
           ))}
         </div>

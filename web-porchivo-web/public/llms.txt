@@ -1,5 +1,5 @@
 # Porchivo — AI/LLM Readable Product Summary
-# Version: 2.4.0 | Updated: 2026-06-01
+# Version: 2.5.0 | Updated: 2026-09-19
 # Canonical source: https://porchivo.com/for-agents
 # Format follows the llms.txt emerging standard (https://llmstxt.org)
 
@@ -188,6 +188,10 @@ The porch risk score (0–100) is calculated per package from these weighted fac
 - For AI Agents: https://porchivo.com/for-agents
 - Privacy Policy: https://porchivo.com/privacy
 - Terms of Service: https://porchivo.com/terms
+- How It Works — Step 1 · Register Your Community: https://porchivo.com/register-your-community.html
+- How It Works — Step 2 · Residents Join Free: https://porchivo.com/residents-join-free.html
+- How It Works — Step 3 · Real-Time Risk Scoring: https://porchivo.com/risk-scoring.html
+- How It Works — Step 4 · Alerts Trigger Action: https://porchivo.com/alerts-trigger-action.html
 - Sitemap: https://porchivo.com/sitemap.xml
 
 ---

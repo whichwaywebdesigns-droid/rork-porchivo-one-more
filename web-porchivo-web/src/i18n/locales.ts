@@ -79,6 +79,7 @@ const en = {
   "landing.how.s4.title": "Alerts trigger action",
   "landing.how.s4.body":
     "When a package crosses the risk threshold, residents and nearby Porch Partners are notified instantly. Every handoff gets a full chain-of-custody log — timestamps, photos, identities — that managers can export.",
+  "landing.how.more": "Read the full story",
 
   "landing.features.title":
     "Everything your community needs to protect deliveries and retain residents",
@@ -236,6 +237,7 @@ const es: Partial<TranslationKeys> = {
   "landing.how.s4.title": "Las alertas activan acciones",
   "landing.how.s4.body":
     "Cuando un paquete cruza el umbral de riesgo, residentes y Porch Partners cercanos reciben una notificación al instante. Cada entrega queda con un registro completo de cadena de custodia — horarios, fotos, identidades — que los administradores pueden exportar.",
+  "landing.how.more": "Lee la historia completa",
 
   "landing.features.title":
     "Todo lo que tu comunidad necesita para proteger entregas y retener residentes",
