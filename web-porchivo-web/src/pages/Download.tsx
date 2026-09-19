@@ -99,7 +99,7 @@ export default function DownloadPage() {
                 <span className="text-3xl font-bold text-brand-text-primary">$99</span>
                 <span className="text-brand-text-muted text-sm">/mo starting</span>
               </div>
-              <div className="text-sm text-brand-text-muted mb-6">From Starter (50 units) to Enterprise (2,000 units). Annual includes 2 months free.</div>
+              <div className="text-sm text-brand-text-muted mb-6">From Essential (50 units) to Enterprise (2,000 units). Annual includes 2 months free.</div>
               <div className="text-xs font-semibold text-brand-text-muted uppercase tracking-wider mb-3">
                 Your subscription unlocks:
               </div>
@@ -261,7 +261,7 @@ export default function DownloadPage() {
               <h3 className="text-[15px] font-bold text-brand-text-primary mb-4">Invoice summary</h3>
               <dl className="space-y-2.5 text-[13px]">
                 {[
-                  ["Plan", "Starter Community"],
+                  ["Plan", "Essential"],
                   ["Amount", "$99.00 / month"],
                   ["Next payment", "Sep 1, 2026"],
                 ].map(([term, value]) => (

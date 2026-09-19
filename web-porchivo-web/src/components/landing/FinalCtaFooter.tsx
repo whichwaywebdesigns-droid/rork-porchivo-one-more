@@ -42,7 +42,7 @@ export function FinalCtaSection() {
         )}
         <div className="absolute inset-0 bg-pv-navy/70" />
         <div className="absolute inset-0 bg-gradient-to-b from-pv-navy/80 via-transparent to-pv-navy" />
-        <div className="absolute inset-0 bg-[radial-gradient(60%_50%_at_30%_38%,rgba(59,130,246,0.18),transparent_70%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(60%_50%_at_30%_38%,rgba(56,189,248,0.16),transparent_70%)]" />
       </div>
       {/* Glow backdrop */}
       <div

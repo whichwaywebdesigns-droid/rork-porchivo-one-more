@@ -162,7 +162,7 @@ export default function FeaturesSection() {
 
         {/* Wide setup card with the risk-vault 3D side visual */}
         <Reveal delay={120}>
-          <div className="mt-6 grid grid-cols-1 items-center gap-8 overflow-hidden rounded-3xl border border-pv-amber/25 bg-white/[0.05] p-8 shadow-[0_0_70px_-24px_rgba(245,158,11,0.4)] backdrop-blur-xl md:grid-cols-[1.2fr_1fr]">
+          <div className="mt-6 grid grid-cols-1 items-center gap-8 overflow-hidden rounded-3xl border border-pv-amber/25 bg-white/[0.05] p-8 shadow-[0_0_70px_-24px_rgba(52,211,153,0.4)] backdrop-blur-xl md:grid-cols-[1.2fr_1fr]">
             <div>
               <div className="inline-flex items-center gap-2 rounded-full border border-pv-amber/30 bg-pv-amber/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-pv-amber">
                 <Lock className="h-3.5 w-3.5" aria-hidden />

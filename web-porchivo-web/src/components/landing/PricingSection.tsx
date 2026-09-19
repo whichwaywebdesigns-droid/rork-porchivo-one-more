@@ -72,7 +72,7 @@ export default function PricingSection() {
               <div
                 className={
                   tier.highlighted
-                    ? "relative flex h-full flex-col rounded-3xl border border-pv-amber/40 bg-white/[0.05] p-7 shadow-[0_0_70px_-18px_rgba(245,158,11,0.45)] backdrop-blur-xl"
+                    ? "relative flex h-full flex-col rounded-3xl border border-pv-amber/40 bg-white/[0.05] p-7 shadow-[0_0_70px_-18px_rgba(52,211,153,0.45)] backdrop-blur-xl"
                     : "flex h-full flex-col rounded-3xl border border-white/10 bg-white/[0.04] p-7 backdrop-blur-xl"
                 }
               >

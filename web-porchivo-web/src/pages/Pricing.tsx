@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Check, ArrowRight, Building2, Users, Zap, Shield } from "lucide-react";
+import { Check, ArrowRight, Building2, Zap, Shield } from "lucide-react";
 import PageLayout from "@/components/PageLayout";
 import SEOHead from "@/components/SEOHead";
 import BreadcrumbNav from "@/components/BreadcrumbNav";
@@ -30,19 +30,18 @@ interface B2BPlan {
 
 const B2B_PLANS: B2BPlan[] = [
   {
-    name: "Starter",
-    tagline: "Small HOAs and condo associations getting started with community communication.",
+    name: "Essential",
+    tagline: "Communities getting started with real-time package protection.",
     monthly: "$99",
     annual: "$990",
     annualPerMonth: "$83",
     maxUnits: "Up to 50 units",
     setupFee: "No setup fee",
     features: [
-      "Community announcements",
-      "5GB document library",
-      "Maintenance requests",
-      "Package tracking (all residents)",
-      "Porch Partner network access",
+      "Real-time risk scoring for every package",
+      "Instant alerts to residents & Porch Partners",
+      "Porch Partner delivery network",
+      "Full chain-of-custody for every handoff",
       "Email support",
     ],
     highlight: false,
@@ -51,21 +50,18 @@ const B2B_PLANS: B2BPlan[] = [
     ctaHref: "/download",
   },
   {
-    name: "Community",
-    tagline: "The most popular plan for mid-size HOAs with active boards and amenity management needs.",
-    monthly: "$249",
-    annual: "$2,490",
-    annualPerMonth: "$208",
-    maxUnits: "Up to 200 units",
-    setupFee: "No setup fee",
+    name: "Professional",
+    tagline: "The full picture — community insights, manager dashboard, and priority support.",
+    monthly: "$499",
+    annual: "$4,990",
+    annualPerMonth: "$416",
+    maxUnits: "Up to 500 units, 3 communities",
+    setupFee: "$500 one-time onboarding",
     features: [
-      "Everything in Starter, plus:",
-      "HOA dues collection & payments",
-      "Payment history & receipts",
-      "Ledger exports",
-      "Amenity reservations",
-      "Board member roles & permissions",
-      "Priority email support",
+      "Everything in Essential, plus:",
+      "Community insights — risk zones, theft hotspots, delivery congestion",
+      "Manager dashboard with live community activity",
+      "Priority support",
     ],
     highlight: true,
     badge: "Most popular",
@@ -73,30 +69,8 @@ const B2B_PLANS: B2BPlan[] = [
     ctaHref: "/download",
   },
   {
-    name: "Professional",
-    tagline: "Multi-community property managers who need a portfolio view, vendor directory, and custom branding.",
-    monthly: "$499",
-    annual: "$4,990",
-    annualPerMonth: "$416",
-    maxUnits: "Up to 500 units, 3 communities",
-    setupFee: "$500 one-time onboarding",
-    features: [
-      "Everything in Community, plus:",
-      "Multi-community portfolio (3 communities)",
-      "Maintenance request queue & assignment",
-      "Vendor directory & assignment",
-      "Custom branding",
-      "Resident directory",
-      "Phone + email support",
-    ],
-    highlight: false,
-    badge: "Multi-community",
-    cta: "Get started",
-    ctaHref: "/download",
-  },
-  {
-    name: "Property Manager",
-    tagline: "Large-scale property management companies with white-label and API requirements.",
+    name: "Enterprise",
+    tagline: "Multi-property portfolios that need custom reporting and a dedicated success manager.",
     monthly: "$1,499",
     annual: "$14,990",
     annualPerMonth: "$1,249",
@@ -104,15 +78,12 @@ const B2B_PLANS: B2BPlan[] = [
     setupFee: "$1,500 one-time onboarding",
     features: [
       "Everything in Professional, plus:",
-      "Unlimited communities",
-      "White-label options",
-      "API access",
-      "Dedicated account manager",
-      "Custom onboarding & data migration",
-      "SLA-backed support",
+      "Multi-property portfolio management",
+      "Custom reporting",
+      "Dedicated success manager",
     ],
     highlight: false,
-    badge: "Enterprise",
+    badge: null,
     cta: "Contact sales",
     ctaHref: "/download",
   },
@@ -127,43 +98,39 @@ const FREE_FEATURES = [
 ];
 
 // MXN pricing (Mexico-market push) — fixed MXN, reviewed quarterly.
-// Starter + Professional only; prices are IVA-incluido (16% VAT inside the
-// gross amount). Must match MXN_PLANS in supabase/functions/create-org-checkout.
+// Essential + Professional only; prices are IVA-incluido (16% VAT inside the
+// gross amount). Values match the Starter/Professional MXN products in
+// create-org-checkout (display-only here — this page's CTAs route to /download).
 const MXN_PLANS: Record<
   string,
   { monthly: number; annual: number; annualPerMonth: number; setupFee: number }
 > = {
-  Starter: { monthly: 1490, annual: 14900, annualPerMonth: 1242, setupFee: 0 },
+  Essential: { monthly: 1490, annual: 14900, annualPerMonth: 1242, setupFee: 0 },
   Professional: { monthly: 3690, annual: 36900, annualPerMonth: 3075, setupFee: 3690 },
 };
 
 const fmtMXN = (n: number) => `$${n.toLocaleString("en-US")}`;
 
 const COMPARISON_ROWS = [
-  { feature: "Max units", starter: "50", community: "200", professional: "500", enterprise: "2,000" },
-  { feature: "Communities", starter: "1", community: "1", professional: "3", enterprise: "Unlimited" },
-  { feature: "Announcements", starter: true, community: true, professional: true, enterprise: true },
-  { feature: "Maintenance requests", starter: true, community: true, professional: true, enterprise: true },
-  { feature: "Package tracking", starter: true, community: true, professional: true, enterprise: true },
-  { feature: "Porch Partner network", starter: true, community: true, professional: true, enterprise: true },
-  { feature: "HOA dues collection", starter: false, community: true, professional: true, enterprise: true },
-  { feature: "Amenity reservations", starter: false, community: true, professional: true, enterprise: true },
-  { feature: "Board member roles", starter: false, community: true, professional: true, enterprise: true },
-  { feature: "Multi-community portfolio", starter: false, community: false, professional: true, enterprise: true },
-  { feature: "Vendor directory & assignment", starter: false, community: false, professional: true, enterprise: true },
-  { feature: "Custom branding", starter: false, community: false, professional: true, enterprise: true },
-  { feature: "White-label options", starter: false, community: false, professional: false, enterprise: true },
-  { feature: "API access", starter: false, community: false, professional: false, enterprise: true },
-  { feature: "Dedicated account manager", starter: false, community: false, professional: false, enterprise: true },
-  { feature: "SLA-backed support", starter: false, community: false, professional: false, enterprise: true },
-  { feature: "Onboarding fee", starter: "—", community: "—", professional: "$500", enterprise: "$1,500" },
+  { feature: "Max units", essential: "50", professional: "500", enterprise: "2,000" },
+  { feature: "Communities", essential: "1", professional: "3", enterprise: "Unlimited" },
+  { feature: "Real-time risk scoring", essential: true, professional: true, enterprise: true },
+  { feature: "Instant alerts", essential: true, professional: true, enterprise: true },
+  { feature: "Porch Partner network", essential: true, professional: true, enterprise: true },
+  { feature: "Chain-of-custody", essential: true, professional: true, enterprise: true },
+  { feature: "Community insights (risk zones, hotspots, congestion)", essential: false, professional: true, enterprise: true },
+  { feature: "Manager dashboard", essential: false, professional: true, enterprise: true },
+  { feature: "Priority support", essential: false, professional: true, enterprise: true },
+  { feature: "Multi-property portfolio", essential: false, professional: false, enterprise: true },
+  { feature: "Custom reporting", essential: false, professional: false, enterprise: true },
+  { feature: "Dedicated success manager", essential: false, professional: false, enterprise: true },
+  { feature: "Onboarding fee", essential: "—", professional: "$500", enterprise: "$1,500" },
 ];
 
 const PLAN_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
-  Starter: Building2,
-  Community: Users,
+  Essential: Building2,
   Professional: Zap,
-  "Property Manager": Shield,
+  Enterprise: Shield,
 };
 
 export default function PricingPage() {
@@ -215,7 +182,7 @@ export default function PricingPage() {
             ))}
             {currency === "MXN" && (
               <span className="text-xs text-brand-text-muted">
-                Precios fijos en pesos — IVA incluido (Starter y Professional)
+                Precios fijos en pesos — IVA incluido (Essential y Professional)
               </span>
             )}
           </div>
@@ -249,7 +216,7 @@ export default function PricingPage() {
       {/* B2B Plans */}
       <section className="py-16 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {B2B_PLANS.map((plan) => {
               const Icon = PLAN_ICONS[plan.name] ?? Building2;
               const mxn = currency === "MXN" ? MXN_PLANS[plan.name] : undefined;
@@ -330,7 +297,7 @@ export default function PricingPage() {
 
           {currency === "MXN" && (
             <p className="text-center text-xs text-brand-text-muted mt-6 max-w-2xl mx-auto">
-              Starter and Professional are billed in fixed Mexican pesos (IVA incluido) and reviewed quarterly — no exchange-rate surprises. Community and Enterprise remain billed in USD.
+              Essential and Professional are billed in fixed Mexican pesos (IVA incluido) and reviewed quarterly — no exchange-rate surprises. Enterprise remains billed in USD.
             </p>
           )}
         </div>
@@ -355,9 +322,8 @@ export default function PricingPage() {
               <thead>
                 <tr className="border-b border-brand-navy-500/40">
                   <th className="text-left py-3 pr-4 text-brand-text-muted font-medium">Feature</th>
-                  <th className="text-center py-3 px-2 text-brand-text-secondary font-semibold">Starter</th>
-                  <th className="text-center py-3 px-2 text-brand-orange font-semibold">Community</th>
-                  <th className="text-center py-3 px-2 text-brand-text-secondary font-semibold">Professional</th>
+                  <th className="text-center py-3 px-2 text-brand-text-secondary font-semibold">Essential</th>
+                  <th className="text-center py-3 px-2 text-brand-orange font-semibold">Professional</th>
                   <th className="text-center py-3 px-2 text-brand-text-secondary font-semibold">Enterprise</th>
                 </tr>
               </thead>
@@ -365,7 +331,7 @@ export default function PricingPage() {
                 {COMPARISON_ROWS.map((row) => (
                   <tr key={row.feature}>
                     <td className="py-2.5 pr-4 text-brand-text-secondary font-medium">{row.feature}</td>
-                    {(["starter", "community", "professional", "enterprise"] as const).map((tier) => (
+                    {(["essential", "professional", "enterprise"] as const).map((tier) => (
                       <td key={tier} className="py-2.5 text-center">
                         {typeof row[tier] === "boolean" ? (
                           row[tier] ? (

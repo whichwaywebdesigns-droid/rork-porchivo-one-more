@@ -67,7 +67,7 @@ export default function HowItWorksSection() {
         {/* Glowing connector line (desktop) */}
         <div aria-hidden className="relative mt-14 hidden lg:block">
           <div className="absolute left-0 right-0 top-1/2 h-px bg-gradient-to-r from-transparent via-pv-electric/50 to-transparent" />
-          <div className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-pv-amber shadow-[0_0_16px_4px_rgba(245,158,11,0.5)] motion-safe:animate-pulse" />
+          <div className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-pv-amber shadow-[0_0_16px_4px_rgba(52,211,153,0.5)] motion-safe:animate-pulse" />
         </div>
 
         <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:mt-0">

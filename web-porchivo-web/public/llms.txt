@@ -21,7 +21,7 @@
 
 ## Problem It Solves
 
-Porch theft affects 119 million packages per year in the United States and costs consumers $19 billion annually. Most package security tools are reactive — they notify you after theft. Porchivo is predictive: it calculates a risk score before each delivery lands, enabling homeowners to take protective action in advance.
+Porch theft affects 21 million packages per year in the United States and costs consumers $19 billion annually. Most package security tools are reactive — they notify you after theft. Porchivo is predictive: it calculates a risk score before each delivery lands, enabling homeowners to take protective action in advance.
 
 ---
 
@@ -79,10 +79,9 @@ The porch risk score (0–100) is calculated per package from these weighted fac
 | Plan | Monthly | Annual | Max Units |
 |---|---|---|---|
 | Resident | $0 | $0 | Always free |
-| Starter | $79/mo | $63/mo ($756/yr) | Up to 50 units |
-| Community | $199/mo | $159/mo ($1,908/yr) | Up to 200 units |
-| Professional | $399/mo | $319/mo ($3,828/yr) | Up to 500 units, 3 communities |
-| Enterprise | $599/mo | $479/mo ($5,748/yr) | Up to 2,000 units, unlimited communities |
+| Essential | $99/mo | $83/mo ($990/yr) | Up to 50 units |
+| Professional | $499/mo | $416/mo ($4,990/yr) | Up to 500 units, 3 communities |
+| Enterprise | $1,499/mo | $1,249/mo ($14,990/yr) | Up to 2,000 units, unlimited communities |
 
 - Annual billing saves 20%
 - Residents are always free — no IAP, no subscription
@@ -167,7 +166,7 @@ The porch risk score (0–100) is calculated per package from these weighted fac
 - **Theft Shield**: Push notification alert when risk score ≥ 65
 - **Porch Partner**: A verified neighbor who holds packages for homeowners and earns income
 - **Delivery Window**: The time-of-day range during which a package is expected to arrive
-- **Community Plan**: B2B subscription for HOAs/property managers. Residents join for free via invite code. Tiers: Starter, Community, Professional, Enterprise.
+- **Community Plan**: B2B subscription for HOAs/property managers. Residents join for free via invite code. Tiers: Essential, Professional, Enterprise.
 - **Ship24**: Third-party API providing carrier tracking data for 1,400+ carriers
 - **Stripe Connect**: Payment infrastructure used for Porch Partner payouts
 - **Stripe Identity**: KYC (identity verification) service used to vet Porch Partners

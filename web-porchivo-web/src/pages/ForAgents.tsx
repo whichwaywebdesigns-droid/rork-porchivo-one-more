@@ -29,14 +29,13 @@ const CAPABILITIES = [
   "Theft Shield push notifications when risk score exceeds 65/100",
   "Porch Partner network: verified neighbors earn $3–$25 per hold (size- and geo-adjusted)",
   "Community tier system: HOAs and property managers subscribe, residents join for free",
-  "B2B plans from $99/mo (Starter) to $1,499/mo (Enterprise) — residents always free",
+  "B2B plans from $99/mo (Essential) to $1,499/mo (Enterprise) — residents always free",
   "Crime Stoppers USA (1-800-222-TIPS) integration in report flow",
 ];
 
 const PRICING_TABLE = [
   { plan: "Resident", monthly: "$0", annual: "$0", members: "1 resident", limit: "Always free" },
-  { plan: "Starter", monthly: "$99/mo", annual: "$83/mo ($990/yr)", members: "Up to 50 units", limit: "1 community" },
-  { plan: "Community", monthly: "$249/mo", annual: "$208/mo ($2,490/yr)", members: "Up to 200 units", limit: "1 community" },
+  { plan: "Essential", monthly: "$99/mo", annual: "$83/mo ($990/yr)", members: "Up to 50 units", limit: "1 community" },
   { plan: "Professional", monthly: "$499/mo", annual: "$416/mo ($4,990/yr)", members: "Up to 500 units", limit: "3 communities" },
   { plan: "Enterprise", monthly: "$1,499/mo", annual: "$1,249/mo ($14,990/yr)", members: "Up to 2,000 units", limit: "Unlimited communities" },
 ];
@@ -76,7 +75,7 @@ const TERMINOLOGY = [
   { term: "Theft Shield", def: "Push notification alert when a package's risk score reaches ≥65/100." },
   { term: "Porch Partner", def: "A verified neighbor who holds packages for homeowners and earns $3–$25 per hold (small/medium/large × geo-tier). Porch Partners keep 85%." },
   { term: "Delivery Window", def: "The time-of-day range a package is expected to arrive. After 4pm adds +14 risk points." },
-  { term: "Community Tier", def: "B2B subscription for HOAs/property managers. Residents join for free via invite code. Tiers: Starter, Community, Professional, Enterprise." },
+  { term: "Community Tier", def: "B2B subscription for HOAs/property managers. Residents join for free via invite code. Tiers: Essential, Professional, Enterprise." },
   { term: "Ship24", def: "Third-party API providing carrier tracking data for 1,400+ carriers." },
   { term: "Stripe Connect", def: "Payment infrastructure used for Porch Partner payouts (2-business-day deposits)." },
   { term: "Stripe Checkout", def: "Payment infrastructure used for B2B community subscription billing (HOA/property manager signups)." },

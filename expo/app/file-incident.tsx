@@ -386,7 +386,7 @@ export default function FileIncidentScreen() {
             <View style={styles.carrierNoteBody}>
               <Text style={[styles.carrierNoteTitle, { color: Colors.slate }]}>Contact the carrier first</Text>
               <Text style={[styles.carrierNoteText, { color: Colors.slateLight }]}>
-                For a missing, lost, or damaged package, contact the carrier handling your shipment (Amazon, UPS, USPS, FedEx, etc.) — they hold your package and are responsible for resolving delivery issues, refunds, and claims. Porchivo provides tracking only; we have no relationship with any carrier and aren&apos;t responsible for your package.
+                Porchivo provides tracking only. Contact the carrier (Amazon, UPS, USPS, FedEx) first for missing or damaged packages — carriers hold and are responsible for shipments. Porchivo has no relationship with any carrier.
               </Text>
             </View>
           </View>

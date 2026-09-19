@@ -79,29 +79,31 @@ export default {
           secondary: "var(--brand-text-secondary)",
           muted: "var(--brand-text-muted)",
         },
-        // ── Immersive landing palette (self-contained navy system — theme-independent) ──
+        // ── Locked brand palette (2026-09-19 spec — self-contained navy system) ──
+        // bg navy #0a0f1e · surface #121b31 · border #1e2a45 · primary emerald
+        // #34d399/#10b981 · alert red #f87171 · warning amber #fbbf24 · info blue #38bdf8
+        // Key names are legacy: amber→primary emerald, electric→info blue, coral→alert red.
         pv: {
           navy: {
-            DEFAULT: "#0A1128",
-            600: "#16224E",
-            700: "#111C40",
-            800: "#0D1633",
-            900: "#060B1D",
+            DEFAULT: "#0a0f1e",
+            600: "#1e2a45",
+            700: "#121b31",
+            800: "#0e1526",
+            900: "#070b16",
           },
           electric: {
-            DEFAULT: "#3B82F6",
-            light: "#60A5FA",
-            dim: "#1D4ED8",
+            DEFAULT: "#38bdf8",
+            light: "#7dd3fc",
+            dim: "#0284c7",
           },
           amber: {
-            DEFAULT: "#F59E0B",
-            light: "#FBBF24",
-            dim: "#B45309",
+            DEFAULT: "#34d399",
+            light: "#6ee7b7",
+            dim: "#10b981",
           },
-          // Coral-red accent — risk/threat visuals only (per B2B spec)
           coral: {
-            DEFAULT: "#E8573A",
-            light: "#F07B5F",
+            DEFAULT: "#f87171",
+            light: "#fca5a5",
           },
         },
       },
@@ -121,8 +123,8 @@ export default {
           "50%": { transform: "translateY(-12px)" },
         },
         "glow-pulse": {
-          "0%, 100%": { boxShadow: "0 0 24px -6px rgba(245, 158, 11, 0.55)" },
-          "50%": { boxShadow: "0 0 48px -2px rgba(245, 158, 11, 0.85)" },
+          "0%, 100%": { boxShadow: "0 0 24px -6px rgba(52, 211, 153, 0.55)" },
+          "50%": { boxShadow: "0 0 48px -2px rgba(52, 211, 153, 0.85)" },
         },
         "scroll-dot": {
           "0%": { transform: "translateY(0)", opacity: "1" },

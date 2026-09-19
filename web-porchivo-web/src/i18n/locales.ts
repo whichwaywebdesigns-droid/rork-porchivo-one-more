@@ -69,16 +69,16 @@ const en = {
     "No hardware. No IT project. Protect every resident's deliveries in four simple steps.",
   "landing.how.s1.title": "Register your community",
   "landing.how.s1.body":
-    "Sign up your HOA or property in five minutes. No hardware, no installation, no IT integration.",
+    "~5 minute setup, $0 hardware, no IT project. No fragile 'let's loop in IT' project that somehow lasts until the sun burns out.",
   "landing.how.s2.title": "Residents join free",
   "landing.how.s2.body":
-    "Residents download the app and join with your invite code — and can join the Porch Partner network for safer deliveries, extra income, and neighborhood reputation.",
-  "landing.how.s3.title": "Risk scores update continuously",
+    "One invite code (think WLC726) and about a minute to join. Always free — no in-app purchases, no upsells, ever. Optionally, residents become Porch Partners: earn per secure handoff and build a reputation score. The board controls whether the network is on.",
+  "landing.how.s3.title": "Real-time risk scoring",
   "landing.how.s3.body":
-    "Every incoming package gets a real-time risk score based on timing, neighborhood activity, and theft history.",
+    "Every package is scored 0–100 before it lands, from three factors: delivery timing pattern, neighborhood theft activity, and community delivery history. Scores keep updating until handoff.",
   "landing.how.s4.title": "Alerts trigger action",
   "landing.how.s4.body":
-    "Residents and Porch Partners are notified instantly when risk thresholds are crossed, with a full chain-of-custody for every handoff.",
+    "When a package crosses the risk threshold, residents and nearby Porch Partners are notified instantly. Every handoff gets a full chain-of-custody log — timestamps, photos, identities — that managers can export.",
 
   "landing.features.title":
     "Everything your community needs to protect deliveries and retain residents",
@@ -226,16 +226,16 @@ const es: Partial<TranslationKeys> = {
     "Sin hardware. Sin proyectos de TI. Protege las entregas de cada residente en cuatro pasos sencillos.",
   "landing.how.s1.title": "Registra tu comunidad",
   "landing.how.s1.body":
-    "Da de alta tu asociación o propiedad en cinco minutos. Sin hardware, sin instalación, sin integración de TI.",
+    "Configuración de ~5 minutos, $0 en hardware, sin proyecto de TI. Nada del frágil 'involucremos a TI' que dura hasta que el sol se apague.",
   "landing.how.s2.title": "Los residentes se unen gratis",
   "landing.how.s2.body":
-    "Los residentes descargan la app y se unen con tu código de invitación — y pueden sumarse a la red de Porch Partners para entregas más seguras, ingresos extra y reputación en el vecindario.",
-  "landing.how.s3.title": "El nivel de riesgo se actualiza constantemente",
+    "Un código de invitación (tipo WLC726) y alrededor de un minuto para unirse. Siempre gratis — sin compras dentro de la app, sin ventas adicionales, nunca. Opcional: los residentes pueden ser Porch Partners, ganar por cada entrega segura y construir un puntaje de reputación. La mesa directiva decide si la red está activada.",
+  "landing.how.s3.title": "Puntaje de riesgo en tiempo real",
   "landing.how.s3.body":
-    "Cada paquete entrante recibe un puntaje de riesgo en tiempo real según horarios, actividad del vecindario e historial de robos.",
+    "Cada paquete recibe un puntaje de 0 a 100 antes de llegar, según tres factores: patrón de horarios de entrega, actividad de robo en el vecindario e historial de entregas de la comunidad. El puntaje se actualiza hasta la entrega.",
   "landing.how.s4.title": "Las alertas activan acciones",
   "landing.how.s4.body":
-    "Residentes y Porch Partners reciben notificaciones al instante cuando se cruzan los umbrales de riesgo, con una cadena de custodia completa en cada entrega.",
+    "Cuando un paquete cruza el umbral de riesgo, residentes y Porch Partners cercanos reciben una notificación al instante. Cada entrega queda con un registro completo de cadena de custodia — horarios, fotos, identidades — que los administradores pueden exportar.",
 
   "landing.features.title":
     "Todo lo que tu comunidad necesita para proteger entregas y retener residentes",

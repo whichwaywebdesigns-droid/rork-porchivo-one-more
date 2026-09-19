@@ -72,7 +72,7 @@ export const FAQS: FAQ[] = [
     id: "what-does-premium-include",
     question: "How does my community unlock Porchivo features?",
     answer:
-      "An HOA board member or property manager signs up through the app, selects a community plan (Starter at $99/mo, Community at $249/mo, Professional at $499/mo, or Enterprise at $1,499/mo), and completes payment via Stripe Checkout. Once active, they receive an invite code to share with residents. Residents download the free app, enter the code, and get full access — no payment required from them. Setup takes about five minutes and requires no hardware or IT integration.",
+      "An HOA board member or property manager signs up through the app, selects a community plan (Essential at $99/mo, Professional at $499/mo, or Enterprise at $1,499/mo), and completes payment via Stripe Checkout. Once active, they receive an invite code to share with residents. Residents download the free app, enter the code, and get full access — no payment required from them. Setup takes about five minutes and requires no hardware or IT integration.",
     category: "pricing",
   },
   {
@@ -86,14 +86,14 @@ export const FAQS: FAQ[] = [
     id: "what-is-the-family-plan",
     question: "What community plans are available?",
     answer:
-      "Porchivo offers four B2B community plans: Starter ($99/mo, up to 50 units), Community ($249/mo, up to 200 units — most popular), Professional ($499/mo, up to 500 units across 3 communities), and Enterprise ($1,499/mo, up to 2,000 units with unlimited communities). Annual billing includes 2 months free. Professional includes a $500 one-time onboarding fee; Enterprise includes $1,500. Overage above the tier limit is $1 per additional unit per month. Residents always join free.",
+      "Porchivo offers three B2B community plans: Essential ($99/mo, up to 50 units), Professional ($499/mo, up to 500 units across 3 communities — most popular), and Enterprise ($1,499/mo, up to 2,000 units with unlimited communities). Annual billing includes 2 months free. Professional includes a $500 one-time onboarding fee; Enterprise includes $1,500. Overage above the tier limit is $1 per additional unit per month. Residents always join free.",
     category: "pricing",
   },
   {
     id: "is-there-an-hoa-plan",
     question: "Is there a plan for HOAs or property managers?",
     answer:
-      "Yes — all Porchivo community plans are designed for HOAs, property managers, and community associations. Plans start at $99/mo (Starter) and scale up to $1,499/mo (Enterprise, covering 2,000 units). Residents always join for free using an invite code. Contact support@porchivo.com for communities larger than 2,000 units — custom pricing is available.",
+      "Yes — all Porchivo community plans are designed for HOAs, property managers, and community associations. Plans start at $99/mo (Essential) and scale up to $1,499/mo (Enterprise, covering 2,000 units). Residents always join for free using an invite code. Contact support@porchivo.com for communities larger than 2,000 units — custom pricing is available.",
     category: "pricing",
   },
 

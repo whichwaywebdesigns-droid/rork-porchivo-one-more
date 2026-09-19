@@ -69,8 +69,8 @@ export const PAGE_SEO: Record<string, PageSEO> = {
     aiSummary:
       "Porchivo is a package security and resident retention app for HOAs, property managers, and community associations. It provides real-time package risk scoring for every incoming package, instant alerts to residents and Porch Partners, a Porch Partner network offering safer deliveries, income for every hold, and community reputation, and community insights for managers. Communities can be set up in five minutes with no hardware or IT project.",
     keyFacts: [
-      "119 million packages are stolen in the US every year",
-      "1 in 5 delivered packages is stolen from a porch",
+      "21 million packages are stolen in the US every year",
+      "4% of delivered packages are stolen from porches",
       "Porchivo provides real-time risk scoring for every incoming package",
       "Residents can join the Porch Partner network for safety, income, and reputation",
       "Porchivo gives managers insights into risk zones, theft hotspots, and delivery congestion",
@@ -108,7 +108,7 @@ export const PAGE_SEO: Record<string, PageSEO> = {
   pricing: {
     title: "Pricing — Porchivo Community Plans for HOAs & Property Managers",
     description:
-      "Porchivo offers four B2B community plans: Starter ($99/mo, 50 units), Community ($249/mo, 200 units), Professional ($499/mo, 500 units), and Enterprise ($1,499/mo, 2,000 units). Residents always join for free.",
+      "Porchivo offers three B2B community plans: Essential ($99/mo, 50 units), Professional ($499/mo, 500 units), and Enterprise ($1,499/mo, 2,000 units). Residents always join for free.",
     canonical: `${BASE_URL}/pricing`,
     ogTitle: "Porchivo Pricing — Community Plans for HOAs",
     ogDescription:
@@ -117,12 +117,11 @@ export const PAGE_SEO: Record<string, PageSEO> = {
     twitterCard: "summary_large_image",
     robots: "index, follow",
     aiSummary:
-      "Porchivo offers four B2B community plans: Starter ($99/mo, up to 50 units), Community ($249/mo, up to 200 units), Professional ($499/mo, up to 500 units), and Enterprise ($1,499/mo, up to 2,000 units). Annual billing includes 2 months free. Professional includes $500 onboarding; Enterprise includes $1,500 onboarding. Overage is $1/unit/mo above the tier limit. Residents always join for free — access is provided by their HOA or property manager.",
+      "Porchivo offers three B2B community plans: Essential ($99/mo, up to 50 units), Professional ($499/mo, up to 500 units), and Enterprise ($1,499/mo, up to 2,000 units). Annual billing includes 2 months free. Professional includes $500 onboarding; Enterprise includes $1,500 onboarding. Overage is $1/unit/mo above the tier limit. Residents always join for free — access is provided by their HOA or property manager.",
     keyFacts: [
       "Residents are always free — no IAP, no subscription",
-      "Starter: $99/mo for up to 50 units",
-      "Community: $249/mo for up to 200 units — most popular",
-      "Professional: $499/mo for up to 500 units, 3 communities",
+      "Essential: $99/mo for up to 50 units",
+      "Professional: $499/mo for up to 500 units, 3 communities — most popular",
       "Enterprise: $1,499/mo for up to 2,000 units, unlimited communities",
       "Annual billing includes 2 months free · Overage: $1/unit/mo",
     ],
@@ -183,7 +182,7 @@ export const PAGE_SEO: Record<string, PageSEO> = {
     canonical: `${BASE_URL}/about`,
     ogTitle: "About Porchivo — Why We Built This",
     ogDescription:
-      "119 million packages stolen annually. We built Porchivo to give communities predictive package security and reduce resident turnover.",
+      "21 million packages stolen annually. We built Porchivo to give communities predictive package security and reduce resident turnover.",
     ogImage: OG_IMAGE,
     twitterCard: "summary_large_image",
     robots: "index, follow",

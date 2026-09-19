@@ -48,7 +48,7 @@ export default function ModelFallback({ icon: Icon, label, className, image }: M
           />
         ) : (
           <Icon
-            className="h-14 w-14 text-pv-amber drop-shadow-[0_0_14px_rgba(245,158,11,0.7)] sm:h-20 sm:w-20"
+            className="h-14 w-14 text-pv-amber drop-shadow-[0_0_14px_rgba(52,211,153,0.7)] sm:h-20 sm:w-20"
             strokeWidth={1.5}
           />
         )}

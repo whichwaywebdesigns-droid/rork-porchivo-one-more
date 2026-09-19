@@ -36,8 +36,8 @@ export const BRAND = {
 
   /** Key facts for AI summarization and structured data */
   keyFacts: [
-    "119 million packages are stolen in the US every year",
-    "1 in 5 delivered packages is stolen from a porch",
+    "21 million packages are stolen in the US every year",
+    "4% of delivered packages are stolen from porches",
     "Porch theft costs US consumers $19 billion annually",
     "Porchivo provides real-time package risk scoring for every incoming delivery",
     "Risk scores factor in timing, neighborhood activity, and theft history",

@@ -22,14 +22,14 @@ interface Stat {
   end: number;
   suffix: string;
   labelKey: string;
-  /** Coral = threat data; amber = Porchivo value. */
+  /** Alert red = threat data; emerald = Porchivo value (locked brand spec). */
   tone: "coral" | "amber";
 }
 
 const STATS: Stat[] = [
-  { end: 52, suffix: "M", labelKey: "landing.hero.stat1", tone: "coral" },
-  { end: 9, suffix: "%", labelKey: "landing.hero.stat2", tone: "coral" },
-  { end: 2, suffix: " min", labelKey: "landing.hero.stat3", tone: "amber" },
+  { end: 21, suffix: "M", labelKey: "landing.hero.stat1", tone: "coral" },
+  { end: 4, suffix: "%", labelKey: "landing.hero.stat2", tone: "coral" },
+  { end: 1, suffix: " min", labelKey: "landing.hero.stat3", tone: "amber" },
 ];
 
 /** Single count-up stat with a glowing coral/amber number. */
@@ -120,7 +120,7 @@ export default function HeroSection() {
         )}
         <div className="absolute inset-0 bg-pv-navy/70" />
         <div className="absolute inset-0 bg-gradient-to-b from-pv-navy/80 via-transparent to-pv-navy" />
-        <div className="absolute inset-0 bg-[radial-gradient(60%_50%_at_30%_38%,rgba(59,130,246,0.18),transparent_70%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(60%_50%_at_30%_38%,rgba(56,189,248,0.16),transparent_70%)]" />
       </div>
 
       {/* ── Content: 3D model left, copy right (stacked copy-first on mobile) ── */}

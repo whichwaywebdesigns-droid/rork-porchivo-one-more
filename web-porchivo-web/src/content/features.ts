@@ -162,7 +162,7 @@ export const FEATURES: Feature[] = [
     aiSummary:
       "Porchivo offers B2B community plans from $99/mo to $1,499/mo for HOAs and property managers. Residents always join for free via invite code.",
     facts: [
-      "Community plans from $99/mo (Starter) to $1,499/mo (Enterprise)",
+      "Community plans from $99/mo (Essential) to $1,499/mo (Enterprise)",
       "Residents always join for free via invite code",
       "Unlimited package tracking for all community members",
       "Annual billing includes 2 months free",

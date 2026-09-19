@@ -80,7 +80,7 @@ export default function AboutPage() {
           <h2 className="text-2xl font-bold text-brand-text-primary mb-6">The problem we're solving</h2>
           <div className="space-y-5 text-brand-text-secondary leading-relaxed">
             <p>
-              <strong className="text-brand-text-primary">119 million packages are stolen from US porches every year.</strong> That number isn't static — it grows every year as e-commerce volume increases and delivery density in residential communities rises.
+              <strong className="text-brand-text-primary">21 million packages are stolen from US porches every year.</strong> That number isn't static — it grows every year as e-commerce volume increases and delivery density in residential communities rises.
             </p>
             <p>
               Property managers and HOA boards are left with two bad options: expensive lockboxes and camera systems that take months to deploy, or doing nothing and absorbing the daily stream of "where's my package?" calls, complaints, and move-out risk.
