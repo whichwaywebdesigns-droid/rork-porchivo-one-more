@@ -39,7 +39,7 @@ function HeroStat({ stat }: { stat: Stat }) {
 
   return (
     <div ref={ref} className="text-center lg:text-left">
-      <div className={`font-display text-3xl font-bold tabular-nums sm:text-4xl ${toneClass}`}>
+      <div className={`font-display text-2xl font-bold tabular-nums sm:text-4xl ${toneClass}`}>
         {count.toLocaleString()}
         {stat.suffix}
       </div>
@@ -219,7 +219,7 @@ export default function HeroSection() {
 
         {/* ── Animated stat bar ── */}
         <Reveal delay={200}>
-          <div className="mt-12 grid grid-cols-1 gap-6 rounded-2xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur-xl sm:grid-cols-3 sm:gap-4 lg:mt-16 lg:p-8">
+          <div className="mt-12 grid grid-cols-3 gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-xl sm:gap-4 sm:p-6 lg:mt-16 lg:p-8">
             {STATS.map((stat) => (
               <HeroStat key={stat.labelKey} stat={stat} />
             ))}
