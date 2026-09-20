@@ -665,23 +665,36 @@ actor SupabaseService {
         return await verifyOtpGrant(email: email, token: token, type: "signup")
     }
 
+    /// GoTrue has no `grant_type=otp` on the token endpoint — OTP verification
+    /// MUST hit `/auth/v1/verify` (the same endpoint supabase-js uses).
     private func verifyOtpGrant(email: String, token: String, type: String) async -> Result<AuthSession, Error> {
-        let body: [String: Any] = [
+        var req = URLRequest(url: baseURL.appendingPathComponent("auth/v1/verify"))
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.setValue(publishableKey, forHTTPHeaderField: "apikey")
+        req.httpBody = try? JSONSerialization.data(withJSONObject: [
             "email": email,
             "token": token,
             "type": type,
-        ]
-        return await authPost("token?grant_type=otp", body: body) { [weak self] data in
-            guard let self else { throw URLError(.cannotConnectToHost) }
-            var session = try self.decoder.decode(AuthSession.self, from: data)
+        ])
+        do {
+            let (data, resp) = try await session.data(for: req)
+            guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+                let msg = otpErrorMessage(from: data)
+                return .failure(NSError(domain: "SupabaseAuth", code: 1,
+                                         userInfo: [NSLocalizedDescriptionKey: msg]))
+            }
+            var session = try decoder.decode(AuthSession.self, from: data)
             if session.expiresAt == 0, session.expiresIn > 0 {
                 session.expiresAt = Date().timeIntervalSince1970 + session.expiresIn
             }
-            if let user = try? await self.fetchUser(token: session.accessToken) {
+            if let user = try? await fetchUser(token: session.accessToken) {
                 session.user = user
             }
-            await self.persist(session)
-            return session
+            await persist(session)
+            return .success(session)
+        } catch {
+            return .failure(error)
         }
     }
 
@@ -1693,8 +1706,29 @@ actor SupabaseService {
     private func errorMessage(from data: Data) -> String? {
         guard let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return nil }
         if let msg = obj["message"] as? String { return msg }
+        // GoTrue error bodies use `msg` (e.g. rate limits on /auth/v1/otp)
+        if let msg = obj["msg"] as? String { return msg }
         if let error = obj["error"] as? String { return error }
+        if let desc = obj["error_description"] as? String { return desc }
         return nil
+    }
+
+    /// Human-friendly message for a GoTrue verify error body, which uses
+    /// `error_code` + `msg` — a shape `errorMessage(from:)` didn't fully cover.
+    private func otpErrorMessage(from data: Data) -> String {
+        guard let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return "Couldn't verify the code. Please try again."
+        }
+        switch obj["error_code"] as? String {
+        case "otp_expired":
+            return "That code has expired or doesn't match. Tap Resend code and enter the code from the newest email."
+        case "over_email_send_rate_limit":
+            return "Too many code requests. Please wait a minute and try again."
+        default:
+            break
+        }
+        if let msg = obj["msg"] as? String, !msg.isEmpty { return msg }
+        return "Couldn't verify the code. Please try again."
     }
 
     /// Postgres error code from a PostgREST error body (e.g. "23P01" exclusion violation).

@@ -172,8 +172,12 @@ class SupabaseClient(
         return verifyOtpGrant(email, token, "signup")
     }
 
+    /**
+     * GoTrue has no `grant_type=otp` on the token endpoint — OTP verification
+     * MUST hit `/auth/v1/verify` (the same endpoint supabase-js uses).
+     */
     private suspend fun verifyOtpGrant(email: String, token: String, type: String): Result<AuthSession> = try {
-        val response = httpClient.post("$authBase/token?grant_type=otp") {
+        val response = httpClient.post("$authBase/verify") {
             header(HttpHeaders.ContentType, "application/json")
             header("apikey", anonKey)
             setBody(
@@ -198,11 +202,23 @@ class SupabaseClient(
             sessionStore.saveSession(fullSession)
             Result.success(fullSession)
         } else {
-            val msg = parseErrorMessage(response)
-            Result.failure(Exception(msg ?: "Invalid or expired code. Try again."))
+            Result.failure(Exception(otpErrorMessage(response)))
         }
     } catch (e: Exception) {
         Result.failure(e)
+    }
+
+    /** Human-friendly message for a GoTrue verify error body (`error_code` + `msg`). */
+    private suspend fun otpErrorMessage(response: io.ktor.client.statement.HttpResponse): String = try {
+        val body = response.body<String>()
+        val obj = json.parseToJsonElement(body).jsonObject
+        when (obj["error_code"]?.jsonPrimitive?.content) {
+            "otp_expired" -> "That code has expired or doesn't match. Tap Resend code and enter the code from the newest email."
+            "over_email_send_rate_limit" -> "Too many code requests. Please wait a minute and try again."
+            else -> obj["msg"]?.jsonPrimitive?.content ?: "Couldn't verify the code. Please try again."
+        }
+    } catch (_: Exception) {
+        "Couldn't verify the code. Please try again."
     }
 
     private suspend fun parseErrorMessage(response: io.ktor.client.statement.HttpResponse): String? = try {
