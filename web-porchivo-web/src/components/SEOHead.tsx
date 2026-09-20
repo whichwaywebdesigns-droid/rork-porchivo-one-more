@@ -68,7 +68,7 @@ export function usePageSEO(props: SEOHeadProps): void {
     canonical,
     ogTitle,
     ogDescription,
-    ogImage = "https://porchivo.com/og-image.png",
+    ogImage = "https://www.porchivo.com/og-image.png",
     twitterCard = "summary_large_image",
     robots = "index, follow",
     schemas,

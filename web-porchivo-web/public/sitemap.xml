@@ -3,147 +3,147 @@
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
 
   <url>
-    <loc>https://porchivo.com/</loc>
-    <lastmod>2026-06-01</lastmod>
+    <loc>https://www.porchivo.com/</loc>
+    <lastmod>2026-09-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
     <image:image>
-      <image:loc>https://porchivo.com/og-image.png</image:loc>
+      <image:loc>https://www.porchivo.com/og-image.png</image:loc>
       <image:title>Porchivo — Package Risk Intelligence for Your Porch</image:title>
     </image:image>
   </url>
 
   <url>
-    <loc>https://porchivo.com/features</loc>
-    <lastmod>2026-06-01</lastmod>
+    <loc>https://www.porchivo.com/features</loc>
+    <lastmod>2026-09-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
 
   <url>
-    <loc>https://porchivo.com/pricing</loc>
-    <lastmod>2026-06-01</lastmod>
+    <loc>https://www.porchivo.com/pricing</loc>
+    <lastmod>2026-09-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
 
   <url>
-    <loc>https://porchivo.com/porch-partners</loc>
-    <lastmod>2026-06-01</lastmod>
+    <loc>https://www.porchivo.com/porch-partners</loc>
+    <lastmod>2026-09-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://porchivo.com/use-cases</loc>
-    <lastmod>2026-06-01</lastmod>
+    <loc>https://www.porchivo.com/use-cases</loc>
+    <lastmod>2026-09-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://porchivo.com/about</loc>
-    <lastmod>2026-06-01</lastmod>
+    <loc>https://www.porchivo.com/about</loc>
+    <lastmod>2026-09-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://porchivo.com/faq</loc>
-    <lastmod>2026-06-01</lastmod>
+    <loc>https://www.porchivo.com/faq</loc>
+    <lastmod>2026-09-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://porchivo.com/changelog</loc>
-    <lastmod>2026-06-01</lastmod>
+    <loc>https://www.porchivo.com/changelog</loc>
+    <lastmod>2026-09-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
 
   <url>
-    <loc>https://porchivo.com/download</loc>
-    <lastmod>2026-06-01</lastmod>
+    <loc>https://www.porchivo.com/download</loc>
+    <lastmod>2026-09-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
 
   <url>
-    <loc>https://porchivo.com/for-agents</loc>
-    <lastmod>2026-06-01</lastmod>
+    <loc>https://www.porchivo.com/for-agents</loc>
+    <lastmod>2026-09-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://porchivo.com/privacy</loc>
-    <lastmod>2026-06-01</lastmod>
+    <loc>https://www.porchivo.com/privacy</loc>
+    <lastmod>2026-09-20</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
 
   <url>
-    <loc>https://porchivo.com/terms</loc>
-    <lastmod>2026-06-01</lastmod>
+    <loc>https://www.porchivo.com/terms</loc>
+    <lastmod>2026-09-20</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
 
   <url>
-    <loc>https://porchivo.com/es/privacidad</loc>
+    <loc>https://www.porchivo.com/es/privacidad</loc>
     <lastmod>2026-09-06</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
   </url>
 
   <url>
-    <loc>https://porchivo.com/es/terminos</loc>
+    <loc>https://www.porchivo.com/es/terminos</loc>
     <lastmod>2026-09-06</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
   </url>
 
   <url>
-    <loc>https://porchivo.com/register-your-community.html</loc>
+    <loc>https://www.porchivo.com/register-your-community.html</loc>
     <lastmod>2026-09-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://porchivo.com/invite-code.jpg</image:loc>
+      <image:loc>https://www.porchivo.com/invite-code.jpg</image:loc>
       <image:title>Porchivo app — invite code screen for a registered community</image:title>
     </image:image>
   </url>
 
   <url>
-    <loc>https://porchivo.com/residents-join-free.html</loc>
+    <loc>https://www.porchivo.com/residents-join-free.html</loc>
     <lastmod>2026-09-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://porchivo.com/porch-handoff.jpg</image:loc>
+      <image:loc>https://www.porchivo.com/porch-handoff.jpg</image:loc>
       <image:title>Porchivo — neighbor porch handoff</image:title>
     </image:image>
   </url>
 
   <url>
-    <loc>https://porchivo.com/risk-scoring.html</loc>
+    <loc>https://www.porchivo.com/risk-scoring.html</loc>
     <lastmod>2026-09-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://porchivo.com/hoa-office.jpg</image:loc>
+      <image:loc>https://www.porchivo.com/hoa-office.jpg</image:loc>
       <image:title>Porchivo — real-time package risk scoring</image:title>
     </image:image>
   </url>
 
   <url>
-    <loc>https://porchivo.com/alerts-trigger-action.html</loc>
+    <loc>https://www.porchivo.com/alerts-trigger-action.html</loc>
     <lastmod>2026-09-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://porchivo.com/file-incident.jpg</image:loc>
+      <image:loc>https://www.porchivo.com/file-incident.jpg</image:loc>
       <image:title>Porchivo app — file an incident screen</image:title>
     </image:image>
   </url>

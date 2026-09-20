@@ -6,6 +6,17 @@ const NotFound = () => {
 
   useEffect(() => {
     console.error("404 Error: User attempted to access non-existent route:", location.pathname);
+    // SPA fallback serves index.html with HTTP 200 for every URL — mark unknown
+    // routes noindex so crawlers don't record soft-404s as duplicate content.
+    document.title = "Page not found — Porchivo";
+    const meta = document.createElement("meta");
+    meta.name = "robots";
+    meta.content = "noindex, follow";
+    document.head.appendChild(meta);
+    return () => {
+      document.head.removeChild(meta);
+      document.title = "Porchivo — Package Security & Resident Retention for Communities";
+    };
   }, [location.pathname]);
 
   return (

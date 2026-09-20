@@ -531,6 +531,15 @@ export default function TrustEngineScreen() {
         }
       />
 
+      {/* Integrity disclaimer — the control registry is a client-side simulation,
+          not real audit evidence. Always visible to Enterprise viewers. */}
+      <View style={styles.simBanner}>
+        <AlertTriangle size={14} color={palette.gold} />
+        <Text style={styles.simBannerText}>
+          Simulation — illustrative compliance posture for demonstration. Not an audit, certification, or legal evidence.
+        </Text>
+      </View>
+
       <Animated.View style={[styles.topBar, { opacity: mountAnim }]}>
         <RailBackButton onPress={() => router.back()} testID="trust-engine-back" />
         <Text style={styles.screenTitle}>Trust Engine</Text>
@@ -890,6 +899,25 @@ const styles = StyleSheet.create({
   },
   exportBtnDisabled: {
     opacity: 0.5,
+  },
+  simBanner: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    gap: 8,
+    marginHorizontal: space.lg,
+    marginBottom: space.sm,
+    paddingHorizontal: space.md,
+    paddingVertical: space.sm,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: `${palette.gold}55`,
+    backgroundColor: `${palette.gold}18`,
+  },
+  simBannerText: {
+    flex: 1,
+    color: palette.railText,
+    fontSize: 12,
+    lineHeight: 16,
   },
   exportBtnText: {
     color: palette.railText,

@@ -36,12 +36,34 @@ function json(body: unknown, status = 200): Response {
   });
 }
 
+// Light per-IP rate limit (30 requests / 10 min, best-effort per isolate —
+// mirrors reviewer-access). Slows abuse of the public @porchivo.dev gate.
+const RATE_LIMIT = 30;
+const RATE_WINDOW_MS = 10 * 60 * 1000;
+const rateMap = new Map<string, { count: number; resetAt: number }>();
+
 serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
   if (req.method !== 'POST') {
     return json({ error: 'Method not allowed' }, 405);
+  }
+
+  // ── 0. Per-IP rate limit ─────────────────────────────────────────────────
+  const ip =
+    req.headers.get('cf-connecting-ip') ??
+    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
+    'unknown';
+  const now = Date.now();
+  const entry = rateMap.get(ip);
+  if (!entry || now > entry.resetAt) {
+    rateMap.set(ip, { count: 1, resetAt: now + RATE_WINDOW_MS });
+  } else {
+    entry.count += 1;
+    if (entry.count > RATE_LIMIT) {
+      return json({ error: 'Too many requests. Try again later.' }, 429);
+    }
   }
 
   try {

@@ -295,6 +295,10 @@ export default function PricingPage() {
             Need more than 2,000 units? <a href="mailto:support@porchivo.com" className="text-brand-orange hover:underline">Contact us</a> for a custom quote.
           </p>
 
+          <p className="text-center text-xs text-brand-text-muted mt-4 max-w-2xl mx-auto">
+            Cancel anytime — no long-term contracts. Questions about cancellation or refunds? Email <a href="mailto:support@porchivo.com" className="text-brand-orange hover:underline">support@porchivo.com</a> and we'll take care of it.
+          </p>
+
           {currency === "MXN" && (
             <p className="text-center text-xs text-brand-text-muted mt-6 max-w-2xl mx-auto">
               Essential and Professional are billed in fixed Mexican pesos (IVA incluido) and reviewed quarterly — no exchange-rate surprises. Enterprise remains billed in USD.
