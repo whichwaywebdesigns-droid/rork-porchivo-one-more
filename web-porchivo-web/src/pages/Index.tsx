@@ -51,7 +51,7 @@ export default function IndexPage() {
       />
 
       <LandingNav />
-      <main>
+      <main id="main-content" tabIndex={-1} className="outline-none">
         <HeroSection />
         <HowItWorksSection />
         <FeaturesSection />

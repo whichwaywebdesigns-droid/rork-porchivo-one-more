@@ -168,6 +168,14 @@ function ResidentDashboardBody({
 
   return (
     <div className="page-desk min-h-screen">
+      {/* Skip to main content — keyboard / screen-reader accessibility */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[200] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-brand-orange focus:text-white focus:text-sm focus:font-semibold focus:shadow-lg"
+      >
+        Skip to main content
+      </a>
+
       {/* Top bar */}
       <header className="sticky top-0 z-20 bg-brand-navy-800/95 backdrop-blur border-b border-brand-navy-500/60">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
@@ -197,7 +205,7 @@ function ResidentDashboardBody({
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+      <main id="main-content" tabIndex={-1} className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-8 outline-none">
         <div>
           <h1 className="text-2xl font-bold text-brand-text-primary">{org.name}</h1>
           <p className="text-sm text-brand-text-secondary mt-1">

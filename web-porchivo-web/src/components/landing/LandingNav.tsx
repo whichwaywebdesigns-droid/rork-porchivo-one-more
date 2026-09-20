@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -32,6 +32,8 @@ export function scrollToHash(hash: string): void {
 export default function LandingNav() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
+  const toggleRef = useRef<HTMLButtonElement>(null);
   const { t } = useTranslation();
   const navLabel = (link: (typeof NAV_LINKS)[number]) =>
     NAV_LABEL_KEYS[link.hash] ? t(NAV_LABEL_KEYS[link.hash]) : link.label;
@@ -49,8 +51,50 @@ export default function LandingNav() {
     scrollToHash(hash);
   };
 
+  // Keyboard: Escape closes the mobile menu from anywhere and returns focus
+  // to the toggle button.
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setMenuOpen(false);
+        toggleRef.current?.focus();
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [menuOpen]);
+
+  /** Focus trap: while the mobile menu is open, Tab cycles inside the header. */
+  const onHeaderKeyDown = (e: React.KeyboardEvent) => {
+    if (!menuOpen || e.key !== "Tab" || !headerRef.current) return;
+    const focusables = Array.from(
+      headerRef.current.querySelectorAll<HTMLElement>("a[href], button:not([disabled])"),
+    ).filter((el) => el.offsetParent !== null);
+    if (focusables.length === 0) return;
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  };
+
   return (
+    <>
+      {/* Skip to main content — keyboard / screen-reader accessibility */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[200] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-pv-amber focus:text-pv-navy focus:text-sm focus:font-semibold focus:shadow-lg"
+      >
+        Skip to main content
+      </a>
     <header
+      ref={headerRef}
+      onKeyDown={onHeaderKeyDown}
       className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
         scrolled
           ? "border-b border-white/10 bg-pv-navy/90 shadow-lg shadow-black/20 backdrop-blur-md"
@@ -98,6 +142,7 @@ export default function LandingNav() {
           </Link>
           {/* Mobile menu toggle */}
           <button
+            ref={toggleRef}
             type="button"
             className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/15 text-white md:hidden"
             aria-expanded={menuOpen}
@@ -137,5 +182,6 @@ export default function LandingNav() {
         </div>
       )}
     </header>
+    </>
   );
 }

@@ -208,6 +208,15 @@
   }
 }
 
+/* ── Keyboard focus indicators ─────────────────────────────────────────── */
+/* Visible outline for keyboard users only — :focus-visible never fires on
+   mouse/touch input, so mouse users see no change. Uses the brand accent so
+   the ring reads on both the light (kraft) and dark (navy) themes. */
+:focus-visible {
+  outline: 2px solid var(--brand-orange);
+  outline-offset: 2px;
+}
+
 /* ── Theme transition ────────────────────────────────────────────────────── */
 /* Smooth color transition when switching themes. Only applies to color/background
    properties so layout transitions aren't affected. */

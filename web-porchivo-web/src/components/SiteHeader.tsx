@@ -57,7 +57,8 @@ export default function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
-  const menuRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLElement>(null);
+  const toggleRef = useRef<HTMLButtonElement>(null);
   const { t } = useTranslation();
   const navLabel = (item: { href: string; label: string }) =>
     NAV_LABEL_KEYS[item.href] ? t(NAV_LABEL_KEYS[item.href]) : item.label;
@@ -91,6 +92,38 @@ export default function SiteHeader() {
     return () => { document.body.style.overflow = ""; };
   }, [menuOpen]);
 
+  // Keyboard: Escape closes the mobile menu from anywhere and returns focus
+  // to the toggle button, so keyboard users are never trapped.
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setMenuOpen(false);
+        toggleRef.current?.focus();
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [menuOpen]);
+
+  /** Focus trap: while the mobile menu is open, Tab cycles inside the header. */
+  const onHeaderKeyDown = (e: React.KeyboardEvent) => {
+    if (!menuOpen || e.key !== "Tab" || !menuRef.current) return;
+    const focusables = Array.from(
+      menuRef.current.querySelectorAll<HTMLElement>("a[href], button:not([disabled])"),
+    ).filter((el) => el.offsetParent !== null);
+    if (focusables.length === 0) return;
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  };
+
   const isActive = (href: string) => {
     if (href.startsWith("/#")) return false; // hash links are never "active page"
     return href === "/" ? location.pathname === "/" : location.pathname.startsWith(href);
@@ -108,6 +141,7 @@ export default function SiteHeader() {
 
       <header
         ref={menuRef}
+        onKeyDown={onHeaderKeyDown}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 overflow-visible ${
           scrolled || menuOpen
             ? "bg-brand-navy-900/97 backdrop-blur-xl border-b border-brand-navy-500/40"
@@ -194,6 +228,7 @@ export default function SiteHeader() {
               <LanguagePill />
               <ThemeToggle />
               <button
+                ref={toggleRef}
                 className="p-2.5 rounded-xl text-brand-text-muted hover:text-brand-text-primary hover:bg-brand-navy-600/50 transition-colors"
                 onClick={() => setMenuOpen(!menuOpen)}
                 aria-label={menuOpen ? "Close menu" : "Open menu"}

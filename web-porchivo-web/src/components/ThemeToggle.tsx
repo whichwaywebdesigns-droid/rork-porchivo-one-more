@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Moon, Sun, Monitor } from "lucide-react";
 import { useTheme } from "next-themes";
 
@@ -18,6 +18,7 @@ export default function ThemeToggle() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
+  const toggleRef = useRef<HTMLButtonElement>(null);
 
   // Avoid hydration mismatch — render placeholder until mounted
   useEffect(() => {
@@ -37,6 +38,19 @@ export default function ThemeToggle() {
     return () => document.removeEventListener("mousedown", handler);
   }, [open]);
 
+  // Keyboard: Escape closes the dropdown and returns focus to the toggle
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setOpen(false);
+        toggleRef.current?.focus();
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open]);
+
   if (!mounted) {
     // Placeholder with same dimensions to prevent layout shift
     return (
@@ -52,6 +66,7 @@ export default function ThemeToggle() {
   return (
     <div className="relative" data-theme-toggle>
       <button
+        ref={toggleRef}
         onClick={() => setOpen(!open)}
         className="w-9 h-9 rounded-lg flex items-center justify-center text-brand-text-muted hover:text-brand-text-primary hover:bg-brand-navy-600/50 transition-colors"
         aria-label={`Theme: ${current}. Click to change.`}

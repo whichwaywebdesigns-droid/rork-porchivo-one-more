@@ -111,6 +111,14 @@ export default function ManageLayout() {
 
   return (
     <div className="page-desk min-h-screen">
+      {/* Skip to main content — keyboard / screen-reader accessibility */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[200] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-brand-orange focus:text-white focus:text-sm focus:font-semibold focus:shadow-lg"
+      >
+        Skip to main content
+      </a>
+
       {/* Top bar */}
       <header className="sticky top-0 z-20 bg-brand-navy-800/95 backdrop-blur border-b border-brand-navy-500/60">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
@@ -135,7 +143,30 @@ export default function ManageLayout() {
         </div>
 
         {/* Nav tabs */}
-        <nav className="max-w-5xl mx-auto px-4 sm:px-6 flex items-center gap-1 overflow-x-auto pb-1.5">
+        <nav
+          aria-label="Manager portal sections"
+          className="max-w-5xl mx-auto px-4 sm:px-6 flex items-center gap-1 overflow-x-auto pb-1.5"
+          onKeyDown={(e) => {
+            // Arrow-key navigation across the section tabs (links stay Tab-reachable)
+            if (e.key !== "ArrowRight" && e.key !== "ArrowLeft" && e.key !== "Home" && e.key !== "End") return;
+            const tabs = Array.from(
+              e.currentTarget.querySelectorAll<HTMLElement>("a[href]"),
+            ).filter((el) => el.offsetParent !== null);
+            if (tabs.length === 0) return;
+            const current = tabs.indexOf(document.activeElement as HTMLElement);
+            if (current === -1) return;
+            e.preventDefault();
+            const next =
+              e.key === "ArrowRight"
+                ? (current + 1) % tabs.length
+                : e.key === "ArrowLeft"
+                  ? (current - 1 + tabs.length) % tabs.length
+                  : e.key === "Home"
+                    ? 0
+                    : tabs.length - 1;
+            tabs[next].focus();
+          }}
+        >
           {NAV_ITEMS.map(({ to, label, icon: Icon, ...rest }) => (
             <NavLink
               key={to}
@@ -157,7 +188,7 @@ export default function ManageLayout() {
       </header>
 
       {/* Page body */}
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+      <main id="main-content" tabIndex={-1} className="max-w-5xl mx-auto px-4 sm:px-6 py-8 outline-none">
         <Outlet context={{ org }} />
       </main>
 
