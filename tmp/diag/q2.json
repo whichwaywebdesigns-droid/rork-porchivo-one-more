@@ -1,0 +1,1 @@
+{"query": "SELECT id, payload->>'action' AS action, payload->>'ip_address' AS ip, created_at FROM auth.audit_log_entries WHERE payload->>'actor_id' = 'b5095078-dd55-479d-b9c0-76ed42fc326b' OR payload->>'user_id' = 'b5095078-dd55-479d-b9c0-76ed42fc326b' OR payload->>'actor_email' ILIKE 'support@porchivo.com' ORDER BY created_at DESC LIMIT 25"}

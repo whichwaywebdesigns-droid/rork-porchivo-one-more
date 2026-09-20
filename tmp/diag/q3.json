@@ -1,0 +1,1 @@
+{"query": "SELECT created_at, payload FROM auth.audit_log_entries ORDER BY created_at DESC LIMIT 40"}
