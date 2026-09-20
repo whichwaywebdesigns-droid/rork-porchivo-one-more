@@ -161,6 +161,9 @@ const en = {
   "landing.videos.v3.desc":
     "The idea behind Porchivo: real neighbors, real accountability, and a delivery network that makes your porch the safest spot on the street.",
   "landing.videos.watchOnYoutube": "Watch on YouTube",
+  "landing.returning.manager": "Welcome back — open your manager portal",
+  "landing.returning.resident": "Welcome back — open your dashboard",
+  "landing.returning.dismiss": "Dismiss",
 };
 
 /** Translation keys with string values (en is the canonical key set). */
@@ -321,6 +324,9 @@ const es: Partial<TranslationKeys> = {
   "landing.videos.v3.desc":
     "La idea detrás de Porchivo: vecinos reales, responsabilidad real y una red de entregas que hace de tu porche el lugar más seguro de la calle.",
   "landing.videos.watchOnYoutube": "Ver en YouTube",
+  "landing.returning.manager": "Bienvenido de nuevo — abre tu portal de administración",
+  "landing.returning.resident": "Bienvenido de nuevo — abre tu panel",
+  "landing.returning.dismiss": "Cerrar",
 };
 
 const fr: Partial<TranslationKeys> = {

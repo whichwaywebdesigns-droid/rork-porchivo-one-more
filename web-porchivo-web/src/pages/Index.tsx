@@ -1,4 +1,5 @@
 import SEOHead from "@/components/SEOHead";
+import ReturningUserChip from "@/components/ReturningUserChip";
 import LandingNav from "@/components/landing/LandingNav";
 import HeroSection from "@/components/landing/HeroSection";
 import HowItWorksSection from "@/components/landing/HowItWorksSection";
@@ -61,6 +62,8 @@ export default function IndexPage() {
         <FinalCtaSection />
       </main>
       <LandingFooter />
+      {/* Session-aware one-tap portal shortcut — renders nothing for logged-out visitors */}
+      <ReturningUserChip />
     </div>
   );
 }

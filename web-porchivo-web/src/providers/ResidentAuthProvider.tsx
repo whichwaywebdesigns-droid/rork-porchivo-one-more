@@ -152,6 +152,15 @@ export function ResidentAuthProvider({ children }: { children: ReactNode }) {
 
     const { data: sub } = supabase.auth.onAuthStateChange((_event, nextSession) => {
       if (isMounted) setSession(nextSession);
+      // Hint for the homepage's ReturningUserChip: last portal this browser
+      // signed into (fires on sign-in AND every portal load with a session).
+      if (nextSession) {
+        try {
+          localStorage.setItem("porchivo.last_portal", "resident");
+        } catch {
+          /* private browsing — chip falls back to the role probe */
+        }
+      }
     });
 
     return () => {
