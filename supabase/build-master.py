@@ -64,6 +64,7 @@ ORDER = [
     "add_is_volunteer.sql",                  # volunteer partner flag + stats view rebuild
     "email-spanish-templates-migration.sql",  # profiles.preferred_language (en|es) + resend_template_es_alias + locale-aware enqueue_template_email (es → published '-espanol' aliases; English fallback)
     "onboarding-fee-msi-migration.sql",       # organizations.onboarding_payment_status/session/url — MXN onboarding fee split onto a payment-mode Checkout session (MSI-enabled; subscriptions exempt)
+    "billing-event-log-migration.sql",         # append-only billing webhook audit (RC receiver foundation; formalized 2026-09-21 + immutability FIX: alerts fully immutable, log allows outcome-only updates)
 ]
 
 POLICY_RE = re.compile(
