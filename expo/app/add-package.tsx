@@ -170,7 +170,14 @@ export default function AddPackageScreen() {
       );
     }
 
-    router.back();
+    // Land on the new package's detail view instead of silently returning —
+    // the package lives in the Packages store (not the community shipments
+    // feed), so returning to the feed looked like the entry was lost.
+    if (newPkg) {
+      router.replace({ pathname: '/package-detail' as any, params: { id: newPkg.id } });
+    } else {
+      router.back();
+    }
   }, [name, carrier, trackingNumber, expectedDate, addressNickname, customAddress, notes, addPackage, user?.id, router, validateDate, parseDateToISO, selectedPartnerId, assignPartnerToPackage, user?.address]);
 
   const formatDateInput = useCallback((text: string) => {
