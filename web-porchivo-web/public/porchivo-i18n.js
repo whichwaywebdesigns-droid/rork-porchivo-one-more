@@ -230,7 +230,7 @@
         title: "Alertas instantáneas de robo de paquetes — Porchivo",
         desc: "Residentes y Porch Partners reciben una notificación al instante cuando se cruzan los umbrales de riesgo — con cadena de custodia completa para cada entrega.",
       },
-      alt: { ".hero-shot": "App de Porchivo — pantalla para reportar un incidente con categorías de problemas de entrega" },
+      alt: { ".hero-shot": "App de Porchivo — pantalla de Puntaje de Seguridad con medidor de riesgo, factores que contribuyen y estadísticas de robo de paquetes" },
       sel: {
         ".nav-links a:not(.nav-cta)": ["Cómo funcionan las alertas", "Panel para administradores", "El ciclo completo"],
         ".nav-cta": "Registra tu comunidad",
