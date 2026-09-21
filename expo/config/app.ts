@@ -260,8 +260,8 @@ export const SOCIAL_PROOF = {
   porchesProtected: 'Beta launch',
 
   // Shown on intro slides / paywall
-  // Source: USPS/CargoNet data — "119M packages stolen annually in the US"
-  packagesStoredStat: '119M',
+  // Source: SafeWise 2025 Package Theft Report — 104M packages stolen in the US last year
+  packagesStoredStat: '104M',
 
   // "1 in X packages stolen" ratio used in onboarding
   stolenRatio: '1 in 5',

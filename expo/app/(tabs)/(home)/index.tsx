@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { View, Text, StyleSheet, FlatList, RefreshControl, TouchableOpacity, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Stack } from 'expo-router';
-import { Shield, MapPin, ShieldAlert, Bell, BarChart3, Plus, Zap, BadgeDollarSign, ArrowRight, Users } from 'lucide-react-native';
+import { Shield, MapPin, ShieldAlert, Bell, BarChart3, Plus, Zap, BadgeDollarSign, ArrowRight, Users, Package, ChevronRight } from 'lucide-react-native';
 import { useQueryClient } from '@tanstack/react-query';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -14,6 +14,8 @@ import { useOrganization } from '@/store/OrganizationContext';
 import { useShipments } from '@/store/ShipmentsContext';
 import { useNotifications } from '@/store/NotificationsContext';
 import ShipmentCard from '@/components/ShipmentCard';
+import StatusPill from '@/components/ui/StatusPill';
+import { usePackages } from '@/store/PackagesContext';
 import { HomeDashboardSkeleton } from '@/components/SkeletonLoader';
 import DailyPackageTheftFact from '@/components/DailyPackageTheftFact';
 import OnboardingWalkthrough from '@/components/OnboardingTooltip';
@@ -44,26 +46,12 @@ export default function HomeScreen() {
   const queryClient = useQueryClient();
   const colors = useColors();
   const { user, isHomeowner, isPartner, session } = useApp();
-  const { isOrgMember, isLoading: isOrgLoading } = useOrganization();
+  const { isLoading: isOrgLoading } = useOrganization();
   const { myShipments, nearbyShipments, acceptShipment, isLoading: isShipmentsLoading } = useShipments();
+  const { packages } = usePackages();
   const { unreadNotificationCount } = useNotifications();
   const posthog = usePostHog();
   const [refreshing, setRefreshing] = useState(false);
-
-  // Tier guard: (home) is the community-tier tab and is hidden from the bar
-  // for free-tier users. Several screens (login, location-consent,
-  // notifications-permission, +not-found) navigate here unconditionally, so a
-  // free-tier user would otherwise strand on a tab with no bar item. Defer
-  // with setTimeout — synchronous router.replace() during React's reconnect
-  // phase can crash (see note at the bottom of this file).
-  useEffect(() => {
-    if (isOrgLoading || isOrgMember) return;
-    const t = setTimeout(() => {
-      router.replace('/(tabs)/packages' as any);
-    }, 0);
-    return () => clearTimeout(t);
-  }, [isOrgLoading, isOrgMember, router]);
-
 
   // P-3: app-maturity gating. Counted on each home mount so first-time users
   // see a calm screen instead of 6 stacked marketing sections.
@@ -122,6 +110,22 @@ export default function HomeScreen() {
 
   const data = isPartner && !isHomeowner ? nearbyShipments : myShipments;
   const isPartnerView = isPartner && !isHomeowner;
+
+  // Dashboard visibility for self-tracked packages (PackagesContext) — the
+  // shipments list below only shows org/community shipments.
+  const activePackages = useMemo(
+    () =>
+      packages
+        .filter(
+          (p) =>
+            p.currentStatus === 'ordered' ||
+            p.currentStatus === 'shipped' ||
+            p.currentStatus === 'out_for_delivery',
+        )
+        .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
+        .slice(0, 3),
+    [packages],
+  );
 
   // P-3: partner-view-dependent gates, declared after isPartnerView.
   const showDailyStreak = !isPartnerView && isMatureUser;
@@ -231,6 +235,46 @@ export default function HomeScreen() {
         />
       )}
 
+      {!isPartnerView && activePackages.length > 0 && (
+        <View style={styles.packagesSection}>
+          <View style={styles.packagesHeader}>
+            <Text style={[styles.packagesTitle, { color: colors.slate }]}>Your packages</Text>
+            <TouchableOpacity
+              onPress={() => router.push('/(tabs)/packages' as any)}
+              style={styles.packagesSeeAll}
+              accessibilityRole="button"
+              accessibilityLabel="See all packages"
+            >
+              <Text style={[styles.packagesSeeAllText, { color: colors.primary }]}>See all</Text>
+              <ChevronRight size={13} color={colors.primary} />
+            </TouchableOpacity>
+          </View>
+          {activePackages.map((pkg) => (
+            <TouchableOpacity
+              key={pkg.id}
+              style={[styles.packageRow, { backgroundColor: colors.surface, borderColor: colors.border }]}
+              onPress={() => router.push({ pathname: '/package-detail' as any, params: { id: pkg.id } })}
+              activeOpacity={0.8}
+              accessibilityRole="button"
+              accessibilityLabel={`Open package ${pkg.name}`}
+            >
+              <View style={[styles.packageIcon, { backgroundColor: colors.primaryLight }]}>
+                <Package size={16} color={colors.primary} />
+              </View>
+              <View style={styles.packageInfo}>
+                <Text style={[styles.packageName, { color: colors.slate }]} numberOfLines={1}>
+                  {pkg.name}
+                </Text>
+                <Text style={[styles.packageMeta, { color: colors.slateLight }]} numberOfLines={1}>
+                  {pkg.carrier} · ···{pkg.trackingNumber.slice(-4)}
+                </Text>
+              </View>
+              <StatusPill status={pkg.currentStatus} hasTracking={!!pkg.trackingNumber} size="sm" />
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+
       <View style={styles.greetingRow}>
         <View style={{ flex: 1 }}>
           <Text style={[styles.greeting, { color: colors.slate }]}>
@@ -296,7 +340,7 @@ export default function HomeScreen() {
         />
       )}
     </View>
-  ), [user, isPartnerView, router, quickLinks, myShipments, showTheftFact, showPartnerUpsell, showDailyStreak, showReferral, posthog, quickLinksVariant, handleQuickLinkPress, renderQuickLink, colors]);
+  ), [user, isPartnerView, router, quickLinks, myShipments, activePackages, showTheftFact, showPartnerUpsell, showDailyStreak, showReferral, posthog, quickLinksVariant, handleQuickLinkPress, renderQuickLink, colors]);
 
   const ListEmpty = useCallback(() => (
     <View>
@@ -336,14 +380,6 @@ export default function HomeScreen() {
   ), [isPartnerView, router]);
 
   const [_walkthroughDone, setWalkthroughDone] = useState(false);
-
-  // Free-tier users don't have a Home tab. We render nothing instead of
-  // calling router.replace() — that crashes during React's
-  // reconnectPassiveEffects phase (HMR in dev) when the navigator isn't
-  // ready. The root layout redirect handles navigation to Deliveries.
-  if (!isOrgLoading && !isOrgMember) {
-    return <View style={[styles.container, { backgroundColor: colors.background }]} />;
-  }
 
   // Skeleton: shown while org context resolves or the first shipment query
   // loads with no cached data. Subsequent refetches use RefreshControl instead
@@ -531,6 +567,56 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '600' as const,
     // color set via inline override using useColors()
+  },
+  packagesSection: {
+    marginBottom: space.md,
+  },
+  packagesHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  packagesTitle: {
+    fontSize: 15,
+    fontWeight: '700' as const,
+  },
+  packagesSeeAll: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+  },
+  packagesSeeAllText: {
+    fontSize: 13,
+    fontWeight: '600' as const,
+  },
+  packageRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    borderWidth: 1,
+    borderRadius: radius.md,
+    padding: 10,
+    marginBottom: 8,
+  },
+  packageIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  packageInfo: {
+    flex: 1,
+    minWidth: 0,
+  },
+  packageName: {
+    fontSize: 13.5,
+    fontWeight: '600' as const,
+  },
+  packageMeta: {
+    fontSize: 11.5,
+    marginTop: 1,
   },
   partnerUpsellBanner: {
     flexDirection: 'row',

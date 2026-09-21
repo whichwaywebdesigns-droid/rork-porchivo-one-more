@@ -2,9 +2,10 @@
 //  MainTabView.swift
 //  Porchivo
 //
-//  Hybrid navigation — Free Tier (3 tabs: Deliveries, Porch Partner, Account)
-//  vs Community Tier (4 tabs: Home, Payments, Requests, More).
-//  Tier is determined by `appState.isOrgMember` (active org membership).
+//  Unified bottom bar — every user gets the same 4 tabs (Home, Payments,
+//  Requests, More) so the app reads as one product across tiers. Free-tier
+//  surfaces stay reachable: My Deliveries lives under More, Porch Partner
+//  via the Create flow, Account via More > Settings.
 //
 
 import SwiftUI
@@ -30,40 +31,12 @@ struct MainTabView: View {
     }
 
     var body: some View {
-        Group {
-            if appState.isOrgMember {
-                communityTabs
-            } else {
-                freeTabs
-            }
-        }
-        .tint(c.accent)
-        .animation(.easeInOut(duration: 0.3), value: appState.isOrgMember)
-        .sensoryFeedback(.selection, trigger: selection)
+        communityTabs
+            .tint(c.accent)
+            .sensoryFeedback(.selection, trigger: selection)
     }
 
-    // MARK: - Free Tier (3 tabs)
-
-    private var freeTabs: some View {
-        TabView(selection: selectionBinding) {
-            HomeScreen()
-                .tabItem { Label("Deliveries", systemImage: "shippingbox.fill") }
-                .tag(0)
-                .environment(\.pvTabIndex, 0)
-
-            PorchPartnerScreen()
-                .tabItem { Label("Porch Partner", systemImage: "hand.raised.fill") }
-                .tag(1)
-                .environment(\.pvTabIndex, 1)
-
-            ProfileScreen()
-                .tabItem { Label("Account", systemImage: "person.fill") }
-                .tag(2)
-                .environment(\.pvTabIndex, 2)
-        }
-    }
-
-    // MARK: - Community Tier (4 tabs)
+    // MARK: - Tabs
 
     private var communityTabs: some View {
         TabView(selection: selectionBinding) {

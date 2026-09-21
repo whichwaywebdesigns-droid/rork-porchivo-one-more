@@ -26,16 +26,11 @@ const SPLASH_BG = '#CBCBCA'; // Matches the video's edge color for seamless cove
 export default function SplashScreen(): React.ReactElement {
   const router = useRouter();
   const { session, isOnboarded } = useApp();
-  const { isOrgMember, isLoading: isOrgLoading } = useOrganization();
+  const { isLoading: isOrgLoading } = useOrganization();
   const [hasSeenSlides, setHasSeenSlides] = useState<boolean | null>(null);
 
   // Refs so the navigation callback and failsafe timer read the latest
   // values without restarting the splash timeline.
-  const isOrgMemberRef = useRef<boolean>(isOrgMember);
-  useEffect(() => {
-    isOrgMemberRef.current = isOrgMember;
-  }, [isOrgMember]);
-
   const sessionRef = useRef(session);
   const isOnboardedRef = useRef<boolean | null>(isOnboarded);
   const isOrgLoadingRef = useRef<boolean>(isOrgLoading);
@@ -64,9 +59,7 @@ export default function SplashScreen(): React.ReactElement {
 
     if (sessionRef.current) {
       if (isOnboardedRef.current) {
-        // Tier-aware: community members go to Home, free-tier to Deliveries.
-        const dest = isOrgMemberRef.current ? '/(tabs)/(home)' : '/(tabs)/packages';
-        safeReplace(dest);
+        safeReplace('/(tabs)/(home)');
       } else {
         safeReplace('/onboarding-setup');
       }

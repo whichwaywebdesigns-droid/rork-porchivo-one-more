@@ -379,6 +379,10 @@ export const [PackagesProvider, usePackages] = createContextHook(() => {
     }
     const now = new Date().toISOString();
     const id = `pkg_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const hasTracking = !!input.trackingNumber?.trim();
+    // A tracking number means the carrier already has the parcel — seed past
+    // 'ordered' so the package screen shows movement ("In transit") right away.
+    const initialStatus: PackageTrackingStatus = hasTracking ? 'shipped' : 'ordered';
 
     const newPkg: TrackedPackage = {
       id,
@@ -389,12 +393,12 @@ export const [PackagesProvider, usePackages] = createContextHook(() => {
       expectedDeliveryDate: input.expectedDeliveryDate,
       expectedDeliveryWindowStart: input.expectedDeliveryWindowStart,
       expectedDeliveryWindowEnd: input.expectedDeliveryWindowEnd,
-      currentStatus: 'ordered',
+      currentStatus: initialStatus,
       addressNickname: input.addressNickname,
       customAddressLabel: input.customAddressLabel,
       notesForPartner: input.notesForPartner,
       personalNotes: '',
-      statusHistory: createInitialStatusHistory('ordered'),
+      statusHistory: createInitialStatusHistory(initialStatus),
       driverId: null,
       porchPartnerId: input.porchPartnerId ?? null,
       deliveredTimestamp: null,

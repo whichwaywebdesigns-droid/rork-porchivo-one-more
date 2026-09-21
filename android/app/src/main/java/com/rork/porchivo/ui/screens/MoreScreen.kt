@@ -17,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.outlined.Campaign
 import androidx.compose.material.icons.outlined.FolderOpen
+import androidx.compose.material.icons.outlined.Handshake
 import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material.icons.outlined.People
 import androidx.compose.material.icons.outlined.Pool
@@ -158,6 +159,10 @@ fun MoreScreen(
                 Column {
                     LinkRow(icon = Icons.Outlined.Settings, tint = c.textSecondary, label = "Account & Settings") {
                         navController.navigate(Routes.PROFILE)
+                    }
+                    HorizontalDivider(color = c.border)
+                    LinkRow(icon = Icons.Outlined.Handshake, tint = c.accent, label = "Porch Partner") {
+                        navController.navigate(Routes.PORCH_PARTNER)
                     }
                     HorizontalDivider(color = c.border)
                     LinkRow(icon = Icons.Outlined.Shield, tint = c.warmOrange, label = "Safety Score") {

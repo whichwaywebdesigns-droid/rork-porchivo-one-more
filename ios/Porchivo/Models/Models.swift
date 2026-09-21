@@ -53,7 +53,7 @@ nonisolated enum PackageTrackingStatus: String, CaseIterable, Codable {
     var label: String {
         switch self {
         case .ordered: "Ordered"
-        case .shipped: "Shipped"
+        case .shipped: "In Transit"
         case .outForDelivery: "Out for Delivery"
         case .delivered: "Delivered"
         case .pickedUp: "Picked Up"

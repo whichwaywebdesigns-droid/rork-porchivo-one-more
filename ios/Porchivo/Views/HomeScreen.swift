@@ -84,6 +84,39 @@ struct HomeScreen: View {
                             .buttonStyle(.plain)
                         }
                     }
+
+                    if !appState.packages.isEmpty {
+                        SectionHeader(title: "Your packages", trailing: "See all")
+                            .padding(.top, 8)
+
+                        ForEach(appState.packages.prefix(3)) { pkg in
+                            NavigationLink(value: Route.packageDetail(pkg.id)) {
+                                HStack(spacing: 12) {
+                                    Image(systemName: pkg.carrier.sfSymbol)
+                                        .font(.system(size: 16, weight: .bold))
+                                        .foregroundStyle(c.accent)
+                                        .frame(width: 36, height: 36)
+                                        .background(c.accentSoft, in: .rect(cornerRadius: Radius.md))
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(pkg.name)
+                                            .font(.system(size: 14, weight: .semibold))
+                                            .foregroundStyle(c.textPrimary)
+                                            .lineLimit(1)
+                                        Text(pkg.currentStatus.label)
+                                            .font(.system(size: 12))
+                                            .foregroundStyle(c.textSecondary)
+                                    }
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 12))
+                                        .foregroundStyle(c.textMuted)
+                                }
+                                .padding(12)
+                                .background(c.surface, in: .rect(cornerRadius: Radius.md))
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 16)

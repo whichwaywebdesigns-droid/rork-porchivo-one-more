@@ -107,8 +107,6 @@ fun AppNavigation() {
     val orgMembership by appViewModel.orgMembership.collectAsStateWithLifecycle()
     val languageTransitioning by appViewModel.languageTransitioning.collectAsStateWithLifecycle()
     val c = PorchivoTheme.colors
-    val isOrgMember = orgMembership?.isActive == true
-
     // Smooth alpha fade when switching languages.
     val contentAlpha by animateFloatAsState(
         targetValue = if (languageTransitioning) 0f else 1f,
@@ -116,20 +114,14 @@ fun AppNavigation() {
         label = "languageFade",
     )
 
-    val tabs = if (isOrgMember) {
-        listOf(
-            TabItem(Routes.HOME, "Home", Icons.Outlined.Home, Icons.Filled.Home),
-            TabItem(Routes.PAYMENTS, "Payments", Icons.Outlined.CreditCard, Icons.Filled.CreditCard),
-            TabItem(Routes.REQUESTS, "Requests", Icons.Outlined.Build, Icons.Filled.Build),
-            TabItem(Routes.MORE, "More", Icons.Outlined.MoreHoriz, Icons.Filled.MoreHoriz),
-        )
-    } else {
-        listOf(
-            TabItem(Routes.HOME, "Deliveries", Icons.Outlined.Inventory2, Icons.Filled.Inventory2),
-            TabItem(Routes.PORCH_PARTNER, "Porch Partner", Icons.Outlined.Handshake, Icons.Filled.Handshake),
-            TabItem(Routes.PROFILE, "Account", Icons.Outlined.Person, Icons.Filled.Person),
-        )
-    }
+    // Unified bottom bar — same 4 tabs for every user (free-tier surfaces
+    // live in More: My Deliveries, Porch Partner, Account & Settings).
+    val tabs = listOf(
+        TabItem(Routes.HOME, "Home", Icons.Outlined.Home, Icons.Filled.Home),
+        TabItem(Routes.PAYMENTS, "Payments", Icons.Outlined.CreditCard, Icons.Filled.CreditCard),
+        TabItem(Routes.REQUESTS, "Requests", Icons.Outlined.Build, Icons.Filled.Build),
+        TabItem(Routes.MORE, "More", Icons.Outlined.MoreHoriz, Icons.Filled.MoreHoriz),
+    )
 
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route

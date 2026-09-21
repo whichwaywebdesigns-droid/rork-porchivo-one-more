@@ -22,7 +22,7 @@ export type StatusToken = {
 
 const TOKENS: Record<DeliveryStatus, StatusToken> = {
   ordered: { label: 'Ordered', fg: palette.slate700, bg: palette.slate100, icon: 'box' },
-  shipped: { label: 'Shipped', fg: palette.navySoft, bg: palette.sky, icon: 'truck' },
+  shipped: { label: 'In transit', fg: palette.navySoft, bg: palette.sky, icon: 'truck' },
   in_transit: { label: 'In transit', fg: palette.navySoft, bg: palette.sky, icon: 'truck' },
   out_for_delivery: {
     label: 'Out for delivery',

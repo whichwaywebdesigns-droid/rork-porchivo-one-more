@@ -595,7 +595,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   scrollContent: {
-    paddingBottom: 40,
+    paddingBottom: 120,
   },
   scoreSection: {
     alignItems: 'center',

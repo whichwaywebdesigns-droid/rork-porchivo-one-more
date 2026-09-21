@@ -129,8 +129,8 @@ fun SafetyScreen(
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
-                        text = "${AppConfig.SocialProof.PACKAGES_STOLEN_STAT} packages are stolen every year — " +
-                            "${AppConfig.SocialProof.STOLEN_RATIO} households are hit.",
+                        text = "${AppConfig.SocialProof.PACKAGES_STOLEN_STAT} packages were stolen in the US last year, and " +
+                            "${AppConfig.SocialProof.STOLEN_RATIO} Americans have had a package stolen (SafeWise · Security.org, 2025).",
                         color = c.textSecondary,
                         fontSize = 12.sp,
                         lineHeight = 17.sp,

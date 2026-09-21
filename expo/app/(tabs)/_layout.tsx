@@ -1,27 +1,24 @@
 import React from 'react';
 import { View, StyleSheet, Platform } from 'react-native';
 import { Tabs } from 'expo-router';
-import { Home, CreditCard, Wrench, MoreHorizontal, Package, Handshake, User, Building2 } from 'lucide-react-native';
+import { Home, CreditCard, Wrench, MoreHorizontal } from 'lucide-react-native';
 import { useColors } from '@/constants/colors';
 import { useOrganization } from '@/store/OrganizationContext';
 import { useTranslation } from 'react-i18next';
-import { isEnabled } from '@/lib/featureFlags';
 import { TabShellSkeleton } from '@/components/SkeletonLoader';
 
 /**
- * Hybrid Navigation — Tab Layout
+ * Hybrid Navigation — Tab Layout (unified)
  *
- * Free Tier (no HOA community):  [ Deliveries ] [ Porch Partner ] [ Account ]
- * Community Tier (HOA-connected): [ Home ] [ Payments ] [ Requests ] [ More ]
- *
- * The tier is determined by whether the user has an active org membership.
+ * Every user sees the same 4 tabs (Home / Payments / Requests / More) so the
+ * app reads as one product across tiers. Free-tier surfaces stay reachable:
+ * My Deliveries and Porch Partner live under More; Account via More settings.
  * No IAP, no pricing, no paywall anywhere.
  */
 export default function TabLayout() {
   const Colors = useColors();
-  const { isOrgMember, isLoading: isOrgLoading } = useOrganization();
+  const { isLoading: isOrgLoading } = useOrganization();
   const { t } = useTranslation();
-  const showPorchPartners = isEnabled('PORCH_PARTNERS');
 
   const tabOptions = {
     headerShown: false,
@@ -41,101 +38,56 @@ export default function TabLayout() {
   };
 
   if (isOrgLoading) {
-    // Tier is still unknown (first launch, no cached membership) — show the
-    // shell skeleton instead of committing to the wrong tab set and flipping.
+    // Org context still resolving on first launch — show the shell skeleton
+    // instead of flashing an incomplete bar.
     return <TabShellSkeleton />;
   }
 
-  if (isOrgMember) {
-    // ── Community Tier: 4-tab nav ──────────────────────────────────────
-    return (
-      <Tabs screenOptions={tabOptions}>
-        <Tabs.Screen
-          name="(home)"
-          options={{
-            title: t('tab.home'),
-            tabBarIcon: ({ color, focused }) => (
-              <Home size={22} color={color} fill={focused ? color : 'transparent'} />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="payments"
-          options={{
-            title: t('tab.payments'),
-            tabBarIcon: ({ color, focused }) => (
-              <CreditCard size={22} color={color} fill={focused ? color : 'transparent'} />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="requests"
-          options={{
-            title: t('tab.requests'),
-            tabBarIcon: ({ color, focused }) => (
-              <Wrench size={22} color={color} fill={focused ? color : 'transparent'} />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="more"
-          options={{
-            title: t('tab.more'),
-            tabBarIcon: ({ color, focused }) => (
-              <MoreHorizontal size={22} color={color} fill={focused ? color : 'transparent'} />
-            ),
-          }}
-        />
-        {/* Hide free-tier tabs — they live inside More > My Deliveries */}
-        <Tabs.Screen name="packages" options={{ href: null }} />
-        <Tabs.Screen name="porch-partner" options={{ href: showPorchPartners ? null : null }} />
-        <Tabs.Screen name="create" options={{ href: null }} />
-        <Tabs.Screen name="activity" options={{ href: null }} />
-        <Tabs.Screen name="community" options={{ href: null }} />
-        <Tabs.Screen name="profile" options={{ href: null }} />
-      </Tabs>
-    );
-  }
-
-  // ── Free Tier: 3-tab nav ────────────────────────────────────────────
   return (
     <Tabs screenOptions={tabOptions}>
       <Tabs.Screen
-        name="packages"
+        name="(home)"
         options={{
-          title: t('tab.deliveries'),
+          title: t('tab.home'),
           tabBarIcon: ({ color, focused }) => (
-            <Package size={22} color={color} fill={focused ? color : 'transparent'} />
+            <Home size={22} color={color} fill={focused ? color : 'transparent'} />
           ),
         }}
       />
       <Tabs.Screen
-        name="porch-partner"
+        name="payments"
         options={{
-          title: t('tab.porchPartner'),
-          href: showPorchPartners ? undefined : null,
+          title: t('tab.payments'),
           tabBarIcon: ({ color, focused }) => (
-            <Handshake size={22} color={color} fill={focused ? color : 'transparent'} />
+            <CreditCard size={22} color={color} fill={focused ? color : 'transparent'} />
           ),
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="requests"
         options={{
-          title: t('tab.account'),
+          title: t('tab.requests'),
           tabBarIcon: ({ color, focused }) => (
-            <User size={22} color={color} fill={focused ? color : 'transparent'} />
+            <Wrench size={22} color={color} fill={focused ? color : 'transparent'} />
           ),
         }}
       />
-      {/* Hide community-tier tabs */}
-      <Tabs.Screen name="(home)" options={{ href: null }} />
-      <Tabs.Screen name="payments" options={{ href: null }} />
-      <Tabs.Screen name="requests" options={{ href: null }} />
-      <Tabs.Screen name="more" options={{ href: null }} />
+      <Tabs.Screen
+        name="more"
+        options={{
+          title: t('tab.more'),
+          tabBarIcon: ({ color, focused }) => (
+            <MoreHorizontal size={22} color={color} fill={focused ? color : 'transparent'} />
+          ),
+        }}
+      />
+      {/* Reachable via More (My Deliveries / Porch Partner) — hidden from the bar */}
+      <Tabs.Screen name="packages" options={{ href: null }} />
+      <Tabs.Screen name="porch-partner" options={{ href: null }} />
       <Tabs.Screen name="create" options={{ href: null }} />
       <Tabs.Screen name="activity" options={{ href: null }} />
       <Tabs.Screen name="community" options={{ href: null }} />
+      <Tabs.Screen name="profile" options={{ href: null }} />
     </Tabs>
   );
 }

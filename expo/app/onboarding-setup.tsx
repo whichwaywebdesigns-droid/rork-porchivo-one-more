@@ -33,7 +33,6 @@ export default function OnboardingSetupScreen() {
   const Colors = useColors();
   const { track } = useAnalytics();
   const { completeOnboarding } = useApp();
-  const { isOrgMember } = useOrganization();
   const { role, setup, updateSetup, markCompleted } = useOnboardingFlow();
 
   const [building, setBuilding] = useState<string>(setup.buildingName);
@@ -90,9 +89,7 @@ export default function OnboardingSetupScreen() {
     track('onboarding_completed', { role, skipped: !building.trim() && !unit.trim() });
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     // Skip paywall — HOA-provisioned model, no IAP.
-    // Route tier-aware: community users land on Home, free-tier users land on
-    // Deliveries, because the (home) tab is hidden for free-tier users.
-    const destination = isOrgMember ? '/(tabs)/(home)' : '/(tabs)/packages';
+    const destination = '/(tabs)/(home)';
     router.replace(destination as any);
   };
 

@@ -122,19 +122,23 @@ struct AddPackageScreen: View {
 
     private func save() {
         isSaving = true
+        // A tracking number means the carrier already has the parcel — seed past
+        // 'ordered' so the detail screen shows movement ("In Transit") right away.
+        let hasTracking = !trackingNumber.trimmingCharacters(in: .whitespaces).isEmpty
+        let initialStatus: PackageTrackingStatus = hasTracking ? .shipped : .ordered
         let pkg = TrackedPackage(
             id: UUID().uuidString,
             name: name,
             carrier: carrier,
             trackingNumber: trackingNumber,
             expectedDeliveryDate: expectedDate,
-            currentStatus: .ordered,
+            currentStatus: initialStatus,
             addressNickname: addressNickname,
             customAddressLabel: addressNickname == .other ? customAddress : nil,
             notesForPartner: notes,
             statusHistory: [
                 PackageStatusEvent(status: .ordered, timestamp: Date(), completed: true),
-                PackageStatusEvent(status: .shipped, timestamp: nil, completed: false),
+                PackageStatusEvent(status: .shipped, timestamp: hasTracking ? Date() : nil, completed: hasTracking),
                 PackageStatusEvent(status: .outForDelivery, timestamp: nil, completed: false),
                 PackageStatusEvent(status: .delivered, timestamp: nil, completed: false),
             ],

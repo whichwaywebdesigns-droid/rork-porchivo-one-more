@@ -54,7 +54,9 @@ object AppConfig {
     }
 
     object SocialProof {
-        const val PACKAGES_STOLEN_STAT = "119M"
-        const val STOLEN_RATIO = "1 in 5"
+        // Sourced: SafeWise 2025 Package Theft Report (104M packages, $15B/yr)
+        // and Security.org 2025 report (1 in 4 Americans have had a package stolen).
+        const val PACKAGES_STOLEN_STAT = "104M"
+        const val STOLEN_RATIO = "1 in 4"
     }
 }

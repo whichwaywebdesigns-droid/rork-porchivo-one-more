@@ -44,7 +44,7 @@ export const COPY = {
 
   intro: {
     slide1: {
-      headline: '119M packages stolen every year.',
+      headline: '104M packages stolen every year.',
       subheadline: '1 in 5 deliveries never makes it inside.',
       body: 'Porch theft isn\'t rare — it\'s a $19 billion problem that gets worse every year.',
     },

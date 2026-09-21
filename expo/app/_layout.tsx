@@ -82,7 +82,7 @@ const queryClient = new QueryClient();
 
 function RootLayoutNav() {
   const { isOnboarded, isLoading, authLoading, session } = useApp();
-  const { isOrgMember, isLoading: isOrgLoading } = useOrganization();
+  const { isLoading: isOrgLoading } = useOrganization();
   const Colors = useColors();
   const { isDark } = useTheme();
   const router = useRouter();
@@ -192,9 +192,9 @@ function RootLayoutNav() {
     if (!pendingLaunchRedirect) {
       if (isLoading || isOnboarded === null || hasSeenSlides === null) return;
 
-      // Wait for org context to resolve before redirecting — we need isOrgMember
-      // to pick the correct initial tab. Only matters when there's a session
-      // (the org query is disabled without a userId, so isOrgLoading is false).
+      // Wait for org context to resolve before redirecting. Only matters when
+      // there's a session (the org query is disabled without a userId, so
+      // isOrgLoading is false).
       if (session && isOrgLoading) return;
     }
 
@@ -249,11 +249,7 @@ function RootLayoutNav() {
     } else if (isOnboarded && session && inWelcome && !inTrackingOnboarding) {
       // Onboarded user inside the OLD pre-auth/welcome chain -> send home.
       // Tracking onboarding screens are excluded — the step manager exits itself.
-      // Tier-aware: community members go to Home tab, free-tier users to
-      // Deliveries. Without this, free-tier users land on the hidden Home tab
-      // and the HomeScreen safety redirect fires — which can crash during
-      // React reconnection (navigator not yet ready).
-      target = isOrgMember ? "/(tabs)/(home)" : "/(tabs)/packages";
+      target = "/(tabs)/(home)";
     } else if (isOnboarded && !session && !inWelcome) {
       target = "/welcome";
     }
@@ -281,7 +277,7 @@ function RootLayoutNav() {
     return () => {
       if (navTimer) clearTimeout(navTimer);
     };
-  }, [isOnboarded, isLoading, session, segments, router, hasSeenSlides, isOrgMember, isOrgLoading]);
+  }, [isOnboarded, isLoading, session, segments, router, hasSeenSlides, isOrgLoading]);
 
   return (
     <View style={{ flex: 1 }}>

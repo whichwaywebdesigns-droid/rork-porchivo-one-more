@@ -60,7 +60,9 @@ enum AppConfig {
     }
 
     enum SocialProof {
-        static let packagesStolenStat = "119M"
-        static let stolenRatio = "1 in 5"
+        // Sourced: SafeWise 2025 Package Theft Report (104M packages, $15B/yr)
+        // and Security.org 2025 report (1 in 4 Americans have had a package stolen).
+        static let packagesStolenStat = "104M"
+        static let stolenRatio = "1 in 4"
     }
 }

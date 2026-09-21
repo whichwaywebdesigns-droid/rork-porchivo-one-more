@@ -21,7 +21,7 @@ struct SafetyScreen: View {
             }
             .padding(.horizontal, 16)
             .padding(.top, 16)
-            .padding(.bottom, 24)
+            .padding(.bottom, 120)
         }
         .background(c.background.ignoresSafeArea())
         .navigationTitle("Safety Score")
@@ -89,12 +89,12 @@ struct SafetyScreen: View {
     private var statsCard: some View {
         Card {
             VStack(alignment: .leading, spacing: 10) {
-                Text("Theft on your block")
+                Text("Package theft in the U.S.")
                     .font(.system(size: 16, weight: .bold))
                     .foregroundStyle(c.textPrimary)
-                statRow("\(AppConfig.SocialProof.packagesStolenStat)", "packages stolen in the US last year")
-                statRow("\(AppConfig.SocialProof.stolenRatio)", "households hit by porch piracy")
-                statRow("90%", "drop in theft when a neighbor picks up packages")
+                statRow("\(AppConfig.SocialProof.packagesStolenStat)", "packages stolen in the US last year — SafeWise 2025 report")
+                statRow("\(AppConfig.SocialProof.stolenRatio)", "Americans have had a package stolen — Security.org 2025 survey")
+                statRow("$15B", "lost to porch piracy last year — SafeWise 2025 report")
             }
         }
     }
