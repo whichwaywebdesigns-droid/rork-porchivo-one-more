@@ -10,12 +10,12 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
   Linking,
   Dimensions,
   ImageBackground,
   Image,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
@@ -265,7 +265,7 @@ export default function LoginScreen() {
         if (session) {
           triggerSuccessAndRoute(() => router.replace('/(tabs)/(home)' as any));
         } else {
-          Alert.alert(
+          showAlert(
             t('login.sessionExpiredTitle'),
             t('login.sessionExpiredMessage'),
             [{ text: t('common.continue'), onPress: () => switchToAuth('signin') }]
@@ -337,7 +337,7 @@ export default function LoginScreen() {
 
     try {
       if (!isSupabaseConfigured) {
-        Alert.alert(t('login.setupRequiredTitle'), t('login.setupRequiredMessage'));
+        showAlert(t('login.setupRequiredTitle'), t('login.setupRequiredMessage'));
         setIsSubmitting(false);
         return;
       }
@@ -360,7 +360,7 @@ export default function LoginScreen() {
           router.push('/auth-fail' as any);
           return;
         }
-        Alert.alert(t('login.couldNotSendLinkTitle'), getSupabaseErrorMessage(error.message));
+        showAlert(t('login.couldNotSendLinkTitle'), getSupabaseErrorMessage(error.message));
         setIsSubmitting(false);
         return;
       }
@@ -375,7 +375,7 @@ export default function LoginScreen() {
     } catch {
       const probe = await pingSupabase();
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert(t('login.connectionErrorTitle'), !probe.ok ? t('login.serverUnreachable') : t('errors.generic'));
+      showAlert(t('login.connectionErrorTitle'), !probe.ok ? t('login.serverUnreachable') : t('errors.generic'));
     } finally {
       setIsSubmitting(false);
     }
@@ -397,7 +397,7 @@ export default function LoginScreen() {
 
     try {
       if (!isSupabaseConfigured) {
-        Alert.alert(t('login.setupRequiredTitle'), t('login.setupRequiredMessage'));
+        showAlert(t('login.setupRequiredTitle'), t('login.setupRequiredMessage'));
         setIsSubmitting(false);
         return;
       }
@@ -410,13 +410,13 @@ export default function LoginScreen() {
         });
 
         if (error) {
-          Alert.alert(t('login.signUpFailedTitle'), getSupabaseErrorMessage(error.message));
+          showAlert(t('login.signUpFailedTitle'), getSupabaseErrorMessage(error.message));
           setIsSubmitting(false);
           return;
         }
 
         if (data.user && !data.session) {
-          Alert.alert(t('login.checkEmailTitle'), t('login.checkEmailMessage'), [
+          showAlert(t('login.checkEmailTitle'), t('login.checkEmailMessage'), [
             { text: t('common.ok'), onPress: () => setAuthMode('signin') },
           ]);
           setIsSubmitting(false);
@@ -439,7 +439,7 @@ export default function LoginScreen() {
             router.push('/auth-fail' as any);
             return;
           }
-          Alert.alert(t('login.signInFailedTitle'), getSupabaseErrorMessage(error.message));
+          showAlert(t('login.signInFailedTitle'), getSupabaseErrorMessage(error.message));
           setIsSubmitting(false);
           return;
         }
@@ -465,9 +465,9 @@ export default function LoginScreen() {
     } catch (err: any) {
       const msg = (err?.message ?? '').toLowerCase();
       if (msg.includes('network') || msg.includes('fetch') || msg.includes('timeout')) {
-        Alert.alert(t('login.connectionErrorTitle'), t('login.unreachableGeneric'));
+        showAlert(t('login.connectionErrorTitle'), t('login.unreachableGeneric'));
       } else {
-        Alert.alert(t('common.errorTitle'), t('errors.generic'));
+        showAlert(t('common.errorTitle'), t('errors.generic'));
       }
     } finally {
       setIsSubmitting(false);
@@ -490,7 +490,7 @@ export default function LoginScreen() {
   const handleForgotPassword = useCallback(() => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     if (identifier.trim() && validateEmail(identifier.trim())) {
-      Alert.alert(t('login.resetPasswordTitle'), t('login.resetPasswordMessage', { email: identifier.trim() }), [
+      showAlert(t('login.resetPasswordTitle'), t('login.resetPasswordMessage', { email: identifier.trim() }), [
         { text: t('common.cancel'), style: 'cancel' },
         {
           text: t('login.sendResetLink'),
@@ -502,22 +502,22 @@ export default function LoginScreen() {
               const { error } = await supabase.auth.resetPasswordForEmail(identifier.trim(), {
                 redirectTo,
               });
-              if (error) Alert.alert(t('common.errorTitle'), getSupabaseErrorMessage(error.message));
-              else Alert.alert(t('login.emailSentTitle'), t('login.emailSentMessage'));
+              if (error) showAlert(t('common.errorTitle'), getSupabaseErrorMessage(error.message));
+              else showAlert(t('login.emailSentTitle'), t('login.emailSentMessage'));
             } catch {
-              Alert.alert(t('common.errorTitle'), t('login.couldNotSendReset'));
+              showAlert(t('common.errorTitle'), t('login.couldNotSendReset'));
             }
           },
         },
       ]);
     } else {
-      Alert.alert(t('login.resetPasswordTitle'), t('login.resetPasswordInstruction'));
+      showAlert(t('login.resetPasswordTitle'), t('login.resetPasswordInstruction'));
     }
   }, [identifier, t]);
 
   const handleGoogleSignIn = useCallback(() => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    Alert.alert(t('login.googleTitle'), t('login.googleComingSoon'));
+    showAlert(t('login.googleTitle'), t('login.googleComingSoon'));
   }, [t]);
 
   const getQaCredentials = useCallback((): { email: string; password: string } => ({
@@ -563,7 +563,7 @@ export default function LoginScreen() {
 
     try {
       if (!isSupabaseConfigured) {
-        Alert.alert(t('login.setupRequiredTitle'), t('login.setupRequiredMessage'));
+        showAlert(t('login.setupRequiredTitle'), t('login.setupRequiredMessage'));
         return;
       }
 
@@ -574,7 +574,7 @@ export default function LoginScreen() {
       });
 
       if (ensureError) {
-        Alert.alert(
+        showAlert(
           'Dev Setup Failed',
           'The dev-confirm-user edge function could not prepare the QA account.\n\nMake sure it is deployed:\n  supabase functions deploy dev-confirm-user --no-verify-jwt'
         );
@@ -605,7 +605,7 @@ export default function LoginScreen() {
       }
 
       if (signInResult?.error) {
-        Alert.alert('Dev Sign In Failed', getSupabaseErrorMessage(signInResult.error.message));
+        showAlert('Dev Sign In Failed', getSupabaseErrorMessage(signInResult.error.message));
         return;
       }
 
@@ -625,9 +625,9 @@ export default function LoginScreen() {
     } catch (err: any) {
       const msg = (err?.message ?? '').toLowerCase();
       if (msg.includes('network') || msg.includes('fetch') || msg.includes('timeout')) {
-        Alert.alert('Connection Error', 'Unable to reach Supabase. Check your internet connection.');
+        showAlert('Connection Error', 'Unable to reach Supabase. Check your internet connection.');
       } else {
-        Alert.alert('Dev Sign In Error', 'Something went wrong. Check console for details.');
+        showAlert('Dev Sign In Error', 'Something went wrong. Check console for details.');
       }
     } finally {
       setIsDevAutoSigningIn(false);
@@ -1018,7 +1018,7 @@ export default function LoginScreen() {
       <TouchableOpacity
         style={styles.supportBtn}
         onPress={() => {
-          Alert.alert(t('login.supportTitle'), t('login.supportMessage'), [
+          showAlert(t('login.supportTitle'), t('login.supportMessage'), [
             { text: t('common.cancel'), style: 'cancel' },
             { text: t('login.emailSupport'), onPress: () => Linking.openURL('mailto:support@porchivo.com?subject=Porchivo%20Support') },
           ]);

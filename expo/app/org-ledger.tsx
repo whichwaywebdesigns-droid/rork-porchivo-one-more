@@ -14,8 +14,8 @@ import {
   ActivityIndicator,
   RefreshControl,
   Platform,
-  Alert,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { router } from 'expo-router';
 import {
   ChevronLeft,
@@ -123,7 +123,7 @@ export default function OrgLedgerScreen() {
   const exportCsv = async (): Promise<void> => {
     const rows = ledgerQuery.data ?? [];
     if (rows.length === 0) {
-      Alert.alert('Nothing to export', 'The ledger is empty.');
+      showAlert('Nothing to export', 'The ledger is empty.');
       return;
     }
     try {
@@ -149,7 +149,7 @@ export default function OrgLedgerScreen() {
       });
     } catch (e) {
       warn('[OrgLedger] Export failed:', e);
-      Alert.alert('Export failed', 'Could not create the CSV file — try again.');
+      showAlert('Export failed', 'Could not create the CSV file — try again.');
     } finally {
       setExporting(false);
     }

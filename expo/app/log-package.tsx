@@ -7,11 +7,11 @@ import {
   StyleSheet,
   TextInput,
   ActivityIndicator,
-  Alert,
   Animated,
   Platform,
   KeyboardAvoidingView,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -438,14 +438,14 @@ export default function LogPackageScreen() {
         location: location.trim() || null,
       });
       // Success feedback then pop back to board
-      Alert.alert('Package Logged', 'The package has been added to the board.', [
+      showAlert('Package Logged', 'The package has been added to the board.', [
         {
           text: 'Done',
           onPress: () => router.back(),
         },
       ]);
     } catch {
-      Alert.alert('Error', 'Could not log the package. Please try again.');
+      showAlert('Error', 'Could not log the package. Please try again.');
     }
   }, [carrier, activeOrg?.id, logPackage, tracking, unitNumber, description, sizeHint, location, isStaffIntakeLocked]);
 

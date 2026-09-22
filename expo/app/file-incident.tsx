@@ -10,8 +10,8 @@ import {
   Platform,
   ActivityIndicator,
   Animated,
-  Alert,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ChevronLeft, AlertTriangle, CheckCircle, Truck } from 'lucide-react-native';
@@ -304,7 +304,7 @@ export default function FileIncidentScreen() {
       });
       setSubmitted(true);
     } catch {
-      Alert.alert('Error', 'Could not file incident. Please check your connection and try again.');
+      showAlert('Error', 'Could not file incident. Please check your connection and try again.');
     }
   }, [canSubmit, activeOrg, fileIncident, selectedType, selectedSeverity, title, description, unitNumber, estimatedValue]);
 

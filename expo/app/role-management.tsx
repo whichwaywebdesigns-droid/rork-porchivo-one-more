@@ -8,13 +8,13 @@ import {
   ActivityIndicator,
   RefreshControl,
   Animated,
-  Alert,
   TextInput,
   Modal,
   KeyboardAvoidingView,
   Platform,
   Pressable,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -601,7 +601,7 @@ export default function RoleManagementScreen() {
       try {
         await assignMemberRole({ membershipId: member.membershipId, newRole });
       } catch {
-        Alert.alert('Error', 'Could not update role. Please try again.');
+        showAlert('Error', 'Could not update role. Please try again.');
       } finally {
         setProcessingId(null);
       }
@@ -614,7 +614,7 @@ export default function RoleManagementScreen() {
     (member: MemberAdminRow) => {
       // Billing grace stage 2: suspensions are manager admin writes
       if (isManagerAdminReadOnly) return;
-      Alert.alert(
+      showAlert(
         'Suspend Member',
         `Suspend ${member.displayName}? They will lose access until reinstated.`,
         [
@@ -627,7 +627,7 @@ export default function RoleManagementScreen() {
               try {
                 await suspendMember({ membershipId: member.membershipId });
               } catch {
-                Alert.alert('Error', 'Could not suspend member.');
+                showAlert('Error', 'Could not suspend member.');
               } finally {
                 setProcessingId(null);
               }
@@ -644,7 +644,7 @@ export default function RoleManagementScreen() {
     (member: MemberAdminRow) => {
       // Billing grace stage 2: reinstatements are manager admin writes
       if (isManagerAdminReadOnly) return;
-      Alert.alert(
+      showAlert(
         'Reinstate Member',
         `Restore access for ${member.displayName}?`,
         [
@@ -657,7 +657,7 @@ export default function RoleManagementScreen() {
               try {
                 await reinstateMember({ membershipId: member.membershipId });
               } catch {
-                Alert.alert('Error', 'Could not reinstate member.');
+                showAlert('Error', 'Could not reinstate member.');
               } finally {
                 setProcessingId(null);
               }
@@ -674,7 +674,7 @@ export default function RoleManagementScreen() {
     (member: MemberAdminRow) => {
       // Billing grace stage 2: removals are manager admin writes
       if (isManagerAdminReadOnly) return;
-      Alert.alert(
+      showAlert(
         'Remove Member',
         `Permanently remove ${member.displayName} from ${activeOrg?.name ?? 'this community'}? This cannot be undone.`,
         [
@@ -687,7 +687,7 @@ export default function RoleManagementScreen() {
               try {
                 await removeMember({ membershipId: member.membershipId });
               } catch {
-                Alert.alert('Error', 'Could not remove member.');
+                showAlert('Error', 'Could not remove member.');
               } finally {
                 setProcessingId(null);
               }
@@ -708,15 +708,15 @@ export default function RoleManagementScreen() {
         const result = await inviteMemberByEmail({ email, role });
         setShowInvite(false);
         if (result === null) {
-          Alert.alert(
+          showAlert(
             'User Not Found',
             `No Porchivo account was found for ${email}. Ask them to download the app and create an account first.`
           );
         } else {
-          Alert.alert('Invited!', `${email} has been added as ${ORG_ROLE_LABELS[role]}.`);
+          showAlert('Invited!', `${email} has been added as ${ORG_ROLE_LABELS[role]}.`);
         }
       } catch {
-        Alert.alert('Error', 'Could not complete invite. Please try again.');
+        showAlert('Error', 'Could not complete invite. Please try again.');
       }
     },
     [inviteMemberByEmail, isManagerAdminReadOnly]
@@ -726,7 +726,7 @@ export default function RoleManagementScreen() {
   const handleRegenerateCode = useCallback(() => {
     // Billing grace stage 2: invite-code regeneration is a manager admin write
     if (isManagerAdminReadOnly) return;
-    Alert.alert(
+    showAlert(
       'Regenerate Invite Code',
       'The current code will stop working immediately. Share the new code with members who need to join.',
       [
@@ -737,9 +737,9 @@ export default function RoleManagementScreen() {
           onPress: async () => {
             try {
               const newCode = await regenerateInviteCode();
-              Alert.alert('New Code Generated', `Your new invite code is: ${newCode}`);
+              showAlert('New Code Generated', `Your new invite code is: ${newCode}`);
             } catch {
-              Alert.alert('Error', 'Could not regenerate code.');
+              showAlert('Error', 'Could not regenerate code.');
             }
           },
         },
@@ -751,7 +751,7 @@ export default function RoleManagementScreen() {
   const handleCopyCode = useCallback(async () => {
     if (!activeOrg?.inviteCode) return;
     await Clipboard.setStringAsync(activeOrg.inviteCode);
-    Alert.alert('Copied', `Invite code ${activeOrg.inviteCode} copied to clipboard.`);
+    showAlert('Copied', `Invite code ${activeOrg.inviteCode} copied to clipboard.`);
   }, [activeOrg?.inviteCode]);
 
   if (!activeOrg || !activeMembership) {

@@ -8,10 +8,10 @@ import {
   ActivityIndicator,
   RefreshControl,
   Animated,
-  Alert,
   Platform,
   TextInput,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -650,7 +650,7 @@ export default function IncidentQueueScreen() {
         : 'Close Incident';
 
       if (needsResolution) {
-        Alert.alert(
+        showAlert(
           label,
           'Add a brief resolution note (optional):',
           [
@@ -662,7 +662,7 @@ export default function IncidentQueueScreen() {
                 try {
                   await updateIncidentStatus({ incidentId, newStatus });
                 } catch {
-                  Alert.alert('Error', 'Could not update incident. Please try again.');
+                  showAlert('Error', 'Could not update incident. Please try again.');
                 } finally {
                   setUpdatingId(null);
                 }
@@ -673,7 +673,7 @@ export default function IncidentQueueScreen() {
         return;
       }
 
-      Alert.alert(label, 'Update this incident status?', [
+      showAlert(label, 'Update this incident status?', [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Confirm',
@@ -682,7 +682,7 @@ export default function IncidentQueueScreen() {
             try {
               await updateIncidentStatus({ incidentId, newStatus });
             } catch {
-              Alert.alert('Error', 'Could not update incident. Please try again.');
+              showAlert('Error', 'Could not update incident. Please try again.');
             } finally {
               setUpdatingId(null);
             }

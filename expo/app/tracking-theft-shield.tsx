@@ -8,8 +8,8 @@ import {
   ScrollView,
   Animated,
   Easing,
-  Alert,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   ShieldCheck,
@@ -160,13 +160,13 @@ export default function TrackingTheftShieldScreen({
   const handleFetchScore = useCallback(async () => {
     const cleanZip = zipCode.trim();
     if (!/^\d{5}$/.test(cleanZip)) {
-      Alert.alert('Invalid ZIP', 'Please enter a valid 5-digit ZIP code.');
+      showAlert('Invalid ZIP', 'Please enter a valid 5-digit ZIP code.');
       return;
     }
 
     const userId = session?.user?.id ?? user?.id;
     if (!userId) {
-      Alert.alert('Sign In Required', 'Please add a delivery first to create your account.');
+      showAlert('Sign In Required', 'Please add a delivery first to create your account.');
       return;
     }
 
@@ -185,13 +185,13 @@ export default function TrackingTheftShieldScreen({
 
       if (error) {
         log('[TheftShield] Edge function error:', error.message);
-        Alert.alert('Error', 'Could not fetch risk score. Please try again.');
+        showAlert('Error', 'Could not fetch risk score. Please try again.');
         setIsLoading(false);
         return;
       }
 
       if (!data || typeof data.score !== 'number') {
-        Alert.alert('Error', 'Unexpected response from risk score service.');
+        showAlert('Error', 'Unexpected response from risk score service.');
         setIsLoading(false);
         return;
       }
@@ -241,7 +241,7 @@ export default function TrackingTheftShieldScreen({
       }, 650);
     } catch (err) {
       log('[TheftShield] Fetch error:', err);
-      Alert.alert('Connection Error', 'Unable to reach the server. Check your internet connection.');
+      showAlert('Connection Error', 'Unable to reach the server. Check your internet connection.');
       setIsLoading(false);
     }
   }, [zipCode, session, user, scoreAnim, gaugeAnim, factorsAnim]);

@@ -8,9 +8,9 @@ import {
   ActivityIndicator,
   RefreshControl,
   Animated,
-  Alert,
   Platform,
 } from 'react-native';
+import { showAlert, showPrompt } from '@/lib/platformAlert';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -516,15 +516,16 @@ export default function PackageOpsBoardScreen() {
       // Billing grace stage 3 (day 30+): the ONLY point where staff intake stops
       if (isStaffIntakeLocked) return;
       if (newStatus === 'exception') {
-        Alert.prompt(
+        showPrompt(
           'Flag Exception',
           'Describe the issue with this package:',
           async (reason) => {
+            if (reason === null) return; // cancelled
             setUpdatingId(packageId);
             try {
-              await updatePackageStatus({ packageId, newStatus, exceptionReason: reason ?? null });
+              await updatePackageStatus({ packageId, newStatus, exceptionReason: reason || null });
             } catch {
-              Alert.alert('Error', 'Could not update package status.');
+              showAlert('Error', 'Could not update package status.');
             } finally {
               setUpdatingId(null);
             }
@@ -537,7 +538,7 @@ export default function PackageOpsBoardScreen() {
       }
 
       const actionLabel = STATUS_ACTION_LABELS[newStatus] ?? PKG_STATUS_LABELS[newStatus];
-      Alert.alert(actionLabel, 'Update this package status?', [
+      showAlert(actionLabel, 'Update this package status?', [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Confirm',
@@ -546,7 +547,7 @@ export default function PackageOpsBoardScreen() {
             try {
               await updatePackageStatus({ packageId, newStatus });
             } catch {
-              Alert.alert('Error', 'Could not update package status.');
+              showAlert('Error', 'Could not update package status.');
             } finally {
               setUpdatingId(null);
             }

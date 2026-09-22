@@ -6,11 +6,11 @@ import {
   FlatList,
   TouchableOpacity,
   Animated,
-  Alert,
   Linking,
   Platform,
   ActivityIndicator,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { Stack } from 'expo-router';
 import {
   Navigation,
@@ -213,7 +213,7 @@ export default function MyAssignmentsScreen() {
   }, []);
 
   const handleMarkDelivered = useCallback((pkg: TrackedPackage) => {
-    Alert.alert(
+    showAlert(
       'Confirm Delivery',
       `Mark "${pkg.name}" as delivered?`,
       [
@@ -223,7 +223,7 @@ export default function MyAssignmentsScreen() {
           onPress: () => {
             log('[MyAssignments] Marking package as delivered:', pkg.id);
             updatePackageStatus(pkg.id, 'delivered');
-            Alert.alert('Delivered!', `"${pkg.name}" has been marked as delivered. The homeowner has been notified.`);
+            showAlert('Delivered!', `"${pkg.name}" has been marked as delivered. The homeowner has been notified.`);
           },
         },
       ],

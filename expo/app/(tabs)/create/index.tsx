@@ -1,8 +1,17 @@
 import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity,
-  KeyboardAvoidingView, Platform, Alert, Animated, ActivityIndicator,
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TextInput,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
+  Animated,
+  ActivityIndicator,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { useRouter, Stack } from 'expo-router';
 import { Package, ChevronDown, Check, Truck, ChevronLeft, Crosshair, MapPin } from 'lucide-react-native';
 import { useColors, AppColors } from '@/constants/colors';
@@ -107,8 +116,18 @@ export default function CreateScreen() {
       completionPhotoUrl: null,
     });
 
+    // Tab screens stay mounted — clear the form explicitly so returning to
+    // this tab never shows the previous shipment's stale fields.
+    setCarrier(null);
+    setShowCarrierPicker(false);
+    setPackages('');
+    setTrackingNumber('');
+    setNotes('');
+    setReturnTime('');
+    setApproxOnly(true);
+
     log('[Create] Shipment posted');
-    Alert.alert(
+    showAlert(
       'Shipment Posted!',
       'Your neighbors will be notified. A Porch Partner will accept soon.',
       [{ text: 'Great!', onPress: () => router.push('/(tabs)/(home)' as any) }]

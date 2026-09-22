@@ -5,8 +5,8 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  Alert,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
@@ -35,7 +35,7 @@ export default function ConsentGate() {
     const ok = await recordConsentNow();
     if (!ok) {
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert(
+      showAlert(
         'Could Not Save',
         'We could not record your acceptance. Check your connection and try again.'
       );
@@ -48,7 +48,7 @@ export default function ConsentGate() {
 
   const handleDecline = useCallback(() => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    Alert.alert(
+    showAlert(
       'Decline Updated Terms?',
       'You must accept the updated Terms of Service and Privacy Policy to keep using Porchivo. Declining will sign you out.',
       [

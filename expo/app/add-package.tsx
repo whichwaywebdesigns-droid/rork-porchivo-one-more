@@ -6,11 +6,11 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
-  Alert,
   Platform,
   KeyboardAvoidingView,
   Animated,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { useRouter, Stack } from 'expo-router';
 import { ChevronDown, Calendar, X, HandHeart, MapPin, Star, CheckCircle, ChevronRight, ScanBarcode } from 'lucide-react-native';
 import { useColors, AppColors } from '@/constants/colors';
@@ -110,19 +110,19 @@ export default function AddPackageScreen() {
 
   const handleSubmit = useCallback(() => {
     if (!name.trim()) {
-      Alert.alert('Missing Info', 'Please enter a package name.');
+      showAlert('Missing Info', 'Please enter a package name.');
       return;
     }
     if (!trackingNumber.trim()) {
-      Alert.alert('Missing Info', 'Please enter a tracking number.');
+      showAlert('Missing Info', 'Please enter a tracking number.');
       return;
     }
     if (!validateDate(expectedDate)) {
-      Alert.alert('Invalid Date', 'Please enter a valid future date (MM/DD/YYYY).');
+      showAlert('Invalid Date', 'Please enter a valid future date (MM/DD/YYYY).');
       return;
     }
     if (addressNickname === 'Other' && !customAddress.trim()) {
-      Alert.alert('Missing Info', 'Please enter a custom address label.');
+      showAlert('Missing Info', 'Please enter a custom address label.');
       return;
     }
 
@@ -147,7 +147,7 @@ export default function AddPackageScreen() {
       );
     } catch (err: any) {
       if (err?.message === 'FREE_LIMIT_REACHED') {
-        Alert.alert(
+        showAlert(
           'Free limit reached',
           'Free accounts can track 1 active package. Join a community on Porchivo to unlock unlimited tracking.',
           [
@@ -156,7 +156,7 @@ export default function AddPackageScreen() {
         );
         return;
       }
-      Alert.alert('Error', 'Could not add package. Please try again.');
+      showAlert('Error', 'Could not add package. Please try again.');
       return;
     }
 

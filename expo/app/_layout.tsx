@@ -37,6 +37,7 @@ import { LanguageRootProvider } from "@/i18n/LanguageProvider";
 import { ToastProvider } from "@/providers/ToastProvider";
 import { OfflineQueueProvider } from "@/store/OfflineQueueContext";
 import { OfflineBanner } from "@/components/OfflineBanner";
+import PlatformAlertHost from "@/components/PlatformAlertHost";
 import { SplashOverlay } from "@/components/SplashOverlay";
 import { BackgroundErrorProvider } from "@/store/BackgroundErrorContext";
 import { BackgroundErrorBanner } from "@/components/BackgroundErrorBanner";
@@ -264,11 +265,16 @@ function RootLayoutNav() {
       // isn't ready. setTimeout(0) fires after the current synchronous
       // effect cycle, by which time the navigator is guaranteed ready.
       navTimer = setTimeout(() => {
-        try {
-          router.replace(target as any);
-        } catch {
-          lastTarget.current = null;
-        }
+        // One extra frame: on web the REPLACE previously landed before the
+        // navigator mounted and was dropped ("not handled by any navigator"),
+        // which killed the launch redirect for that session.
+        requestAnimationFrame(() => {
+          try {
+            router.replace(target as any);
+          } catch {
+            lastTarget.current = null;
+          }
+        });
       }, 0);
     } else if (!target) {
       lastTarget.current = null;
@@ -381,6 +387,8 @@ function RootLayoutNav() {
       reason={reviewPrompt.reason}
       onDismiss={reviewPrompt.dismiss}
     />
+    {/* Web renderer for showAlert() — the RN-web Alert stub shows nothing */}
+    <PlatformAlertHost />
     {/* Forced re-accept gate when the legal version changes */}
     <ConsentGate />
     {/* Non-intrusive banner for background process failures (Ship24 polling, etc.) */}

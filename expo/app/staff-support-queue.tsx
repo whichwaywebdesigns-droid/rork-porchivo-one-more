@@ -8,12 +8,12 @@ import {
   ActivityIndicator,
   RefreshControl,
   Animated,
-  Alert,
   Platform,
   TextInput,
   KeyboardAvoidingView,
   Modal,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -456,7 +456,7 @@ function ReplyModal({ ticket, visible, onClose, onSent }: ReplyModalProps) {
 
   const handleRegenerate = useCallback(async () => {
     if (!ticket) return;
-    Alert.alert(
+    showAlert(
       'Regenerate AI draft?',
       'This clears the current draft and asks the AI to write a new one. It takes a few seconds to land.',
       [
@@ -468,7 +468,7 @@ function ReplyModal({ ticket, visible, onClose, onSent }: ReplyModalProps) {
             try {
               await regenerateTicketAiDraft(ticket.id);
               Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
-              Alert.alert(
+              showAlert(
                 'Draft regenerating',
                 'The new draft will appear in a few seconds. Pull to refresh the queue.',
                 [{ text: 'OK', onPress: onClose }],
@@ -476,7 +476,7 @@ function ReplyModal({ ticket, visible, onClose, onSent }: ReplyModalProps) {
             } catch (err) {
               const msg = err instanceof Error ? err.message : 'Failed to regenerate draft';
               logError('[staff-support-queue] regenerate: ' + msg);
-              Alert.alert('Could not regenerate', msg);
+              showAlert('Could not regenerate', msg);
             } finally {
               setRegenerating(false);
             }
@@ -515,7 +515,7 @@ function ReplyModal({ ticket, visible, onClose, onSent }: ReplyModalProps) {
       const msg = err instanceof Error ? err.message : 'Failed to send reply';
       logError('[staff-support-queue] send: ' + msg);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {});
-      Alert.alert('Could not send reply', msg);
+      showAlert('Could not send reply', msg);
     } finally {
       setSending(false);
     }

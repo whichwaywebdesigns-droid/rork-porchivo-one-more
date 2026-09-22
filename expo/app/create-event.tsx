@@ -9,9 +9,9 @@ import {
   ActivityIndicator,
   Animated,
   Platform,
-  Alert,
   Switch,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -245,7 +245,7 @@ export default function CreateEventScreen() {
 
   const handleNext = () => {
     if (step === 0 && !title.trim()) {
-      Alert.alert('Required', 'Please enter an event title.');
+      showAlert('Required', 'Please enter an event title.');
       return;
     }
     goTo(step + 1);
@@ -259,7 +259,7 @@ export default function CreateEventScreen() {
   const handleSubmit = useCallback(async () => {
     if (!activeOrg?.id) return;
     if (!title.trim()) {
-      Alert.alert('Required', 'Please enter an event title.');
+      showAlert('Required', 'Please enter an event title.');
       return;
     }
     try {
@@ -279,7 +279,7 @@ export default function CreateEventScreen() {
       });
       router.replace('/community-calendar');
     } catch {
-      Alert.alert('Error', 'Could not create event. Please try again.');
+      showAlert('Error', 'Could not create event. Please try again.');
     }
   }, [
     activeOrg?.id,

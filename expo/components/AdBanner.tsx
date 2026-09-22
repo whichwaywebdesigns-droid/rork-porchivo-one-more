@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated, Linking, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Animated, Linking } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { X, ExternalLink } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import { useApp } from '@/store/AppContext';
@@ -82,7 +83,7 @@ export default React.memo(function AdBanner({ variant = 'banner', style }: AdBan
       return;
     }
     if (ad.link) {
-      Linking.openURL(ad.link).catch(() => Alert.alert('Error', 'Could not open the link.'));
+      Linking.openURL(ad.link).catch(() => showAlert('Error', 'Could not open the link.'));
     }
   }, [adIndex, guardPremiumAccess]);
 

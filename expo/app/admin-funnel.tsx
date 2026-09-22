@@ -6,9 +6,9 @@ import {
   ScrollView,
   TouchableOpacity,
   RefreshControl,
-  Alert,
   ActivityIndicator,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { Stack, useRouter } from 'expo-router';
 import { useApp } from '@/store/AppContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -77,7 +77,7 @@ export default function AdminFunnelScreen() {
   }, [refresh]);
 
   const onClear = useCallback(() => {
-    Alert.alert(
+    showAlert(
       'Clear local funnel?',
       'This wipes the device-side event buffer. Remote rows in Supabase are untouched.',
       [

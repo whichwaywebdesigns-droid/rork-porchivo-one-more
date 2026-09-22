@@ -11,9 +11,9 @@ import {
   ScrollView,
   ActivityIndicator,
   Linking,
-  Alert,
   Platform,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { Stack } from 'expo-router';
 import {
   Search,
@@ -156,26 +156,26 @@ function DriverDetailModal({
 
   const handleCall = async () => {
     if (!driver.phone) {
-      Alert.alert('No phone number', 'This driver has no phone number on file.');
+      showAlert('No phone number', 'This driver has no phone number on file.');
       return;
     }
     const url = `tel:${driver.phone.replace(/[^0-9+]/g, '')}`;
     try {
       const supported = Platform.OS === 'web' ? false : await Linking.canOpenURL(url);
       if (!supported) {
-        Alert.alert('Unavailable', 'Phone calls are not supported on this device.');
+        showAlert('Unavailable', 'Phone calls are not supported on this device.');
         return;
       }
       await Linking.openURL(url);
     } catch (e) {
       log('[drivers] call error', e);
-      Alert.alert('Error', 'Could not start a call.');
+      showAlert('Error', 'Could not start a call.');
     }
   };
 
   const handleMessage = async () => {
     if (!driver.phone) {
-      Alert.alert('No phone number', 'This driver has no phone number on file.');
+      showAlert('No phone number', 'This driver has no phone number on file.');
       return;
     }
     const url = Platform.select({
@@ -186,13 +186,13 @@ function DriverDetailModal({
     try {
       const supported = Platform.OS === 'web' ? false : await Linking.canOpenURL(url);
       if (!supported) {
-        Alert.alert('Unavailable', 'Text messages are not supported on this device.');
+        showAlert('Unavailable', 'Text messages are not supported on this device.');
         return;
       }
       await Linking.openURL(url);
     } catch (e) {
       log('[drivers] sms error', e);
-      Alert.alert('Error', 'Could not open messages.');
+      showAlert('Error', 'Could not open messages.');
     }
   };
 

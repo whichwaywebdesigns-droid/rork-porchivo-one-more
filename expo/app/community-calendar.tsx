@@ -9,8 +9,8 @@ import {
   RefreshControl,
   Animated,
   Platform,
-  Alert,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -467,7 +467,7 @@ export default function CommunityCalendarScreen() {
         await upsertEventRsvp({ eventId, status });
         void queryClient.invalidateQueries({ queryKey: ['org-calendar', activeOrg?.id] });
       } catch {
-        Alert.alert('Error', 'Could not save your RSVP. Please try again.');
+        showAlert('Error', 'Could not save your RSVP. Please try again.');
       } finally {
         setRsvpLoadingId(null);
       }
@@ -477,7 +477,7 @@ export default function CommunityCalendarScreen() {
 
   const handleCancel = useCallback(
     (eventId: string) => {
-      Alert.alert('Cancel Event', 'Mark this event as cancelled?', [
+      showAlert('Cancel Event', 'Mark this event as cancelled?', [
         { text: 'Back', style: 'cancel' },
         {
           text: 'Cancel Event',
@@ -486,7 +486,7 @@ export default function CommunityCalendarScreen() {
             try {
               await cancelCalendarEvent({ eventId });
             } catch {
-              Alert.alert('Error', 'Could not cancel event.');
+              showAlert('Error', 'Could not cancel event.');
             }
           },
         },

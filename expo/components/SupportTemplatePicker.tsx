@@ -9,9 +9,9 @@ import {
   TextInput,
   Modal,
   Platform,
-  Alert,
   KeyboardAvoidingView,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
@@ -241,7 +241,7 @@ function TemplateEditor({ visible, initial, onClose, onSaved }: TemplateEditorPr
       const msg = err instanceof Error ? err.message : 'Failed to save template';
       logError('[SupportTemplatePicker] save: ' + msg);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {});
-      Alert.alert('Could not save template', msg);
+      showAlert('Could not save template', msg);
     } finally {
       setSaving(false);
     }
@@ -502,7 +502,7 @@ export default function SupportTemplatePicker({
 
   const handleDelete = useCallback(
     (t: SupportReplyTemplate) => {
-      Alert.alert(
+      showAlert(
         'Delete template?',
         `"${t.label}" will be removed from the shared staff library. This cannot be undone.`,
         [
@@ -518,7 +518,7 @@ export default function SupportTemplatePicker({
               } catch (err) {
                 const msg = err instanceof Error ? err.message : 'Failed to delete template';
                 logError('[SupportTemplatePicker] delete: ' + msg);
-                Alert.alert('Could not delete', msg);
+                showAlert('Could not delete', msg);
               }
             },
           },

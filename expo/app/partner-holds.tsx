@@ -6,9 +6,9 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
-  Alert,
   RefreshControl,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { Stack, useRouter } from 'expo-router';
 import {
   Package,
@@ -320,7 +320,7 @@ export default function PartnerHoldsScreen() {
   });
 
   const handleAccept = useCallback((id: string) => {
-    Alert.alert(
+    showAlert(
       'Accept Hold Request',
       'You agree to receive this package and hold it safely until the homeowner returns.',
       [
@@ -334,7 +334,7 @@ export default function PartnerHoldsScreen() {
   }, [acceptMutation]);
 
   const handleDecline = useCallback((id: string) => {
-    Alert.alert(
+    showAlert(
       'Decline Request',
       'Are you sure you want to decline this hold request?',
       [
@@ -345,7 +345,7 @@ export default function PartnerHoldsScreen() {
   }, [declineMutation]);
 
   const handlePickup = useCallback((id: string) => {
-    Alert.alert(
+    showAlert(
       'Confirm Package Pickup',
       'Confirm you have physically received and secured this package.',
       [

@@ -8,10 +8,10 @@ import {
   ActivityIndicator,
   RefreshControl,
   Animated,
-  Alert,
   Platform,
   TextInput,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -300,14 +300,14 @@ export default function MaintenanceQueueScreen() {
       queryClient.invalidateQueries({ queryKey: ['maintenance-counts', orgId] });
     },
     onError: () => {
-      Alert.alert('Error', 'Could not update status. Please try again.');
+      showAlert('Error', 'Could not update status. Please try again.');
     },
   });
 
   const handleStatusChange = useCallback(
     (requestId: string, status: MaintenanceStatus) => {
       const label = STATUS_META[status].label;
-      Alert.alert(`Mark as ${label}?`, undefined, [
+      showAlert(`Mark as ${label}?`, undefined, [
         { text: 'Cancel', style: 'cancel' },
         {
           text: label,

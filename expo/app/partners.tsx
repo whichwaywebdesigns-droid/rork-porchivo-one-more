@@ -6,8 +6,8 @@ import {
   FlatList,
   TouchableOpacity,
   Animated,
-  Alert,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { useRouter, Stack } from 'expo-router';
 import {
   Users,
@@ -204,7 +204,7 @@ export default function PartnersScreen() {
 
   const handlePickUp = useCallback(
     (packageId: string) => {
-      Alert.alert(
+      showAlert(
         'Confirm Pickup',
         'Mark this package as picked up from the porch?',
         [
@@ -224,7 +224,7 @@ export default function PartnersScreen() {
 
   const handleReturn = useCallback(
     (packageId: string) => {
-      Alert.alert(
+      showAlert(
         'Confirm Return',
         'Mark this package as returned to the owner?',
         [

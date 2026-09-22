@@ -8,8 +8,8 @@ import {
   Animated,
   Platform,
   Linking,
-  Alert,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import {
@@ -150,7 +150,7 @@ export default function TrackingPartnersScreen({
     }
 
     if (locStatus === 'denied') {
-      Alert.alert(
+      showAlert(
         'Location turned off',
         'Open Settings to allow approximate location for Porchivo.',
         [

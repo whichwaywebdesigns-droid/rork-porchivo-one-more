@@ -1,8 +1,17 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity, Alert, Platform,
-  ActivityIndicator, FlatList, TextInput, KeyboardAvoidingView, Image as RNImage,
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Platform,
+  ActivityIndicator,
+  FlatList,
+  TextInput,
+  KeyboardAvoidingView,
+  Image as RNImage,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { ChevronLeft, Send as SendIcon, ImagePlus } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
@@ -203,7 +212,7 @@ export default function ChatScreen() {
 
       if (error) {
         log('[Chat] Send error:', error.message);
-        Alert.alert('Send failed', 'Could not send message. Please try again.');
+        showAlert('Send failed', 'Could not send message. Please try again.');
         setMessages(prev => prev.filter(m => m.id !== optimisticMsg.id));
       }
     } catch (err) {
@@ -220,7 +229,7 @@ export default function ChatScreen() {
     try {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('Permission needed', 'Permission to access your photo library is required to send photos.');
+        showAlert('Permission needed', 'Permission to access your photo library is required to send photos.');
         return;
       }
 
@@ -245,7 +254,7 @@ export default function ChatScreen() {
 
       if (error) {
         log('[Chat] Image send error:', error.message);
-        Alert.alert('Send failed', 'Could not send image. Please try again.');
+        showAlert('Send failed', 'Could not send image. Please try again.');
       }
     } catch (err) {
       log('[Chat] Image pick error:', err);

@@ -7,12 +7,12 @@ import {
   TouchableOpacity,
   TextInput,
   ActivityIndicator,
-  Alert,
   Platform,
   KeyboardAvoidingView,
   Modal,
   FlatList,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { Stack, useRouter, useLocalSearchParams } from 'expo-router';
 import {
   Package,
@@ -317,31 +317,31 @@ export default function CreateAssignmentScreen() {
       }),
     onSuccess: (data) => {
       if (!data) {
-        Alert.alert('Error', 'Failed to create hold request. Please try again.');
+        showAlert('Error', 'Failed to create hold request. Please try again.');
         return;
       }
       queryClient.invalidateQueries({ queryKey: ['homeowner-assignments'] });
-      Alert.alert(
+      showAlert(
         'Hold Request Sent!',
         `Your request has been sent to ${partnerName}. They'll receive a notification to accept.`,
         [{ text: 'Done', onPress: () => router.back() }],
       );
     },
     onError: () => {
-      Alert.alert('Error', 'Something went wrong. Please try again.');
+      showAlert('Error', 'Something went wrong. Please try again.');
     },
   });
 
   const handleSubmit = useCallback(() => {
     if (!connectionId || !partnerId) {
-      Alert.alert('Error', 'Missing connection info. Please go back and try again.');
+      showAlert('Error', 'Missing connection info. Please go back and try again.');
       return;
     }
     if (rateCents > 0 && rateCents < 50) {
-      Alert.alert('Rate too low', 'The minimum paid rate is $0.50.');
+      showAlert('Rate too low', 'The minimum paid rate is $0.50.');
       return;
     }
-    Alert.alert(
+    showAlert(
       'Confirm Hold Request',
       rateCents > 0
         ? `Send a paid hold request to ${partnerName} for ${formatCents(rateCents)}?`

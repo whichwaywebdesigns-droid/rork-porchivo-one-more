@@ -16,7 +16,6 @@
 import React, { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -25,6 +24,7 @@ import {
   View,
   StatusBar,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { Stack, useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 import * as Haptics from 'expo-haptics';
@@ -309,7 +309,7 @@ function ProfileCard({ tokens }: { tokens: ThemeTokens }) {
           : e?.message === 'avatar-too-large'
           ? t('settings.photoTooLarge')
           : t('settings.photoUploadFailed');
-      Alert.alert(t('settings.photoUploadFailedTitle'), msg);
+      showAlert(t('settings.photoUploadFailedTitle'), msg);
     } finally {
       setIsUploading(false);
     }
@@ -320,7 +320,7 @@ function ProfileCard({ tokens }: { tokens: ThemeTokens }) {
     const previousUrl = user.avatarUrl;
     if (!previousUrl) return;
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    Alert.alert(
+    showAlert(
       t('settings.removePhotoTitle'),
       t('settings.removePhotoMessage'),
       [

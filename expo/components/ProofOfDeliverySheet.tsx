@@ -6,9 +6,9 @@ import {
   TouchableOpacity,
   Modal,
   ActivityIndicator,
-  Alert,
   Image,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import {
   Camera,
   Check,
@@ -62,19 +62,19 @@ export default function ProofOfDeliverySheet({
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
       if (msg === 'camera-permission-denied') {
-        Alert.alert(
+        showAlert(
           'Camera Permission Needed',
           'Please allow camera access in Settings to capture proof-of-delivery photos.',
           [{ text: 'OK' }],
         );
       } else if (msg === 'photo-too-large') {
-        Alert.alert(
+        showAlert(
           'Photo Too Large',
           'The captured photo exceeds the 10 MB limit. Please try again.',
           [{ text: 'OK' }],
         );
       } else {
-        Alert.alert('Camera Error', 'Could not capture a photo. Please try again.', [{ text: 'OK' }]);
+        showAlert('Camera Error', 'Could not capture a photo. Please try again.', [{ text: 'OK' }]);
       }
     } finally {
       setCapturing(false);
@@ -115,7 +115,7 @@ export default function ProofOfDeliverySheet({
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
       log('[ProofOfDelivery] Upload error:', msg);
-      Alert.alert(
+      showAlert(
         'Upload Failed',
         'Could not upload the proof photo. You can complete without a photo or try again.',
         [

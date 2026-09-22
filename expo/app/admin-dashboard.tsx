@@ -8,9 +8,9 @@ import {
   ActivityIndicator,
   RefreshControl,
   Animated,
-  Alert,
   Platform,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -348,7 +348,7 @@ export default function AdminDashboardScreen() {
   // ── Approve / deny ────────────────────────────────────────────────────────
   const handleApprove = useCallback(
     (membershipId: string) => {
-      Alert.alert('Approve Member', 'Grant this person active membership?', [
+      showAlert('Approve Member', 'Grant this person active membership?', [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Approve',
@@ -358,7 +358,7 @@ export default function AdminDashboardScreen() {
             try {
               await approveMembership({ membershipId });
             } catch {
-              Alert.alert('Error', 'Could not approve membership. Please try again.');
+              showAlert('Error', 'Could not approve membership. Please try again.');
             } finally {
               setProcessingId(null);
             }
@@ -371,7 +371,7 @@ export default function AdminDashboardScreen() {
 
   const handleDeny = useCallback(
     (membershipId: string) => {
-      Alert.alert('Decline Request', 'Remove this membership request?', [
+      showAlert('Decline Request', 'Remove this membership request?', [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Decline',
@@ -381,7 +381,7 @@ export default function AdminDashboardScreen() {
             try {
               await denyMembership({ membershipId });
             } catch {
-              Alert.alert('Error', 'Could not decline request. Please try again.');
+              showAlert('Error', 'Could not decline request. Please try again.');
             } finally {
               setProcessingId(null);
             }

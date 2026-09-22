@@ -9,8 +9,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Shield, Lock, Eye, EyeOff, Check, ChevronLeft } from 'lucide-react-native';
@@ -112,7 +112,7 @@ export default function ResetPasswordScreen() {
 
     try {
       if (!isSupabaseConfigured) {
-        Alert.alert('Setup Required', 'The app backend is not configured yet.');
+        showAlert('Setup Required', 'The app backend is not configured yet.');
         setIsSubmitting(false);
         return;
       }

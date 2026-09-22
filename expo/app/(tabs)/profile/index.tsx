@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Switch, Linking, Modal } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Linking, Modal } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { Stack } from 'expo-router';
 import { Image } from 'expo-image';
 import { MapPin, Mail, Phone, Home, Shield, Bell, UserPlus, ChevronRight, FileText, Pencil, Send, LogOut, HelpCircle, CheckCircle, Trash2, Moon, Sun, ArrowRight, Handshake, BookOpen, Star, Building2, MailOpen, Globe } from 'lucide-react-native';
@@ -393,7 +394,7 @@ export default function ProfileScreen() {
         <TouchableOpacity
           style={styles.supportButton}
           onPress={() => {
-            Alert.alert(
+            showAlert(
               'Help & Support',
               'Contact us at support@porchivo.com',
               [
@@ -411,7 +412,7 @@ export default function ProfileScreen() {
         <TouchableOpacity
           style={styles.signOutButton}
           onPress={() => {
-            Alert.alert(
+            showAlert(
               'Sign Out',
               'Are you sure you want to sign out?',
               [
@@ -426,7 +427,7 @@ export default function ProfileScreen() {
                       router.replace('/welcome' as any);
                     } catch (err) {
                       log('[Profile] Sign out error:', err);
-                      Alert.alert('Error', 'Could not sign out. Please try again.');
+                      showAlert('Error', 'Could not sign out. Please try again.');
                     }
                   },
                 },

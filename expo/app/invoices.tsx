@@ -6,10 +6,10 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
-  Alert,
   RefreshControl,
   Animated,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { Stack, useRouter } from 'expo-router';
 import {
   FileText,
@@ -187,7 +187,7 @@ export default function InvoicesScreen() {
       const html = buildInvoiceHTML(invoice, activeRole);
       await printOrSharePDF(html, invoice.invoiceNumber);
     } catch {
-      Alert.alert('PDF Error', 'Could not generate the PDF. Please try again.');
+      showAlert('PDF Error', 'Could not generate the PDF. Please try again.');
     } finally {
       setDownloadingId(null);
     }
@@ -203,7 +203,7 @@ export default function InvoicesScreen() {
       const html = buildPeriodReportHTML(period, periodInvoices, userName);
       await printOrSharePDF(html, `Porchivo-${period.periodLabel.replace(/\s/g, '-')}-${activeRole}`);
     } catch {
-      Alert.alert('PDF Error', 'Could not generate the report. Please try again.');
+      showAlert('PDF Error', 'Could not generate the report. Please try again.');
     } finally {
       setDownloadingId(null);
     }
@@ -228,9 +228,9 @@ export default function InvoicesScreen() {
 
       if (result) {
         await queryClient.invalidateQueries({ queryKey: ['invoice-periods', activeRole, periodType] });
-        Alert.alert('Report Ready', `Your ${periodType} summary has been compiled.`);
+        showAlert('Report Ready', `Your ${periodType} summary has been compiled.`);
       } else {
-        Alert.alert('Compile Error', 'Could not compile the period. Try again later.');
+        showAlert('Compile Error', 'Could not compile the period. Try again later.');
       }
     } finally {
       setCompilingPeriod(null);

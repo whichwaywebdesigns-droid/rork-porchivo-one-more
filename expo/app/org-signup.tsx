@@ -21,10 +21,10 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-  Alert,
   Animated,
   Linking,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { getLocales } from 'expo-localization';
@@ -469,7 +469,7 @@ export default function OrgSignupScreen() {
   const handleCopyCode = useCallback(() => {
     if (!inviteCode) return;
     // Clipboard copy — using the basic approach to avoid extra imports
-    Alert.alert('Invite Code', `Your invite code is: ${inviteCode}\n\nShare this with residents so they can join your community.`);
+    showAlert('Invite Code', `Your invite code is: ${inviteCode}\n\nShare this with residents so they can join your community.`);
   }, [inviteCode]);
 
   // ── Step indicator ─────────────────────────────────────────────────────────

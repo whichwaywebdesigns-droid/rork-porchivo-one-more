@@ -18,8 +18,8 @@ import {
   Modal,
   TextInput,
   Platform,
-  Alert,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { router } from 'expo-router';
 import {
   ChevronLeft,
@@ -186,7 +186,7 @@ export default function AmenityReservationsScreen() {
       setAmenityName('');
     },
     onError: (e: Error) => {
-      Alert.alert('Could not add amenity', e.message);
+      showAlert('Could not add amenity', e.message);
     },
   });
 
@@ -200,7 +200,7 @@ export default function AmenityReservationsScreen() {
       void queryClient.invalidateQueries({ queryKey: ['org-amenity-reservations', activeOrg?.id] });
     },
     onError: (e: Error) => {
-      Alert.alert('Could not remove amenity', e.message);
+      showAlert('Could not remove amenity', e.message);
     },
   });
 
@@ -226,9 +226,9 @@ export default function AmenityReservationsScreen() {
     onError: (e: Error) => {
       const code = (e as Error & { code?: string }).code;
       if (code === '23P01') {
-        Alert.alert('Just booked', 'Someone grabbed that slot first. Pick another time.');
+        showAlert('Just booked', 'Someone grabbed that slot first. Pick another time.');
       } else {
-        Alert.alert('Could not reserve', e.message);
+        showAlert('Could not reserve', e.message);
       }
     },
   });
@@ -245,13 +245,13 @@ export default function AmenityReservationsScreen() {
       void queryClient.invalidateQueries({ queryKey: ['org-amenity-reservations', activeOrg?.id] });
     },
     onError: (e: Error) => {
-      Alert.alert('Could not cancel', e.message);
+      showAlert('Could not cancel', e.message);
     },
   });
 
   const confirmRemoveAmenity = useCallback(
     (amenity: OrgAmenity) => {
-      Alert.alert('Remove amenity', `Remove ${amenity.name} and its reservations?`, [
+      showAlert('Remove amenity', `Remove ${amenity.name} and its reservations?`, [
         { text: 'Cancel', style: 'cancel' },
         { text: 'Remove', style: 'destructive', onPress: () => removeAmenity.mutate(amenity.id) },
       ]);

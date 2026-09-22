@@ -8,7 +8,6 @@ import {
   StyleSheet,
   ActivityIndicator,
   Linking,
-  Alert,
   Animated,
   Platform,
   RefreshControl,
@@ -16,6 +15,7 @@ import {
   SectionListRenderItemInfo,
   DefaultSectionT,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { router } from 'expo-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -227,11 +227,11 @@ function MemberCard({
   }, [pressAnim]);
 
   const handleCall = useCallback(() => {
-    if (entry.phone) void Linking.openURL(`tel:${entry.phone}`).catch(() => Alert.alert('Error', 'Could not open the phone app.'));
+    if (entry.phone) void Linking.openURL(`tel:${entry.phone}`).catch(() => showAlert('Error', 'Could not open the phone app.'));
   }, [entry.phone]);
 
   const handleEmail = useCallback(() => {
-    if (entry.email) void Linking.openURL(`mailto:${entry.email}`).catch(() => Alert.alert('Error', 'Could not open the email app.'));
+    if (entry.email) void Linking.openURL(`mailto:${entry.email}`).catch(() => showAlert('Error', 'Could not open the email app.'));
   }, [entry.email]);
 
   return (

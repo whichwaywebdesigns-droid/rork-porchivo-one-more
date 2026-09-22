@@ -7,8 +7,8 @@ import {
   Animated,
   Platform,
   Linking,
-  Alert,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { Stack, useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
@@ -103,13 +103,13 @@ export default function NotificationsPermissionScreen() {
 
   const handleEnable = useCallback(async () => {
     if (Platform.OS === 'web') {
-      Alert.alert('Not available', 'Push notifications are unsupported on web.');
+      showAlert('Not available', 'Push notifications are unsupported on web.');
       goNext();
       return;
     }
 
     if (status === 'denied') {
-      Alert.alert(
+      showAlert(
         'Notifications turned off',
         'Open Settings to enable notifications for Porchivo.',
         [
@@ -143,7 +143,7 @@ export default function NotificationsPermissionScreen() {
       }
     } catch (e) {
       log('[NotificationsPermission] request error:', e);
-      Alert.alert('Something went wrong', 'Please try again.');
+      showAlert('Something went wrong', 'Please try again.');
     } finally {
       setRequesting(false);
     }

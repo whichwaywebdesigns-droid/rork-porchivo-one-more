@@ -6,7 +6,6 @@ import {
   ScrollView,
   TouchableOpacity,
   Animated,
-  Alert,
   Modal,
   FlatList,
   Linking,
@@ -15,6 +14,7 @@ import {
   Share,
   TextInput,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { useApp } from '@/store/AppContext';
 import {
@@ -293,7 +293,7 @@ export default function PackageDetailScreen() {
   const showAssignButton = canAssignDriver(pkg) && !assignedDriver;
 
   const handleDelete = () => {
-    Alert.alert(
+    showAlert(
       'Delete Package',
       `Remove "${pkg.name}" from your tracking list?`,
       [
@@ -318,7 +318,7 @@ export default function PackageDetailScreen() {
   };
 
   const handleAssignDriver = (driver: Driver) => {
-    Alert.alert(
+    showAlert(
       'Assign Driver',
       `Assign this package to ${driver.name}?`,
       [
@@ -330,7 +330,7 @@ export default function PackageDetailScreen() {
             assignDriverToPackage(pkg.id, driver.id);
             driverCtxAssign(driver.id, pkg.id);
             setShowDriverPicker(false);
-            Alert.alert('Driver Assigned', `${driver.name} has been assigned to deliver "${pkg.name}".`);
+            showAlert('Driver Assigned', `${driver.name} has been assigned to deliver "${pkg.name}".`);
           },
         },
       ],
@@ -339,31 +339,31 @@ export default function PackageDetailScreen() {
 
   const handleContact = async (phone: string | undefined | null, type: 'call' | 'sms') => {
     if (!phone) {
-      Alert.alert('No phone number', 'No phone number is available.');
+      showAlert('No phone number', 'No phone number is available.');
       return;
     }
     const cleaned = phone.replace(/[^0-9+]/g, '');
     const url = type === 'call' ? `tel:${cleaned}` : `sms:${cleaned}`;
     try {
       if (Platform.OS === 'web') {
-        Alert.alert('Unavailable', `${type === 'call' ? 'Calls' : 'Messages'} are not supported on web.`);
+        showAlert('Unavailable', `${type === 'call' ? 'Calls' : 'Messages'} are not supported on web.`);
         return;
       }
       const supported = await Linking.canOpenURL(url);
       if (!supported) {
-        Alert.alert('Unavailable', `${type === 'call' ? 'Calls' : 'Messages'} are not supported on this device.`);
+        showAlert('Unavailable', `${type === 'call' ? 'Calls' : 'Messages'} are not supported on this device.`);
         return;
       }
       await Linking.openURL(url);
     } catch (e) {
       log('[package-detail] contact error', e);
-      Alert.alert('Error', 'Could not open the app.');
+      showAlert('Error', 'Could not open the app.');
     }
   };
 
   const handleUnassignDriver = () => {
     if (!assignedDriver) return;
-    Alert.alert(
+    showAlert(
       'Unassign Driver',
       `Remove ${assignedDriver.name} from this package?`,
       [
@@ -381,7 +381,7 @@ export default function PackageDetailScreen() {
   };
 
   const handleAssignPartner = (partner: PorchPartner) => {
-    Alert.alert(
+    showAlert(
       'Assign Partner',
       `Assign this package to ${partner.name}?`,
       [
@@ -394,7 +394,7 @@ export default function PackageDetailScreen() {
             const street = user?.address ? user.address.split(',')[0] : 'your block';
             assignPartnerToPackage(pkg.id, partner.id, user?.id ?? '', `Neighbor on ${street}`);
             setShowPartnerPicker(false);
-            Alert.alert('Partner Assigned', `${partner.name} will hold your package.`);
+            showAlert('Partner Assigned', `${partner.name} will hold your package.`);
           },
         },
       ],
@@ -402,7 +402,7 @@ export default function PackageDetailScreen() {
   };
 
   const handleUnassignPartner = () => {
-    Alert.alert('Remove Partner', 'Unassign this Porch Partner?', [
+    showAlert('Remove Partner', 'Unassign this Porch Partner?', [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Remove',
@@ -450,13 +450,13 @@ export default function PackageDetailScreen() {
     try {
       const supported = await Linking.canOpenURL(carrierTrackingUrl);
       if (!supported) {
-        Alert.alert('Unable to open', 'This tracking link cannot be opened on your device.');
+        showAlert('Unable to open', 'This tracking link cannot be opened on your device.');
         return;
       }
       await Linking.openURL(carrierTrackingUrl);
     } catch (e) {
       log('[package-detail] carrier tracking open error', e);
-      Alert.alert('Error', 'Could not open the carrier tracking page.');
+      showAlert('Error', 'Could not open the carrier tracking page.');
     }
   }, [carrierTrackingUrl]);
 
@@ -618,7 +618,7 @@ export default function PackageDetailScreen() {
                 <TouchableOpacity
                   style={styles.driverActionBtn}
                   onPress={() => {
-                    Alert.alert('Confirm', 'Mark as picked up by partner?', [
+                    showAlert('Confirm', 'Mark as picked up by partner?', [
                       { text: 'Cancel', style: 'cancel' },
                       { text: 'Picked Up', onPress: () => markPickedUp(pkg.id) },
                     ]);
@@ -632,7 +632,7 @@ export default function PackageDetailScreen() {
                 <TouchableOpacity
                   style={styles.driverActionBtn}
                   onPress={() => {
-                    Alert.alert('Confirm', 'Mark as returned to owner?', [
+                    showAlert('Confirm', 'Mark as returned to owner?', [
                       { text: 'Cancel', style: 'cancel' },
                       { text: 'Returned', onPress: () => markReturned(pkg.id) },
                     ]);

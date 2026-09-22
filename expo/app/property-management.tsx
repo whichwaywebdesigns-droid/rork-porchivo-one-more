@@ -8,10 +8,10 @@ import {
   ActivityIndicator,
   RefreshControl,
   Animated,
-  Alert,
   Platform,
   TextInput,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -156,7 +156,7 @@ function AddUnitInput({
       setValue('');
       onDone();
     } catch {
-      Alert.alert('Error', 'Could not add unit. Please try again.');
+      showAlert('Error', 'Could not add unit. Please try again.');
     }
   };
 
@@ -239,7 +239,7 @@ function PropertyCard({
   const handleRemoveUnit = (unit: UnitRow) => {
     // Billing grace stage 2: unit removal is a property edit — read-only
     if (isManagerAdminReadOnly) return;
-    Alert.alert(
+    showAlert(
       'Remove Unit',
       `Remove Unit ${unit.unitNumber}? This will unlink any assigned residents.`,
       [
@@ -252,7 +252,7 @@ function PropertyCard({
             try {
               await removeUnit({ unitId: unit.id, propertyId: property.id });
             } catch {
-              Alert.alert('Error', 'Could not remove unit.');
+              showAlert('Error', 'Could not remove unit.');
             } finally {
               setRemovingUnitId(null);
             }

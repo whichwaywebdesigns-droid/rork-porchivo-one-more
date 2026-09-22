@@ -9,8 +9,8 @@ import {
   Animated,
   KeyboardAvoidingView,
   Platform,
-  Alert,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { Stack, useRouter } from 'expo-router';
 import {
   UserPlus,
@@ -86,7 +86,7 @@ export default function InvitePartnerScreen() {
         log('[InvitePartner] Link copied to clipboard');
         setCopied(true);
         setTimeout(() => setCopied(false), 3000);
-        Alert.alert('Copied!', 'Invite link copied to clipboard. Share it with your neighbor!');
+        showAlert('Copied!', 'Invite link copied to clipboard. Share it with your neighbor!');
       });
       return;
     }
@@ -117,7 +117,7 @@ export default function InvitePartnerScreen() {
       }
     } catch (err) {
       log('[InvitePartner] Send error:', err);
-      Alert.alert('Error', 'Could not send invite. Please try again.');
+      showAlert('Error', 'Could not send invite. Please try again.');
     } finally {
       setSending(false);
     }

@@ -15,9 +15,9 @@ import {
   ScrollView,
   TouchableOpacity,
   RefreshControl,
-  Alert,
   Share,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { Stack, useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import {
@@ -142,7 +142,7 @@ export default function ManageSubscriptionScreen() {
   // ── Copy invite code ─────────────────────────────────────────────────────────
   const handleCopyCode = useCallback(() => {
     if (!sub?.invite_code) return;
-    Alert.alert('Invite Code', `Your invite code is: ${sub.invite_code}\n\nShare this with residents so they can join your community.`);
+    showAlert('Invite Code', `Your invite code is: ${sub.invite_code}\n\nShare this with residents so they can join your community.`);
   }, [sub?.invite_code]);
 
   // ── Share invite code ────────────────────────────────────────────────────────
@@ -159,7 +159,7 @@ export default function ManageSubscriptionScreen() {
 
   // ── Regenerate invite code ───────────────────────────────────────────────────
   const handleRegenerateCode = useCallback(async () => {
-    Alert.alert(
+    showAlert(
       'Regenerate Invite Code',
       'This will invalidate the current code. Anyone using the old code will no longer be able to join. Continue?',
       [
@@ -172,7 +172,7 @@ export default function ManageSubscriptionScreen() {
               await regenerateInviteCode();
               await queryClient.invalidateQueries({ queryKey: ['org-subscription', activeOrg?.id] });
             } catch (e: any) {
-              Alert.alert('Error', e?.message ?? 'Could not regenerate invite code');
+              showAlert('Error', e?.message ?? 'Could not regenerate invite code');
             }
           },
         },
@@ -202,7 +202,7 @@ export default function ManageSubscriptionScreen() {
     } catch (e: any) {
       const msg = e?.message ?? 'Could not open billing portal';
       warn('[ManageSub] Portal error:', msg);
-      Alert.alert('Billing Portal', msg);
+      showAlert('Billing Portal', msg);
     } finally {
       setPortalLoading(false);
     }

@@ -11,8 +11,8 @@ import {
   ActivityIndicator,
   Animated,
   RefreshControl,
-  Alert,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -371,7 +371,7 @@ export default function ContactSupportScreen() {
         setMode('list');
       } else {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {});
-        Alert.alert(
+        showAlert(
           'Could not submit ticket',
           'Please check your connection and try again. If the problem persists, email support@porchivo.com.',
           [{ text: 'OK' }],
@@ -380,7 +380,7 @@ export default function ContactSupportScreen() {
     } catch (err) {
       logError('[contact-support] submit error');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {});
-      Alert.alert(
+      showAlert(
         'Could not submit ticket',
         'Please check your connection and try again.',
         [{ text: 'OK' }],

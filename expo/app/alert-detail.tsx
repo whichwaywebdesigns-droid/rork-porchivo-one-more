@@ -5,10 +5,10 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Alert,
   Image,
   Platform,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import {
   AlertTriangle,
@@ -79,7 +79,7 @@ export default function AlertDetailScreen() {
 
   const handleResolve = useCallback(() => {
     if (!alert) return;
-    Alert.alert(
+    showAlert(
       'Mark as Resolved',
       'This will de-emphasize this alert in the feed. Continue?',
       [
@@ -99,22 +99,22 @@ export default function AlertDetailScreen() {
   const handleMute = useCallback(() => {
     if (!alert) return;
     if (muted) {
-      Alert.alert('Already muted', 'You have already muted this alert.');
+      showAlert('Already muted', 'You have already muted this alert.');
       return;
     }
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     muteAlert(alert.id);
-    Alert.alert('Muted', 'You will not receive future updates about this alert.');
+    showAlert('Muted', 'You will not receive future updates about this alert.');
     log('[AlertDetail] Alert muted:', alert.id);
   }, [alert, muted, muteAlert]);
 
   const handleReport = useCallback(() => {
     if (!alert) return;
     if (reported) {
-      Alert.alert('Already reported', 'You have already reported this alert.');
+      showAlert('Already reported', 'You have already reported this alert.');
       return;
     }
-    Alert.alert(
+    showAlert(
       'Report Abuse',
       'Flag this alert as inappropriate or false? Our team will review it.',
       [
@@ -125,7 +125,7 @@ export default function AlertDetailScreen() {
           onPress: () => {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
             reportAbuse(alert.id);
-            Alert.alert('Reported', 'Thank you. Our team will review this alert.');
+            showAlert('Reported', 'Thank you. Our team will review this alert.');
             log('[AlertDetail] Alert reported:', alert.id);
           },
         },
@@ -136,10 +136,10 @@ export default function AlertDetailScreen() {
   const handleBlockUser = useCallback(() => {
     if (!alert) return;
     if (blocked) {
-      Alert.alert('Already blocked', 'You have already blocked this user.');
+      showAlert('Already blocked', 'You have already blocked this user.');
       return;
     }
-    Alert.alert(
+    showAlert(
       'Block This User',
       'You will no longer see alerts from this user. You can unblock them later from your profile settings.',
       [
@@ -150,7 +150,7 @@ export default function AlertDetailScreen() {
           onPress: () => {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
             blockUser(alert.userId);
-            Alert.alert('User Blocked', 'You will no longer see alerts from this user.');
+            showAlert('User Blocked', 'You will no longer see alerts from this user.');
             log('[AlertDetail] User blocked:', alert.userId);
           },
         },

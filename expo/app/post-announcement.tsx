@@ -15,12 +15,12 @@ import {
   ActivityIndicator,
   Platform,
   Switch,
-  Alert,
   KeyboardAvoidingView,
   Animated,
   Dimensions,
   Pressable,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -688,11 +688,11 @@ export default function PostAnnouncementScreen() {
   // ── Submit ─────────────────────────────────────────────────────────────
   async function handlePost() {
     if (!step2Valid) {
-      Alert.alert('Missing content', 'Please add a title and body before posting.');
+      showAlert('Missing content', 'Please add a title and body before posting.');
       return;
     }
     if (isScheduled && !scheduleIso) {
-      Alert.alert('Choose schedule time', 'Please select when to publish this announcement.');
+      showAlert('Choose schedule time', 'Please select when to publish this announcement.');
       return;
     }
 
@@ -715,7 +715,7 @@ export default function PostAnnouncementScreen() {
       });
       router.back();
     } catch {
-      Alert.alert('Error', 'Could not post announcement. Please try again.');
+      showAlert('Error', 'Could not post announcement. Please try again.');
     }
   }
 

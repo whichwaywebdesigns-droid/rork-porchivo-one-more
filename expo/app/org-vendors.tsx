@@ -15,8 +15,8 @@ import {
   Modal,
   TextInput,
   Platform,
-  Alert,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { router } from 'expo-router';
 import {
   ChevronLeft,
@@ -146,7 +146,7 @@ export default function OrgVendorsScreen() {
       resetForm();
     },
     onError: (e: Error) => {
-      Alert.alert('Could not add vendor', e.message);
+      showAlert('Could not add vendor', e.message);
     },
   });
 
@@ -159,13 +159,13 @@ export default function OrgVendorsScreen() {
       void queryClient.invalidateQueries({ queryKey: ['org-vendors', activeOrg?.id] });
     },
     onError: (e: Error) => {
-      Alert.alert('Could not remove vendor', e.message);
+      showAlert('Could not remove vendor', e.message);
     },
   });
 
   const confirmRemove = useCallback(
     (vendor: OrgVendor) => {
-      Alert.alert('Remove vendor', `Remove ${vendor.name} from the directory?`, [
+      showAlert('Remove vendor', `Remove ${vendor.name} from the directory?`, [
         { text: 'Cancel', style: 'cancel' },
         { text: 'Remove', style: 'destructive', onPress: () => removeVendor.mutate(vendor.id) },
       ]);

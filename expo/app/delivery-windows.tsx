@@ -6,10 +6,10 @@ import {
   ScrollView,
   TouchableOpacity,
   Animated,
-  Alert,
   Platform,
   Modal,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { Stack } from 'expo-router';
 import {
   Calendar,
@@ -290,7 +290,7 @@ export default function DeliveryWindowsScreen() {
 
   const handleBook = useCallback((windowId: string) => {
     if (!user) return;
-    Alert.alert(
+    showAlert(
       'Book This Window',
       'Would you like to book this delivery window?',
       [
@@ -307,7 +307,7 @@ export default function DeliveryWindowsScreen() {
   }, [user, bookWindow]);
 
   const handleCancel = useCallback((windowId: string) => {
-    Alert.alert(
+    showAlert(
       'Cancel Window',
       'Are you sure you want to cancel this window?',
       [
@@ -330,7 +330,7 @@ export default function DeliveryWindowsScreen() {
   }, [updateWindowStatus]);
 
   const handleDelete = useCallback((windowId: string) => {
-    Alert.alert(
+    showAlert(
       'Delete Window',
       'This will permanently remove this window.',
       [

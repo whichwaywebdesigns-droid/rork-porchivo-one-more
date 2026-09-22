@@ -8,8 +8,8 @@ import {
   Animated,
   Easing,
   Linking,
-  Alert,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { useRouter } from 'expo-router';
 import { ChevronLeft, UserPlus, HelpCircle } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -145,7 +145,7 @@ export default function AuthFailScreen() {
             style={styles.supportBtn}
             onPress={() => {
               void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              Alert.alert('Support', 'Contact us at support@porchivo.com', [
+              showAlert('Support', 'Contact us at support@porchivo.com', [
                 { text: 'Cancel', style: 'cancel' },
                 {
                   text: 'Email Support',

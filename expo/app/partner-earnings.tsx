@@ -6,10 +6,10 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
-  Alert,
   Platform,
   RefreshControl,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { Stack, useRouter } from 'expo-router';
 import {
   Banknote,
@@ -393,18 +393,18 @@ export default function PartnerEarningsScreen() {
     mutationFn: (id: string) => triggerPayout(id),
     onSuccess: (data) => {
       if (!data) {
-        Alert.alert('Error', 'Payout failed. Check that your bank account is connected.');
+        showAlert('Error', 'Payout failed. Check that your bank account is connected.');
         return;
       }
       queryClient.invalidateQueries({ queryKey: ['partner-assignments'] });
       queryClient.invalidateQueries({ queryKey: ['partner-payouts'] });
       queryClient.invalidateQueries({ queryKey: ['partner-verification'] });
-      Alert.alert('Payment Released!', `${formatCents(data.partnerEarnCents)} is on its way to your bank. Expected in 2 business days.`);
+      showAlert('Payment Released!', `${formatCents(data.partnerEarnCents)} is on its way to your bank. Expected in 2 business days.`);
     },
   });
 
   const handleComplete = useCallback((id: string) => {
-    Alert.alert(
+    showAlert(
       'Mark Hold Complete',
       'Confirm that you have handed the package back to the homeowner.',
       [
@@ -415,7 +415,7 @@ export default function PartnerEarningsScreen() {
   }, [completeMutation]);
 
   const handlePayout = useCallback((id: string) => {
-    Alert.alert(
+    showAlert(
       'Release Payment to Partner',
       'This will transfer the agreed amount to your partner\'s bank account. Confirm?',
       [
@@ -431,7 +431,7 @@ export default function PartnerEarningsScreen() {
     try {
       const result = await initiateConnectOnboarding();
       if (!result) {
-        Alert.alert('Error', 'Could not start bank setup. Make sure your identity is verified.');
+        showAlert('Error', 'Could not start bank setup. Make sure your identity is verified.');
         return;
       }
       if (result.alreadyConnected) {

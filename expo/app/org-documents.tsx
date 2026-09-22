@@ -18,9 +18,9 @@ import {
   Modal,
   TextInput,
   Platform,
-  Alert,
   Linking,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { router } from 'expo-router';
 import {
   ChevronLeft,
@@ -106,7 +106,7 @@ export default function OrgDocumentsScreen() {
       setUrl('');
     },
     onError: (e: Error) => {
-      Alert.alert('Could not add document', e.message);
+      showAlert('Could not add document', e.message);
     },
   });
 
@@ -162,7 +162,7 @@ export default function OrgDocumentsScreen() {
       setUrl('');
     },
     onError: (e: Error) => {
-      Alert.alert('Could not add document', e.message);
+      showAlert('Could not add document', e.message);
     },
   });
 
@@ -179,7 +179,7 @@ export default function OrgDocumentsScreen() {
       void queryClient.invalidateQueries({ queryKey: ['org-documents', activeOrg?.id] });
     },
     onError: (e: Error) => {
-      Alert.alert('Could not remove document', e.message);
+      showAlert('Could not remove document', e.message);
     },
   });
 
@@ -193,7 +193,7 @@ export default function OrgDocumentsScreen() {
         .from(DOC_BUCKET)
         .createSignedUrl(doc.file_path, 300);
       if (error || !data?.signedUrl) {
-        Alert.alert('Could not open document', 'The link expired — try again.');
+        showAlert('Could not open document', 'The link expired — try again.');
         return;
       }
       void Linking.openURL(data.signedUrl);
@@ -202,7 +202,7 @@ export default function OrgDocumentsScreen() {
 
   const confirmRemove = useCallback(
     (doc: OrgDocument) => {
-      Alert.alert('Remove document', `Remove "${doc.name}" from the library?`, [
+      showAlert('Remove document', `Remove "${doc.name}" from the library?`, [
         { text: 'Cancel', style: 'cancel' },
         { text: 'Remove', style: 'destructive', onPress: () => removeDoc.mutate(doc) },
       ]);

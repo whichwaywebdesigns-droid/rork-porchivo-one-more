@@ -11,9 +11,9 @@ import {
   ActivityIndicator,
   Animated,
   RefreshControl,
-  Alert,
   Linking,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -201,11 +201,11 @@ export default function SupportTicketDetailScreen() {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
       } else {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {});
-        Alert.alert('Could not send reply', 'Please try again in a moment.');
+        showAlert('Could not send reply', 'Please try again in a moment.');
       }
     } catch (err) {
       logError('[support-ticket-detail] reply error');
-      Alert.alert('Could not send reply', 'Please try again in a moment.');
+      showAlert('Could not send reply', 'Please try again in a moment.');
     } finally {
       setSending(false);
     }
@@ -213,7 +213,7 @@ export default function SupportTicketDetailScreen() {
 
   const handleClose = useCallback(() => {
     if (!ticketId) return;
-    Alert.alert(
+    showAlert(
       'Close this ticket?',
       'Closing marks this as resolved. You can re-open it later if needed.',
       [
@@ -230,7 +230,7 @@ export default function SupportTicketDetailScreen() {
               await queryClient.invalidateQueries({ queryKey: ['support-tickets'] });
               Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
             } else {
-              Alert.alert('Could not close ticket', 'Please try again.');
+              showAlert('Could not close ticket', 'Please try again.');
             }
             setActionLoading(null);
           },
@@ -251,7 +251,7 @@ export default function SupportTicketDetailScreen() {
         await queryClient.invalidateQueries({ queryKey: ['support-tickets'] });
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
       } else {
-        Alert.alert('Could not re-open ticket', 'Please try again.');
+        showAlert('Could not re-open ticket', 'Please try again.');
       }
     } catch (err) {
       logError('[support-ticket-detail] reopen error');

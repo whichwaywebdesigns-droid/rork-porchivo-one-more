@@ -7,11 +7,11 @@ import {
   StyleSheet,
   TextInput,
   Switch,
-  Alert,
   Platform,
   KeyboardAvoidingView,
   Animated,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -188,24 +188,24 @@ export default function SubmitMaintenanceScreen() {
       queryClient.invalidateQueries({ queryKey: ['maintenance-queue', activeOrg?.id] });
       queryClient.invalidateQueries({ queryKey: ['maintenance-counts', activeOrg?.id] });
       queryClient.invalidateQueries({ queryKey: ['my-maintenance', activeOrg?.id] });
-      Alert.alert(
+      showAlert(
         'Request Submitted',
         "Your maintenance request has been submitted. You'll receive updates as it progresses.",
         [{ text: 'Done', onPress: () => router.back() }]
       );
     },
     onError: (err: Error) => {
-      Alert.alert('Submission Failed', err.message || 'Please try again.');
+      showAlert('Submission Failed', err.message || 'Please try again.');
     },
   });
 
   const handleSubmit = () => {
     if (!title.trim()) {
-      Alert.alert('Missing Title', 'Please enter a brief title for the issue.');
+      showAlert('Missing Title', 'Please enter a brief title for the issue.');
       return;
     }
     if (priority === 'emergency') {
-      Alert.alert(
+      showAlert(
         'Submit Emergency Request?',
         'This will be marked as highest priority and notify building staff immediately.',
         [

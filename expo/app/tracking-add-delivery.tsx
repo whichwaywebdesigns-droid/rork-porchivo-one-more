@@ -9,8 +9,8 @@ import {
   Platform,
   KeyboardAvoidingView,
   Animated,
-  Alert,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   Package,
@@ -179,11 +179,11 @@ export default function TrackingAddDeliveryScreen({
   // ── Submit: add package + auth if needed ────────────────────────────
   const handleAddPackage = useCallback(async () => {
     if (!trackingNumber.trim()) {
-      Alert.alert('Missing Info', 'Please enter a tracking number.');
+      showAlert('Missing Info', 'Please enter a tracking number.');
       return;
     }
     if (!isValidTrackingFormat(trackingNumber)) {
-      Alert.alert('Invalid Format', 'Tracking numbers should be at least 10 characters.');
+      showAlert('Invalid Format', 'Tracking numbers should be at least 10 characters.');
       return;
     }
 
@@ -215,9 +215,9 @@ export default function TrackingAddDeliveryScreen({
         return;
       } catch (err: any) {
         if (err?.message === 'FREE_LIMIT_REACHED') {
-          Alert.alert('Free Limit', 'You can track 1 active package on the free plan.');
+          showAlert('Free Limit', 'You can track 1 active package on the free plan.');
         } else {
-          Alert.alert('Error', 'Could not add package. Please try again.');
+          showAlert('Error', 'Could not add package. Please try again.');
         }
         return;
       }
@@ -233,19 +233,19 @@ export default function TrackingAddDeliveryScreen({
 
     // Auth form is visible — validate and submit
     if (!authName.trim()) {
-      Alert.alert('Missing Info', 'Please enter your name.');
+      showAlert('Missing Info', 'Please enter your name.');
       return;
     }
     if (!authEmail.trim() || !authEmail.includes('@')) {
-      Alert.alert('Missing Info', 'Please enter a valid email.');
+      showAlert('Missing Info', 'Please enter a valid email.');
       return;
     }
     if (authPassword.length < 6) {
-      Alert.alert('Weak Password', 'Password must be at least 6 characters.');
+      showAlert('Weak Password', 'Password must be at least 6 characters.');
       return;
     }
     if (!isSupabaseConfigured) {
-      Alert.alert('Setup Required', 'The app backend is not configured yet.');
+      showAlert('Setup Required', 'The app backend is not configured yet.');
       return;
     }
 
@@ -263,14 +263,14 @@ export default function TrackingAddDeliveryScreen({
       });
 
       if (error) {
-        Alert.alert('Sign Up Failed', error.message);
+        showAlert('Sign Up Failed', error.message);
         setIsSubmitting(false);
         return;
       }
 
       // Email confirmation required
       if (data.user && !data.session) {
-        Alert.alert(
+        showAlert(
           'Check Your Email',
           'We sent a confirmation link. Please confirm your account, then return to add your package.',
         );
@@ -285,7 +285,7 @@ export default function TrackingAddDeliveryScreen({
 
       const newUserId = data.user?.id ?? data.session?.user?.id;
       if (!newUserId) {
-        Alert.alert('Error', 'Could not create account. Please try again.');
+        showAlert('Error', 'Could not create account. Please try again.');
         setIsSubmitting(false);
         return;
       }
@@ -330,14 +330,14 @@ export default function TrackingAddDeliveryScreen({
         safeContinue();
       } catch (err: any) {
         if (err?.message === 'FREE_LIMIT_REACHED') {
-          Alert.alert('Free Limit', 'You can track 1 active package on the free plan.');
+          showAlert('Free Limit', 'You can track 1 active package on the free plan.');
         } else {
-          Alert.alert('Error', 'Account created but could not add package. Please try again from the home screen.');
+          showAlert('Error', 'Account created but could not add package. Please try again from the home screen.');
           safeContinue();
         }
       }
     } catch {
-      Alert.alert('Connection Error', 'Unable to reach the server. Check your internet connection.');
+      showAlert('Connection Error', 'Unable to reach the server. Check your internet connection.');
     } finally {
       setIsSubmitting(false);
     }

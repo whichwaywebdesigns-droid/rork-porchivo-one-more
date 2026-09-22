@@ -8,8 +8,8 @@ import {
   Animated,
   Platform,
   Linking,
-  Alert,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import * as Notifications from 'expo-notifications';
@@ -174,14 +174,14 @@ export default function TrackingNotificationsScreen({
 
   const handleEnable = useCallback(async () => {
     if (Platform.OS === 'web') {
-      Alert.alert('Not available', 'Push notifications are unsupported on web.');
+      showAlert('Not available', 'Push notifications are unsupported on web.');
       safeContinue();
       return;
     }
 
     // If already denied and can't ask again → open Settings
     if (status === 'denied') {
-      Alert.alert(
+      showAlert(
         'Notifications turned off',
         'Open Settings to enable notifications for Porchivo.',
         [
@@ -257,7 +257,7 @@ export default function TrackingNotificationsScreen({
       }
     } catch (e) {
       log('[TrackingNotifications] Request error:', e);
-      Alert.alert('Something went wrong', 'Please try enabling notifications from Settings.');
+      showAlert('Something went wrong', 'Please try enabling notifications from Settings.');
     } finally {
       setRequesting(false);
     }

@@ -1,7 +1,15 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert, Image, RefreshControl,
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  TextInput,
+  Image,
+  RefreshControl,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import {
   Package, Clock, MapPin, User, Truck, ChevronRight, X, Check, AlertTriangle, Shield, Bell, PackageCheck, ChevronLeft, MessageCircle, Camera,
@@ -71,7 +79,7 @@ export default function ShipmentDetailScreen() {
 
   const handleAccept = useCallback(() => {
     if (!shipment) return;
-    Alert.alert(
+    showAlert(
       'Accept Shipment',
       `Accept this shipment from ${shipment.homeownerName}? You'll be responsible for picking up and safeguarding the package.`,
       [
@@ -83,7 +91,7 @@ export default function ShipmentDetailScreen() {
 
   const handleCancel = useCallback(() => {
     if (!shipment) return;
-    Alert.alert(
+    showAlert(
       'Cancel Shipment',
       'Are you sure you want to cancel this shipment?',
       [
@@ -100,7 +108,7 @@ export default function ShipmentDetailScreen() {
 
   const handleProofComplete = useCallback(() => {
     setShowProofSheet(false);
-    Alert.alert('Delivery Complete', 'The shipment has been marked as completed. The homeowner has been notified.');
+    showAlert('Delivery Complete', 'The shipment has been marked as completed. The homeowner has been notified.');
   }, []);
 
   const shipmentNotifications = useMemo(() =>
@@ -112,7 +120,7 @@ export default function ShipmentDetailScreen() {
     if (!shipment || !trackingInput.trim()) return;
     updateShipmentTracking(shipment.id, trackingInput.trim(), shareLocation);
     setShowTrackingForm(false);
-    Alert.alert(
+    showAlert(
       'Tracking Saved',
       'You\'ll be notified when your package is delivered, and your Porch Partner will be alerted to pick it up.',
     );

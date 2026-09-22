@@ -9,9 +9,9 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-  Alert,
   Animated,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { router, useLocalSearchParams } from 'expo-router';
 import {
   Building2,
@@ -106,7 +106,7 @@ function ClaimForm() {
 
   const handleSubmit = useCallback(async () => {
     if (!name.trim()) {
-      Alert.alert('Name required', 'Please enter your community name.');
+      showAlert('Name required', 'Please enter your community name.');
       return;
     }
     try {
@@ -119,13 +119,13 @@ function ClaimForm() {
         zip: zip.trim(),
         totalUnits: totalUnits ? parseInt(totalUnits, 10) : undefined,
       });
-      Alert.alert(
+      showAlert(
         '🎉 Community Created!',
         `${name} is now live on Porchivo. Share your invite code with residents to get them started.`,
         [{ text: 'Done', onPress: () => router.back() }]
       );
     } catch (e: any) {
-      Alert.alert('Error', e?.message ?? 'Something went wrong. Please try again.');
+      showAlert('Error', e?.message ?? 'Something went wrong. Please try again.');
     }
   }, [name, type, address, city, state, zip, totalUnits, createOrg]);
 
@@ -322,7 +322,7 @@ export default function JoinCommunityScreen() {
     if (found) {
       setSelectedOrg(found);
     } else {
-      Alert.alert('Not Found', 'No community found with that invite code. Double-check the code and try again.');
+      showAlert('Not Found', 'No community found with that invite code. Double-check the code and try again.');
     }
   }, [inviteCode, searchByInviteCode]);
 
@@ -332,7 +332,7 @@ export default function JoinCommunityScreen() {
       setIsRequesting(true);
       try {
         await requestMembership({ orgId: org.id });
-        Alert.alert(
+        showAlert(
           '✅ Request Sent!',
           `Your request to join ${org.name} has been submitted. You'll be notified once approved.`,
           [{ text: 'Done', onPress: () => router.back() }]
@@ -340,9 +340,9 @@ export default function JoinCommunityScreen() {
       } catch (e: any) {
         const msg = e?.message ?? '';
         if (msg.includes('unique') || msg.includes('duplicate')) {
-          Alert.alert('Already Requested', 'You already have a pending or active membership for this community.');
+          showAlert('Already Requested', 'You already have a pending or active membership for this community.');
         } else {
-          Alert.alert('Error', 'Could not submit your request. Please try again.');
+          showAlert('Error', 'Could not submit your request. Please try again.');
         }
       } finally {
         setIsRequesting(false);

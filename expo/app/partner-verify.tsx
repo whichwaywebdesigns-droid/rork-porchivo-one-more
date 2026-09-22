@@ -7,8 +7,8 @@ import {
   Animated,
   ScrollView,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import * as WebBrowser from 'expo-web-browser';
 import { Stack, useRouter, useLocalSearchParams } from 'expo-router';
 
@@ -196,7 +196,7 @@ export default function PartnerVerifyScreen() {
     try {
       const result = await initiateConnectOnboarding();
       if (!result) {
-        Alert.alert('Error', 'Could not start bank setup. Make sure your identity is verified and try again.');
+        showAlert('Error', 'Could not start bank setup. Make sure your identity is verified and try again.');
         return;
       }
       if (result.alreadyConnected) {
@@ -218,7 +218,7 @@ export default function PartnerVerifyScreen() {
         setStep('payout_pending');
       }
     } catch {
-      Alert.alert('Error', 'Something went wrong. Please try again.');
+      showAlert('Error', 'Something went wrong. Please try again.');
     } finally {
       setIsConnecting(false);
     }
@@ -230,7 +230,7 @@ export default function PartnerVerifyScreen() {
     try {
       const result = await initiateVerification();
       if (!result) {
-        Alert.alert('Error', 'Could not start verification. Please try again.');
+        showAlert('Error', 'Could not start verification. Please try again.');
         return;
       }
       if (result.alreadyVerified) {
@@ -264,7 +264,7 @@ export default function PartnerVerifyScreen() {
         setStep('id_pending');
       }
     } catch {
-      Alert.alert('Error', 'Something went wrong. Please try again.');
+      showAlert('Error', 'Something went wrong. Please try again.');
     } finally {
       setIsInitiating(false);
     }

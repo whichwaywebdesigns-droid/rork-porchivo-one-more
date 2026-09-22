@@ -19,8 +19,8 @@ import {
   ScrollView,
   Animated,
   Linking,
-  Alert,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
@@ -103,7 +103,7 @@ export default function PartnerPayoutSetupScreen() {
     } catch (err) {
       setStatus((s) => ({ ...s, identity: 'failed' }));
       // Stripe not yet deployed — show informational state
-      Alert.alert(
+      showAlert(
         'Coming Soon',
         "Stripe payout setup is finishing deployment. You'll be notified by email as soon as it's live — usually within 1–2 business days.",
         [{ text: 'OK', onPress: () => {
@@ -135,7 +135,7 @@ export default function PartnerPayoutSetupScreen() {
       }
     } catch (err) {
       setStatus((s) => ({ ...s, bank: 'failed' }));
-      Alert.alert(
+      showAlert(
         'Coming Soon',
         'Bank account connection will be live shortly. You\'ll receive a setup email once your ID is verified.',
         [{ text: 'Got it', onPress: () => {

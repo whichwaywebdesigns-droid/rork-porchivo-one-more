@@ -9,11 +9,11 @@ import {
   Pressable,
   Animated,
   Platform,
-  Alert,
   KeyboardAvoidingView,
   ScrollView,
   Linking,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { X, AlertTriangle, Package, Car, HelpCircle, User, Camera, MapPin, Send, Phone } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import { SuspiciousActivityCategory } from '@/types';
@@ -73,11 +73,11 @@ export default function ReportAlertSheet({ visible, onClose }: ReportAlertSheetP
 
   const handleSubmit = useCallback(async () => {
     if (!category) {
-      Alert.alert('Select a category', 'Please choose a category for your report.');
+      showAlert('Select a category', 'Please choose a category for your report.');
       return;
     }
     if (description.trim().length === 0) {
-      Alert.alert('Add a description', 'Please describe what you observed.');
+      showAlert('Add a description', 'Please describe what you observed.');
       return;
     }
 
@@ -90,7 +90,7 @@ export default function ReportAlertSheet({ visible, onClose }: ReportAlertSheetP
       handleClose();
     } catch (e) {
       log('[ReportAlertSheet] Error submitting alert:', e);
-      Alert.alert('Error', 'Could not submit alert. Please try again.');
+      showAlert('Error', 'Could not submit alert. Please try again.');
     } finally {
       setSubmitting(false);
     }

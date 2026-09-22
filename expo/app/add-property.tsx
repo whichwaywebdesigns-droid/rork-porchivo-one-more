@@ -7,11 +7,11 @@ import {
   StyleSheet,
   ActivityIndicator,
   TextInput,
-  Alert,
   Platform,
   Animated,
   KeyboardAvoidingView,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -199,7 +199,7 @@ export default function AddPropertyScreen() {
 
   const handleNext = () => {
     if (step === 0 && !canProceedStep0) {
-      Alert.alert('Required fields', 'Please fill in property name, address, and city.');
+      showAlert('Required fields', 'Please fill in property name, address, and city.');
       return;
     }
     if (step < TOTAL_STEPS - 1) {
@@ -254,7 +254,7 @@ export default function AddPropertyScreen() {
 
       animateToStep(2);
     } catch {
-      Alert.alert('Error', 'Could not create property. Please check your connection and try again.');
+      showAlert('Error', 'Could not create property. Please check your connection and try again.');
     } finally {
       setIsSubmitting(false);
     }

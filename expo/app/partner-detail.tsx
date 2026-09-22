@@ -5,8 +5,8 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Alert,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import {
   ChevronLeft,
@@ -71,7 +71,7 @@ export default function PartnerDetailScreen() {
 
   const handlePickUp = useCallback(
     (packageId: string) => {
-      Alert.alert('Confirm Pickup', 'Mark this package as picked up from the porch?', [
+      showAlert('Confirm Pickup', 'Mark this package as picked up from the porch?', [
         { text: 'Cancel', style: 'cancel' },
         { text: 'Picked Up', onPress: () => markPickedUp(packageId) },
       ]);
@@ -81,7 +81,7 @@ export default function PartnerDetailScreen() {
 
   const handleReturn = useCallback(
     (packageId: string) => {
-      Alert.alert('Confirm Return', 'Mark this package as returned to the owner?', [
+      showAlert('Confirm Return', 'Mark this package as returned to the owner?', [
         { text: 'Cancel', style: 'cancel' },
         { text: 'Returned', onPress: () => markReturned(packageId) },
       ]);

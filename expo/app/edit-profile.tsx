@@ -8,11 +8,11 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
-  Alert,
   Animated,
   ActivityIndicator,
   Switch,
 } from 'react-native';
+import { showAlert } from '@/lib/platformAlert';
 import { Stack, useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
@@ -394,13 +394,13 @@ export default function EditProfileScreen() {
       const msg = e?.message === 'photo-permission-denied'
         ? 'Please allow photo library access to change your avatar.'
         : 'Could not open the photo library. Please try again.';
-      Alert.alert('Error', msg);
+      showAlert('Error', msg);
     }
   }, []);
 
   const handleRemovePhoto = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    Alert.alert(
+    showAlert(
       'Remove photo?',
       'Your profile picture will be removed and replaced with your initial. This will be applied when you save.',
       [
@@ -426,9 +426,9 @@ export default function EditProfileScreen() {
     const trimmedPhone = phone.trim();
     const trimmedAddress = homeAddress.trim();
 
-    if (!trimmedName) { Alert.alert('Name required', 'Please enter your name.'); return; }
+    if (!trimmedName) { showAlert('Name required', 'Please enter your name.'); return; }
     if (!trimmedEmail || !trimmedEmail.includes('@')) {
-      Alert.alert('Valid email required', 'Please enter a valid email address.');
+      showAlert('Valid email required', 'Please enter a valid email address.');
       return;
     }
 
@@ -462,7 +462,7 @@ export default function EditProfileScreen() {
           const reason = e?.message === 'avatar-too-large'
             ? 'That photo is larger than 5 MB. Please choose a smaller image.'
             : 'Could not upload your photo. Please try again.';
-          Alert.alert('Photo upload failed', reason);
+          showAlert('Photo upload failed', reason);
           setIsSaving(false);
           return;
         }
@@ -492,14 +492,14 @@ export default function EditProfileScreen() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setTimeout(() => router.back(), 300);
     } catch {
-      Alert.alert('Error', 'Could not save your profile. Please try again.');
+      showAlert('Error', 'Could not save your profile. Please try again.');
       setIsSaving(false);
     }
   }, [user, name, email, phone, homeAddress, avatarUri, pendingAvatarAsset, updateUser, router, saveScale, AVATAR_HOSTS, isPartner, extension.isVolunteer, isResidentSettingsReadOnly]);
 
   const handleDiscard = useCallback(() => {
     if (hasChanges()) {
-      Alert.alert('Discard changes?', 'You have unsaved changes that will be lost.', [
+      showAlert('Discard changes?', 'You have unsaved changes that will be lost.', [
         { text: 'Keep Editing', style: 'cancel' },
         { text: 'Discard', style: 'destructive', onPress: () => router.back() },
       ]);
