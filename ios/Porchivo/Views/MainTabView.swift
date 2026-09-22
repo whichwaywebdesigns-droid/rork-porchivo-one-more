@@ -15,21 +15,6 @@ struct MainTabView: View {
     @Environment(\.porchivo) private var c
     @State private var selection = 0
 
-    /// TabView fires the selection setter on every tap — including re-taps of
-    /// the already-selected tab — so equal-value writes record a reselect that
-    /// pops the tab's stack back to its root (see TabReselectMonitor).
-    private var selectionBinding: Binding<Int> {
-        Binding(
-            get: { selection },
-            set: { newValue in
-                if newValue == selection {
-                    TabReselectMonitor.shared.recordReselect(newValue)
-                }
-                selection = newValue
-            }
-        )
-    }
-
     var body: some View {
         communityTabs
             .tint(c.accent)
@@ -38,27 +23,25 @@ struct MainTabView: View {
 
     // MARK: - Tabs
 
+    // Re-tapping the current tab pops its embedded navigation stack to the
+    // root natively on iOS 18+ — no custom reselect detection needed.
     private var communityTabs: some View {
-        TabView(selection: selectionBinding) {
+        TabView(selection: $selection) {
             HomeScreen()
                 .tabItem { Label("Home", systemImage: "house.fill") }
                 .tag(0)
-                .environment(\.pvTabIndex, 0)
 
             PaymentsScreen()
                 .tabItem { Label("Payments", systemImage: "creditcard.fill") }
                 .tag(1)
-                .environment(\.pvTabIndex, 1)
 
             RequestsScreen()
                 .tabItem { Label("Requests", systemImage: "wrench.and.screwdriver.fill") }
                 .tag(2)
-                .environment(\.pvTabIndex, 2)
 
             MoreScreen()
                 .tabItem { Label("More", systemImage: "ellipsis.circle.fill") }
                 .tag(3)
-                .environment(\.pvTabIndex, 3)
         }
     }
 }
