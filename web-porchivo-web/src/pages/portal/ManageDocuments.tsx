@@ -14,6 +14,7 @@ import { supabase } from "@/lib/supabase";
 import type { OrgDocumentRow } from "@/lib/portalTypes";
 import { usePortalOrg } from "@/hooks/usePortalOrg";
 import { usePortalAuth } from "@/providers/PortalAuthProvider";
+import DataTable from "@/components/portal/DataTable";
 
 const DOC_BUCKET = "org-documents";
 const MAX_FILE_BYTES = 25 * 1024 * 1024; // mirrors the bucket's file_size_limit
@@ -232,13 +233,105 @@ export default function ManageDocumentsPage() {
           Nothing here yet — add your first bylaw, budget, or community notice above.
         </p>
       ) : (
-        <ul className="space-y-3">
-          {docs.map((doc) => {
+        <DataTable<OrgDocumentRow>
+          rows={docs}
+          getRowKey={(row) => row.id}
+          initialSort={{ key: "added", direction: "desc" }}
+          searchPlaceholder="Search documents…"
+          emptyIcon={FileText}
+          filters={[
+            {
+              key: "type",
+              label: "Type",
+              options: [
+                { value: "file", label: "Uploaded files" },
+                { value: "link", label: "External links" },
+              ],
+              predicate: (row, value) => (value === "file" ? !row.external_url : Boolean(row.external_url)),
+            },
+          ]}
+          columns={[
+            {
+              key: "name",
+              header: "Document",
+              render: (doc) => {
+                const size = fmtSize(doc.file_size);
+                return (
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span
+                      className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                        doc.external_url
+                          ? "bg-brand-navy-700 text-brand-blue-light"
+                          : "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300"
+                      }`}
+                      aria-hidden
+                    >
+                      {doc.external_url ? <Link2 className="w-4.5 h-4.5" /> : <FileText className="w-4.5 h-4.5" />}
+                    </span>
+                    <div className="min-w-0">
+                      <button
+                        type="button"
+                        onClick={() => void openDoc(doc)}
+                        className="text-[14px] font-semibold text-brand-text-primary truncate max-w-[420px] hover:text-brand-blue-light transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-blue-light rounded"
+                      >
+                        {doc.name}
+                      </button>
+                      <p className="text-[12px] text-brand-text-muted">
+                        {doc.external_url ? "External link" : "File"}
+                        {size ? ` · ${size}` : ""}
+                      </p>
+                    </div>
+                  </div>
+                );
+              },
+              sortValue: (doc) => doc.name.toLowerCase(),
+              searchValue: (doc) => doc.name,
+            },
+            {
+              key: "type",
+              header: "Type",
+              render: (doc) => (
+                <span className="text-[13px] text-brand-text-secondary whitespace-nowrap">
+                  {doc.external_url ? "Link" : doc.mime_type ?? "File"}
+                </span>
+              ),
+              sortValue: (doc) => (doc.external_url ? "link" : doc.mime_type ?? "file"),
+              searchValue: (doc) => `${doc.external_url ? "link" : "file"} ${doc.mime_type ?? ""}`,
+            },
+            {
+              key: "added",
+              header: "Added",
+              render: (doc) => (
+                <span className="text-[13px] text-brand-text-secondary tabular-nums whitespace-nowrap">
+                  {fmtDate(doc.created_at)}
+                </span>
+              ),
+              sortValue: (doc) => doc.created_at,
+            },
+            {
+              key: "actions",
+              header: "",
+              headerClassName: "w-px",
+              render: (doc) => (
+                <button
+                  type="button"
+                  aria-label={`Remove ${doc.name}`}
+                  disabled={removeDoc.isPending}
+                  onClick={() => {
+                    if (window.confirm(`Remove "${doc.name}" from the library?`)) removeDoc.mutate(doc);
+                  }}
+                  className="p-2 rounded-lg text-brand-text-muted hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-blue-light"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              ),
+            },
+          ]}
+          renderMobileRow={(doc) => {
             const size = fmtSize(doc.file_size);
             return (
-              <li
-                key={doc.id}
-                className="paper-sheet rounded-xl px-5 py-4 flex items-center gap-4 group cursor-pointer"
+              <div
+                className="paper-sheet rounded-xl px-5 py-4 flex items-center gap-4 cursor-pointer"
                 onClick={() => void openDoc(doc)}
               >
                 <span
@@ -267,10 +360,10 @@ export default function ManageDocumentsPage() {
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
-              </li>
+              </div>
             );
-          })}
-        </ul>
+          }}
+        />
       )}
     </div>
   );

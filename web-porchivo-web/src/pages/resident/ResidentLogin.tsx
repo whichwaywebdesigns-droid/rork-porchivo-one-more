@@ -9,7 +9,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Navigate, Link } from "react-router-dom";
-import { Loader2, MailCheck, ArrowLeft, ShieldCheck } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { Loader2, MailCheck, ArrowLeft, ShieldCheck, Info } from "lucide-react";
 
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { isReviewerEmail, useResidentAuth } from "@/providers/ResidentAuthProvider";
@@ -24,6 +25,7 @@ type Phase = "email" | "code";
 export default function ResidentLoginPage() {
   const { session, isLoadingSession, sendOtpCode, verifyOtpCode } = useResidentAuth();
   const { membership, isLoading: isLoadingOrg } = useResidentOrg();
+  const { t } = useTranslation();
 
   const [phase, setPhase] = useState<Phase>("email");
   const [emailValue, setEmailValue] = useState<string>("");
@@ -242,6 +244,11 @@ export default function ResidentLoginPage() {
               <MailCheck className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
               Don't have an account? Residents join through their community's invite — ask your
               HOA or property manager. This screen never signs anyone up.
+            </p>
+            {/* Shared-office reminder — front-desk and shared computers */}
+            <p className="text-[11px] leading-relaxed text-brand-text-muted flex items-start gap-1.5">
+              <Info className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" aria-hidden="true" />
+              {t("auth.sharedComputer")}
             </p>
             <Link
               to="/"

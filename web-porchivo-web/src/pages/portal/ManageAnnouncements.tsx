@@ -12,6 +12,7 @@ import { supabase } from "@/lib/supabase";
 import type { OrgAnnouncementRow } from "@/lib/portalTypes";
 import { usePortalOrg } from "@/hooks/usePortalOrg";
 import { usePortalAuth } from "@/providers/PortalAuthProvider";
+import DataTable from "@/components/portal/DataTable";
 
 type PriorityValue = "low" | "normal" | "high" | "urgent";
 
@@ -170,9 +171,74 @@ export default function ManageAnnouncementsPage() {
       ) : (listQuery.data ?? []).length === 0 ? (
         <p className="text-[13px] text-brand-text-muted">Nothing posted yet — your first announcement goes out instantly.</p>
       ) : (
-        <ul className="space-y-3">
-          {(listQuery.data ?? []).map((row) => (
-            <li key={row.id} className="paper-sheet rounded-xl px-5 py-4">
+        <DataTable<OrgAnnouncementRow>
+          rows={listQuery.data ?? []}
+          getRowKey={(row) => row.id}
+          initialSort={{ key: "posted", direction: "desc" }}
+          searchPlaceholder="Search announcements…"
+          filters={[
+            {
+              key: "priority",
+              label: "Priority",
+              options: PRIORITIES.map((p) => ({
+                value: p,
+                label: p.charAt(0).toUpperCase() + p.slice(1),
+              })),
+              predicate: (row, value) => row.priority === value,
+            },
+            {
+              key: "pinned",
+              label: "Pinned",
+              options: [
+                { value: "pinned", label: "Pinned only" },
+                { value: "unpinned", label: "Not pinned" },
+              ],
+              predicate: (row, value) => (value === "pinned" ? row.is_pinned : !row.is_pinned),
+            },
+          ]}
+          columns={[
+            {
+              key: "title",
+              header: "Announcement",
+              render: (row) => (
+                <div className="min-w-0 max-w-[480px]">
+                  <div className="flex items-center gap-2">
+                    {row.is_pinned && <Pin className="w-3.5 h-3.5 text-tape-gold flex-shrink-0" aria-label="Pinned" />}
+                    <p className="text-[14px] font-semibold text-brand-text-primary truncate">{row.title}</p>
+                  </div>
+                  <p className="mt-0.5 text-[12px] text-brand-text-muted truncate max-w-[480px]">
+                    {row.body.length > 160 ? `${row.body.slice(0, 160)}…` : row.body}
+                  </p>
+                </div>
+              ),
+              sortValue: (row) => row.title.toLowerCase(),
+              searchValue: (row) => `${row.title} ${row.body}`,
+            },
+            {
+              key: "priority",
+              header: "Priority",
+              render: (row) => (
+                <span
+                  className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide whitespace-nowrap ${priorityClasses(row.priority)}`}
+                >
+                  {row.priority}
+                </span>
+              ),
+              searchValue: (row) => row.priority,
+            },
+            {
+              key: "posted",
+              header: "Posted",
+              render: (row) => (
+                <span className="text-[13px] text-brand-text-secondary tabular-nums whitespace-nowrap">
+                  {new Date(row.created_at).toLocaleString()}
+                </span>
+              ),
+              sortValue: (row) => row.created_at,
+            },
+          ]}
+          renderMobileRow={(row) => (
+            <div className="paper-sheet rounded-xl px-5 py-4">
               <div className="flex items-start justify-between gap-3">
                 <h3 className="text-[15px] font-semibold text-brand-text-primary">{row.title}</h3>
                 <div className="flex items-center gap-1.5 flex-shrink-0">
@@ -188,9 +254,9 @@ export default function ManageAnnouncementsPage() {
               <p className="mt-2 text-[11px] text-brand-text-muted">
                 {new Date(row.created_at).toLocaleString()}
               </p>
-            </li>
-          ))}
-        </ul>
+            </div>
+          )}
+        />
       )}
     </div>
   );

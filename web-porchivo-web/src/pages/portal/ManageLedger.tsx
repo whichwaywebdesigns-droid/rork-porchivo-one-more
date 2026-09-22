@@ -13,6 +13,7 @@ import { Download, Loader2, Receipt } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { isCommunityPlanOrHigher, type OrgPaymentRow } from "@/lib/portalTypes";
 import { usePortalOrg } from "@/hooks/usePortalOrg";
+import DataTable from "@/components/portal/DataTable";
 
 const STATUS_CLASSES: Record<string, string> = {
   paid: "bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300",
@@ -161,30 +162,95 @@ export default function ManageLedgerPage() {
           No payments yet — dues and assessments will appear here as residents pay.
         </p>
       ) : (
-        <ul className="space-y-3">
-          {rows.map((r) => (
-            <li key={r.id} className="paper-sheet rounded-xl px-5 py-4 flex items-center gap-4">
+        <DataTable<OrgPaymentRow>
+          rows={rows}
+          getRowKey={(row) => row.id}
+          initialSort={{ key: "date", direction: "desc" }}
+          searchPlaceholder="Search payments…"
+          emptyIcon={Receipt}
+          filters={[
+            {
+              key: "status",
+              label: "Status",
+              options: [
+                { value: "paid", label: "Paid" },
+                { value: "pending", label: "Pending" },
+                { value: "failed", label: "Failed" },
+                { value: "refunded", label: "Refunded" },
+              ],
+              predicate: (row, value) => row.status === value,
+            },
+          ]}
+          columns={[
+            {
+              key: "member",
+              header: "Member",
+              render: (row) => (
+                <span className="text-[14px] font-semibold text-brand-text-primary">
+                  {row.member?.name ?? "Unknown resident"}
+                </span>
+              ),
+              sortValue: (row) => (row.member?.name ?? "").toLowerCase(),
+              searchValue: (row) => `${row.member?.name ?? ""} ${row.status}`,
+            },
+            {
+              key: "date",
+              header: "Date",
+              render: (row) => (
+                <span className="text-[13px] text-brand-text-secondary tabular-nums whitespace-nowrap">
+                  {fmtDate(row.paid_at ?? row.created_at)}
+                </span>
+              ),
+              sortValue: (row) => row.paid_at ?? row.created_at,
+            },
+            {
+              key: "amount",
+              header: "Amount",
+              render: (row) => (
+                <span className="text-[14px] font-bold text-brand-text-primary tabular-nums">
+                  {fmtMoney(row.amount_cents)}
+                </span>
+              ),
+              sortValue: (row) => row.amount_cents,
+            },
+            {
+              key: "status",
+              header: "Status",
+              render: (row) => (
+                <span
+                  className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide whitespace-nowrap ${
+                    STATUS_CLASSES[row.status] ?? "bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300"
+                  }`}
+                >
+                  {row.status}
+                </span>
+              ),
+              searchValue: (row) => row.status,
+            },
+          ]}
+          renderMobileRow={(row) => (
+            <div className="paper-sheet rounded-xl px-5 py-4 flex items-center gap-4">
               <div className="min-w-0 flex-1">
                 <h3 className="text-[15px] font-semibold text-brand-text-primary truncate">
-                  {r.member?.name ?? "Unknown resident"}
+                  {row.member?.name ?? "Unknown resident"}
                 </h3>
-                <p className="text-[12px] text-brand-text-muted">{fmtDate(r.paid_at ?? r.created_at)}</p>
+                <p className="text-[12px] text-brand-text-muted">{fmtDate(row.paid_at ?? row.created_at)}</p>
               </div>
               <div className="flex items-center gap-3 flex-shrink-0">
                 <span className="text-[15px] font-bold text-brand-text-primary tabular-nums">
-                  {fmtMoney(r.amount_cents)}
+                  {fmtMoney(row.amount_cents)}
                 </span>
                 <span
                   className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ${
-                    STATUS_CLASSES[r.status] ?? "bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300"
+                    STATUS_CLASSES[row.status] ?? "bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300"
                   }`}
                 >
-                  {r.status}
+                  {row.status}
                 </span>
               </div>
-            </li>
-          ))}
-        </ul>
+            </div>
+          )}
+        />
       )}
     </div>
   );

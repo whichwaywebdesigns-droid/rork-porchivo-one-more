@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import AppErrorBoundary from "@/components/AppErrorBoundary";
 import CorrugatedBackground from "@/components/CorrugatedBackground";
+import PwaUpdateToast from "@/components/PwaUpdateToast";
 import PostHogPageView from "./components/PostHogPageView";
 import TapeDispenserSpinner from "@/components/TapeDispenserSpinner";
 
@@ -27,6 +28,7 @@ const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const PrivacyPolicyEs = lazy(() => import("./pages/PrivacyPolicyEs"));
 const TermsOfServiceEs = lazy(() => import("./pages/TermsOfServiceEs"));
 const Settings = lazy(() => import("./pages/Settings"));
+const Install = lazy(() => import("./pages/Install"));
 const EmailPreview = lazy(() => import("./pages/EmailPreview"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const AuthFail = lazy(() => import("./pages/AuthFail"));
@@ -115,6 +117,7 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
+        <PwaUpdateToast />
         <BrowserRouter>
           <CorrugatedBackground />
           <ScrollToTop />
@@ -137,6 +140,7 @@ const App = () => (
               <Route path="/es/privacidad" element={<PrivacyPolicyEs />} />
               <Route path="/es/terminos" element={<TermsOfServiceEs />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/install" element={<Install />} />
               <Route path="/email-preview" element={<EmailPreview />} />
               <Route path="/auth-fail" element={<AuthFail />} />
               <Route path="/unsubscribe" element={<Unsubscribe />} />

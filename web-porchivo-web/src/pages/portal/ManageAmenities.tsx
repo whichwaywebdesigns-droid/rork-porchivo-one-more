@@ -20,6 +20,7 @@ import {
 } from "@/lib/portalTypes";
 import { usePortalOrg } from "@/hooks/usePortalOrg";
 import { usePortalAuth } from "@/providers/PortalAuthProvider";
+import DataTable from "@/components/portal/DataTable";
 
 /** First slot of the bookable day (8 AM), last start hour (7 PM → ends 8 PM). */
 const FIRST_HOUR = 8;
@@ -276,22 +277,91 @@ export default function ManageAmenitiesPage() {
         ) : reservations.length === 0 ? (
           <p className="text-[13px] text-brand-text-muted">No upcoming reservations yet.</p>
         ) : (
-          <ul className="space-y-3">
-            {reservations.map((r) => {
-              const mine = r.reserved_by === userId;
+          <DataTable<OrgReservationRow>
+            rows={reservations}
+            getRowKey={(row) => row.id}
+            initialSort={{ key: "when", direction: "asc" }}
+            searchPlaceholder="Search reservations…"
+            filters={[
+              {
+                key: "amenity",
+                label: "Amenity",
+                options: amenities.map((a) => ({ value: a.id, label: a.name })),
+                predicate: (row, value) => row.amenity_id === value,
+              },
+            ]}
+            columns={[
+              {
+                key: "amenity",
+                header: "Amenity",
+                render: (row) => (
+                  <span className="inline-flex items-center gap-2 text-[14px] font-semibold text-brand-text-primary">
+                    <span aria-hidden className="w-8 h-8 rounded-lg bg-brand-navy-700 flex items-center justify-center flex-shrink-0 text-[15px]">
+                      {amenityEmoji(amenityNameById.get(row.amenity_id) ?? "")}
+                    </span>
+                    {amenityNameById.get(row.amenity_id) ?? "Amenity"}
+                    {row.reserved_by === userId ? " · You" : ""}
+                  </span>
+                ),
+                sortValue: (row) => (amenityNameById.get(row.amenity_id) ?? "").toLowerCase(),
+                searchValue: (row) =>
+                  `${amenityNameById.get(row.amenity_id) ?? ""} ${row.member?.name ?? ""}`,
+              },
+              {
+                key: "reservedBy",
+                header: "Reserved by",
+                render: (row) => (
+                  <span className="text-[13px] text-brand-text-secondary whitespace-nowrap">
+                    {row.reserved_by === userId ? "You" : row.member?.name ?? "—"}
+                  </span>
+                ),
+                sortValue: (row) => (row.reserved_by === userId ? "" : row.member?.name ?? ""),
+                searchValue: (row) => row.member?.name ?? "",
+              },
+              {
+                key: "when",
+                header: "When",
+                render: (row) => (
+                  <span className="text-[13px] text-brand-text-secondary whitespace-nowrap">
+                    {fmtRange(row.starts_at, row.ends_at)}
+                  </span>
+                ),
+                sortValue: (row) => row.starts_at,
+              },
+              {
+                key: "actions",
+                header: "",
+                headerClassName: "w-px",
+                render: (row) => (
+                  <button
+                    type="button"
+                    aria-label="Cancel reservation"
+                    disabled={cancelReservation.isPending}
+                    onClick={() => {
+                      if (window.confirm("Cancel this reservation?")) cancelReservation.mutate(row.id);
+                    }}
+                    className="p-2 rounded-lg text-brand-text-muted hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-blue-light"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                ),
+              },
+            ]}
+            renderMobileRow={(row) => {
+              const mine = row.reserved_by === userId;
               return (
-                <li key={r.id} className="paper-sheet rounded-xl px-5 py-4 flex items-center gap-4">
+                <div className="paper-sheet rounded-xl px-5 py-4 flex items-center gap-4">
                   <span className="w-10 h-10 rounded-lg bg-brand-navy-700 flex items-center justify-center flex-shrink-0" aria-hidden>
-                    {amenityEmoji(amenityNameById.get(r.amenity_id) ?? "")}
+                    {amenityEmoji(amenityNameById.get(row.amenity_id) ?? "")}
                   </span>
                   <div className="min-w-0 flex-1">
                     <h3 className="text-[15px] font-semibold text-brand-text-primary truncate">
-                      {amenityNameById.get(r.amenity_id) ?? "Amenity"}
+                      {amenityNameById.get(row.amenity_id) ?? "Amenity"}
                       {mine ? " · You" : ""}
                     </h3>
                     <p className="text-[12px] text-brand-text-muted">
-                      {fmtRange(r.starts_at, r.ends_at)}
-                      {!mine && r.member?.name ? ` · Reserved by ${r.member.name}` : ""}
+                      {fmtRange(row.starts_at, row.ends_at)}
+                      {!mine && row.member?.name ? ` · Reserved by ${row.member.name}` : ""}
                     </p>
                   </div>
                   <button
@@ -299,16 +369,16 @@ export default function ManageAmenitiesPage() {
                     aria-label="Cancel reservation"
                     disabled={cancelReservation.isPending}
                     onClick={() => {
-                      if (window.confirm("Cancel this reservation?")) cancelReservation.mutate(r.id);
+                      if (window.confirm("Cancel this reservation?")) cancelReservation.mutate(row.id);
                     }}
                     className="p-2 rounded-lg text-brand-text-muted hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors disabled:opacity-50"
                   >
                     <X className="w-4 h-4" />
                   </button>
-                </li>
+                </div>
               );
-            })}
-          </ul>
+            }}
+          />
         )}
       </div>
 

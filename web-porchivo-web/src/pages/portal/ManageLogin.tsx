@@ -5,7 +5,8 @@
 
 import { useState } from "react";
 import { Navigate, Link } from "react-router-dom";
-import { MailCheck, Loader2, ArrowLeft } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { MailCheck, Loader2, ArrowLeft, Info } from "lucide-react";
 
 import { usePortalAuth } from "@/providers/PortalAuthProvider";
 import { usePortalOrg } from "@/hooks/usePortalOrg";
@@ -15,6 +16,7 @@ type LoginPhase = "idle" | "sending" | "sent";
 export default function ManageLoginPage() {
   const { session, signInWithMagicLink } = usePortalAuth();
   const { membership, isLoading } = usePortalOrg();
+  const { t } = useTranslation();
 
   const [emailValue, setEmailValue] = useState<string>("");
   const [phase, setPhase] = useState<LoginPhase>("idle");
@@ -92,6 +94,12 @@ export default function ManageLoginPage() {
               </button>
             </form>
           )}
+
+          {/* Shared-office reminder — front-desk and shared computers */}
+          <p className="mt-6 flex items-start gap-1.5 text-[12px] text-brand-text-muted leading-relaxed">
+            <Info className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" aria-hidden="true" />
+            {t("auth.sharedComputer")}
+          </p>
 
           <div className="mt-8 pt-5 border-t border-dashed border-brand-navy-500/50">
             <Link

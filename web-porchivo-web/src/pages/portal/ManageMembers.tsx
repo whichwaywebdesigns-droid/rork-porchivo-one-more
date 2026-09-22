@@ -11,6 +11,7 @@ import { Check, X, UserPlus, Inbox } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { canDecideMembers, type PendingMemberRow } from "@/lib/portalTypes";
 import { usePortalOrg } from "@/hooks/usePortalOrg";
+import DataTable from "@/components/portal/DataTable";
 
 export default function ManageMembersPage() {
   const { membership, org } = usePortalOrg();
@@ -98,9 +99,85 @@ export default function ManageMembersPage() {
           </p>
         </div>
       ) : (
-        <ul className="space-y-3">
-          {rows.map((row) => (
-            <li key={row.membership_id} className="paper-sheet rounded-xl px-5 py-4 flex flex-wrap items-center gap-4">
+        <DataTable<PendingMemberRow>
+          rows={rows}
+          getRowKey={(row) => row.membership_id}
+          initialSort={{ key: "requested", direction: "desc" }}
+          searchPlaceholder="Search residents…"
+          emptyIcon={Inbox}
+          columns={[
+            {
+              key: "resident",
+              header: "Resident",
+              render: (row) => (
+                <div className="min-w-0">
+                  <p className="text-[14px] font-semibold text-brand-text-primary truncate">{row.display_name}</p>
+                  {row.notes && (
+                    <p className="text-[12px] text-brand-text-muted truncate max-w-[260px]">{row.notes}</p>
+                  )}
+                </div>
+              ),
+              sortValue: (row) => row.display_name.toLowerCase(),
+              searchValue: (row) => `${row.display_name} ${row.unit_number ?? ""} ${row.notes ?? ""}`,
+            },
+            {
+              key: "unit",
+              header: "Unit",
+              render: (row) =>
+                row.unit_number ? (
+                  <span className="text-[13px] text-brand-text-secondary whitespace-nowrap">
+                    Unit {row.unit_number}
+                  </span>
+                ) : (
+                  <span className="text-brand-text-muted">—</span>
+                ),
+              sortValue: (row) => row.unit_number ?? "",
+            },
+            {
+              key: "requested",
+              header: "Requested",
+              render: (row) => (
+                <span className="text-[13px] text-brand-text-secondary tabular-nums whitespace-nowrap">
+                  {new Date(row.created_at).toLocaleDateString()}
+                </span>
+              ),
+              sortValue: (row) => row.created_at,
+            },
+            {
+              key: "actions",
+              header: "",
+              headerClassName: "w-px",
+              render: (row) =>
+                canDecide ? (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => {
+                        setBusyId(row.membership_id);
+                        decideMutation.mutate({ id: row.membership_id, decision: "approve" });
+                      }}
+                      disabled={busyId !== null}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-700/90 hover:bg-green-700 text-white text-[13px] font-semibold transition-colors disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600"
+                    >
+                      <Check className="w-3.5 h-3.5" /> Approve
+                    </button>
+                    <button
+                      onClick={() => {
+                        setBusyId(row.membership_id);
+                        decideMutation.mutate({ id: row.membership_id, decision: "deny" });
+                      }}
+                      disabled={busyId !== null}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-brand-navy-500/70 text-brand-text-secondary hover:text-brand-text-primary hover:border-brand-navy-500 text-[13px] font-medium transition-colors disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-blue-light"
+                    >
+                      <X className="w-3.5 h-3.5" /> Deny
+                    </button>
+                  </div>
+                ) : (
+                  <UserPlus className="w-4 h-4 text-brand-text-muted" />
+                ),
+            },
+          ]}
+          renderMobileRow={(row) => (
+            <div className="paper-sheet rounded-xl px-5 py-4 flex flex-wrap items-center gap-4">
               <div className="min-w-0 flex-1">
                 <p className="text-[15px] font-semibold text-brand-text-primary truncate">{row.display_name}</p>
                 <p className="text-[12px] text-brand-text-muted mt-0.5">
@@ -134,9 +211,9 @@ export default function ManageMembersPage() {
               ) : (
                 <UserPlus className="w-4 h-4 text-brand-text-muted" />
               )}
-            </li>
-          ))}
-        </ul>
+            </div>
+          )}
+        />
       )}
     </div>
   );

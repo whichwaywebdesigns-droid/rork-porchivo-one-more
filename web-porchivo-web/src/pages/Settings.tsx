@@ -1,16 +1,22 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Settings as SettingsIcon, Globe, Check, Sun, Moon, Monitor } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Settings as SettingsIcon, Globe, Check, Sun, Moon, Monitor, MonitorDown, Bell, ArrowRight } from "lucide-react";
 import { useTheme } from "next-themes";
 
 import PageLayout from "@/components/PageLayout";
 import SEOHead from "@/components/SEOHead";
 import BreadcrumbNav from "@/components/BreadcrumbNav";
 import LanguageSelector from "@/components/LanguageSelector";
+import InstallPorchivoButton from "@/components/InstallPorchivoButton";
+import { Button } from "@/components/ui/button";
+import { usePwaInstall } from "@/lib/pwa";
 import { getLanguageMeta } from "@/i18n/languages";
 import { BRAND } from "@/config/brand";
 
 type ThemeOption = "light" | "system" | "dark";
+
+type NotificationPermissionState = "default" | "granted" | "denied" | "unsupported";
 
 const THEME_OPTIONS: { value: ThemeOption; icon: typeof Sun; label: string; description: string }[] = [
   { value: "light", icon: Sun, label: "Light", description: "Bright background, dark text" },
@@ -38,6 +44,32 @@ export default function SettingsPage() {
   }).format(new Date());
 
   const sampleNumber = new Intl.NumberFormat(locale).format(119_000_000);
+
+  const { canInstall, isInstalled } = usePwaInstall();
+
+  // Desktop notification permission — only ever requested after an explicit
+  // click on the enable button below. Never probed at page load.
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermissionState>("default");
+  useEffect(() => {
+    if (typeof Notification === "undefined") {
+      setNotificationPermission("unsupported");
+      return;
+    }
+    setNotificationPermission(Notification.permission as NotificationPermissionState);
+  }, []);
+  const enableNotifications = async (): Promise<void> => {
+    if (typeof Notification === "undefined") return;
+    const result = await Notification.requestPermission();
+    setNotificationPermission(result as NotificationPermissionState);
+  };
+  const notificationStatusKey: string =
+    notificationPermission === "granted"
+      ? "pwa.notifications.statusGranted"
+      : notificationPermission === "denied"
+        ? "pwa.notifications.statusDenied"
+        : notificationPermission === "unsupported"
+          ? "pwa.notifications.statusUnsupported"
+          : "pwa.notifications.statusDefault";
 
   return (
     <PageLayout>
@@ -175,6 +207,69 @@ export default function SettingsPage() {
               </p>
             </div>
           )}
+        </section>
+
+        {/* Desktop app card */}
+        <section
+          aria-labelledby="desktop-heading"
+          className="rounded-2xl border border-brand-navy-500/40 bg-brand-navy-800/40 p-6 sm:p-8 mt-6"
+        >
+          <div className="flex items-center gap-2.5 mb-1.5">
+            <MonitorDown className="w-5 h-5 text-brand-blue-light" />
+            <h2 id="desktop-heading" className="text-xl font-semibold text-brand-text-primary">
+              {t("pwa.settings.desktop.title")}
+            </h2>
+          </div>
+          <p className="text-sm text-brand-text-muted leading-relaxed mb-5 max-w-prose">
+            {t("pwa.settings.desktop.description")}
+          </p>
+          <div className="flex flex-wrap items-center gap-3">
+            <InstallPorchivoButton showInstalledState />
+            {!canInstall && !isInstalled && (
+              <p className="text-[13px] text-brand-text-muted leading-relaxed max-w-prose">
+                {t("pwa.settings.desktop.unavailable")}
+              </p>
+            )}
+          </div>
+          <Link
+            to="/install"
+            className="mt-4 inline-flex items-center gap-1.5 text-[13px] font-semibold text-brand-blue-light hover:text-brand-blue transition-colors"
+          >
+            {t("installPage.title")}
+            <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+          </Link>
+        </section>
+
+        {/* Desktop notifications card */}
+        <section
+          aria-labelledby="notifications-heading"
+          className="rounded-2xl border border-brand-navy-500/40 bg-brand-navy-800/40 p-6 sm:p-8 mt-6"
+        >
+          <div className="flex items-center gap-2.5 mb-1.5">
+            <Bell className="w-5 h-5 text-brand-blue-light" />
+            <h2 id="notifications-heading" className="text-xl font-semibold text-brand-text-primary">
+              {t("pwa.notifications.title")}
+            </h2>
+          </div>
+          <p className="text-sm text-brand-text-muted leading-relaxed mb-5 max-w-prose">
+            {t("pwa.notifications.description")}
+          </p>
+          <div className="flex flex-wrap items-center gap-3">
+            {notificationPermission === "default" ? (
+              <Button onClick={() => void enableNotifications()} size="sm">
+                <Bell className="w-4 h-4" aria-hidden="true" />
+                {t("pwa.notifications.enable")}
+              </Button>
+            ) : null}
+            <p
+              className={`text-[13px] font-medium ${
+                notificationPermission === "granted" ? "text-emerald-600 dark:text-emerald-400" : "text-brand-text-secondary"
+              }`}
+              aria-live="polite"
+            >
+              {t(notificationStatusKey)}
+            </p>
+          </div>
         </section>
       </div>
     </PageLayout>

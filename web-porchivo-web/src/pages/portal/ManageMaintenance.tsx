@@ -11,6 +11,7 @@ import { Wrench } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import type { MaintenanceRequestRow } from "@/lib/portalTypes";
 import { usePortalOrg } from "@/hooks/usePortalOrg";
+import DataTable from "@/components/portal/DataTable";
 
 /** Statuses staff can transition an OPEN request into (maintenance_status enum minus 'submitted'). */
 const NEXT_STATUSES = [
@@ -125,9 +126,132 @@ export default function ManageMaintenancePage() {
           </p>
         </div>
       ) : (
-        <ul className="space-y-3">
-          {rows.map((row) => (
-            <li key={row.id} className="paper-sheet rounded-xl px-5 py-4">
+        <DataTable<MaintenanceRequestRow>
+          rows={rows}
+          getRowKey={(row) => row.id}
+          initialSort={{ key: "filed", direction: "desc" }}
+          searchPlaceholder="Search requests…"
+          emptyIcon={Wrench}
+          filters={[
+            {
+              key: "status",
+              label: "Status",
+              options: [
+                { value: "submitted", label: "Submitted" },
+                { value: "acknowledged", label: "Acknowledged" },
+                { value: "scheduled", label: "Scheduled" },
+                { value: "in_progress", label: "In progress" },
+                { value: "on_hold", label: "On hold" },
+              ],
+              predicate: (row, value) => row.status === value,
+            },
+            {
+              key: "priority",
+              label: "Priority",
+              options: [
+                { value: "urgent", label: "Urgent only" },
+                { value: "standard", label: "Standard" },
+              ],
+              predicate: (row, value) => (value === "urgent" ? row.is_urgent : !row.is_urgent),
+            },
+          ]}
+          columns={[
+            {
+              key: "request",
+              header: "Request",
+              render: (row) => (
+                <div className="min-w-0 max-w-[420px]">
+                  <div className="flex items-center gap-2">
+                    {row.is_urgent && (
+                      <span className="inline-flex px-2 py-0.5 rounded-full bg-red-600 text-white text-[10px] font-bold uppercase tracking-wide flex-shrink-0">
+                        Urgent
+                      </span>
+                    )}
+                    <p className="text-[14px] font-semibold text-brand-text-primary truncate">{row.title}</p>
+                  </div>
+                  {row.description && (
+                    <p className="mt-0.5 text-[12px] text-brand-text-muted truncate max-w-[420px]">
+                      {row.description}
+                    </p>
+                  )}
+                </div>
+              ),
+              sortValue: (row) => row.title.toLowerCase(),
+              searchValue: (row) =>
+                `${row.title} ${row.description ?? ""} ${row.category ?? ""} ${row.location_detail ?? ""}`,
+            },
+            {
+              key: "status",
+              header: "Status",
+              render: (row) => (
+                <span
+                  className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide whitespace-nowrap ${statusBadgeClass(row.status)}`}
+                >
+                  {row.status.replace(/_/g, " ")}
+                </span>
+              ),
+              searchValue: (row) => row.status.replace(/_/g, " "),
+            },
+            {
+              key: "category",
+              header: "Category",
+              render: (row) => (
+                <span className="text-[13px] text-brand-text-secondary whitespace-nowrap">
+                  {row.category ? row.category.replace(/_/g, " ") : "—"}
+                </span>
+              ),
+              sortValue: (row) => row.category ?? "",
+              searchValue: (row) => row.category ?? "",
+            },
+            {
+              key: "location",
+              header: "Location",
+              render: (row) => (
+                <span className="text-[13px] text-brand-text-secondary whitespace-nowrap">
+                  {row.location_detail ?? "—"}
+                </span>
+              ),
+              sortValue: (row) => row.location_detail ?? "",
+              searchValue: (row) => row.location_detail ?? "",
+            },
+            {
+              key: "filed",
+              header: "Filed",
+              render: (row) => (
+                <span className="text-[13px] text-brand-text-secondary tabular-nums whitespace-nowrap">
+                  {new Date(row.created_at).toLocaleDateString()}
+                </span>
+              ),
+              sortValue: (row) => row.created_at,
+            },
+            {
+              key: "actions",
+              header: "Move to",
+              render: (row) => (
+                <label className="flex items-center gap-2 text-[12px] font-semibold text-brand-text-muted">
+                  <span className="sr-only">Move request {row.title} to status</span>
+                  <select
+                    value=""
+                    disabled={busyId !== null}
+                    onChange={(e) => {
+                      const next = e.target.value as NextStatus;
+                      if (!next) return;
+                      setBusyId(row.id);
+                      statusMutation.mutate({ id: row.id, next });
+                    }}
+                    className="rounded-md border border-brand-navy-500/70 bg-transparent px-2 py-1.5 text-[12px] text-brand-text-primary focus:outline-none focus:ring-2 focus:ring-tape-gold/40 disabled:opacity-50"
+                  >
+                    <option value="" disabled>status…</option>
+                    {NEXT_STATUSES.filter((s) => s !== row.status).map((s) => (
+                      <option key={s} value={s}>{s.replace(/_/g, " ")}</option>
+                    ))}
+                  </select>
+                </label>
+              ),
+            },
+          ]}
+          renderMobileRow={(row) => (
+            <div className="paper-sheet rounded-xl px-5 py-4">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
@@ -176,9 +300,9 @@ export default function ManageMaintenancePage() {
                   </select>
                 </label>
               </div>
-            </li>
-          ))}
-        </ul>
+            </div>
+          )}
+        />
       )}
     </div>
   );

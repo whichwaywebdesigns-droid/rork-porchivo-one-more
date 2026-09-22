@@ -5,11 +5,13 @@ import ThemeProvider from "./components/ThemeProvider";
 import "./i18n";
 import "./index.css";
 import { initScrollbarAutoHide } from "./lib/scrollbar-auto-hide";
+import { registerServiceWorker } from "./lib/pwa";
 import { initPostHog, isPostHogEnabled, posthog } from "./lib/posthog";
 import { PostHogProvider } from "posthog-js/react";
 
 initScrollbarAutoHide();
 initPostHog();
+registerServiceWorker();
 
 createRoot(document.getElementById("root")!).render(
   <ThemeProvider>

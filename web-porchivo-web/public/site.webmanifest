@@ -1,16 +1,39 @@
 {
+  "id": "/?source=pwa",
   "name": "Porchivo",
   "short_name": "Porchivo",
-  "description": "Package security and resident retention for HOAs, property managers, and community associations. Real-time risk scoring, instant alerts, and a trusted Porch Partner network — no hardware or IT project required.",
-  "start_url": "/",
+  "description": "Porchivo is a community and property-management platform for HOAs, property managers, landlords, staff, and residents.",
+  "start_url": "/?source=pwa",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "any",
   "background_color": "#F5F7FA",
   "theme_color": "#3A7BD5",
+  "categories": ["business", "productivity", "utilities"],
   "icons": [
     {
-      "src": "/porchivo-icon-liquid-glass-512.png",
+      "src": "/porchivo-pwa-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/porchivo-pwa-icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/porchivo-pwa-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/porchivo-pwa-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }

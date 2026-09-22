@@ -10,6 +10,7 @@ import { Users, Wrench, Megaphone, ChevronRight } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import type { PortalOrg } from "@/lib/portalTypes";
 import { usePortalOrg } from "@/hooks/usePortalOrg";
+import InstallPorchivoBanner from "@/components/InstallPorchivoBanner";
 
 interface OutletData { org: PortalOrg }
 const QUICK_LINKS = [
@@ -59,6 +60,9 @@ export default function ManageDashboardPage() {
 
   return (
     <div className="space-y-8">
+      {/* Desktop install CTA — only renders when the browser can install */}
+      <InstallPorchivoBanner />
+
       <div>
         <h1 className="text-2xl font-bold text-brand-text-primary">Community dashboard</h1>
         <p className="text-sm text-brand-text-secondary mt-1">
