@@ -91,9 +91,11 @@ export const PLANNED_LOCALES: readonly PlannedLocaleMeta[] = [
 
 const ENABLED_LOCALE_CODES: readonly string[] = ENABLED_LOCALES.map((l) => l.code);
 
+// Keyed by normalizeTag(code) — lookups in getLocaleMeta/resolveLocale pass
+// normalized (lowercased) tags, so mixed-case keys like 'en-US' would never hit.
 const LOCALE_MAP: Record<string, LocaleMeta> = ENABLED_LOCALES.reduce(
   (acc, lang) => {
-    acc[lang.code] = lang;
+    acc[normalizeTag(lang.code)] = lang;
     return acc;
   },
   {} as Record<string, LocaleMeta>,

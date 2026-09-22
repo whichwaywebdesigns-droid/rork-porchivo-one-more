@@ -63,7 +63,7 @@ export default function OnboardingScreen(): React.ReactElement {
   const { track } = useAnalytics();
   const { languageMeta } = useLanguage();
   const { t } = useTranslation();
-  const slides = languageMeta.baseLanguage === 'es' ? SPANISH_SLIDES : ENGLISH_SLIDES;
+  const slides = languageMeta?.baseLanguage === 'es' ? SPANISH_SLIDES : ENGLISH_SLIDES;
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [nextIndex, setNextIndex] = useState<number | null>(null);
   const [isAnimating, setIsAnimating] = useState<boolean>(false);

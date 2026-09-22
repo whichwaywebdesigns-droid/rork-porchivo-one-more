@@ -227,7 +227,8 @@ export const [LanguageProvider, useLanguage] = createContextHook(
       [fadeAnim, isTransitioning],
     );
 
-    const meta = getLocaleMeta(language) ?? getLocaleMeta(DEFAULT_LOCALE)!;
+    // Guaranteed non-null: the default locale is always in ENABLED_LOCALES.
+    const meta = getLocaleMeta(language) ?? ENABLED_LOCALES[0];
 
     return {
       language,
