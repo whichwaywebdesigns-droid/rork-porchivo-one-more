@@ -91,14 +91,14 @@ struct RouteView: View {
     @ViewBuilder
     private var destination: some View {
         switch route {
-        case .create:        CreateScreen()
+        case .create:        CreateScreen(path: $path)
         case .packages:      PackagesScreen(path: $path)
         case .safety:        SafetyScreen()
         case .alerts:        AlertsScreen()
         case .addPackage:    AddPackageScreen()
         case .shipmentDetail(let id): ShipmentDetailScreen(shipmentId: id)
         case .packageDetail(let id):  PackageDetailScreen(packageId: id)
-        case .residentDirectory:      ResidentDirectoryScreen()
+        case .residentDirectory:      ResidentDirectoryScreen(path: $path)
         case .chat(let threadId):      ChatScreen(threadId: threadId)
         case .editProfile:   EditProfileScreen()
         case .settings:      SettingsScreen()

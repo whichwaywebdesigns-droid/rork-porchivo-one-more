@@ -11,13 +11,12 @@ import SwiftUI
 struct ResidentDirectoryScreen: View {
     @Environment(AppState.self) private var appState
     @Environment(\.porchivo) private var c
-    @State private var path = NavigationPath()
+    @Binding var path: NavigationPath
     @State private var search = ""
     @State private var loaded = false
 
     var body: some View {
-        NavigationStack(path: $path) {
-            ScrollView {
+        ScrollView {
                 VStack(spacing: 12) {
                     searchBar
                     if appState.directory.isEmpty {
@@ -42,10 +41,6 @@ struct ResidentDirectoryScreen: View {
             .background(c.background.ignoresSafeArea())
             .navigationTitle("Directory")
             .navigationBarTitleDisplayMode(.inline)
-            .navigationDestination(for: Route.self) { route in
-                RouteView(route: route, path: $path)
-            }
-        }
         .task {
             if !loaded {
                 await appState.loadDirectory()

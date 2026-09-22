@@ -11,7 +11,7 @@ import SwiftUI
 struct CreateScreen: View {
     @Environment(AppState.self) private var appState
     @Environment(\.porchivo) private var c
-    @State private var path = NavigationPath()
+    @Binding var path: NavigationPath
     @State private var showAnnouncement = false
     @State private var announcementTitle = ""
     @State private var announcementText = ""
@@ -20,8 +20,7 @@ struct CreateScreen: View {
     @State private var postError: String?
 
     var body: some View {
-        NavigationStack(path: $path) {
-            ScrollView {
+        ScrollView {
                 VStack(spacing: 16) {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Create")
@@ -75,13 +74,9 @@ struct CreateScreen: View {
             }
             .background(c.background.ignoresSafeArea())
             .navigationTitle("")
-            .navigationDestination(for: Route.self) { route in
-                RouteView(route: route, path: $path)
-            }
             .sheet(isPresented: $showAnnouncement) {
                 announcementSheet
             }
-        }
     }
 
     private func actionCard(_ title: String, _ blurb: String, _ symbol: String,
@@ -175,5 +170,5 @@ struct CreateScreen: View {
 }
 
 #Preview {
-    CreateScreen().environment(AppState())
+    CreateScreen(path: .constant(NavigationPath())).environment(AppState())
 }
