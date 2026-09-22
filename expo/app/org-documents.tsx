@@ -131,11 +131,13 @@ export default function OrgDocumentsScreen() {
       const path = `${activeOrg.id}/${Date.now()}.${safeExt}`;
       const mimeType = asset.mimeType ?? 'image/jpeg';
 
+      // ArrayBuffer body (not Blob) — supabase-js wraps Blobs in a FormData
+      // part with an empty name, which RN networking cannot serialize.
       const response = await fetch(asset.uri);
-      const blob = await response.blob();
+      const fileBody = await response.arrayBuffer();
       const { error: upErr } = await supabase.storage
         .from(DOC_BUCKET)
-        .upload(path, blob, { contentType: mimeType, upsert: false });
+        .upload(path, fileBody, { contentType: mimeType, upsert: false });
       if (upErr) {
         warn('[OrgDocuments] Upload error:', upErr.message);
         throw new Error('Upload failed — try again.');

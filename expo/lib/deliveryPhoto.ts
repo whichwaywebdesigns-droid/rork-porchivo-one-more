@@ -1,5 +1,6 @@
 import * as ImagePicker from 'expo-image-picker';
-import * as FileSystem from 'expo-file-system';
+// SDK 54+: legacy functions (getInfoAsync) live in the '/legacy' entry.
+import * as FileSystem from 'expo-file-system/legacy';
 import { supabase } from '@/lib/supabase';
 import { log, warn } from '@/lib/logger';
 
@@ -124,11 +125,14 @@ export async function uploadDeliveryPhoto(
         ? 'image/webp'
         : 'image/jpeg');
 
-  // Upload via fetch -> Blob (cross-platform RN pattern)
-  let blob: Blob;
+  // Upload via fetch -> ArrayBuffer. Never upload a Blob from RN: supabase-js
+  // wraps it in a FormData part with an empty name, which RN networking cannot
+  // serialize (request dies before reaching Storage). ArrayBuffer is the
+  // officially documented React Native upload pattern.
+  let fileBody: ArrayBuffer;
   try {
     const response = await fetch(localUri);
-    blob = await response.blob();
+    fileBody = await response.arrayBuffer();
   } catch (e) {
     warn('[deliveryPhoto] Failed to read local URI for upload:', e);
     throw new Error('photo-read-failed');
@@ -136,7 +140,7 @@ export async function uploadDeliveryPhoto(
 
   const { error } = await supabase.storage
     .from(DELIVERY_PHOTOS_BUCKET)
-    .upload(path, blob, {
+    .upload(path, fileBody, {
       contentType: mimeType,
       upsert: false,
       cacheControl: '3600',

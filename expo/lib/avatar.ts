@@ -1,4 +1,5 @@
-import * as FileSystem from 'expo-file-system';
+// SDK 54+: legacy functions (getInfoAsync) live in the '/legacy' entry.
+import * as FileSystem from 'expo-file-system/legacy';
 import * as ImagePicker from 'expo-image-picker';
 import { supabase } from '@/lib/supabase';
 import { log, warn } from '@/lib/logger';
@@ -13,14 +14,15 @@ export const AVATAR_BUCKET = 'avatars';
 const MAX_AVATAR_BYTES = 5 * 1024 * 1024; // 5 MB
 
 /**
- * Lift a local `file://` (or `ph://` on iOS) URI returned by
- * expo-image-picker into a File that supabase-js can upload. Falls back to
- * the raw URI when `fetch` cannot read the source (e.g. some content://
- * schemes on Android), in which case supabase-js will resolve it directly.
+ * Read a local `file://` (or `ph://` on iOS) URI returned by expo-image-picker
+ * into raw bytes. We upload an ArrayBuffer, NOT a Blob: supabase-js wraps
+ * Blobs in a FormData part with an empty name, which React Native's networking
+ * cannot serialize as multipart — the request fails before reaching Storage.
+ * The ArrayBuffer body is the officially documented React Native pattern.
  */
-async function uriToBlob(uri: string): Promise<Blob> {
+async function uriToArrayBuffer(uri: string): Promise<ArrayBuffer> {
   const response = await fetch(uri);
-  return await response.blob();
+  return await response.arrayBuffer();
 }
 
 /**
@@ -113,10 +115,11 @@ export async function uploadAvatar(
           : 'image/jpeg');
 
   // ── Upload ───────────────────────────────────────────────────────────────
-  // supabase-js v2 accepts a Blob (from fetch) for cross-platform RN uploads.
-  let blob: Blob;
+  // ArrayBuffer body (not Blob) — see uriToArrayBuffer for why. storage-js
+  // sends non-Blob bodies as the raw request body with our content-type.
+  let fileBody: ArrayBuffer;
   try {
-    blob = await uriToBlob(localUri);
+    fileBody = await uriToArrayBuffer(localUri);
   } catch (e) {
     warn('[avatar] Failed to read local URI for upload:', e);
     throw new Error('avatar-read-failed');
@@ -124,7 +127,7 @@ export async function uploadAvatar(
 
   const { error } = await supabase.storage
     .from(AVATAR_BUCKET)
-    .upload(path, blob, {
+    .upload(path, fileBody, {
       contentType: mimeType,
       upsert: true,
       cacheControl: '3600',
