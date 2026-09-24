@@ -38,6 +38,7 @@ android {
         targetSdk = 36
         versionCode = 1788441601
         versionName = "1.0.9"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // Supabase credentials — read from local.properties, system env vars,
         // or the Expo .env file (EXPO_PUBLIC_ prefixed vars) as a final fallback.
@@ -129,4 +130,9 @@ dependencies {
     implementation(libs.androidx.security.crypto)
     implementation(libs.revenuecat.purchases)
     debugImplementation(libs.androidx.ui.tooling)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    debugImplementation(libs.androidx.ui.test.manifest)
 }
