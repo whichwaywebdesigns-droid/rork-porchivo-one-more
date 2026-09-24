@@ -87,6 +87,7 @@ import com.rork.porchivo.model.PackageTrackingStatus
 import com.rork.porchivo.model.TrackedPackage
 import com.rork.porchivo.ui.theme.PorchivoTheme
 import com.rork.porchivo.ui.viewmodel.AppViewModel
+import com.rork.porchivo.util.SafetyScore
 import java.util.UUID
 
 /**
@@ -441,7 +442,7 @@ private fun TheftShieldStep(
     LaunchedEffect(Unit) {
         isLoading = true
         val response = appViewModel.fetchRiskScore(userZip)
-        targetScore = response.score
+        targetScore = SafetyScore.fromRisk(response.score)
         riskLevel = response.level
         riskZip = response.zip
         isLoading = false
@@ -487,7 +488,7 @@ private fun TheftShieldStep(
                     .padding(18.dp),
             ) {
                 Text(
-                    text = "Risk score · deliveries to $riskZip",
+                    text = "Safety score · deliveries to $riskZip",
                     color = c.textMuted,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
@@ -534,6 +535,8 @@ private fun TheftShieldStep(
                 TickRow(c, "Refreshed every 90 seconds during active delivery windows")
                 Spacer(modifier = Modifier.height(8.dp))
                 TickRow(c, "Built from reported thefts, delivery density, and timing patterns near you")
+                Spacer(modifier = Modifier.height(8.dp))
+                TickRow(c, "Scores run 0–100 — the higher, the safer your porch")
             }
         }
 

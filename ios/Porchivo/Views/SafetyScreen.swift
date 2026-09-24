@@ -29,34 +29,16 @@ struct SafetyScreen: View {
     }
 
     private var gaugeCard: some View {
-        let score = RiskEngine.score(appState.shipments)
-        let level = RiskEngine.level(score)
-        let tint: Color = level == .high ? c.danger : (level == .medium ? c.warmOrange : c.success)
+        let safety = SafetyScore.value(fromRisk: RiskEngine.score(appState.shipments))
+        let band = SafetyScore.band(safety)
+        let tint: Color = band == .high ? c.danger : (band == .medium ? c.warmOrange : c.success)
         return Card {
             VStack(spacing: 12) {
-                ZStack {
-                    Circle().stroke(c.elevated, lineWidth: 14)
-                    Circle()
-                        .trim(from: 0, to: CGFloat(score) / 100)
-                        .stroke(tint, style: StrokeStyle(lineWidth: 14, lineCap: .round))
-                        .rotationEffect(.degrees(-90))
-                        .animation(.spring, value: score)
-                    VStack(spacing: 0) {
-                        Text("\(score)")
-                            .font(.system(size: 40, weight: .black))
-                            .foregroundStyle(c.textPrimary)
-                        Text("/ 100")
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundStyle(c.textMuted)
-                    }
-                }
-                .frame(width: 160, height: 160)
-                Text(level.label)
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundStyle(tint)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 6)
-                    .background(tint.opacity(0.12), in: .capsule)
+                NeedleGaugeView(score: safety, riskLabel: band.label, scoreColor: tint)
+                Text("Higher is safer — protections add points, risks subtract them.")
+                    .font(.system(size: 12))
+                    .foregroundStyle(c.textSecondary)
+                    .multilineTextAlignment(.center)
             }
             .frame(maxWidth: .infinity)
         }
@@ -70,16 +52,17 @@ struct SafetyScreen: View {
                     .font(.system(size: 16, weight: .bold))
                     .foregroundStyle(c.textPrimary)
                 ForEach(factors) { f in
+                    let safetyDelta = -f.delta
                     HStack {
-                        Image(systemName: f.delta < 0 ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
-                            .foregroundStyle(f.delta < 0 ? c.success : c.warmOrange)
+                        Image(systemName: safetyDelta > 0 ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
+                            .foregroundStyle(safetyDelta > 0 ? c.success : c.warmOrange)
                         Text(f.label)
                             .font(.system(size: 13, weight: .medium))
                             .foregroundStyle(c.textPrimary)
                         Spacer()
-                        Text(f.delta > 0 ? "+\(f.delta)" : "\(f.delta)")
+                        Text(safetyDelta > 0 ? "+\(safetyDelta)" : "\(safetyDelta)")
                             .font(.system(size: 13, weight: .bold))
-                            .foregroundStyle(f.delta < 0 ? c.success : c.warmOrange)
+                            .foregroundStyle(safetyDelta > 0 ? c.success : c.warmOrange)
                     }
                 }
             }
@@ -114,7 +97,7 @@ struct SafetyScreen: View {
     private var tipsCard: some View {
         Card {
             VStack(alignment: .leading, spacing: 10) {
-                Text("Lower your risk")
+                Text("Raise your score")
                     .font(.system(size: 16, weight: .bold))
                     .foregroundStyle(c.textPrimary)
                 tip("Assign a Porch Partner for active deliveries", "person.2.fill", c.success)

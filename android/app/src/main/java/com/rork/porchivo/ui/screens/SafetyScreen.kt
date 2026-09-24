@@ -22,7 +22,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -36,9 +35,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.rork.porchivo.config.AppConfig
+import com.rork.porchivo.ui.components.NeedleGauge
 import com.rork.porchivo.ui.theme.PorchivoTheme
 import com.rork.porchivo.ui.viewmodel.ShipmentsViewModel
 import com.rork.porchivo.util.RiskEngine
+import com.rork.porchivo.util.SafetyScore
 
 /** Porch risk breakdown — mirrors the Expo app's safety-score / porch-risk screens. */
 @Composable
@@ -50,9 +51,11 @@ fun SafetyScreen(
     val c = PorchivoTheme.colors
     val myShipments by shipmentsViewModel.myShipments.collectAsStateWithLifecycle()
     val factors = remember(myShipments) { RiskEngine.factors(myShipments) }
-    val score = remember(myShipments) { RiskEngine.score(myShipments) }
-    val level = RiskEngine.level(score)
-    val tint = when (level) {
+    val riskScore = remember(myShipments) { RiskEngine.score(myShipments) }
+    // Displayed as a SAFETY score (higher = safer) via the shared helper.
+    val safetyScore = remember(riskScore) { SafetyScore.fromRisk(riskScore) }
+    val band = SafetyScore.band(safetyScore)
+    val tint = when (band) {
         RiskEngine.RiskLevel.HIGH -> c.danger
         RiskEngine.RiskLevel.MEDIUM -> c.warmOrange
         RiskEngine.RiskLevel.LOW -> c.success
@@ -78,7 +81,7 @@ fun SafetyScreen(
                 )
             }
             Text(
-                text = "Porch Risk",
+                text = "Safety Score",
                 color = c.textPrimary,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
@@ -101,31 +104,18 @@ fun SafetyScreen(
                         .padding(20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    Text(
-                        text = "$score",
-                        color = tint,
-                        fontSize = 56.sp,
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = (-2).sp,
+                    NeedleGauge(
+                        score = safetyScore,
+                        riskLabel = band.label,
+                        scoreColor = tint,
+                        modifier = Modifier.fillMaxWidth(),
                     )
+                    Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        text = level.label.uppercase(),
-                        color = tint,
+                        text = "Higher is safer — protections add points, risks subtract them.",
+                        color = c.textSecondary,
                         fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.4.sp,
-                        modifier = Modifier
-                            .background(tint.copy(alpha = 0.12f), RoundedCornerShape(8.dp))
-                            .padding(horizontal = 10.dp, vertical = 4.dp),
-                    )
-                    Spacer(modifier = Modifier.height(14.dp))
-                    LinearProgressIndicator(
-                        progress = { score / 100f },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(8.dp),
-                        color = tint,
-                        trackColor = c.elevated,
+                        lineHeight = 17.sp,
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
@@ -146,7 +136,7 @@ fun SafetyScreen(
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "RISK FACTORS",
+                        text = "SAFETY FACTORS",
                         color = c.textMuted,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.SemiBold,
@@ -162,10 +152,11 @@ fun SafetyScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(10.dp),
                         ) {
+                            val safetyDelta = -factor.delta
                             Icon(
-                                imageVector = if (factor.delta > 0) Icons.Filled.TrendingUp else Icons.Filled.TrendingDown,
+                                imageVector = if (safetyDelta > 0) Icons.Filled.TrendingUp else Icons.Filled.TrendingDown,
                                 contentDescription = null,
-                                tint = if (factor.delta > 0) c.danger else c.success,
+                                tint = if (safetyDelta > 0) c.success else c.danger,
                                 modifier = Modifier.size(16.dp),
                             )
                             Text(
@@ -176,8 +167,8 @@ fun SafetyScreen(
                                 modifier = Modifier.weight(1f),
                             )
                             Text(
-                                text = if (factor.delta > 0) "+${factor.delta}" else "${factor.delta}",
-                                color = if (factor.delta > 0) c.danger else c.success,
+                                text = if (safetyDelta > 0) "+$safetyDelta" else "$safetyDelta",
+                                color = if (safetyDelta > 0) c.success else c.warmOrange,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold,
                             )

@@ -58,6 +58,7 @@ import com.rork.porchivo.ui.viewmodel.AppViewModel
 import com.rork.porchivo.ui.viewmodel.NotificationsViewModel
 import com.rork.porchivo.ui.viewmodel.ShipmentsViewModel
 import com.rork.porchivo.util.RiskEngine
+import com.rork.porchivo.util.SafetyScore
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -79,7 +80,7 @@ fun HomeScreen(
     val shipmentsLoadState by shipmentsViewModel.shipmentsLoadState.collectAsStateWithLifecycle()
     val announcements by appViewModel.announcements.collectAsStateWithLifecycle()
 
-    val riskScore = remember(myShipments) { RiskEngine.score(myShipments) }
+    val safetyScore = remember(myShipments) { SafetyScore.fromRisk(RiskEngine.score(myShipments)) }
     val theftFact = remember {
         val dayOfYear = Calendar.getInstance().get(Calendar.DAY_OF_YEAR)
         MockData.theftFacts[dayOfYear % MockData.theftFacts.size]
@@ -115,7 +116,7 @@ fun HomeScreen(
 
         item {
             TodayRiskCard(
-                score = riskScore,
+                score = safetyScore,
                 onClick = { pressHaptic(); navController.navigate(Routes.SAFETY) },
             )
         }
@@ -314,8 +315,10 @@ private fun CreateEntryBanner(onClick: () -> Unit, modifier: Modifier = Modifier
 @Composable
 private fun TodayRiskCard(score: Int, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val c = PorchivoTheme.colors
-    val level = RiskEngine.level(score)
-    val tint = when (level) {
+    // Displayed as a SAFETY score (higher = safer) via the shared helper.
+    val safety = SafetyScore.fromRisk(score)
+    val band = SafetyScore.band(safety)
+    val tint = when (band) {
         RiskEngine.RiskLevel.HIGH -> c.danger
         RiskEngine.RiskLevel.MEDIUM -> c.warmOrange
         RiskEngine.RiskLevel.LOW -> c.success
@@ -333,7 +336,7 @@ private fun TodayRiskCard(score: Int, onClick: () -> Unit, modifier: Modifier = 
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "TODAY'S PORCH RISK",
+                    text = "TODAY'S SAFETY",
                     color = c.textMuted,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.SemiBold,
@@ -341,7 +344,7 @@ private fun TodayRiskCard(score: Int, onClick: () -> Unit, modifier: Modifier = 
                     modifier = Modifier.weight(1f),
                 )
                 Text(
-                    text = level.label,
+                    text = band.label,
                     color = tint,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
@@ -353,7 +356,7 @@ private fun TodayRiskCard(score: Int, onClick: () -> Unit, modifier: Modifier = 
             Spacer(modifier = Modifier.height(10.dp))
             Row(verticalAlignment = Alignment.Bottom) {
                 Text(
-                    text = "$score",
+                    text = "$safety",
                     color = c.textPrimary,
                     fontSize = 38.sp,
                     fontWeight = FontWeight.Black,
@@ -369,7 +372,7 @@ private fun TodayRiskCard(score: Int, onClick: () -> Unit, modifier: Modifier = 
             }
             Spacer(modifier = Modifier.height(8.dp))
             LinearProgressIndicator(
-                progress = { score / 100f },
+                progress = { safety / 100f },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(8.dp),

@@ -176,17 +176,17 @@ struct HomeScreen: View {
     }
 
     private var todayRiskCard: some View {
-        let score = RiskEngine.score(appState.shipments)
-        let level = RiskEngine.level(score)
-        let tint: Color = level == .high ? c.danger : (level == .medium ? c.warmOrange : c.success)
+        let safety = SafetyScore.value(fromRisk: RiskEngine.score(appState.shipments))
+        let band = SafetyScore.band(safety)
+        let tint: Color = band == .high ? c.danger : (band == .medium ? c.warmOrange : c.success)
         return VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text("TODAY'S PORCH RISK")
+                Text("TODAY'S SAFETY")
                     .font(.system(size: 11, weight: .semibold))
                     .tracking(1.4)
                     .foregroundStyle(c.textMuted)
                 Spacer()
-                Text(level.label)
+                Text(band.label)
                     .font(.system(size: 11, weight: .bold))
                     .foregroundStyle(tint)
                     .padding(.horizontal, 8)
@@ -194,7 +194,7 @@ struct HomeScreen: View {
                     .background(tint.opacity(0.12), in: .rect(cornerRadius: Radius.sm))
             }
             HStack(alignment: .bottom, spacing: 2) {
-                Text("\(score)")
+                Text("\(safety)")
                     .font(.system(size: 38, weight: .black))
                     .foregroundStyle(c.textPrimary)
                 Text("/ 100")
@@ -202,7 +202,7 @@ struct HomeScreen: View {
                     .foregroundStyle(c.textMuted)
                     .padding(.bottom, 6)
             }
-            ProgressView(value: Double(score), total: 100)
+            ProgressView(value: Double(safety), total: 100)
                 .tint(tint)
                 .scaleEffect(y: 1.4)
             Text("View breakdown →")
