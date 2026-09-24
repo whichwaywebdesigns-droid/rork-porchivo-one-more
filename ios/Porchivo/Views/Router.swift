@@ -86,6 +86,8 @@ struct RouteView: View {
 
     var body: some View {
         destination
+            // Every pushed screen gets a prominent Back button (elderly-friendly).
+            .modifier(PorchivoBackButtonModifier(path: $path))
     }
 
     @ViewBuilder
