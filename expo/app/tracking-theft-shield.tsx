@@ -7,14 +7,11 @@ import {
   TouchableOpacity,
   ScrollView,
   Animated,
-  Easing,
 } from 'react-native';
 import { showAlert } from '@/lib/platformAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   ShieldCheck,
-  ShieldAlert,
-  ShieldX,
   ArrowRight,
   ChevronRight,
   TrendingUp,
@@ -25,6 +22,8 @@ import {
 
 import * as Haptics from 'expo-haptics';
 import { palette, space, radius, type as ttype, elevation } from '@/constants/theme';
+import NeedleGauge from '@/components/NeedleGauge';
+import { getSafetyBand, getSafetyScore } from '@/lib/safetyScore';
 import { useAnalytics } from '@/store/AnalyticsContext';
 import { useApp } from '@/store/AppContext';
 import { supabase } from '@/lib/supabase';
@@ -51,39 +50,21 @@ interface RiskScoreResponse {
 
 // ── Risk level helpers ──────────────────────────────────────────────────
 
-type RiskColor = { primary: string; soft: string; text: string };
+// ── Safety score helpers (display is flipped: higher = safer) ──────
 
-function getRiskStyle(score: number): { label: string; icon: React.ReactNode; colors: RiskColor } {
-  if (score >= 65) {
-    return {
-      label: 'HIGH RISK',
-      icon: <ShieldX size={28} color={palette.surface} strokeWidth={2.2} />,
-      colors: { primary: palette.rose, soft: palette.roseSoft, text: palette.rose },
-    };
-  }
-  if (score >= 35) {
-    return {
-      label: 'MODERATE RISK',
-      icon: <ShieldAlert size={28} color={palette.surface} strokeWidth={2.2} />,
-      colors: { primary: '#D97706', soft: '#FFF8EC', text: '#D97706' },
-    };
-  }
-  return {
-    label: 'LOW RISK',
-    icon: <ShieldCheck size={28} color={palette.surface} strokeWidth={2.2} />,
-    colors: { primary: palette.sage, soft: palette.sageSoft, text: palette.sage },
-  };
+function safetyDelta(riskDelta: number): number {
+  return -riskDelta;
 }
 
-function factorIcon(delta: number): React.ReactNode {
-  if (delta > 5) return <TrendingUp size={14} color={palette.rose} strokeWidth={2.2} />;
-  if (delta < -1) return <TrendingDown size={14} color={palette.sage} strokeWidth={2.2} />;
+function factorIcon(safety: number): React.ReactNode {
+  if (safety > 0) return <TrendingUp size={14} color={palette.sage} strokeWidth={2.2} />;
+  if (safety < 0) return <TrendingDown size={14} color={palette.rose} strokeWidth={2.2} />;
   return <Minus size={14} color={palette.slate300} strokeWidth={2.2} />;
 }
 
-function formatDelta(delta: number): string {
-  if (delta > 0) return `+${delta}`;
-  return String(delta);
+function formatDelta(safety: number): string {
+  if (safety > 0) return `+${safety}`;
+  return String(safety);
 }
 
 export default function TrackingTheftShieldScreen({
@@ -109,13 +90,10 @@ export default function TrackingTheftShieldScreen({
   const [riskScore, setRiskScore] = useState<number | null>(null);
   const [, setRiskLevel] = useState<string>('');
   const [factors, setFactors] = useState<RiskFactor[]>([]);
-  const [displayScore, setDisplayScore] = useState<number>(0);
 
   // ── Animations ──────────────────────────────────────────────────────
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
-  const scoreAnim = useRef(new Animated.Value(0)).current;
-  const gaugeAnim = useRef(new Animated.Value(0)).current;
   const factorsAnim = useRef(new Animated.Value(0)).current;
   const shieldPulse = useRef(new Animated.Value(0)).current;
 
@@ -171,9 +149,6 @@ export default function TrackingTheftShieldScreen({
     }
 
     setIsLoading(true);
-    scoreAnim.setValue(0);
-    setDisplayScore(0);
-    gaugeAnim.setValue(0);
     factorsAnim.setValue(0);
 
     try {
@@ -205,32 +180,12 @@ export default function TrackingTheftShieldScreen({
       setIsLoading(false);
 
       void Haptics.notificationAsync(
-        data.score >= 65
+        getSafetyScore(data.score) <= 35
           ? Haptics.NotificationFeedbackType.Warning
           : Haptics.NotificationFeedbackType.Success,
       );
 
-      // Animate count-up: 600ms ease-out with listener for text display
-      scoreAnim.addListener(({ value }) => setDisplayScore(Math.round(value)));
-      Animated.timing(scoreAnim, {
-        toValue: data.score,
-        duration: 600,
-        easing: Easing.out(Easing.cubic),
-        useNativeDriver: false,
-      }).start(() => {
-        scoreAnim.removeAllListeners();
-        setDisplayScore(data.score);
-      });
-
-      // Animate gauge ring fill
-      Animated.timing(gaugeAnim, {
-        toValue: data.score / 100,
-        duration: 600,
-        easing: Easing.out(Easing.cubic),
-        useNativeDriver: false,
-      }).start();
-
-      // Stagger factors appearance after score completes
+      // Stagger factors appearance after the score reveal completes
       setTimeout(() => {
         Animated.spring(factorsAnim, {
           toValue: 1,
@@ -244,11 +199,15 @@ export default function TrackingTheftShieldScreen({
       showAlert('Connection Error', 'Unable to reach the server. Check your internet connection.');
       setIsLoading(false);
     }
-  }, [zipCode, session, user, scoreAnim, gaugeAnim, factorsAnim]);
+  }, [zipCode, session, user, factorsAnim]);
 
   const handleContinue = useCallback(() => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    track('onboarding_step_complete', { step: 'theft_shield', risk_score: riskScore ?? -1 });
+    track('onboarding_step_complete', {
+      step: 'theft_shield',
+      risk_score: riskScore ?? -1,
+      safety_score: safetyScore ?? -1,
+    });
     safeContinue();
   }, [track, safeContinue, riskScore]);
 
@@ -268,7 +227,9 @@ export default function TrackingTheftShieldScreen({
     outputRange: [0.3, 0.0, 0.0],
   });
 
-  const currentStyle = riskScore !== null ? getRiskStyle(riskScore) : null;
+  // Displayed as a SAFETY score (higher = safer) via the shared helper.
+  const safetyScore = riskScore !== null ? getSafetyScore(riskScore) : null;
+  const band = safetyScore !== null ? getSafetyBand(safetyScore) : null;
 
   return (
     <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
@@ -307,7 +268,7 @@ export default function TrackingTheftShieldScreen({
           <Text style={styles.eyebrow}>THEFT SHIELD</Text>
           <Text style={styles.title}>How safe is your porch?</Text>
           <Text style={styles.subtitle}>
-            Enter your ZIP code to see your neighborhood's package theft risk score.
+            Enter your ZIP code to see your neighborhood's safety score — higher is safer.
           </Text>
         </Animated.View>
 
@@ -342,7 +303,7 @@ export default function TrackingTheftShieldScreen({
               activeOpacity={0.85}
               testID="btn-get-score"
             >
-              <Text style={styles.scoreButtonText}>Get My Risk Score</Text>
+              <Text style={styles.scoreButtonText}>Get My Safety Score</Text>
               <ArrowRight size={18} color={palette.surface} strokeWidth={2.5} />
             </TouchableOpacity>
           </Animated.View>
@@ -373,20 +334,11 @@ export default function TrackingTheftShieldScreen({
         )}
 
         {/* Score reveal */}
-        {riskScore !== null && !isLoading && currentStyle ? (
+        {safetyScore !== null && band && !isLoading ? (
           <>
-            {/* Score gauge */}
-            <View style={[styles.scoreGauge, { backgroundColor: currentStyle.colors.soft }]}>
-              <View style={[styles.scoreShieldTile, { backgroundColor: currentStyle.colors.primary }]}>
-                {currentStyle.icon}
-              </View>
-              <Text style={[styles.scoreNumber, { color: currentStyle.colors.text }]}>
-                {displayScore}
-              </Text>
-              <Text style={styles.scoreOutOf}>out of 100</Text>
-              <View style={[styles.levelBadge, { backgroundColor: currentStyle.colors.primary }]}>
-                <Text style={styles.levelBadgeText}>{currentStyle.label}</Text>
-              </View>
+            {/* Safety gauge — higher = safer, needle lands in the green zone when well protected */}
+            <View style={[styles.scoreGauge, { backgroundColor: band.bg }]}>
+              <NeedleGauge score={safetyScore} riskLabel={band.label} size={260} />
             </View>
 
             {/* Risk factors */}
@@ -407,29 +359,32 @@ export default function TrackingTheftShieldScreen({
               ]}
             >
               <Text style={styles.factorsTitle}>What's driving your score</Text>
-              {factors.map((factor, i) => (
-                <View key={i} style={styles.factorRow}>
-                  <View style={styles.factorIconWrap}>
-                    {factorIcon(factor.delta)}
-                  </View>
-                  <Text style={styles.factorLabel}>{factor.label}</Text>
-                  <Text
-                    style={[
-                      styles.factorDelta,
-                      {
-                        color:
-                          factor.delta > 5
-                            ? palette.rose
-                            : factor.delta < -1
+              {factors.map((factor, i) => {
+                const delta = safetyDelta(factor.delta);
+                return (
+                  <View key={i} style={styles.factorRow}>
+                    <View style={styles.factorIconWrap}>
+                      {factorIcon(delta)}
+                    </View>
+                    <Text style={styles.factorLabel}>{factor.label}</Text>
+                    <Text
+                      style={[
+                        styles.factorDelta,
+                        {
+                          color:
+                            delta > 0
                               ? palette.sage
-                              : palette.slate500,
-                      },
-                    ]}
-                  >
-                    {formatDelta(factor.delta)}
-                  </Text>
-                </View>
-              ))}
+                              : delta < 0
+                                ? palette.rose
+                                : palette.slate500,
+                        },
+                      ]}
+                    >
+                      {formatDelta(delta)}
+                    </Text>
+                  </View>
+                );
+              })}
             </Animated.View>
           </>
         ) : null}
@@ -636,42 +591,10 @@ const styles = StyleSheet.create({
   scoreGauge: {
     alignItems: 'center',
     borderRadius: radius.xxl,
-    paddingVertical: space.xxxl,
-    paddingHorizontal: space.xxl,
+    paddingVertical: space.xxl,
+    paddingHorizontal: space.sm,
     marginBottom: space.xxl,
     ...elevation.low,
-  },
-  scoreShieldTile: {
-    width: 64,
-    height: 64,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: space.lg,
-  },
-  scoreNumber: {
-    fontSize: 64,
-    fontWeight: '900' as const,
-    letterSpacing: -2,
-    lineHeight: 70,
-  },
-  scoreOutOf: {
-    ...ttype.caption,
-    color: palette.slate500,
-    fontSize: 14,
-    marginTop: space.xs,
-    marginBottom: space.lg,
-  },
-  levelBadge: {
-    paddingVertical: 8,
-    paddingHorizontal: 20,
-    borderRadius: radius.pill,
-  },
-  levelBadgeText: {
-    color: palette.surface,
-    fontSize: 13,
-    fontWeight: '800' as const,
-    letterSpacing: 1.2,
   },
   // ── Risk factors ────────────────────────────────────────────────────
   factorsSection: {

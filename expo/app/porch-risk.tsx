@@ -35,35 +35,24 @@ import { useAlerts } from '@/store/AlertsContext';
 import { useNeighborhood } from '@/store/NeighborhoodContext';
 import { usePorchPartners } from '@/store/PorchPartnersContext';
 import { useDrivers } from '@/store/DriversContext';
-import { calculatePorchRisk, RiskLevel, RiskResult } from '@/lib/porchRisk';
+import { calculatePorchRisk, RiskResult } from '@/lib/porchRisk';
+import { getSafetyBand, getSafetyScore, type SafetyBand } from '@/lib/safetyScore';
 import { useAnalytics } from '@/store/AnalyticsContext';
 
-const LEVEL_META: Record<RiskLevel, {
-  label: string;
+const BAND_META: Record<SafetyBand['key'], {
   headline: string;
-  color: string;
-  bg: string;
   Icon: typeof Shield;
 }> = {
   low: {
-    label: 'Low Porch Risk',
     headline: 'You’re in good shape for this delivery.',
-    color: palette.sage,
-    bg: palette.sageSoft,
     Icon: ShieldCheck,
   },
   medium: {
-    label: 'Medium Porch Risk',
     headline: 'A few things could go wrong — let’s tighten the plan.',
-    color: palette.gold,
-    bg: palette.goldSoft,
     Icon: Shield,
   },
   high: {
-    label: 'High Porch Risk',
-    headline: 'High likelihood of porch trouble. Take action below.',
-    color: palette.rose,
-    bg: palette.roseSoft,
+    headline: 'High chance of porch trouble. Take action below.',
     Icon: ShieldAlert,
   },
 };
@@ -120,7 +109,7 @@ export default function PorchRiskScreen() {
   useEffect(() => {
     if (!result) return;
     Animated.timing(progress, {
-      toValue: result.score / 100,
+      toValue: getSafetyScore(result.score) / 100,
       duration: 900,
       easing: Easing.out(Easing.cubic),
       useNativeDriver: false,
@@ -130,10 +119,10 @@ export default function PorchRiskScreen() {
   if (!pkg || !result) {
     return (
       <View style={styles.center}>
-        <Stack.Screen options={{ title: 'Porch Risk' }} />
+        <Stack.Screen options={{ title: 'Porch Safety' }} />
         <Shield size={36} color={palette.slate300} />
         <Text style={styles.emptyTitle}>No active deliveries</Text>
-        <Text style={styles.emptyBody}>Add a package to see its porch risk.</Text>
+        <Text style={styles.emptyBody}>Add a package to see its safety score.</Text>
         <TouchableOpacity
           style={styles.emptyBtn}
           onPress={() => router.replace('/add-package' as never)}
@@ -144,9 +133,12 @@ export default function PorchRiskScreen() {
     );
   }
 
-  const meta = LEVEL_META[result.level];
+  // Displayed as a SAFETY score (higher = safer) via the shared helper.
+  const safetyScore = getSafetyScore(result.score);
+  const band = getSafetyBand(safetyScore);
+  const meta = BAND_META[band.key];
   const Icon = meta.Icon;
-  const fillColor = meta.color;
+  const fillColor = band.color;
 
   const widthInterp = progress.interpolate({
     inputRange: [0, 1],
@@ -190,26 +182,26 @@ export default function PorchRiskScreen() {
 
   return (
     <View style={styles.container}>
-      <Stack.Screen options={{ title: 'Porch Risk' }} />
+      <Stack.Screen options={{ title: 'Porch Safety' }} />
       <ScrollView
         contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + space.xxxl }]}
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={palette.navy} />}
       >
-        <View style={[styles.heroCard, { backgroundColor: meta.bg }]}>
+        <View style={[styles.heroCard, { backgroundColor: band.bg }]}>
           <View style={styles.heroTop}>
             <View style={[styles.heroIcon, { backgroundColor: fillColor }]}>
               <Icon size={26} color={palette.surface} />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={[styles.heroLabel, { color: fillColor }]}>{meta.label}</Text>
+              <Text style={[styles.heroLabel, { color: fillColor }]}>{band.label}</Text>
               <Text style={styles.heroHeadline}>{meta.headline}</Text>
             </View>
           </View>
 
           <View style={styles.scoreRow}>
-            <Text style={[styles.scoreNumber, { color: fillColor }]}>{result.score}</Text>
-            <Text style={styles.scoreOver}>/100 risk</Text>
+            <Text style={[styles.scoreNumber, { color: fillColor }]}>{safetyScore}</Text>
+            <Text style={styles.scoreOver}>/100 safety</Text>
           </View>
 
           <View style={styles.barTrack}>
@@ -219,13 +211,13 @@ export default function PorchRiskScreen() {
                 { width: widthInterp, backgroundColor: fillColor },
               ]}
             />
-            <View style={[styles.barTick, { left: '35%' }]} />
-            <View style={[styles.barTick, { left: '65%' }]} />
+            <View style={[styles.barTick, { left: '33%' }]} />
+            <View style={[styles.barTick, { left: '67%' }]} />
           </View>
           <View style={styles.barLabels}>
-            <Text style={styles.barLabelLow}>Low</Text>
+            <Text style={styles.barLabelHigh}>High Risk</Text>
             <Text style={styles.barLabelMid}>Medium</Text>
-            <Text style={styles.barLabelHigh}>High</Text>
+            <Text style={styles.barLabelLow}>Low Risk</Text>
           </View>
 
           <View style={styles.pkgPill}>
@@ -270,7 +262,7 @@ export default function PorchRiskScreen() {
                   { color: f.positive ? palette.sage : palette.rose },
                 ]}
               >
-                {f.positive ? '−' : '+'}
+                {f.positive ? '+' : '−'}
                 {Math.abs(f.weight)}
               </Text>
             </View>
@@ -420,9 +412,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: 6,
   },
-  barLabelLow: { fontSize: 11, color: palette.sage, fontWeight: '700' as const },
-  barLabelMid: { fontSize: 11, color: palette.gold, fontWeight: '700' as const },
-  barLabelHigh: { fontSize: 11, color: palette.rose, fontWeight: '700' as const },
+  barLabelLow: { fontSize: 11, color: '#16A34A', fontWeight: '700' as const },
+  barLabelMid: { fontSize: 11, color: '#E8611A', fontWeight: '700' as const },
+  barLabelHigh: { fontSize: 11, color: '#EF4444', fontWeight: '700' as const },
   pkgPill: {
     flexDirection: 'row',
     alignItems: 'center',

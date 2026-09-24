@@ -7,7 +7,12 @@
  * Usage:
  *   const payload = buildDeliveryAlert({ userName: 'Sarah', carrier: 'UPS', riskScore: 72 });
  *   await sendPushNotification(token, payload.title, payload.body, payload.data);
+ *
+ * Note: risk scores are always displayed to users as SAFETY scores
+ * (higher = safer) via getSafetyScore — see lib/safetyScore.ts.
  */
+
+import { getSafetyScore } from './safetyScore';
 
 export interface PushPayload {
   title: string;
@@ -63,7 +68,7 @@ export function buildDeliveredAlert(params: {
   };
 }
 
-/** High-risk porch alert personalized to user */
+/** High-risk porch alert personalized to user (copy uses the flipped safety score) */
 export function buildHighRiskAlert(params: {
   userName: string;
   riskScore: number;
@@ -71,14 +76,15 @@ export function buildHighRiskAlert(params: {
 }): PushPayload {
   const { userName, riskScore, activeAlertCount } = params;
   const first = userName.split(' ')[0];
+  const safetyScore = getSafetyScore(riskScore);
   const alertNote = activeAlertCount && activeAlertCount > 0
     ? ` ${activeAlertCount} theft alert${activeAlertCount > 1 ? 's' : ''} active in your area.`
     : '';
 
   return {
-    title: `⚠️ High porch risk, ${first} — ${riskScore}/100`,
-    body: `Your porch risk just jumped to ${riskScore}.${alertNote} Tap to see what's driving it.`,
-    data: { type: 'high_risk', riskScore },
+    title: `⚠️ Porch safety alert, ${first} — ${safetyScore}/100`,
+    body: `Your porch safety score dropped to ${safetyScore}.${alertNote} Tap to see what's driving it.`,
+    data: { type: 'high_risk', riskScore, safetyScore },
   };
 }
 

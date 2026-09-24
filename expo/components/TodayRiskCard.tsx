@@ -12,7 +12,8 @@ import { useRouter } from 'expo-router';
 import { ChevronRight, Shield, ShieldAlert, ShieldCheck, Package } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { palette, radius, space, type as ttype } from '@/constants/theme';
-import { calculatePorchRisk, pickNextInboundPackage, RiskLevel } from '@/lib/porchRisk';
+import { calculatePorchRisk, pickNextInboundPackage } from '@/lib/porchRisk';
+import { getSafetyBand, getSafetyScore, type SafetyBand } from '@/lib/safetyScore';
 import { usePackages } from '@/store/PackagesContext';
 import { useAlerts } from '@/store/AlertsContext';
 import { useNeighborhood } from '@/store/NeighborhoodContext';
@@ -20,34 +21,16 @@ import { usePorchPartners } from '@/store/PorchPartnersContext';
 import { useDrivers } from '@/store/DriversContext';
 import { useApp } from '@/store/AppContext';
 
-const LEVEL_META: Record<RiskLevel, {
-  label: string;
-  color: string;
-  bg: string;
-  glow: string;
-  Icon: typeof Shield;
-}> = {
-  low: {
-    label: 'Low risk',
-    color: palette.successGreen,
-    bg: palette.successGlow,
-    glow: 'rgba(68,255,136,0.08)',
-    Icon: ShieldCheck,
-  },
-  medium: {
-    label: 'Medium risk',
-    color: palette.gold,
-    bg: palette.goldGlow,
-    glow: 'rgba(232,200,74,0.08)',
-    Icon: Shield,
-  },
-  high: {
-    label: 'High risk',
-    color: palette.danger,
-    bg: palette.dangerGlow,
-    glow: 'rgba(255,68,68,0.08)',
-    Icon: ShieldAlert,
-  },
+const BAND_ICONS: Record<SafetyBand['key'], typeof Shield> = {
+  low: ShieldCheck,
+  medium: Shield,
+  high: ShieldAlert,
+};
+
+const BAND_GLOW: Record<SafetyBand['key'], string> = {
+  low: 'rgba(68,255,136,0.08)',
+  medium: 'rgba(232,200,74,0.08)',
+  high: 'rgba(255,68,68,0.08)',
 };
 
 function formatEta(dateStr: string): string {
@@ -99,15 +82,21 @@ export default function TodayRiskCard() {
 
   const progress = useRef(new Animated.Value(0)).current;
 
+  // Displayed as a SAFETY score (higher = safer) via the shared helper.
+  const safetyScore = useMemo(
+    () => (result ? getSafetyScore(result.score) : 0),
+    [result],
+  );
+  const band = useMemo<SafetyBand>(() => getSafetyBand(safetyScore), [safetyScore]);
+
   useEffect(() => {
-    if (!result) return;
     Animated.timing(progress, {
-      toValue: result.score / 100,
+      toValue: safetyScore / 100,
       duration: 900,
       easing: Easing.out(Easing.cubic),
       useNativeDriver: false,
     }).start();
-  }, [result, progress]);
+  }, [progress, safetyScore]);
 
   if (!pkg) {
     return (
@@ -124,9 +113,9 @@ export default function TodayRiskCard() {
             <Package size={20} color={palette.textMuted} strokeWidth={2} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={styles.eyebrow}>Today's risk</Text>
+            <Text style={styles.eyebrow}>Today's safety</Text>
             <Text style={styles.emptyTitle}>No active deliveries</Text>
-            <Text style={styles.emptyBody}>Add a package to start scoring your porch risk.</Text>
+            <Text style={styles.emptyBody}>Add a package to start scoring your porch safety.</Text>
           </View>
           <ChevronRight size={16} color={palette.textMuted} />
         </View>
@@ -136,8 +125,7 @@ export default function TodayRiskCard() {
 
   if (!result) return null;
 
-  const meta = LEVEL_META[result.level];
-  const Icon = meta.Icon;
+  const Icon = BAND_ICONS[band.key];
 
   const widthInterp = progress.interpolate({
     inputRange: [0, 1],
@@ -155,11 +143,11 @@ export default function TodayRiskCard() {
       onPress={handlePress}
       testID="today-risk-card"
       accessibilityRole="button"
-      accessibilityLabel={`Today's risk for ${pkg.name}: ${meta.label}, ${result.score} out of 100`}
+      accessibilityLabel={`Today's safety for ${pkg.name}: ${band.label}, ${safetyScore} out of 100`}
     >
-      {/* Ambient color wash from risk level */}
+      {/* Ambient color wash from safety band */}
       <LinearGradient
-        colors={[meta.glow, 'transparent']}
+        colors={[BAND_GLOW[band.key], 'transparent']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={StyleSheet.absoluteFillObject}
@@ -167,11 +155,11 @@ export default function TodayRiskCard() {
       />
 
       <View style={styles.topRow}>
-        <View style={[styles.iconWrap, { backgroundColor: meta.bg }]}>
-          <Icon size={22} color={meta.color} strokeWidth={2.2} />
+        <View style={[styles.iconWrap, { backgroundColor: band.bg }]}>
+          <Icon size={22} color={band.color} strokeWidth={2.2} />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={styles.eyebrow}>Today's risk</Text>
+          <Text style={styles.eyebrow}>Today's safety</Text>
           <Text style={styles.title} numberOfLines={1}>
             {pkg.name}
           </Text>
@@ -180,22 +168,22 @@ export default function TodayRiskCard() {
           </Text>
         </View>
         <View style={styles.scorePill}>
-          <Text style={[styles.scoreNum, { color: meta.color }]}>{result.score}</Text>
+          <Text style={[styles.scoreNum, { color: band.color }]}>{safetyScore}</Text>
           <Text style={styles.scoreOver}>/100</Text>
         </View>
       </View>
 
       <View style={styles.barTrack}>
         <Animated.View
-          style={[styles.barFill, { width: widthInterp, backgroundColor: meta.color }]}
+          style={[styles.barFill, { width: widthInterp, backgroundColor: band.color }]}
         />
-        <View style={[styles.barTick, { left: '35%' }]} />
-        <View style={[styles.barTick, { left: '65%' }]} />
+        <View style={[styles.barTick, { left: '33%' }]} />
+        <View style={[styles.barTick, { left: '67%' }]} />
       </View>
 
       <View style={styles.footer}>
-        <View style={[styles.levelChip, { backgroundColor: meta.bg, borderColor: `${meta.color}30` }]}>
-          <Text style={[styles.levelChipText, { color: meta.color }]}>{meta.label}</Text>
+        <View style={[styles.levelChip, { backgroundColor: band.bg, borderColor: `${band.color}30` }]}>
+          <Text style={[styles.levelChipText, { color: band.color }]}>{band.label}</Text>
         </View>
         <View style={styles.cta}>
           <Text style={styles.ctaText}>Secure plan</Text>

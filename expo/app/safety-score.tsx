@@ -25,8 +25,12 @@ import {
   Clock,
   CheckCircle,
   MapPin,
+  Sun,
+  FileText,
 } from 'lucide-react-native';
 import Colors from '@/constants/colors';
+import NeedleGauge from '@/components/NeedleGauge';
+import { getSafetyBand } from '@/lib/safetyScore';
 import { useApp } from '@/store/AppContext';
 import { useShipments } from '@/store/ShipmentsContext';
 import { usePorchPartners } from '@/store/PorchPartnersContext';
@@ -60,83 +64,6 @@ function calculateSafetyScore(params: {
 
   return Math.max(0, Math.min(100, Math.round(score)));
 }
-
-function getScoreGrade(score: number): { label: string; color: string; bg: string; icon: React.ReactNode } {
-  if (score >= 85) return { label: 'Excellent', color: '#059669', bg: '#ECFDF5', icon: <ShieldCheck size={20} color="#059669" /> };
-  if (score >= 70) return { label: 'Good', color: Colors.primary, bg: Colors.skyBlue, icon: <Shield size={20} color={Colors.primary} /> };
-  if (score >= 50) return { label: 'Fair', color: '#D97706', bg: '#FFFBEB', icon: <Shield size={20} color="#D97706" /> };
-  return { label: 'Needs Attention', color: '#DC2626', bg: '#FEF2F2', icon: <ShieldAlert size={20} color="#DC2626" /> };
-}
-
-function AnimatedCircleProgress({ score, size = 160 }: { score: number; size?: number }) {
-  const animValue = useRef(new Animated.Value(0)).current;
-  const strokeWidth = 12;
-  const radius = (size - strokeWidth) / 2;
-  const circumference = 2 * Math.PI * radius;
-
-  useEffect(() => {
-    Animated.timing(animValue, {
-      toValue: score / 100,
-      duration: 1200,
-      useNativeDriver: false,
-    }).start();
-  }, [score]);
-
-  const grade = getScoreGrade(score);
-
-  return (
-    <View style={[circleStyles.container, { width: size, height: size }]}>
-      <View style={[circleStyles.trackCircle, { width: size, height: size, borderRadius: size / 2, borderWidth: strokeWidth, borderColor: Colors.borderLight }]} />
-      <Animated.View
-        style={[
-          circleStyles.progressArc,
-          {
-            width: size,
-            height: size,
-            borderRadius: size / 2,
-            borderWidth: strokeWidth,
-            borderColor: grade.color,
-            borderRightColor: 'transparent',
-            borderBottomColor: score > 50 ? grade.color : 'transparent',
-            borderLeftColor: score > 75 ? grade.color : 'transparent',
-            transform: [{ rotate: '-45deg' }],
-          },
-        ]}
-      />
-      <View style={circleStyles.innerContent}>
-        <Text style={[circleStyles.scoreText, { color: grade.color }]}>{score}</Text>
-        <Text style={circleStyles.scoreLabel}>/ 100</Text>
-      </View>
-    </View>
-  );
-}
-
-const circleStyles = StyleSheet.create({
-  container: {
-    position: 'relative',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  trackCircle: {
-    position: 'absolute',
-  },
-  progressArc: {
-    position: 'absolute',
-  },
-  innerContent: {
-    alignItems: 'center',
-  },
-  scoreText: {
-    fontSize: 42,
-    fontWeight: '800' as const,
-  },
-  scoreLabel: {
-    fontSize: 14,
-    color: Colors.slateLighter,
-    fontWeight: '500' as const,
-    marginTop: -4,
-  },
-});
 
 function StatCard({ icon, value, label, color, bg }: {
   icon: React.ReactNode;
@@ -324,7 +251,13 @@ export default function SafetyScoreScreen() {
     weekEvents: weekCount,
   }), [activePartners.length, completedHolds, activeCount, resolvedAlerts, deliveredPackages, activeShipments.length, weekCount]);
 
-  const grade = getScoreGrade(score);
+  const band = getSafetyBand(score);
+
+  const bandIcon = band.key === 'low'
+    ? <ShieldCheck size={20} color={band.color} />
+    : band.key === 'medium'
+      ? <Shield size={20} color={band.color} />
+      : <ShieldAlert size={20} color={band.color} />;
 
   const insights = useMemo(() => {
     const result: {
@@ -438,21 +371,45 @@ export default function SafetyScoreScreen() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.primary} />}
       >
         <View style={styles.scoreSection}>
-          <View style={[styles.gradeBanner, { backgroundColor: grade.bg }]}>
-            {grade.icon}
-            <Text style={[styles.gradeLabel, { color: grade.color }]}>{grade.label}</Text>
+          <View style={[styles.gradeBanner, { backgroundColor: band.bg }]}>
+            {bandIcon}
+            <Text style={[styles.gradeLabel, { color: band.color }]}>{band.label}</Text>
           </View>
 
-          <AnimatedCircleProgress score={score} />
+          <NeedleGauge score={score} riskLabel={band.label} />
 
           <Text style={styles.blockName}>
             <MapPin size={13} color={Colors.slateLight} /> {user?.address ? user.address.split(',')[0] : 'Your Block'}
           </Text>
           <Text style={styles.scoreDescription}>
             {showPorchPartners
-              ? 'Based on partner activity, alerts, and package tracking on your block.'
-              : 'Based on alerts and package tracking on your block.'}
+              ? 'The higher your score, the safer your block. Based on partner activity, alerts, and package tracking.'
+              : 'The higher your score, the safer your block. Based on alerts and package tracking.'}
           </Text>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>How Your Score Works</Text>
+          <View style={styles.howCard}>
+            <Text style={styles.howIntro}>
+              Your score runs from 0 to 100 — the higher it is, the safer your porch. Protections add points, risks subtract them.
+            </Text>
+            {[
+              { key: 'alerts', icon: <AlertTriangle size={16} color="#EF4444" />, label: '1–2 theft alerts on your block', delta: '−14', color: '#EF4444' },
+              { key: 'partner', icon: <Users size={16} color="#E8611A" />, label: 'No Porch Partner assigned', delta: '−8', color: '#E8611A' },
+              { key: 'window', icon: <Sun size={16} color="#F59E0B" />, label: 'Daytime delivery window', delta: '+4', color: '#059669' },
+              { key: 'notes', icon: <FileText size={16} color="#059669" />, label: 'Drop instructions added', delta: '+4', color: '#059669' },
+            ].map((item) => (
+              <View key={item.key} style={styles.howRow}>
+                <View style={styles.howIcon}>{item.icon}</View>
+                <Text style={styles.howLabel}>{item.label}</Text>
+                <Text style={[styles.howDelta, { color: item.color }]}>{item.delta}</Text>
+              </View>
+            ))}
+            <Text style={styles.howFoot}>
+              Every package you track and every protection you add pushes the needle to the right.
+            </Text>
+          </View>
         </View>
 
         <View style={styles.section}>
@@ -579,7 +536,7 @@ export default function SafetyScoreScreen() {
             </View>
             <View style={styles.breakdownRow}>
               <Text style={[styles.breakdownTotalLabel, { fontWeight: '700' as const }]}>Final Score</Text>
-              <Text style={[styles.breakdownTotalValue, { fontWeight: '800' as const, color: grade.color }]}>{score}</Text>
+              <Text style={[styles.breakdownTotalValue, { fontWeight: '800' as const, color: band.color }]}>{score}</Text>
             </View>
           </View>
           )}
@@ -706,5 +663,50 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700' as const,
     color: Colors.slate,
+  },
+  howCard: {
+    backgroundColor: Colors.white,
+    borderRadius: 14,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 3,
+    elevation: 1,
+  },
+  howIntro: {
+    fontSize: 13,
+    color: Colors.slateLight,
+    lineHeight: 19,
+    marginBottom: 12,
+  },
+  howRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 9,
+    borderTopWidth: 1,
+    borderTopColor: Colors.borderLight,
+    gap: 10,
+  },
+  howIcon: {
+    width: 26,
+    alignItems: 'center',
+  },
+  howLabel: {
+    flex: 1,
+    fontSize: 13,
+    fontWeight: '600' as const,
+    color: Colors.slate,
+  },
+  howDelta: {
+    fontSize: 14,
+    fontWeight: '800' as const,
+    fontVariant: ['tabular-nums'],
+  },
+  howFoot: {
+    fontSize: 12,
+    color: Colors.slateLighter,
+    lineHeight: 17,
+    marginTop: 10,
   },
 });
