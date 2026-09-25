@@ -588,6 +588,11 @@ class AppRepository(context: Context) {
         }
 
         loadLocalPackages()
+
+        // Initial data is in — lift the root splash overlay. Nothing else
+        // completes this handshake (signIn/signUp only set it false), so
+        // without this the splash would cover the app forever after login.
+        _isReadyToShowUI.value = true
     }
 
     // ── Profile ─────────────────────────────────────────────────────────

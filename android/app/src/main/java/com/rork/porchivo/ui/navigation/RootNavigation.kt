@@ -56,6 +56,10 @@ fun RootNavigation() {
     val authState by appViewModel.authState.collectAsStateWithLifecycle()
     val isReadyToShowUI by appViewModel.isReadyToShowUI.collectAsStateWithLifecycle()
     val showAuthFail by appViewModel.showAuthFail.collectAsStateWithLifecycle()
+    // Collected so the onboarding → main-app gate recomposes when
+    // markOnboardingComplete() flips the user's flag (a plain getter
+    // wouldn't observe the StateFlow update).
+    val user by appViewModel.user.collectAsStateWithLifecycle()
     val c = PorchivoTheme.colors
 
     val showSplash = authState is AuthState.Loading ||
@@ -92,7 +96,7 @@ fun RootNavigation() {
             }
 
             is AuthState.Authenticated -> {
-                if (appViewModel.isOnboarded) {
+                if (user?.isOnboarded == true) {
                     AppNavigation()
                 } else {
                     OnboardingFlowScreen(

@@ -26,6 +26,8 @@ data class AuthUser(
     // JsonElement (not String) — app_metadata holds nested arrays/objects
     // (e.g. providers: ["email"], provider_id: {...}) that break Map<String, String>.
     @SerialName("app_metadata") val appMetadata: Map<String, JsonElement> = emptyMap(),
-    @SerialName("user_metadata") val userMetadata: Map<String, String> = emptyMap(),
+    // JsonElement (not String) — user_metadata holds booleans/arrays
+    // (e.g. email_verified: true) that break Map<String, String>.
+    @SerialName("user_metadata") val userMetadata: Map<String, JsonElement> = emptyMap(),
     @SerialName("created_at") val createdAt: String = "",
 )
