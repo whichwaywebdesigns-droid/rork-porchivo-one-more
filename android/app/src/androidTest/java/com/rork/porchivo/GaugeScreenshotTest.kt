@@ -69,16 +69,6 @@ class GaugeScreenshotTest {
         return out.distinct()
     }
 
-    /** Lists ALL system windows (dialogs included) — catches overlay screens semantics can't show. */
-    private fun dumpWindows(): String {
-        val au = InstrumentationRegistry.getInstrumentation().uiAutomation
-        val bounds = android.graphics.Rect()
-        return au.windows.joinToString("\n") { w ->
-            w.getBoundsInScreen(bounds)
-            "win title=${w.title} type=${w.type} focused=${w.isFocused} active=${w.isActive} bounds=$bounds"
-        }
-    }
-
     /**
      * Walks the NATIVE view hierarchy — class name, visibility, alpha, screen
      * bounds. Reveals full-screen overlays (splash TextureView, dialogs) that
@@ -101,6 +91,17 @@ class GaugeScreenshotTest {
         runCatching { walk(compose.activity.window.decorView, 0) }
             .onFailure { sb.append("viewTree unavailable: ${it.message}") }
         return sb.toString()
+    }
+
+    /** State + top frames of the app's main thread — reveals blocks/deadlocks. */
+    private fun dumpMainThreadStack(): String {
+        val traces = Thread.getAllStackTraces()
+        val main = traces.entries.firstOrNull { it.key.name == "main" }
+        return main?.let { (thread, frames) ->
+            "state=${thread.state} top=" + frames.take(15).joinToString(" > ") {
+                "${it.className.substringAfterLast('.')}.${it.methodName}:${it.lineNumber}"
+            }
+        } ?: "main-not-found states=" + traces.keys.groupingBy { it.state }.eachCount()
     }
 
     /** Tiny JPEG of the actual screen pixels, base64 — eyes without adb. */
@@ -140,7 +141,6 @@ class GaugeScreenshotTest {
         val url = shot?.let { runCatching { upload(it) }.getOrNull() }
         val thumb = shot?.let { runCatching { thumbB64(it) }.getOrNull() } ?: ""
         val vt = runCatching { dumpViewTree() }.getOrDefault("")
-        val wins = runCatching { dumpWindows() }.getOrDefault("")
         // One diagnostic per line, each well under 2000 chars, so nothing is
         // truncated by log-size limits.
         val thumbLines = thumb.chunked(850)
@@ -148,7 +148,8 @@ class GaugeScreenshotTest {
             .joinToString("\n")
         throw AssertionError(
             "[$phase] timed out after ${timeoutMs}ms. visible=${texts.take(50)}\n" +
-                "windows=$wins\nviewTree=$vt\n$thumbLines\n" +
+                "mainThread=${runCatching { dumpMainThreadStack() }.getOrDefault("?")}\n" +
+                "viewTree=$vt\n$thumbLines\n" +
                 "uploadUrls=$url; shot=$shot$extra",
         )
     }
@@ -302,6 +303,14 @@ class GaugeScreenshotTest {
             visible("Developer login") || visible("Hello,") || visible("Get started")
         }
 
+        // The welcome carousel sits in front of the login screen; "Sign in"
+        // reveals it. The QA account is already onboarded server-side, so the
+        // login path should land straight on Home.
+        if (!visible("Developer login") && visible("Sign in")) {
+            tapClickable("Sign in")
+            pumpUntil(15_000) { visible("Developer login") }
+        }
+
         if (visible("Developer login")) {
             tap("Developer login")
             waitForOrDump(90_000, "login") {
@@ -342,7 +351,7 @@ class GaugeScreenshotTest {
             if (stuckRounds == 3 || stuckRounds == 7 || stuckRounds == 15) {
                 walkLog += "STUCK@'$step':${runCatching { visibleTexts().take(12) }.getOrElse { listOf("?") }}"
                 if (stuckRounds == 3) {
-                    walkLog += "WIN:${runCatching { dumpWindows() }.getOrDefault("?")}"
+                    walkLog += "MAIN:${runCatching { dumpMainThreadStack() }.getOrDefault("?")}"
                     walkLog += "VT:${runCatching { dumpViewTree() }.getOrDefault("?")}"
                 }
             }

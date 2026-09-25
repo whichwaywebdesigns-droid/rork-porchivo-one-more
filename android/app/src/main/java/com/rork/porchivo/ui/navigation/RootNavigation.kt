@@ -64,11 +64,6 @@ fun RootNavigation() {
 
     val showSplash = authState is AuthState.Loading ||
         (authState is AuthState.Authenticated && !isReadyToShowUI)
-    val splashAlpha by animateFloatAsState(
-        targetValue = if (showSplash) 1f else 0f,
-        animationSpec = tween(durationMillis = 450),
-        label = "splashAlpha",
-    )
 
     Box(modifier = Modifier.fillMaxSize()) {
         when (authState) {
@@ -107,8 +102,11 @@ fun RootNavigation() {
         }
 
         // Splash overlay — matches the native launch window background.
-        if (splashAlpha > 0f) {
-            SplashScreen(modifier = Modifier.alpha(splashAlpha))
+        // Hard gate on the STATE, not an animated alpha: if removal waited for
+        // splashAlpha to reach 0f, the splash could linger forever whenever
+        // frame production stalls (it must always lift, reliably).
+        if (showSplash) {
+            SplashScreen()
         }
     }
 }

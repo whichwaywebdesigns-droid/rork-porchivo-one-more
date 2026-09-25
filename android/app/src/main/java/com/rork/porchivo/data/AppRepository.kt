@@ -311,6 +311,17 @@ class AppRepository(context: Context) {
      */
     suspend fun restoreSession() {
         _authState.value = AuthState.Loading
+        // Watchdog on the long-lived queueScope (NOT the loadInitialData scope):
+        // whatever wedges below — a child that ignores cancellation, blocking I/O,
+        // a stalled restore — the splash MUST lift. queueScope outlives every
+        // cancellation in the load path, so this always fires.
+        queueScope.launch {
+            delay(30_000L)
+            if (!_isReadyToShowUI.value) {
+                Log.w("Porchivo", "Splash watchdog fired after 30s — lifting splash with partial data")
+                _isReadyToShowUI.value = true
+            }
+        }
         val session = supabase?.restoreSession()
         if (session != null) {
             _authState.value = AuthState.Authenticated(session.user?.id ?: "")
