@@ -2,6 +2,7 @@ package com.rork.porchivo.data.dto
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
 
 /**
  * Supabase Auth session response — the relevant subset.
@@ -22,7 +23,9 @@ data class AuthUser(
     val email: String? = null,
     @SerialName("aud") val aud: String = "",
     @SerialName("role") val role: String = "",
-    @SerialName("app_metadata") val appMetadata: Map<String, String> = emptyMap(),
+    // JsonElement (not String) — app_metadata holds nested arrays/objects
+    // (e.g. providers: ["email"], provider_id: {...}) that break Map<String, String>.
+    @SerialName("app_metadata") val appMetadata: Map<String, JsonElement> = emptyMap(),
     @SerialName("user_metadata") val userMetadata: Map<String, String> = emptyMap(),
     @SerialName("created_at") val createdAt: String = "",
 )

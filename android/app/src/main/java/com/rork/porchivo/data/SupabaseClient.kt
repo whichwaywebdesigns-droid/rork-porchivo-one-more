@@ -94,6 +94,7 @@ class SupabaseClient(
     suspend fun signInWithEmail(email: String, password: String): Result<AuthSession> = try {
         val response = httpClient.post("$authBase/token?grant_type=password") {
             header(HttpHeaders.ContentType, "application/json")
+            header("apikey", anonKey) // gateway requires apikey on every auth call
             setBody(mapOf("email" to email, "password" to password))
         }
         if (response.status.isSuccess()) {
@@ -101,6 +102,7 @@ class SupabaseClient(
             // Fetch user info
             val userResponse = httpClient.get("$authBase/user") {
                 header("Authorization", "Bearer ${session.accessToken}")
+                header("apikey", anonKey) // gateway requires apikey on every auth call
             }
             val fullSession = if (userResponse.status.isSuccess()) {
                 val user: AuthUser = userResponse.body()
@@ -118,6 +120,7 @@ class SupabaseClient(
     suspend fun signUpWithEmail(email: String, password: String): Result<AuthSession> = try {
         val response = httpClient.post("$authBase/signup") {
             header(HttpHeaders.ContentType, "application/json")
+            header("apikey", anonKey) // gateway requires apikey on every auth call
             setBody(mapOf("email" to email, "password" to password))
         }
         if (response.status.isSuccess()) {
@@ -248,6 +251,7 @@ class SupabaseClient(
     private suspend fun refreshSession(refreshToken: String): AuthSession? = try {
         val response = httpClient.post("$authBase/token?grant_type=refresh_token") {
             header(HttpHeaders.ContentType, "application/json")
+            header("apikey", anonKey) // gateway requires apikey on every auth call
             setBody(mapOf("refresh_token" to refreshToken))
         }
         if (response.status.isSuccess()) {

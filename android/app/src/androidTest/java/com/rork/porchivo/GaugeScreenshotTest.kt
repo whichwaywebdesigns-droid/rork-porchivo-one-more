@@ -65,7 +65,9 @@ class GaugeScreenshotTest {
     private fun waitForOrDump(timeoutMs: Long, phase: String, condition: () -> Boolean) {
         try {
             compose.waitUntil(timeoutMs) { condition() }
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
+            // ComposeTimeoutException extends AssertionError (an Error, not an
+            // Exception) — must catch Throwable or the dump never runs.
             val texts = runCatching { visibleTexts() }.getOrElse { listOf("<semantics unavailable>") }
             val shot = runCatching { capture("failure_$phase") }.getOrNull()
             val url = shot?.let { runCatching { upload(it) }.getOrNull() }
