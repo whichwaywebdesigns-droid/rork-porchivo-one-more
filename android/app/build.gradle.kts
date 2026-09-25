@@ -77,11 +77,11 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            signingConfig = if (keystorePropsFile.exists()) {
-                signingConfigs.getByName("release")
-            } else {
-                signingConfigs.getByName("debug")
-            }
+            // Plain debug signing for local builds. Rork's AAB export pipeline
+            // injects the managed upload key itself and its injector cannot
+            // parse a conditional signingConfig expression (it left an orphan
+            // `} else {` that broke the Gradle script compilation).
+            signingConfig = signingConfigs.getByName("debug")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
