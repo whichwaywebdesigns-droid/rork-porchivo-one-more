@@ -116,11 +116,20 @@ export const [OfflineQueueProvider, useOfflineQueue] = createContextHook(() => {
   const [isSyncing, setIsSyncing] = useState(false);
   const [lastSyncCount, setLastSyncCount] = useState(0);
   const [syncFailedCount, setSyncFailedCount] = useState(0);
+  const [lastSyncedAt, setLastSyncedAt] = useState<number | null>(null);
 
   const isSyncingRef = useRef(false);
   const wasOfflineRef = useRef(false);
   const pendingActionsRef = useRef<QueuedAction[]>([]);
   pendingActionsRef.current = pendingActions;
+
+  /**
+   * Registry of reconnect refresher tasks — callbacks for server state NOT
+   * held in React Query (e.g. Ship24 tracking pollers). Registered via
+   * useSyncOnReconnect; all run during each offline→online sync pass.
+   */
+  const syncTasksRef = useRef(new Map<string, () => void | Promise<void>>());
+  const reconnectSyncRunningRef = useRef(false);
 
   const persistQueue = useCallback((actions: QueuedAction[]) => {
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(actions)).catch(() => {
@@ -216,6 +225,59 @@ export const [OfflineQueueProvider, useOfflineQueue] = createContextHook(() => {
   const processQueueRef = useRef(processQueue);
   processQueueRef.current = processQueue;
 
+  /**
+   * The full offline→online background sync pass:
+   *  1. Replay queued mutations so the server reflects offline user actions.
+   *  2. Invalidate every React Query query — active ones refetch immediately,
+   *     so all Supabase-backed contexts (profile, shipments, packages,
+   *     notifications, alerts, org, drivers, partners, delivery windows, …)
+   *     pick up server changes and heal fetches that failed while offline.
+   *  3. Run registered non-React-Query refresher tasks (Ship24 pollers, …).
+   *
+   * The banner only shows "Syncing…" when there are queued actions; the
+   * cache refresh happens quietly otherwise.
+   */
+  const runReconnectSync = useCallback(async () => {
+    if (reconnectSyncRunningRef.current) return;
+    reconnectSyncRunningRef.current = true;
+    const hasQueued = pendingActionsRef.current.length > 0;
+    if (hasQueued) setIsSyncing(true);
+    try {
+      await processQueueRef.current();
+      await queryClient.invalidateQueries();
+      const tasks = [...syncTasksRef.current.values()];
+      if (tasks.length > 0) {
+        const results = await Promise.allSettled(tasks.map((run) => run()));
+        const failed = results.filter((r) => r.status === "rejected").length;
+        if (failed > 0) {
+          warn("[OfflineQueue] Reconnect sync:", failed, "refresher task(s) failed");
+        }
+      }
+      setLastSyncedAt(Date.now());
+      log("[OfflineQueue] Reconnect sync complete");
+    } finally {
+      reconnectSyncRunningRef.current = false;
+      if (hasQueued) setIsSyncing(false);
+    }
+  }, [queryClient]);
+
+  const runReconnectSyncRef = useRef(runReconnectSync);
+  runReconnectSyncRef.current = runReconnectSync;
+
+  /**
+   * Register a refresher task that runs on every offline→online transition.
+   * Returns an unregister function (use as a useEffect cleanup).
+   */
+  const registerSyncTask = useCallback(
+    (id: string, task: () => void | Promise<void>): (() => void) => {
+      syncTasksRef.current.set(id, task);
+      return () => {
+        syncTasksRef.current.delete(id);
+      };
+    },
+    [],
+  );
+
   // ── Enqueue a new action ──────────────────────────────────────────────
   const enqueue = useCallback(
     (action: QueuedActionInput) => {
@@ -257,12 +319,11 @@ export const [OfflineQueueProvider, useOfflineQueue] = createContextHook(() => {
     });
     if (!online) {
       wasOfflineRef.current = true;
-    } else if (
-      wasOfflineRef.current &&
-      pendingActionsRef.current.length > 0
-    ) {
+    } else if (wasOfflineRef.current) {
+      // Offline → online transition: replay queued mutations AND refresh all
+      // server-backed state (React Query caches + registered refreshers).
       wasOfflineRef.current = false;
-      void processQueueRef.current();
+      void runReconnectSyncRef.current();
     }
   }, []);
 
@@ -312,8 +373,30 @@ export const [OfflineQueueProvider, useOfflineQueue] = createContextHook(() => {
     isSyncing,
     lastSyncCount,
     syncFailedCount,
+    lastSyncedAt,
     enqueue,
     processQueue,
+    registerSyncTask,
     clearQueue,
   };
 });
+
+/**
+ * Registers a refresher with the background sync engine: `task` runs every
+ * time the app regains connectivity after being offline. Use for server
+ * state that lives outside React Query (manual Supabase fetches, Ship24
+ * pollers, etc.). The latest `task` closure is always invoked — no dep array
+ * needed. `id` must be unique per call site.
+ */
+export function useSyncOnReconnect(
+  id: string,
+  task: () => void | Promise<void>,
+): void {
+  const { registerSyncTask } = useOfflineQueue();
+  const taskRef = useRef(task);
+  taskRef.current = task;
+  useEffect(() => registerSyncTask(id, () => taskRef.current()), [
+    id,
+    registerSyncTask,
+  ]);
+}

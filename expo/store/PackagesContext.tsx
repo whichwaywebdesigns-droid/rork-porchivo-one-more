@@ -14,6 +14,7 @@ import {
 } from '@/lib/ship24';
 import { useApp } from '@/store/AppContext';
 import { useBackgroundError } from '@/store/BackgroundErrorContext';
+import { useSyncOnReconnect } from '@/store/OfflineQueueContext';
 import { FREE_PACKAGE_LIMIT, FREE_POLL_INTERVAL_MS, PREMIUM_POLL_INTERVAL_MS } from '@/lib/tiers';
 import { log } from "../lib/logger";
 
@@ -325,6 +326,10 @@ export const [PackagesProvider, usePackages] = createContextHook(() => {
     log('[Packages] Refreshing', active.length, 'active packages');
     await Promise.all(active.map((p) => pollPackage(p.id)));
   }, [pollPackage]);
+
+  // Background sync: re-poll Ship24 for all active packages when the device
+  // regains connectivity after being offline.
+  useSyncOnReconnect('packages-tracking-refresh', refreshAllPackages);
 
   useEffect(() => {
     if (!isShip24Configured()) {

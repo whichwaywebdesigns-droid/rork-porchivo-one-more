@@ -9,7 +9,7 @@ import { supabase } from '@/lib/supabase';
 import { useApp } from '@/store/AppContext';
 import { useBackgroundError } from '@/store/BackgroundErrorContext';
 import { useNotifications } from '@/store/NotificationsContext';
-import { useOfflineQueue } from '@/store/OfflineQueueContext';
+import { useOfflineQueue, useSyncOnReconnect } from '@/store/OfflineQueueContext';
 import { playDeliveryChime, playPickupChime } from '@/lib/sounds';
 import { maybeRequestReview } from '@/lib/storeReview';
 import { shouldSendNotification } from '@/lib/notificationPreferences';
@@ -442,6 +442,10 @@ export const [ShipmentsProvider, useShipments] = createContextHook(() => {
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shipments.length, shipmentPollIntervalMs]);
+
+  // Background sync: when the device regains connectivity after being offline,
+  // re-poll Ship24 for all active shipments (in-flight polls failed offline).
+  useSyncOnReconnect('shipments-tracking-refresh', refreshAllShipmentTracking);
 
   const updateShipmentTracking = useCallback((shipmentId: string, trackingNumber: string, shareLocation: boolean) => {
     log('[ShipmentsContext] Updating tracking for:', shipmentId);
