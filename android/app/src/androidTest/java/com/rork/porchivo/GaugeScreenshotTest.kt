@@ -2,7 +2,12 @@ package com.rork.porchivo
 
 import android.Manifest
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Build
+import android.util.Base64
+import android.view.View
+import android.view.ViewGroup
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.semantics.SemanticsProperties
@@ -17,12 +22,14 @@ import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.test.performTouchInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.net.HttpURLConnection
@@ -62,6 +69,50 @@ class GaugeScreenshotTest {
         return out.distinct()
     }
 
+    /** Lists ALL system windows (dialogs included) — catches overlay screens semantics can't show. */
+    private fun dumpWindows(): String {
+        val au = InstrumentationRegistry.getInstrumentation().uiAutomation
+        val bounds = android.graphics.Rect()
+        return au.windows.joinToString("\n") { w ->
+            w.getBoundsInScreen(bounds)
+            "win title=${w.title} type=${w.type} focused=${w.isFocused} active=${w.isActive} bounds=$bounds"
+        }
+    }
+
+    /**
+     * Walks the NATIVE view hierarchy — class name, visibility, alpha, screen
+     * bounds. Reveals full-screen overlays (splash TextureView, dialogs) that
+     * semantics dumps cannot show.
+     */
+    private fun dumpViewTree(): String {
+        val sb = StringBuilder()
+        fun walk(v: View, depth: Int) {
+            val loc = IntArray(2)
+            v.getLocationOnScreen(loc)
+            sb.append("\n").append("  ".repeat(depth)).append(v.javaClass.simpleName)
+                .append(" vis=").append(v.visibility)
+                .append(" alpha=").append(String.format("%.2f", v.alpha))
+                .append(" [").append(loc[0]).append(",").append(loc[1])
+                .append(" ").append(v.width).append("x").append(v.height).append("]")
+            if (v is ViewGroup) {
+                for (i in 0 until v.childCount) walk(v.getChildAt(i), depth + 1)
+            }
+        }
+        runCatching { walk(compose.activity.window.decorView, 0) }
+            .onFailure { sb.append("viewTree unavailable: ${it.message}") }
+        return sb.toString()
+    }
+
+    /** Tiny JPEG of the actual screen pixels, base64 — eyes without adb. */
+    private fun thumbB64(file: File): String = runCatching {
+        val src = BitmapFactory.decodeFile(file.absolutePath) ?: return ""
+        val w = 120
+        val small = Bitmap.createScaledBitmap(src, w, src.height * w / src.width, true)
+        val bos = ByteArrayOutputStream()
+        small.compress(Bitmap.CompressFormat.JPEG, 50, bos)
+        Base64.encodeToString(bos.toByteArray(), Base64.NO_WRAP)
+    }.getOrDefault("")
+
     /**
      * Polls [cond] until true or [timeoutMs] elapses. Plain wall-clock polling:
      * the app renders in real time and waitForIdle stalls on screens with
@@ -81,14 +132,24 @@ class GaugeScreenshotTest {
         Thread.sleep(400)
     }
 
-    /** Polls with manual clock pumping; dumps visible text + a screenshot on timeout. */
+    /** Polls; on timeout dumps visible text + pixels thumbnail + view tree + screenshot. */
     private fun waitForOrDump(timeoutMs: Long, phase: String, extra: String = "", condition: () -> Boolean) {
         if (pumpUntil(timeoutMs, condition)) return
         val texts = runCatching { visibleTexts() }.getOrElse { listOf("<semantics unavailable>") }
         val shot = runCatching { capture("failure_$phase") }.getOrNull()
         val url = shot?.let { runCatching { upload(it) }.getOrNull() }
+        val thumb = shot?.let { runCatching { thumbB64(it) }.getOrNull() } ?: ""
+        val vt = runCatching { dumpViewTree() }.getOrDefault("")
+        val wins = runCatching { dumpWindows() }.getOrDefault("")
+        // One diagnostic per line, each well under 2000 chars, so nothing is
+        // truncated by log-size limits.
+        val thumbLines = thumb.chunked(850)
+            .mapIndexed { i, c -> "thumb$i=$c" }
+            .joinToString("\n")
         throw AssertionError(
-            "[$phase] timed out after ${timeoutMs}ms. visible=${texts.take(50)}; shot=$shot; uploadUrl=$url$extra",
+            "[$phase] timed out after ${timeoutMs}ms. visible=${texts.take(50)}\n" +
+                "windows=$wins\nviewTree=$vt\n$thumbLines\n" +
+                "uploadUrls=$url; shot=$shot$extra",
         )
     }
 
@@ -100,11 +161,12 @@ class GaugeScreenshotTest {
     }
 
     /**
-     * Clicks the last node matching [label] that actually has a click action,
-     * falling back to any text match. Returns a diagnostic for the walk log:
-     * how many nodes matched — >1 means the tree holds duplicates/stale content.
+     * Clicks the last node matching [label]: semantics click by default, a REAL
+     * touch injection at the node center when [useTouch] is set (alternating
+     * covers cases where one dispatch path is broken). Returns a diagnostic for
+     * the walk log: how many nodes matched.
      */
-    private fun tapClickable(label: String): String {
+    private fun tapClickable(label: String, useTouch: Boolean = false): String {
         val clickable = compose.onAllNodes(hasText(label, substring = true).and(hasClickAction()))
         var count = clickable.fetchSemanticsNodes().size
         val target = if (count > 0) clickable else {
@@ -113,9 +175,19 @@ class GaugeScreenshotTest {
             any
         }
         if (target.fetchSemanticsNodes().isEmpty()) return "[$label:nomatch]"
-        target.onLast().performClick()
+        val interaction = target.onLast()
+        if (useTouch) {
+            runCatching {
+                interaction.performTouchInput {
+                    down(Offset(width / 2f, height / 2f))
+                    up()
+                }
+            }.onFailure { interaction.performClick() }
+        } else {
+            interaction.performClick()
+        }
         pumpFrames()
-        return "[$label:x$count]"
+        return "[$label:x$count${if (useTouch) ":touch" else ""}]"
     }
 
     private fun shotsDir(): File {
@@ -144,9 +216,60 @@ class GaugeScreenshotTest {
     }
 
     /**
-     * Uploads to tmpfiles.org (files auto-expire) and returns the share URL, or null.
+     * Uploads to hosts that serve RAW bytes (0x0.st, litterbox), falling back to
+     * tmpfiles. Returns all working URLs pipe-separated.
      */
-    private fun upload(file: File): String? = try {
+    private fun upload(file: File): String? {
+        val urls = mutableListOf<String>()
+        runCatching {
+            val boundary = "----Por" + System.currentTimeMillis()
+            val conn = URL("https://0x0.st").openConnection() as HttpURLConnection
+            conn.requestMethod = "POST"
+            conn.doOutput = true
+            conn.connectTimeout = 15_000
+            conn.readTimeout = 45_000
+            conn.setRequestProperty("User-Agent", "curl/8.5.0")
+            conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=$boundary")
+            conn.outputStream.use { out ->
+                out.write("--$boundary\r\n".toByteArray())
+                out.write("Content-Disposition: form-data; name=\"file\"; filename=\"${file.name}\"\r\n".toByteArray())
+                out.write("Content-Type: image/png\r\n\r\n".toByteArray())
+                out.write(file.readBytes())
+                out.write("\r\n--$boundary--\r\n".toByteArray())
+            }
+            val body = conn.inputStream.bufferedReader().readText().trim()
+            if (body.startsWith("http")) urls += body
+        }
+        runCatching {
+            val boundary = "----Por" + System.currentTimeMillis()
+            val conn = URL("https://litterbox.catbox.moe/resources/internals/api.php").openConnection() as HttpURLConnection
+            conn.requestMethod = "POST"
+            conn.doOutput = true
+            conn.connectTimeout = 15_000
+            conn.readTimeout = 45_000
+            conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=$boundary")
+            conn.outputStream.use { out ->
+                fun field(name: String, value: String) {
+                    out.write("--$boundary\r\n".toByteArray())
+                    out.write("Content-Disposition: form-data; name=\"$name\"\r\n\r\n$value\r\n".toByteArray())
+                }
+                field("reqtype", "fileupload")
+                field("time", "1h")
+                out.write("--$boundary\r\n".toByteArray())
+                out.write("Content-Disposition: form-data; name=\"fileToUpload\"; filename=\"${file.name}\"\r\n".toByteArray())
+                out.write("Content-Type: image/png\r\n\r\n".toByteArray())
+                out.write(file.readBytes())
+                out.write("\r\n--$boundary--\r\n".toByteArray())
+            }
+            val body = conn.inputStream.bufferedReader().readText().trim()
+            if (body.startsWith("http")) urls += body
+        }
+        runCatching { tmpfilesUpload(file)?.let { urls += it } }
+        return if (urls.isEmpty()) null else urls.joinToString(" | ")
+    }
+
+    /** Legacy tmpfiles upload — serves an HTML viewer page, last resort only. */
+    private fun tmpfilesUpload(file: File): String? = try {
         val boundary = "----PorchivoBoundary" + System.currentTimeMillis()
         val conn = URL("https://tmpfiles.org/api/v1/upload").openConnection() as HttpURLConnection
         conn.requestMethod = "POST"
@@ -215,9 +338,13 @@ class GaugeScreenshotTest {
             }
             stuckRounds = if (step == lastStep) stuckRounds + 1 else 0
             lastStep = step
-            walkLog += tapClickable(step)
+            walkLog += tapClickable(step, useTouch = stuckRounds in 1..30 && stuckRounds % 2 == 1)
             if (stuckRounds == 3 || stuckRounds == 7 || stuckRounds == 15) {
                 walkLog += "STUCK@'$step':${runCatching { visibleTexts().take(12) }.getOrElse { listOf("?") }}"
+                if (stuckRounds == 3) {
+                    walkLog += "WIN:${runCatching { dumpWindows() }.getOrDefault("?")}"
+                    walkLog += "VT:${runCatching { dumpViewTree() }.getOrDefault("?")}"
+                }
             }
             Thread.sleep(250)
         }

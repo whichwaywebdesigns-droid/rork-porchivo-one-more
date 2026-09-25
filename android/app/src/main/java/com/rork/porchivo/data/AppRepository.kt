@@ -1,6 +1,7 @@
 package com.rork.porchivo.data
 
 import android.content.Context
+import android.util.Log
 import com.rork.porchivo.BuildConfig
 import com.rork.porchivo.data.dto.DbAnnouncement
 import com.rork.porchivo.data.dto.DbMyMaintenanceRequest
@@ -41,6 +42,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
@@ -461,6 +463,7 @@ class AppRepository(context: Context) {
             if (result.isSuccess) {
                 val session = result.getOrNull()
                 if (session != null) {
+                    Log.d("Porchivo", "developer login ok — loading initial data")
                     _authState.value = AuthState.Authenticated(session.user?.id ?: "")
                     loadInitialData(session.user?.id ?: "")
                 }
@@ -547,51 +550,64 @@ class AppRepository(context: Context) {
         } catch (e: Exception) { /* corrupt cache — ignore */ }
     }
 
-    private suspend fun loadInitialData(userId: String) = coroutineScope {
-        loadCachedOrgContext(userId)
-        val cachedOrgId = _orgMembership.value?.orgId
+    private suspend fun loadInitialData(userId: String) {
+        // Hard deadline: one stalled network call must never hold the root
+        // splash up forever (Ktor has no default request timeout). On timeout
+        // we lift the splash with whatever loaded; refreshers and queue sync
+        // fetch the rest later.
+        val completed = withTimeoutOrNull(15_000L) {
+            coroutineScope {
+                loadCachedOrgContext(userId)
+                val cachedOrgId = _orgMembership.value?.orgId
 
-        // Prefetch community feed content immediately if cached org data is available.
-        // Runs in parallel with profile, shipments, notifications, and org context refresh.
-        val communityJob = async {
-            if (cachedOrgId != null) {
-                val annJob = async { loadAnnouncements(cachedOrgId) }
-                val maintJob = async { loadMaintenanceRequests(cachedOrgId) }
-                annJob.await()
-                maintJob.await()
+                // Prefetch community feed content immediately if cached org data is available.
+                // Runs in parallel with profile, shipments, notifications, and org context refresh.
+                val communityJob = async {
+                    if (cachedOrgId != null) {
+                        val annJob = async { loadAnnouncements(cachedOrgId) }
+                        val maintJob = async { loadMaintenanceRequests(cachedOrgId) }
+                        annJob.await()
+                        maintJob.await()
+                    }
+                }
+
+                // Load other initial data + org context refresh in parallel
+                val profileJob = async { loadProfile(userId) }
+                val shipmentsJob = async { loadShipments(userId) }
+                val notificationsJob = async { loadNotifications(userId) }
+                val orgJob = async { loadOrgContext() }
+                profileJob.await()
+                shipmentsJob.await()
+                notificationsJob.await()
+                orgJob.await()
+                communityJob.await()
+
+                // One-time email-locale sync: push the locally-saved language so choices
+                // made before sign-in — or before this sync shipped — reach
+                // profiles.preferred_language. Runs once per app start / sign-in.
+                if (_user.value != null) {
+                    syncLanguagePreference(_language.value.code)
+                }
+
+                // If org membership changed after network refresh, re-fetch feed with new orgId
+                val networkOrgId = _orgMembership.value?.orgId
+                if (networkOrgId != null && networkOrgId != cachedOrgId) {
+                    loadAnnouncements(networkOrgId)
+                    loadMaintenanceRequests(networkOrgId)
+                }
             }
-        }
-
-        // Load other initial data + org context refresh in parallel
-        val profileJob = async { loadProfile(userId) }
-        val shipmentsJob = async { loadShipments(userId) }
-        val notificationsJob = async { loadNotifications(userId) }
-        val orgJob = async { loadOrgContext() }
-        profileJob.await()
-        shipmentsJob.await()
-        notificationsJob.await()
-        orgJob.await()
-        communityJob.await()
-
-        // One-time email-locale sync: push the locally-saved language so choices
-        // made before sign-in — or before this sync shipped — reach
-        // profiles.preferred_language. Runs once per app start / sign-in.
-        if (_user.value != null) {
-            syncLanguagePreference(_language.value.code)
-        }
-
-        // If org membership changed after network refresh, re-fetch feed with new orgId
-        val networkOrgId = _orgMembership.value?.orgId
-        if (networkOrgId != null && networkOrgId != cachedOrgId) {
-            loadAnnouncements(networkOrgId)
-            loadMaintenanceRequests(networkOrgId)
+            true
         }
 
         loadLocalPackages()
 
-        // Initial data is in — lift the root splash overlay. Nothing else
-        // completes this handshake (signIn/signUp only set it false), so
-        // without this the splash would cover the app forever after login.
+        if (completed == null) {
+            Log.w("Porchivo", "loadInitialData timed out after 15s — lifting splash with partial data")
+        }
+
+        // Lift the root splash overlay. Nothing else completes this handshake
+        // (signIn/signUp only set it false), so without this the splash would
+        // cover the app forever after login.
         _isReadyToShowUI.value = true
     }
 
@@ -606,6 +622,8 @@ class AppRepository(context: Context) {
                 _user.value = Mappers.dbProfileToUser(dbProfile)
                 _tier.value = if (dbProfile.isPremium) SubscriptionTier.PREMIUM else SubscriptionTier.FREE
             }
+        } else {
+            Log.w("Porchivo", "loadProfile failed for $userId: ${result.exceptionOrNull()?.message}")
         }
     }
 
