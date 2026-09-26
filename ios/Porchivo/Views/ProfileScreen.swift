@@ -149,20 +149,6 @@ struct ProfileScreen: View {
             }
 
             VStack(spacing: 8) {
-                Button(action: { Haptics.light(); path.append(Route.orgSignup) }) {
-                    HStack(spacing: 8) {
-                        Image(systemName: "building.2.badge.gearshape.fill")
-                            .font(.system(size: 14, weight: .bold))
-                        Text("I Manage a Community — Sign Up Here")
-                            .font(.system(size: 13, weight: .bold))
-                    }
-                    .foregroundStyle(c.onAccent)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(c.accent, in: .rect(cornerRadius: Radius.md))
-                }
-                .buttonStyle(.plain)
-
                 Button(action: {
                     Haptics.light()
                     if let url = URL(string: "mailto:support@porchivo.com?subject=Request%20Community%20Invitation") {

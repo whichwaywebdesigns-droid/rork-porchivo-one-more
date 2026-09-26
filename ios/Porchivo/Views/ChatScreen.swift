@@ -151,7 +151,7 @@ struct ChatScreen: View {
     private func send() {
         guard let user = appState.user, !draft.isEmpty else { return }
         // Pre-publication screen — nothing objectionable ever goes live.
-        guard ChatContentFilter.isAcceptable(draft) else {
+        guard ContentFilter.objectionableReason(in: draft) == nil else {
             Haptics.medium()
             showFilterAlert = true
             return

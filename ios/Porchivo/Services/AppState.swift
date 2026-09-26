@@ -1354,16 +1354,24 @@ final class AppState {
         let result = await supabase.fetchAnnouncements(orgId: orgId)
         switch result {
         case .success(let rows):
-            announcements = rows.map { Mappers.toAnnouncement($0) }
+            let hidden = Set(UserDefaults.standard.stringArray(forKey: Self.hiddenAnnouncementsKey) ?? [])
+            announcements = rows.map { Mappers.toAnnouncement($0) }.filter { !hidden.contains($0.id) }
             announcementsLoadState = .success(Unit())
         case .failure(let err):
             announcementsLoadState = .error(err.localizedDescription)
         }
     }
 
+    /// Posts an announcement. Returns nil on success, or a user-facing reason
+    /// when the post was rejected (e.g. objectionable language per ContentFilter).
     @MainActor
-    func postAnnouncement(title: String, body: String, priority: AnnouncementPriority) async -> Bool {
-        guard isSupabaseConfigured, let orgId = orgMembership?.orgId, let userId = currentUserId else { return false }
+    func postAnnouncement(title: String, body: String, priority: AnnouncementPriority) async -> String? {
+        guard isSupabaseConfigured, let orgId = orgMembership?.orgId, let userId = currentUserId else {
+            return "You need to be signed in to a community to post."
+        }
+        if let reason = ContentFilter.objectionableReason(in: title) ?? ContentFilter.objectionableReason(in: body) {
+            return reason
+        }
         let payload: [String: Any?] = [
             "org_id": orgId,
             "author_id": userId,
@@ -1378,14 +1386,26 @@ final class AppState {
                 type: "insert", target: "org_announcements",
                 payload: payload, refreshKey: "announcements"
             )
-            return true
+            return nil
         }
         let result = await supabase.insertAnnouncement(payload)
         if case .success(let row) = result {
             announcements.insert(Mappers.toAnnouncement(row), at: 0)
-            return true
+            return nil
         }
-        return false
+        return "Couldn't post the announcement right now. Please try again."
+    }
+
+    private static let hiddenAnnouncementsKey = "porchivo.hiddenAnnouncementIds"
+
+    /// Hides a reported announcement from this device's feed immediately and
+    /// keeps it hidden on future loads (App Store Guideline 1.2 feed-removal).
+    @MainActor
+    func reportAnnouncement(_ item: Announcement) {
+        var hidden = Set(UserDefaults.standard.stringArray(forKey: Self.hiddenAnnouncementsKey) ?? [])
+        hidden.insert(item.id)
+        UserDefaults.standard.set(Array(hidden), forKey: Self.hiddenAnnouncementsKey)
+        announcements.removeAll { $0.id == item.id }
     }
 
     // MARK: - Incidents

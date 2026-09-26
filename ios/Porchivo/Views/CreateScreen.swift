@@ -148,24 +148,23 @@ struct CreateScreen: View {
     private func postAnnouncement() async {
         isPosting = true
         postError = nil
-        let success = await appState.postAnnouncement(
+        if let error = await appState.postAnnouncement(
             title: announcementTitle.trimmingCharacters(in: .whitespacesAndNewlines),
             body: announcementText.trimmingCharacters(in: .whitespacesAndNewlines),
             priority: .normal
-        )
-        isPosting = false
-        if success {
-            Haptics.success()
-            announcementPosted = true
-            announcementTitle = ""
-            announcementText = ""
-            try? await Task.sleep(for: .seconds(1.5))
-            showAnnouncement = false
-            announcementPosted = false
-        } else {
-            postError = "Failed to post announcement. Please try again."
+        ) {
+            isPosting = false
+            postError = error
             Haptics.error()
+            return
         }
+        Haptics.success()
+        announcementPosted = true
+        announcementTitle = ""
+        announcementText = ""
+        try? await Task.sleep(for: .seconds(1.5))
+        showAnnouncement = false
+        announcementPosted = false
     }
 }
 

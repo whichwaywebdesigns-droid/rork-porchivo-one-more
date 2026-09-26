@@ -23,7 +23,9 @@ struct AnnouncementsScreen: View {
                     )
                 } else {
                     ForEach(appState.announcements) { item in
-                        AnnouncementCard(item: item)
+                        AnnouncementCard(item: item) {
+                            appState.reportAnnouncement(item)
+                        }
                     }
                 }
             }
@@ -40,6 +42,8 @@ struct AnnouncementsScreen: View {
 private struct AnnouncementCard: View {
     @Environment(\.porchivo) private var c
     let item: Announcement
+    var onReport: () -> Void = {}
+    @State private var confirmReport = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -79,6 +83,23 @@ private struct AnnouncementCard: View {
         .padding(14)
         .background(c.surface, in: .rect(cornerRadius: Radius.lg))
         .shadow(color: c.textPrimary.opacity(0.05), radius: 6, y: 2)
+        .contextMenu {
+            Button(role: .destructive) {
+                confirmReport = true
+            } label: {
+                Label("Report", systemImage: "flag")
+            }
+        }
+        .confirmationDialog(
+            "Report this announcement?",
+            isPresented: $confirmReport,
+            titleVisibility: .visible
+        ) {
+            Button("Report", role: .destructive) { onReport() }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("It will be removed from your feed.")
+        }
     }
 
     private var priorityPill: some View {

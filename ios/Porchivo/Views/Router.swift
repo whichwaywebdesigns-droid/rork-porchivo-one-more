@@ -19,7 +19,6 @@ enum Route: Hashable {
     case chat(String) // threadId
     case editProfile
     case settings
-    case orgSignup
     case announcements
     case inviteCode
     case pendingMembers
@@ -35,7 +34,7 @@ enum Route: Hashable {
              (.alerts, .alerts), (.addPackage, .addPackage),
              (.residentDirectory, .residentDirectory),
              (.editProfile, .editProfile), (.settings, .settings),
-             (.orgSignup, .orgSignup), (.fileIncident, .fileIncident):
+             (.fileIncident, .fileIncident):
             return true
         case (.announcements, .announcements),
              (.inviteCode, .inviteCode),
@@ -43,8 +42,7 @@ enum Route: Hashable {
              (.manageSubscription, .manageSubscription),
              (.orgDocuments, .orgDocuments),
              (.orgAmenities, .orgAmenities),
-             (.orgLedger, .orgLedger),
-             (.fileIncident, .fileIncident):
+             (.orgLedger, .orgLedger):
             return true
         case (.shipmentDetail(let a), .shipmentDetail(let b)): return a == b
         case (.packageDetail(let a), .packageDetail(let b)): return a == b
@@ -66,7 +64,6 @@ enum Route: Hashable {
         case .chat(let id): hasher.combine(8); hasher.combine(id)
         case .editProfile: hasher.combine(9)
         case .settings: hasher.combine(10)
-        case .orgSignup: hasher.combine(11)
         case .announcements: hasher.combine(12)
         case .inviteCode: hasher.combine(13)
         case .pendingMembers: hasher.combine(14)
@@ -104,7 +101,6 @@ struct RouteView: View {
         case .chat(let threadId):      ChatScreen(threadId: threadId)
         case .editProfile:   EditProfileScreen()
         case .settings:      SettingsScreen()
-        case .orgSignup:     OrgSignupScreen()
         case .announcements: AnnouncementsScreen()
         case .inviteCode:    InviteCodeScreen()
         case .pendingMembers: PendingMembersScreen()
