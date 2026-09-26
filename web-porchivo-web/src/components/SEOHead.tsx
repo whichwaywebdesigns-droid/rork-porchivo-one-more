@@ -10,6 +10,7 @@
  */
 
 import { useEffect } from "react";
+import type { ReactNode } from "react";
 import type { SchemaObject } from "@/config/schema";
 import { serializeSchema } from "@/config/schema";
 import { SITE_KEYWORDS } from "@/config/seo";
@@ -111,8 +112,21 @@ export function usePageSEO(props: SEOHeadProps): void {
   }, [title, description, canonical, ogTitle, ogDescription, ogImage, twitterCard, robots, schemas]);
 }
 
-/** Invisible component wrapper — renders nothing, manages head as side effect. */
-export default function SEOHead(props: SEOHeadProps): null {
+/** Invisible component wrapper — manages head as side effect. During build-time
+ * prerender (SSR) it renders the page's JSON-LD schemas inline so crawlers and
+ * AI agents receive structured data in the static HTML; on the client it renders
+ * nothing and the hook injects schemas into <head> instead (the data-porchivo
+ * attribute lets injectSchema's cleanup remove the prerendered copy on mount). */
+export default function SEOHead(props: SEOHeadProps): ReactNode {
   usePageSEO(props);
+  if (import.meta.env.SSR && props.schemas) {
+    return (
+      <script
+        type="application/ld+json"
+        data-porchivo="true"
+        dangerouslySetInnerHTML={{ __html: serializeSchema(props.schemas) }}
+      />
+    );
+  }
   return null;
 }

@@ -66,7 +66,11 @@ export default function DeleteAccount() {
             ? "Delete Your Porchivo Data — Porchivo"
             : "Delete Your Porchivo Account — Porchivo"
         }
-        description="Delete your Porchivo account and personal data at any time — instantly from the app, or by email request. No account or sign-in required to view this page."
+        description={
+          isDataVariant
+            ? "Delete your Porchivo data and personal information at any time — instantly from the app, or by email request. No sign-in is required to view this page."
+            : "Delete your Porchivo account and personal data at any time — instantly from the app, or by email request. No account or sign-in required to view this page."
+        }
         canonical={canonical}
       />
       <div className="mx-auto max-w-3xl px-6 py-12">

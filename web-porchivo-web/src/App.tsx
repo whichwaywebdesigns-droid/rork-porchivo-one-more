@@ -36,6 +36,8 @@ const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
 const DeleteAccount = lazy(() => import("./pages/DeleteAccount"));
 const PartnersLanding = lazy(() => import("./pages/PartnersLanding"));
 const SafetyLanding = lazy(() => import("./pages/SafetyLanding"));
+const HoaLanding = lazy(() => import("./pages/HoaLanding"));
+const CityLanding = lazy(() => import("./pages/CityLanding"));
 const ReferralLanding = lazy(() => import("./pages/ReferralLanding"));
 const InviteLanding = lazy(() => import("./pages/InviteLanding"));
 const ReportDetail = lazy(() => import("./pages/ReportDetail"));
@@ -150,6 +152,8 @@ const App = () => (
               <Route path="/data-deletion" element={<DeleteAccount />} />
               <Route path="/partners" element={<PartnersLanding />} />
               <Route path="/safety" element={<SafetyLanding />} />
+              <Route path="/hoa" element={<HoaLanding />} />
+              <Route path="/evansville-in" element={<CityLanding slug="evansville-in" />} />
               <Route path="/referral" element={<ReferralLanding />} />
               <Route path="/invite" element={<InviteLanding />} />
               <Route path="/reports/:id" element={<ReportDetail />} />

@@ -1,9 +1,73 @@
+# Porchivo — https://www.porchivo.com
+# Public marketing and content pages are open to all crawlers, including AI
+# answer engines. App shells and authenticated/portal surfaces stay out.
+
 User-agent: *
 Allow: /
 Disallow: /app
+Disallow: /manage
 Disallow: /resident
-Disallow: /manager
 Disallow: /reports
+Disallow: /settings
+Disallow: /email-preview
 Disallow: /unsubscribe
+Disallow: /auth-fail
+
+# AI / answer-engine crawlers — explicitly allowed on public pages.
+
+User-agent: GPTBot
+Allow: /
+Disallow: /app
+Disallow: /manage
+Disallow: /resident
+Disallow: /reports
+Disallow: /settings
+Disallow: /email-preview
+Disallow: /unsubscribe
+Disallow: /auth-fail
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /app
+Disallow: /manage
+Disallow: /resident
+Disallow: /reports
+Disallow: /settings
+Disallow: /email-preview
+Disallow: /unsubscribe
+Disallow: /auth-fail
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /app
+Disallow: /manage
+Disallow: /resident
+Disallow: /reports
+Disallow: /settings
+Disallow: /email-preview
+Disallow: /unsubscribe
+Disallow: /auth-fail
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /app
+Disallow: /manage
+Disallow: /resident
+Disallow: /reports
+Disallow: /settings
+Disallow: /email-preview
+Disallow: /unsubscribe
+Disallow: /auth-fail
+
+User-agent: Bingbot
+Allow: /
+Disallow: /app
+Disallow: /manage
+Disallow: /resident
+Disallow: /reports
+Disallow: /settings
+Disallow: /email-preview
+Disallow: /unsubscribe
+Disallow: /auth-fail
 
 Sitemap: https://www.porchivo.com/sitemap.xml

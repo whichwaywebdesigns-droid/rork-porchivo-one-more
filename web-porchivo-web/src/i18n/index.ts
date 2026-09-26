@@ -32,6 +32,9 @@ void i18n
 
 /** Apply reading direction + lang attribute for the active language. */
 export function applyDocumentLanguage(code: string): void {
+  // SSR guard: the build-time prerenderer loads this module in Node, which has
+  // no document. The languageChanged listener and initial call are no-ops there.
+  if (typeof document === "undefined") return;
   const meta = getLanguageMeta(code);
   const dir = meta.rtl ? "rtl" : "ltr";
   document.documentElement.setAttribute("lang", code);
