@@ -187,9 +187,9 @@ export const PAGE_SEO: Record<string, PageSEO> = {
     twitterCard: "summary_large_image",
     robots: "index, follow",
     aiSummary:
-      "Porchivo was founded to address the $19 billion porch theft epidemic in the United States. The company builds mobile software that gives HOAs and property managers predictive package security — calculating delivery risk before theft occurs. It also connects residents with trusted Porch Partners to hold parcels securely, reducing porch exposure and package-related management workload.",
+      "Porchivo was founded to address the $16 billion in financial losses that porch theft caused in the United States in 2024 (USPS OIG white paper RISC-WP-25-002, May 2025). The company builds mobile software that gives HOAs and property managers predictive package security — calculating delivery risk before theft occurs. It also connects residents with trusted Porch Partners to hold parcels securely, reducing porch exposure and package-related management workload.",
     keyFacts: [
-      "Porch theft costs US consumers $19 billion annually",
+      "Porch piracy caused $16B in financial losses in 2024 (USPS OIG white paper RISC-WP-25-002, May 2025)",
       "Porchivo focuses on predictive prevention, not post-theft reporting",
       "Porch Partners are trusted neighbors who hold parcels with full chain-of-custody",
       "Porchivo communities can be set up in five minutes with no hardware or IT project",

@@ -38,7 +38,7 @@ export const BRAND = {
   keyFacts: [
     "At least 58 million packages were stolen in the US in 2024 (USPS OIG)",
     "1 in 4 Americans has had a package stolen (Security.org, 2025)",
-    "Porch pirates cost Americans an estimated $15 billion in the past year (SafeWise, 2025)",
+    "Porch piracy caused $16B in financial losses in 2024 (USPS OIG white paper RISC-WP-25-002, May 2025)",
     "Porchivo provides real-time package risk scoring for every incoming delivery",
     "Risk scores factor in timing, neighborhood activity, and theft history",
     "Residents can join the Porch Partner network — safer deliveries, income per hold, and community reputation",
