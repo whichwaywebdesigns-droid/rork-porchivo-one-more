@@ -37,6 +37,7 @@ import { LanguageRootProvider } from "@/i18n/LanguageProvider";
 import { ToastProvider } from "@/providers/ToastProvider";
 import { OfflineQueueProvider } from "@/store/OfflineQueueContext";
 import { OfflineBanner } from "@/components/OfflineBanner";
+import { HeaderOfflineIndicator } from "@/components/HeaderOfflineIndicator";
 import PlatformAlertHost from "@/components/PlatformAlertHost";
 import { SplashOverlay } from "@/components/SplashOverlay";
 import { BackgroundErrorProvider } from "@/store/BackgroundErrorContext";
@@ -301,6 +302,8 @@ function RootLayoutNav() {
         headerStyle: { backgroundColor: Colors.surface },
         headerTintColor: Colors.slate,
         headerShadowVisible: false,
+        // Compact offline pill (with last-sync time) in every stack header.
+        headerRight: () => <HeaderOfflineIndicator />,
         headerTitleStyle: { color: Colors.slate },
         // Global cool fade between screens — mirrors the splash dismiss fade,
         // but 30% shorter (500ms -> 350ms) for a snappier webflow.

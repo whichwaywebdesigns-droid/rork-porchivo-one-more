@@ -33,6 +33,7 @@ export type QueuedActionInput = Omit<
 >;
 
 const STORAGE_KEY = "porchivo_offline_queue";
+const LAST_SYNC_STORAGE_KEY = "porchivo_last_synced_at";
 const MAX_RETRIES = 3;
 const POLL_INTERVAL_MS = 30_000;
 const PING_TIMEOUT_MS = 5_000;
@@ -117,6 +118,14 @@ export const [OfflineQueueProvider, useOfflineQueue] = createContextHook(() => {
   const [lastSyncCount, setLastSyncCount] = useState(0);
   const [syncFailedCount, setSyncFailedCount] = useState(0);
   const [lastSyncedAt, setLastSyncedAt] = useState<number | null>(null);
+  const lastSyncedAtRef = useRef<number | null>(null);
+
+  /** Persists the last successful sync timestamp (shown by the header offline pill). */
+  const persistLastSyncedAt = useCallback((ts: number) => {
+    AsyncStorage.setItem(LAST_SYNC_STORAGE_KEY, String(ts)).catch(() => {
+      warn("[OfflineQueue] Failed to persist last sync time");
+    });
+  }, []);
 
   const isSyncingRef = useRef(false);
   const wasOfflineRef = useRef(false);
@@ -150,6 +159,15 @@ export const [OfflineQueueProvider, useOfflineQueue] = createContextHook(() => {
           } catch {
             warn("[OfflineQueue] Failed to parse stored queue");
           }
+        }
+      })
+      .catch(() => {});
+    AsyncStorage.getItem(LAST_SYNC_STORAGE_KEY)
+      .then((stored) => {
+        const ts = stored ? Number(stored) : NaN;
+        if (Number.isFinite(ts) && ts > 0) {
+          lastSyncedAtRef.current = ts;
+          setLastSyncedAt(ts);
         }
       })
       .catch(() => {});
@@ -253,13 +271,16 @@ export const [OfflineQueueProvider, useOfflineQueue] = createContextHook(() => {
           warn("[OfflineQueue] Reconnect sync:", failed, "refresher task(s) failed");
         }
       }
-      setLastSyncedAt(Date.now());
+      const syncedAt = Date.now();
+      lastSyncedAtRef.current = syncedAt;
+      setLastSyncedAt(syncedAt);
+      persistLastSyncedAt(syncedAt);
       log("[OfflineQueue] Reconnect sync complete");
     } finally {
       reconnectSyncRunningRef.current = false;
       if (hasQueued) setIsSyncing(false);
     }
-  }, [queryClient]);
+  }, [persistLastSyncedAt, queryClient]);
 
   const runReconnectSyncRef = useRef(runReconnectSync);
   runReconnectSyncRef.current = runReconnectSync;
@@ -319,13 +340,23 @@ export const [OfflineQueueProvider, useOfflineQueue] = createContextHook(() => {
     });
     if (!online) {
       wasOfflineRef.current = true;
-    } else if (wasOfflineRef.current) {
+      return;
+    }
+    // First successful reachability check of the session counts as a sync, so
+    // the header offline pill has a timestamp even if connectivity never drops.
+    if (lastSyncedAtRef.current === null) {
+      const syncedAt = Date.now();
+      lastSyncedAtRef.current = syncedAt;
+      setLastSyncedAt(syncedAt);
+      persistLastSyncedAt(syncedAt);
+    }
+    if (wasOfflineRef.current) {
       // Offline → online transition: replay queued mutations AND refresh all
       // server-backed state (React Query caches + registered refreshers).
       wasOfflineRef.current = false;
       void runReconnectSyncRef.current();
     }
-  }, []);
+  }, [persistLastSyncedAt]);
 
   // Initial check + periodic polling + AppState (foreground) listener.
   useEffect(() => {

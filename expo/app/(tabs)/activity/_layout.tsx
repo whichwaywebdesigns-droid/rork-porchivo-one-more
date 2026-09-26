@@ -1,5 +1,6 @@
 import { Stack } from 'expo-router';
 import Colors from '@/constants/colors';
+import { HeaderOfflineIndicator } from '@/components/HeaderOfflineIndicator';
 
 export default function ActivityLayout() {
   return (
@@ -9,6 +10,7 @@ export default function ActivityLayout() {
         headerTintColor: Colors.primary,
         headerTitleStyle: { fontWeight: '600' as const, fontSize: 17 },
         headerShadowVisible: false,
+        headerRight: () => <HeaderOfflineIndicator />,
       }}
     />
   );
