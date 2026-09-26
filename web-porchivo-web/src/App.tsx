@@ -33,6 +33,7 @@ const EmailPreview = lazy(() => import("./pages/EmailPreview"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const AuthFail = lazy(() => import("./pages/AuthFail"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
+const DeleteAccount = lazy(() => import("./pages/DeleteAccount"));
 const PartnersLanding = lazy(() => import("./pages/PartnersLanding"));
 const SafetyLanding = lazy(() => import("./pages/SafetyLanding"));
 const ReferralLanding = lazy(() => import("./pages/ReferralLanding"));
@@ -144,6 +145,9 @@ const App = () => (
               <Route path="/email-preview" element={<EmailPreview />} />
               <Route path="/auth-fail" element={<AuthFail />} />
               <Route path="/unsubscribe" element={<Unsubscribe />} />
+              {/* Google Play data-safety URLs — must serve real content, never the SPA 404 */}
+              <Route path="/delete-account" element={<DeleteAccount />} />
+              <Route path="/data-deletion" element={<DeleteAccount />} />
               <Route path="/partners" element={<PartnersLanding />} />
               <Route path="/safety" element={<SafetyLanding />} />
               <Route path="/referral" element={<ReferralLanding />} />
