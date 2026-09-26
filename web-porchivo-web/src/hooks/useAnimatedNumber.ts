@@ -11,10 +11,14 @@ interface UseAnimatedNumberOptions {
  * Counts from 0 to `end` with an ease-out curve, supporting decimals
  * (e.g. 1.7). Honors prefers-reduced-motion by jumping straight to the
  * final value.
+ *
+ * Initializes to `end` so prerendered HTML shows the real value instead of
+ * a zero (scrapers and no-JS visitors never see 0); the count-up resets to
+ * 0 only when the element actually scrolls into view.
  */
 export function useAnimatedNumber(end: number, options: UseAnimatedNumberOptions): number {
   const { decimals = 0, duration = 1600, start } = options;
-  const [value, setValue] = useState(0);
+  const [value, setValue] = useState(end);
   const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -23,6 +27,7 @@ export function useAnimatedNumber(end: number, options: UseAnimatedNumberOptions
       setValue(end);
       return;
     }
+    setValue(0);
     const startedAt = performance.now();
     const factor = Math.pow(10, decimals);
     const tick = (now: number): void => {

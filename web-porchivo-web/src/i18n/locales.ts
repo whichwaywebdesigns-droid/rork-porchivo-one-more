@@ -116,7 +116,7 @@ const en = {
   "landing.hero.ctaJoin": "Residents Join Free",
   "landing.hero.trust": "Built to work in 190+ countries worldwide",
   "landing.hero.stat1": "packages stolen in the US every year",
-  "landing.hero.stat2": "of delivered packages are stolen from porches",
+  "landing.hero.stat2": "of Americans have had a package stolen",
   "landing.hero.stat3": "to register a community and start protecting deliveries",
   "landing.hero.modelAlt": "3D model of a neighborhood protected by a glowing shield",
 
@@ -333,7 +333,7 @@ const es: Partial<TranslationKeys> = {
   "landing.hero.ctaJoin": "Únete gratis como residente",
   "landing.hero.trust": "Diseñado para funcionar en más de 190 países",
   "landing.hero.stat1": "paquetes robados al año en EE. UU.",
-  "landing.hero.stat2": "de los paquetes entregados se roban del porche",
+  "landing.hero.stat2": "de los estadounidenses han tenido un paquete robado",
   "landing.hero.stat3": "para registrar una comunidad y empezar a proteger entregas",
   "landing.hero.modelAlt": "Modelo 3D de un vecindario protegido por un escudo luminoso",
 

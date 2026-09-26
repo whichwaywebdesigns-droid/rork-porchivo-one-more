@@ -69,8 +69,8 @@ export const PAGE_SEO: Record<string, PageSEO> = {
     aiSummary:
       "Porchivo is a package security and resident retention app for HOAs, property managers, and community associations. It provides real-time package risk scoring for every incoming package, instant alerts to residents and Porch Partners, a Porch Partner network offering safer deliveries, income for every hold, and community reputation, and community insights for managers. Communities can be set up in five minutes with no hardware or IT project.",
     keyFacts: [
-      "21 million packages are stolen in the US every year",
-      "4% of delivered packages are stolen from porches",
+      "At least 58 million packages were stolen in the US in 2024 (USPS OIG)",
+      "1 in 4 Americans has had a package stolen (Security.org, 2025)",
       "Porchivo provides real-time risk scoring for every incoming package",
       "Residents can join the Porch Partner network for safety, income, and reputation",
       "Porchivo gives managers insights into risk zones, theft hotspots, and delivery congestion",
@@ -182,7 +182,7 @@ export const PAGE_SEO: Record<string, PageSEO> = {
     canonical: `${BASE_URL}/about`,
     ogTitle: "About Porchivo — Why We Built This",
     ogDescription:
-      "21 million packages stolen annually. We built Porchivo to give communities predictive package security and reduce resident turnover.",
+      "58 million packages stolen in the US in 2024. We built Porchivo to give communities predictive package security and reduce resident turnover.",
     ogImage: OG_IMAGE,
     twitterCard: "summary_large_image",
     robots: "index, follow",

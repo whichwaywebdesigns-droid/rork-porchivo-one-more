@@ -100,8 +100,8 @@ export default function AboutPage() {
         <div className="max-w-4xl mx-auto">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
             {[
-              { value: "119M", label: "packages stolen in the US annually", source: "USPS/CargoNet data" },
-              { value: "$19B", label: "annual consumer loss to porch theft", source: "Industry estimate" },
+              { value: "58M", label: "packages stolen in the US in 2024", source: "USPS OIG, May 2025" },
+              { value: "$15B", label: "annual consumer loss to porch piracy", source: "SafeWise, 2025" },
               { value: "5 min", label: "to register a community and start protecting deliveries", source: "No hardware or IT project" },
             ].map((stat) => (
               <div key={stat.value}>

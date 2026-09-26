@@ -18,7 +18,7 @@ export const BRAND = {
   operatingSystem: ["iOS", "Android"],
   url: "https://www.porchivo.com",
   logoUrl: "https://www.porchivo.com/porchivo-icon-liquid-glass-512.png",
-  ogImageUrl: "https://www.porchivo.com/og-image.png",
+  ogImageUrl: "https://www.porchivo.com/og-image-v2.png",
   // App Store id must match ascAppId in expo/eas.json; Play Store package must
   // match android.package in expo/app.config.ts. A mismatch sends every website
   // visitor to a broken or wrong store listing.
@@ -36,9 +36,9 @@ export const BRAND = {
 
   /** Key facts for AI summarization and structured data */
   keyFacts: [
-    "21 million packages are stolen in the US every year",
-    "4% of delivered packages are stolen from porches",
-    "Porch theft costs US consumers $19 billion annually",
+    "At least 58 million packages were stolen in the US in 2024 (USPS OIG)",
+    "1 in 4 Americans has had a package stolen (Security.org, 2025)",
+    "Porch pirates cost Americans an estimated $15 billion in the past year (SafeWise, 2025)",
     "Porchivo provides real-time package risk scoring for every incoming delivery",
     "Risk scores factor in timing, neighborhood activity, and theft history",
     "Residents can join the Porch Partner network — safer deliveries, income per hold, and community reputation",

@@ -24,10 +24,13 @@ interface Stat {
   tone: "coral" | "amber";
 }
 
+// Sources: USPS OIG white paper RISC-WP-25-002 (May 2025) — at least 58M
+// packages stolen in 2024; Security.org 2025 Package Theft Report — 1 in 4
+// Americans has had a package stolen; 5-min registration is a product fact.
 const STATS: Stat[] = [
-  { end: 21, suffix: "M", labelKey: "landing.hero.stat1", tone: "coral" },
-  { end: 4, suffix: "%", labelKey: "landing.hero.stat2", tone: "coral" },
-  { end: 1, suffix: " min", labelKey: "landing.hero.stat3", tone: "amber" },
+  { end: 58, suffix: "M", labelKey: "landing.hero.stat1", tone: "coral" },
+  { end: 25, suffix: "%", labelKey: "landing.hero.stat2", tone: "coral" },
+  { end: 5, suffix: " min", labelKey: "landing.hero.stat3", tone: "amber" },
 ];
 
 /** Single count-up stat with a glowing coral/amber number. */
