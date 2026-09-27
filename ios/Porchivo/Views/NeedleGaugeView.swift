@@ -6,8 +6,10 @@
 //  240° arc; zones run red → orange → green left to right, so a safe
 //  score always lands the needle in the green zone on the right.
 //  Soft glow is faked with layered strokes — no blur filters.
-//  Sweeps for 1.4s with an eased count-up on appear; Reduce Motion
-//  jumps straight to the final position and skips the badge pulse.
+//  Sweeps for 1.4s with an eased count-up on appear; later score updates
+//  glide the needle from its current position (0.7s) so it never jumps or
+//  resets to zero. Reduce Motion jumps straight to the final position and
+//  skips the badge pulse.
 //
 
 import SwiftUI
@@ -113,10 +115,10 @@ struct NeedleGaugeView: View {
             badge
         }
         .onAppear {
-            startAnimation()
+            startAnimation(resetToZero: true)
             startPulse()
         }
-        .onChange(of: score) { _, _ in startAnimation() }
+        .onChange(of: score) { _, _ in startAnimation(resetToZero: false) }
         .onDisappear { animationTask?.cancel() }
     }
 
@@ -206,21 +208,24 @@ struct NeedleGaugeView: View {
             .shadow(color: scoreColor.opacity(isPulsing ? 0.4 : 0.12), radius: 8)
     }
 
-    private func startAnimation() {
+    /// `resetToZero: true` runs the initial 1.4s sweep from zero; otherwise the
+    /// needle glides from its current position to the new score over 0.7s.
+    private func startAnimation(resetToZero: Bool) {
         animationTask?.cancel()
         guard !reduceMotion else {
             animatedScore = clamped
             return
         }
-        animatedScore = 0
         let target = clamped
+        let from = resetToZero ? 0 : animatedScore
+        if resetToZero { animatedScore = 0 }
+        let duration: TimeInterval = resetToZero ? 1.4 : 0.7
         animationTask = Task { @MainActor in
             let start = Date()
-            let duration: TimeInterval = 1.4
             while !Task.isCancelled {
                 let t = min(Date().timeIntervalSince(start) / duration, 1)
                 let eased = 1 - pow(1 - t, 3) // ease-out cubic
-                animatedScore = target * eased
+                animatedScore = from + (target - from) * eased
                 if t >= 1 { break }
                 try? await Task.sleep(for: .milliseconds(16))
             }

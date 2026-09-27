@@ -18,7 +18,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,8 +55,10 @@ private const val gaugeSweep = 240f
  *
  * 240° arc; zones run red → orange → green left to right, so a safe score
  * always lands the needle in the green zone on the right. Soft glow is faked
- * with layered strokes. Sweeps for 1.4s with an eased count-up; honours the
- * system "remove animations" setting by jumping straight to the final value.
+ * with layered strokes. Sweeps for 1.4s with an eased count-up; later score
+ * updates glide the needle from its current position (0.7s) so it never jumps
+ * or resets to zero. Honours the system "remove animations" setting by jumping
+ * straight to the final value.
  */
 @Composable
 fun NeedleGauge(
@@ -74,12 +79,18 @@ fun NeedleGauge(
     }
     val clamped = score.coerceIn(0, 100)
     val anim = remember { Animatable(0f) }
+    var hasAnimated by remember { mutableStateOf(false) }
     LaunchedEffect(clamped, reduceMotion) {
         if (reduceMotion) {
             anim.snapTo(clamped.toFloat())
-        } else {
+        } else if (!hasAnimated) {
+            hasAnimated = true
             anim.snapTo(0f)
             anim.animateTo(clamped.toFloat(), tween(durationMillis = 1400, easing = EaseOutCubic))
+        } else {
+            // Score update: animateTo starts from the current value, so the
+            // needle glides to the new position instead of resetting to zero.
+            anim.animateTo(clamped.toFloat(), tween(durationMillis = 700, easing = EaseOutCubic))
         }
     }
     val display = anim.value.roundToInt()

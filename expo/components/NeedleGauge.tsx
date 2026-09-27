@@ -27,14 +27,17 @@ import { useThemeContext } from '@/providers/ThemeProvider';
  * - Zone colors run red → orange → green left to right, so a safe score
  *   always lands the needle in the green zone on the right
  * - Soft glow is faked with layered strokes (no SVG filters)
- * - Sweeps for 1.4s with an eased count-up on screen focus; honours
- *   Reduce Motion by jumping straight to the final position
+ * - Sweeps for 1.4s with an eased count-up on first screen focus; later
+ *   score updates glide the needle from its current position (0.7s) so it
+ *   never jumps or resets to zero; honours Reduce Motion by jumping
+ *   straight to the final position
  */
 
 const START_ANGLE = 150;
 const SWEEP_ANGLE = 240;
 const TRACK_WIDTH = 14;
 const ANIMATION_MS = 1400;
+const UPDATE_MS = 700;
 
 interface PolarPoint {
   x: number;
@@ -107,6 +110,7 @@ export default function NeedleGauge({
 
   const countAnim = useRef(new RNAnimated.Value(0)).current;
   const listenerId = useRef<string | null>(null);
+  const hasAnimatedRef = useRef(false);
   const [displayScore, setDisplayScore] = useState<number>(0);
 
   const needleStyle = useAnimatedStyle(() => ({
@@ -117,47 +121,69 @@ export default function NeedleGauge({
     opacity: badgeGlow.value,
   }));
 
-  const startAnimation = useCallback(() => {
-    countAnim.stopAnimation();
-    if (listenerId.current !== null) {
-      countAnim.removeListener(listenerId.current);
-      listenerId.current = null;
-    }
+  /**
+   * First run sweeps from zero (ANIMATION_MS); subsequent runs glide from
+   * wherever the needle and count currently are (UPDATE_MS) so a score
+   * update animates smoothly instead of jumping.
+   */
+  const startAnimation = useCallback(
+    (isInitial: boolean) => {
+      countAnim.stopAnimation();
+      if (listenerId.current !== null) {
+        countAnim.removeListener(listenerId.current);
+        listenerId.current = null;
+      }
 
-    if (reduceMotion) {
-      rotation.value = targetRotation;
-      setDisplayScore(clampedScore);
-      return;
-    }
+      if (reduceMotion) {
+        rotation.value = targetRotation;
+        setDisplayScore(clampedScore);
+        return;
+      }
 
-    rotation.value = 0;
-    rotation.value = withTiming(targetRotation, {
-      duration: ANIMATION_MS,
-      easing: Easing.out(Easing.cubic),
-    });
+      const duration = isInitial ? ANIMATION_MS : UPDATE_MS;
 
-    countAnim.setValue(0);
-    listenerId.current = countAnim.addListener(({ value }: { value: number }) => {
-      setDisplayScore(Math.round(value * clampedScore));
-    });
-    RNAnimated.timing(countAnim, {
-      toValue: 1,
-      duration: ANIMATION_MS,
-      easing: RNEasing.out(RNEasing.cubic),
-      useNativeDriver: false,
-    }).start(({ finished }: { finished: boolean }) => {
-      if (finished) setDisplayScore(clampedScore);
-    });
-  }, [clampedScore, countAnim, reduceMotion, rotation, targetRotation]);
+      if (isInitial) {
+        rotation.value = 0;
+        countAnim.setValue(0);
+      }
+
+      // withTiming starts from the current value, so updates glide in place.
+      rotation.value = withTiming(targetRotation, {
+        duration,
+        easing: Easing.out(Easing.cubic),
+      });
+
+      listenerId.current = countAnim.addListener(({ value }: { value: number }) => {
+        setDisplayScore(Math.round(value));
+      });
+      RNAnimated.timing(countAnim, {
+        toValue: clampedScore,
+        duration,
+        easing: RNEasing.out(RNEasing.cubic),
+        useNativeDriver: false,
+      }).start(({ finished }: { finished: boolean }) => {
+        if (finished) setDisplayScore(clampedScore);
+      });
+    },
+    [clampedScore, countAnim, reduceMotion, rotation, targetRotation],
+  );
 
   useFocusEffect(
     useCallback(() => {
-      startAnimation();
+      startAnimation(!hasAnimatedRef.current);
+      hasAnimatedRef.current = true;
       return () => {
         countAnim.stopAnimation();
       };
     }, [startAnimation, countAnim]),
   );
+
+  // Score changed while the gauge is on screen: glide to the new position.
+  useEffect(() => {
+    if (hasAnimatedRef.current) {
+      startAnimation(false);
+    }
+  }, [clampedScore, startAnimation]);
 
   useEffect(() => {
     if (reduceMotion) {
