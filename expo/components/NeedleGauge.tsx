@@ -17,7 +17,8 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { useFocusEffect } from 'expo-router';
-import { getSafetyBand, SAFETY_GAUGE } from '@/lib/safetyScore';
+import { getSafetyBand, getSafetyGaugeColors, type SafetyGaugeColors } from '@/lib/safetyScore';
+import { useThemeContext } from '@/providers/ThemeProvider';
 
 /**
  * Animated needle gauge for safety scores (higher = safer).
@@ -58,12 +59,14 @@ interface GaugeZone {
   end: number;
 }
 
-// Reversed zones: risk-free green sits on the right where high scores land.
-const ZONES: GaugeZone[] = [
-  { color: SAFETY_GAUGE.red, start: 150, end: 230 },
-  { color: SAFETY_GAUGE.orange, start: 230, end: 310 },
-  { color: SAFETY_GAUGE.green, start: 310, end: 390 },
-];
+/** Reversed zones: risk-free green sits on the right where high scores land. */
+function buildZones(c: SafetyGaugeColors): GaugeZone[] {
+  return [
+    { color: c.red, start: 150, end: 230 },
+    { color: c.orange, start: 230, end: 310 },
+    { color: c.green, start: 310, end: 390 },
+  ];
+}
 
 const GLOW_LAYERS = [
   { extraWidth: 8, opacity: 0.15 },
@@ -84,8 +87,11 @@ export default function NeedleGauge({
   riskLabel,
   size = 280,
 }: NeedleGaugeProps): React.ReactElement {
+  const { isDark, tokens } = useThemeContext();
   const clampedScore = Math.max(0, Math.min(100, Math.round(score)));
-  const band = getSafetyBand(clampedScore);
+  const band = getSafetyBand(clampedScore, isDark);
+  const gaugeColors = getSafetyGaugeColors(isDark);
+  const zones = buildZones(gaugeColors);
   const reduceMotion = useReducedMotion();
 
   const cx = size / 2;
@@ -191,14 +197,14 @@ export default function NeedleGauge({
         <Svg width={size} height={size}>
           <Path
             d={arcPath(cx, cy, radius, START_ANGLE, START_ANGLE + SWEEP_ANGLE)}
-            stroke={SAFETY_GAUGE.track}
+            stroke={gaugeColors.track}
             strokeOpacity={0.4}
             strokeWidth={TRACK_WIDTH}
             strokeLinecap="round"
             fill="none"
           />
           {GLOW_LAYERS.map((glow, gi) =>
-            ZONES.map((zone, zi) => (
+            zones.map((zone, zi) => (
               <Path
                 key={`glow-${gi}-${zi}`}
                 d={arcPath(cx, cy, radius, zone.start, zone.end)}
@@ -210,7 +216,7 @@ export default function NeedleGauge({
               />
             )),
           )}
-          {ZONES.map((zone, zi) => (
+          {zones.map((zone, zi) => (
             <Path
               key={`zone-${zi}`}
               d={arcPath(cx, cy, radius, zone.start, zone.end)}
@@ -227,7 +233,7 @@ export default function NeedleGauge({
               y1={tick.y}
               x2={tick.x2}
               y2={tick.y2}
-              stroke={SAFETY_GAUGE.track}
+              stroke={gaugeColors.track}
               strokeOpacity={tick.major ? 0.5 : 0.28}
               strokeWidth={tick.major ? 2.5 : 1.5}
               strokeLinecap="round"
@@ -237,14 +243,14 @@ export default function NeedleGauge({
 
         <Animated.View style={[StyleSheet.absoluteFill, needleStyle]} pointerEvents="none">
           <Svg width={size} height={size}>
-            <Line {...needleGlow} stroke="#FFFFFF" strokeOpacity={0.15} strokeWidth={9} strokeLinecap="round" />
-            <Line {...needleGlow} stroke="#FFFFFF" strokeOpacity={0.06} strokeWidth={17} strokeLinecap="round" />
-            <Polygon points={needlePoints} fill="#FFFFFF" stroke={SAFETY_GAUGE.track} strokeWidth={1.2} />
+            <Line {...needleGlow} stroke={gaugeColors.needle} strokeOpacity={0.15} strokeWidth={9} strokeLinecap="round" />
+            <Line {...needleGlow} stroke={gaugeColors.needle} strokeOpacity={0.06} strokeWidth={17} strokeLinecap="round" />
+            <Polygon points={needlePoints} fill={gaugeColors.needle} stroke={gaugeColors.track} strokeWidth={1.2} />
           </Svg>
         </Animated.View>
 
-        <View style={[styles.hubRing, { left: cx - 14, top: cy - 14 }]} pointerEvents="none" />
-        <View style={[styles.hub, { left: cx - 10, top: cy - 10 }]} pointerEvents="none" />
+        <View style={[styles.hubRing, { left: cx - 14, top: cy - 14, borderColor: gaugeColors.orange }]} pointerEvents="none" />
+        <View style={[styles.hub, { left: cx - 10, top: cy - 10, backgroundColor: gaugeColors.track }]} pointerEvents="none" />
 
         <View style={[styles.scoreWrap, { top: cy + 24 }]} pointerEvents="none">
           <Text
@@ -255,7 +261,7 @@ export default function NeedleGauge({
           >
             {displayScore}
           </Text>
-          <Text style={styles.scoreOutOf}>out of 100</Text>
+          <Text style={[styles.scoreOutOf, { color: tokens.textMuted }]}>out of 100</Text>
         </View>
       </View>
 
@@ -282,7 +288,6 @@ const styles = StyleSheet.create({
     height: 28,
     borderRadius: 14,
     borderWidth: 2,
-    borderColor: SAFETY_GAUGE.orange,
     backgroundColor: 'transparent',
   },
   hub: {
@@ -290,7 +295,6 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: SAFETY_GAUGE.track,
   },
   scoreWrap: {
     position: 'absolute',
@@ -310,7 +314,6 @@ const styles = StyleSheet.create({
   scoreOutOf: {
     fontSize: 13,
     fontWeight: '600' as const,
-    color: '#64748B',
     marginTop: -2,
   },
   badgeWrap: {

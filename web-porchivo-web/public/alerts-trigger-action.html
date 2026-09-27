@@ -4,7 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="Residents and Porch Partners are notified instantly when risk thresholds are crossed — with a full chain-of-custody for every handoff.">
-<meta name="theme-color" content="#0a0f1e">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0a0f1e">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#f2f5fa">
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="canonical" href="https://porchivo.com/alerts-trigger-action.html">
@@ -38,7 +40,7 @@
  }
  .eyebrow .dot,.hc-badge{animation:pulse 1.6s infinite;}
  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
- .alert-item{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid rgba(30,42,69,.8);}
+ .alert-item{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--line);}
  .alert-item:last-child{border-bottom:none;}
  .alert-icon{width:36px;height:36px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
  .a-red{background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.35);}
@@ -47,7 +49,7 @@
  .alert-item h4{font-size:.88rem;font-weight:700;}
  .alert-item p{font-size:.78rem;color:var(--muted);}
  .alert-item .time{margin-left:auto;font-size:.72rem;color:var(--muted);white-space:nowrap;flex-shrink:0;}
- .custody-strip{margin-top:18px;background:#0b1120;border:1px solid rgba(52,211,153,.25);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:10px;font-size:.8rem;color:var(--muted);}
+ .custody-strip{margin-top:18px;background:var(--bg-2);border:1px solid rgba(52,211,153,.25);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:10px;font-size:.8rem;color:var(--muted);}
  .custody-strip strong{color:var(--accent);}
  .custody-strip svg{flex-shrink:0;}
  .insight-panel{background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius);padding:26px;}
@@ -55,8 +57,8 @@
  .zone-row{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
  .zone-row:last-child{margin-bottom:0;}
  .zone-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;}
- .zone-name{flex:1;font-size:.85rem;color:#d7deee;}
- .zone-bar{width:120px;height:6px;border-radius:99px;background:#1a2440;overflow:hidden;flex-shrink:0;}
+ .zone-name{flex:1;font-size:.85rem;color:var(--text);}
+ .zone-bar{width:120px;height:6px;border-radius:99px;background:var(--factor-track);overflow:hidden;flex-shrink:0;}
  .zone-bar .z{height:100%;border-radius:99px;}
  .zone-val{font-size:.78rem;font-weight:700;width:32px;text-align:right;flex-shrink:0;}
  .steps-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}

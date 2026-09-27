@@ -174,6 +174,7 @@
         ".hc-title": "Puntaje de riesgo del paquete",
         ".hc-badge": "PUNTAJE EN VIVO",
         ".gauge-inner .of": "/ 100 riesgo",
+        ".gauge-pill": "Riesgo medio",
         ".score-gauge p": "Paquete #4821 · Entrega en porche · ETA 14 min",
         ".factor-row .fname": [
           "Patrón de horarios de entrega",

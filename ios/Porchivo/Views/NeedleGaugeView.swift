@@ -93,11 +93,10 @@ struct NeedleGaugeView: View {
     private var needleRotation: Double { gaugeStart + animatedScore * gaugeSweep / 100 - 270 }
     private var needleLength: CGFloat { size / 2 - gaugeRadiusInset - 18 }
 
-    private static let zoneColors: [Color] = [
-        Color(hex: 0xEF4444),
-        Color(hex: 0xE8611A),
-        Color(hex: 0x4ADE80),
-    ]
+    // Zone hues follow the active palette so they stay legible in light and dark.
+    private var zoneColors: [Color] {
+        [c.danger, c.warmOrange, c.success]
+    }
     private static let arcGlow: [(width: CGFloat, opacity: Double)] = [
         (22, 0.15), (30, 0.06),
     ]
@@ -125,7 +124,7 @@ struct NeedleGaugeView: View {
         ZStack {
             // Track
             ArcShape(start: .degrees(gaugeStart), end: .degrees(gaugeStart + gaugeSweep))
-                .stroke(Color(hex: 0x1B3A6B).opacity(0.4), style: StrokeStyle(lineWidth: 14, lineCap: .round))
+                .stroke(c.border, style: StrokeStyle(lineWidth: 14, lineCap: .round))
 
             // Soft glow behind the zones (layered strokes)
             ForEach(0..<2, id: \.self) { layer in
@@ -135,7 +134,7 @@ struct NeedleGaugeView: View {
                         end: .degrees(gaugeStart + Double(zone + 1) * 80)
                     )
                     .stroke(
-                        Self.zoneColors[zone].opacity(Self.arcGlow[layer].opacity),
+                        zoneColors[zone].opacity(Self.arcGlow[layer].opacity),
                         style: StrokeStyle(lineWidth: Self.arcGlow[layer].width, lineCap: .butt)
                     )
                 }
@@ -147,36 +146,36 @@ struct NeedleGaugeView: View {
                     start: .degrees(gaugeStart + Double(zone) * 80),
                     end: .degrees(gaugeStart + Double(zone + 1) * 80)
                 )
-                .stroke(Self.zoneColors[zone], style: StrokeStyle(lineWidth: 14, lineCap: .butt))
+                .stroke(zoneColors[zone], style: StrokeStyle(lineWidth: 14, lineCap: .butt))
             }
 
             // Ticks — longer at 0 / 50 / 100
             GaugeTicksShape(major: false)
-                .stroke(Color(hex: 0x1B3A6B).opacity(0.28), lineWidth: 1.5)
+                .stroke(c.border.opacity(0.6), lineWidth: 1.5)
             GaugeTicksShape(major: true)
-                .stroke(Color(hex: 0x1B3A6B).opacity(0.5), lineWidth: 2.5)
+                .stroke(c.textMuted, lineWidth: 2.5)
 
             // Needle + its glow, rotating around the hub
             ZStack {
                 ForEach(0..<2, id: \.self) { layer in
                     Capsule()
-                        .fill(Color.white.opacity(Self.needleGlow[layer].opacity))
+                        .fill(c.textPrimary.opacity(Self.needleGlow[layer].opacity))
                         .frame(width: Self.needleGlow[layer].width, height: needleLength)
                         .offset(y: -needleLength / 2)
                 }
                 NeedleShape()
-                    .fill(Color.white)
-                    .overlay(NeedleShape().stroke(Color(hex: 0x1B3A6B), lineWidth: 1.2))
+                    .fill(c.textPrimary)
+                    .overlay(NeedleShape().stroke(c.border, lineWidth: 1.2))
             }
             .rotationEffect(.degrees(needleRotation))
 
-            // Hub: navy dot with thin orange ring
+            // Hub: theme dot with warm-orange ring
             ZStack {
                 Circle()
-                    .stroke(Color(hex: 0xE8611A), lineWidth: 2)
+                    .stroke(c.warmOrange, lineWidth: 2)
                     .frame(width: 26, height: 26)
                 Circle()
-                    .fill(Color(hex: 0x1B3A6B))
+                    .fill(c.elevated)
                     .frame(width: 20, height: 20)
             }
         }

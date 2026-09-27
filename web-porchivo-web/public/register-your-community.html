@@ -4,7 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="Bring your HOA, apartment community, or managed property onto Porchivo in minutes—not months. No hardware. No IT project. Residents join free.">
-<meta name="theme-color" content="#0a0f1e">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0a0f1e">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#f2f5fa">
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="canonical" href="https://porchivo.com/register-your-community.html">
@@ -26,13 +28,13 @@
 <link rel="stylesheet" href="porchivo.css">
 <style>
  :root{ --grad-to:#38bdf8; --edge-2:rgba(56,189,248,.25); }
- .step-row{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid rgba(30,42,69,.8);}
+ .step-row{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--line);}
  .step-row:last-child{border-bottom:none;}
  .step-num{width:30px;height:30px;border-radius:9px;flex-shrink:0;background:var(--accent-soft);border:1px solid rgba(52,211,153,.3);color:var(--accent);font-weight:800;font-size:.8rem;display:flex;align-items:center;justify-content:center;}
  .step-row h4{font-size:.92rem;font-weight:700;margin-bottom:2px;}
  .step-row p{font-size:.82rem;color:var(--muted);}
  .hc-progress{margin-top:22px;}
- .hc-progress .bar{height:7px;border-radius:99px;background:#1a2440;overflow:hidden;}
+ .hc-progress .bar{height:7px;border-radius:99px;background:var(--factor-track);overflow:hidden;}
  .hc-progress .fill{height:100%;width:72%;border-radius:99px;background:linear-gradient(90deg,var(--accent),#38bdf8);}
  .hc-progress p{font-size:.78rem;color:var(--muted);margin-top:9px;}
  .hc-progress p strong{color:var(--text);}

@@ -41,6 +41,38 @@
   --icon-stroke:var(--accent);
   --stat-color:var(--accent);
   --cta-glow:rgba(52,211,153,.16);
+  --line:rgba(30,42,69,.7);
+  --nav-bg:rgba(10,15,30,.82);
+  --sheen-1:rgba(30,42,69,.35);
+  --sheen-2:rgba(18,27,49,0);
+  --card-shadow:0 24px 60px rgba(0,0,0,.35);
+  --factor-track:#1a2440;
+}
+
+/* Light theme — story pages follow the OS dark/light setting. Dark stays the
+   default look; these overrides only apply when the system prefers light. */
+@media (prefers-color-scheme: light){
+  :root{
+    --bg:#f2f5fa;
+    --bg-2:#ffffff;
+    --card:#ffffff;
+    --card-border:#dce6f2;
+    --text:#1a2b4a;
+    --muted:#5a6b8c;
+    --accent:#0ea371;
+    --accent-strong:#0b8a5e;
+    --accent-soft:rgba(14,163,113,.10);
+    --amber:#d97706;
+    --red:#e5484d;
+    --blue:#0284c7;
+    --grad-from:#0284c7;
+    --line:rgba(26,43,74,.14);
+    --nav-bg:rgba(245,247,250,.88);
+    --sheen-1:rgba(58,123,213,.07);
+    --sheen-2:rgba(58,123,213,0);
+    --card-shadow:0 24px 60px rgba(26,43,74,.10);
+    --factor-track:#e3eaf4;
+  }
 }
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -79,10 +111,10 @@ nav{
   position:sticky;
   top:0;
   z-index:50;
-  background:rgba(10,15,30,.82);
+  background:var(--nav-bg);
   backdrop-filter:blur(14px);
   -webkit-backdrop-filter:blur(14px);
-  border-bottom:1px solid rgba(30,42,69,.7);
+  border-bottom:1px solid var(--line);
 }
 
 .nav-inner{
@@ -291,13 +323,13 @@ nav{
 
 /* ---------- Hero card ---------- */
 .hero-card{
-  background:linear-gradient(180deg,rgba(30,42,69,.35),rgba(18,27,49,0) 55%),var(--card);
+  background:linear-gradient(180deg,var(--sheen-1),var(--sheen-2) 55%),var(--card);
   border:1px solid var(--card-border);
   border-radius:20px;
   padding:20px;
   position:relative;
   overflow:hidden;
-  box-shadow:0 24px 60px rgba(0,0,0,.35);
+  box-shadow:var(--card-shadow);
 }
 
 .hero-card::before{
@@ -355,8 +387,8 @@ nav{
 
 /* ---------- Stats band ---------- */
 .stats{
-  border-top:1px solid rgba(30,42,69,.7);
-  border-bottom:1px solid rgba(30,42,69,.7);
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
   background:var(--bg-2);
   padding:34px 0;
 }
@@ -522,7 +554,7 @@ h2{
 .final-cta{
   padding:90px 0;
   text-align:center;
-  border-top:1px solid rgba(30,42,69,.7);
+  border-top:1px solid var(--line);
   background:radial-gradient(620px 320px at 50% 38%,var(--cta-glow),transparent 70%);
 }
 
@@ -554,7 +586,7 @@ h2{
 
 /* ---------- Footer ---------- */
 footer{
-  border-top:1px solid rgba(30,42,69,.7);
+  border-top:1px solid var(--line);
   padding:26px 0;
   background:var(--bg);
 }

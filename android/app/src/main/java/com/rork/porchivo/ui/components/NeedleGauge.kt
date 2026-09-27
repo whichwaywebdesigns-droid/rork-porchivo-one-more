@@ -37,15 +37,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.rork.porchivo.ui.theme.PorchivoColors
 import com.rork.porchivo.ui.theme.PorchivoTheme
 import kotlin.math.cos
 import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.math.sin
 
-private val gaugeTrack = Color(0xFF1B3A6B)
-private val gaugeRing = Color(0xFFE8611A)
-private val gaugeZones = listOf(Color(0xFFEF4444), Color(0xFFE8611A), Color(0xFF4ADE80))
 private const val gaugeStart = 150f
 private const val gaugeSweep = 240f
 
@@ -93,7 +91,7 @@ fun NeedleGauge(
                 .semantics { contentDescription = "Safety score $clamped out of 100, $riskLabel" },
         ) {
             Canvas(modifier = Modifier.fillMaxSize()) {
-                drawGauge(animatedScore = anim.value)
+                drawGauge(animatedScore = anim.value, c = c)
             }
             Column(
                 modifier = Modifier
@@ -139,16 +137,17 @@ fun NeedleGauge(
     }
 }
 
-private fun DrawScope.drawGauge(animatedScore: Float) {
+private fun DrawScope.drawGauge(animatedScore: Float, c: PorchivoColors) {
     val stroke = 14.dp.toPx()
     val radius = min(size.width, size.height) / 2f - 26.dp.toPx()
     val center = Offset(size.width / 2f, size.height / 2f)
     val arcTopLeft = Offset(center.x - radius, center.y - radius)
     val arcSize = Size(radius * 2f, radius * 2f)
+    val zoneColors = listOf(c.danger, c.warmOrange, c.success)
 
     // Track
     drawArc(
-        color = gaugeTrack.copy(alpha = 0.4f),
+        color = c.border,
         startAngle = gaugeStart,
         sweepAngle = gaugeSweep,
         useCenter = false,
@@ -159,7 +158,7 @@ private fun DrawScope.drawGauge(animatedScore: Float) {
 
     // Layered glow behind the zones
     listOf(22.dp.toPx() to 0.15f, 30.dp.toPx() to 0.06f).forEach { (glowWidth, glowAlpha) ->
-        gaugeZones.forEachIndexed { index, zoneColor ->
+        zoneColors.forEachIndexed { index, zoneColor ->
             drawArc(
                 color = zoneColor.copy(alpha = glowAlpha),
                 startAngle = gaugeStart + index * 80f,
@@ -173,7 +172,7 @@ private fun DrawScope.drawGauge(animatedScore: Float) {
     }
 
     // Zones (red left → green right)
-    gaugeZones.forEachIndexed { index, zoneColor ->
+    zoneColors.forEachIndexed { index, zoneColor ->
         drawArc(
             color = zoneColor,
             startAngle = gaugeStart + index * 80f,
@@ -192,7 +191,7 @@ private fun DrawScope.drawGauge(animatedScore: Float) {
         val inner = radius + (if (major) 9.dp.toPx() else 11.dp.toPx())
         val outer = radius + (if (major) 21.dp.toPx() else 17.dp.toPx())
         drawLine(
-            color = gaugeTrack.copy(alpha = if (major) 0.5f else 0.28f),
+            color = if (major) c.textMuted else c.border.copy(alpha = 0.6f),
             start = Offset(center.x + cos(radians).toFloat() * inner, center.y + sin(radians).toFloat() * inner),
             end = Offset(center.x + cos(radians).toFloat() * outer, center.y + sin(radians).toFloat() * outer),
             strokeWidth = if (major) 2.5.dp.toPx() else 1.5.dp.toPx(),
@@ -205,7 +204,7 @@ private fun DrawScope.drawGauge(animatedScore: Float) {
     rotate(degrees = -120f + animatedScore * gaugeSweep / 100f, pivot = center) {
         listOf(9.dp.toPx() to 0.15f, 17.dp.toPx() to 0.06f).forEach { (glowWidth, glowAlpha) ->
             drawLine(
-                color = Color.White.copy(alpha = glowAlpha),
+                color = c.textPrimary.copy(alpha = glowAlpha),
                 start = Offset(center.x, center.y + 4.dp.toPx()),
                 end = Offset(center.x, center.y - needleLength + 4.dp.toPx()),
                 strokeWidth = glowWidth,
@@ -219,14 +218,14 @@ private fun DrawScope.drawGauge(animatedScore: Float) {
             lineTo(center.x + 3.dp.toPx(), center.y + 6.dp.toPx())
             close()
         }
-        drawPath(needle, Color.White)
-        drawPath(needle, gaugeTrack, style = Stroke(width = 1.2.dp.toPx()))
+        drawPath(needle, c.textPrimary)
+        drawPath(needle, c.border, style = Stroke(width = 1.2.dp.toPx()))
     }
 
-    // Hub: navy dot with thin orange ring (drawn above the needle)
-    drawCircle(color = gaugeTrack, radius = 10.dp.toPx(), center = center)
+    // Hub: theme dot with warm-orange ring (drawn above the needle)
+    drawCircle(color = c.elevated, radius = 10.dp.toPx(), center = center)
     drawCircle(
-        color = gaugeRing,
+        color = c.warmOrange,
         radius = 13.dp.toPx(),
         center = center,
         style = Stroke(width = 2.dp.toPx()),
