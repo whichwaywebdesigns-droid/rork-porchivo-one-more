@@ -12,11 +12,22 @@ identity `com.whichwayweblabs.porchivo` (debug builds use the same ID — no
 
 1. Install Maestro: https://docs.maestro.dev/getting-started/installing-maestro
 2. A running emulator or attached device (Android 13+ fine).
-3. Install the app on it, from the repo root:
+3. Install the app on it. Preferred (Windows/PowerShell): install the exact
+   shipped build from the 1.0.9 AAB via bundletool. The AAB is signed with
+   the debug keystore (see `signingConfig` in the release build type) and
+   `build-apks` without `--ks` also signs with the debug keystore, so the
+   signatures match:
 
-   ```bash
-   cd android && ./gradlew :app:installDebug
+   ```powershell
+   java -jar bundletool.jar build-apks --bundle=.\Porchivo-1.0.9.aab --output=porchivo-109.apks --mode=universal
+   java -jar bundletool.jar install-apks --apks=.\porchivo-109.apks
    ```
+
+   If a differently-signed copy is already installed, uninstall it first or
+   `install-apks` fails with `INSTALL_FAILED_UPDATE_INCOMPATIBLE`.
+
+   Fallback (gradle, from `android\`): `.\gradlew.bat :app:installDebug`
+   — this is a native Kotlin/Compose app, so no Metro/dev server is needed.
 
 ## Credentials
 
