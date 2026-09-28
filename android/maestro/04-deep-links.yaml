@@ -1,0 +1,27 @@
+appId: com.whichwayweblabs.porchivo
+name: "04 — Deep links (reset password / org signup)"
+---
+- launchApp:
+    appId: com.whichwayweblabs.porchivo
+- waitForAnimationToEnd:
+    timeout: 8000
+
+# MainActivity intercepts both hosts and hands them to the repository
+# (setResetPasswordRedirect / setOrgSignupRedirect). Landing copy isn't
+# pinned here on purpose — these flows verify the links route cleanly
+# and capture screenshots for eyeball verification.
+- openLink: porchivo://reset-password
+- waitForAnimationToEnd:
+    timeout: 10000
+- takeScreenshot: 04-deeplink-reset-password
+
+- openLink: porchivo://org-signup/success
+- waitForAnimationToEnd:
+    timeout: 10000
+- takeScreenshot: 04-deeplink-org-signup
+
+# Sanity: a normal relaunch returns the app to a healthy, signed-in state.
+- launchApp:
+    appId: com.whichwayweblabs.porchivo
+    clearState: true
+- runFlow: 01-login.yaml

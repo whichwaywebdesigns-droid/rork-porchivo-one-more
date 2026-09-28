@@ -1,0 +1,8 @@
+appId: com.whichwayweblabs.porchivo
+name: "Porchivo — full suite"
+---
+- runFlow: 00-launch-onboarding.yaml
+- runFlow: 01-login.yaml
+- runFlow: 02-browse.yaml
+- runFlow: 03-safety-score.yaml
+- runFlow: 04-deep-links.yaml

@@ -1,0 +1,36 @@
+appId: com.whichwayweblabs.porchivo
+name: "03 — Safety score screen + needle gauge"
+---
+- runFlow: 01-login.yaml
+
+- extendedWaitUntil:
+    visible: "Home"
+    timeout: 15000
+
+# Home QuickLink labeled "Safety" navigates to the Safety screen.
+- tapOn: "Safety"
+
+- extendedWaitUntil:
+    visible: "Safety Score"
+    timeout: 15000
+- assertVisible: "SAFETY FACTORS"
+
+# Let the gauge finish its ~1.4s entry sweep before asserting on it.
+- waitForAnimationToEnd:
+    timeout: 6000
+
+# The needle gauge exposes an accessibility description of the form
+# "Safety score <n> out of 100, <risk level>".
+- assertVisible: "Safety score"
+
+- takeScreenshot: 03-safety-score
+
+# Return via the screen's back arrow (contentDescription "Back").
+- runFlow:
+    when:
+      visible: "Back"
+    commands:
+      - tapOn: "Back"
+- extendedWaitUntil:
+    visible: "Home"
+    timeout: 10000

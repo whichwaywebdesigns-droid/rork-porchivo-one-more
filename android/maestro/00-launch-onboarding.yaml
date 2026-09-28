@@ -1,0 +1,65 @@
+appId: com.whichwayweblabs.porchivo
+name: "00 — Cold launch + onboarding"
+---
+# Fresh install state; permissions pre-denied so the POST_NOTIFICATIONS
+# runtime dialog can never stall the run.
+- launchApp:
+    appId: com.whichwayweblabs.porchivo
+    clearState: true
+    permissions:
+      all: deny
+- waitForAnimationToEnd:
+    timeout: 8000
+
+# First-run entry point (if the app shows onboarding).
+- runFlow:
+    when:
+      visible: "Get started"
+    commands:
+      - tapOn: "Get started"
+
+# Dismiss optional interstitials wherever they appear, in any order.
+- repeat:
+    while:
+      visible: "Skip for now"
+    commands:
+      - tapOn: "Skip for now"
+- repeat:
+    while:
+      visible: "Not now"
+    commands:
+      - tapOn: "Not now"
+- repeat:
+    while:
+      visible: "Maybe later"
+    commands:
+      - tapOn: "Maybe later"
+
+# A demo interstitial with a positive CTA — advance past it if shown.
+- runFlow:
+    when:
+      visible: "This is useful — continue"
+    commands:
+      - tapOn: "This is useful — continue"
+
+# Finish the tour.
+- runFlow:
+    when:
+      visible: "Start using Porchivo"
+    commands:
+      - tapOn: "Start using Porchivo"
+- waitForAnimationToEnd:
+    timeout: 8000
+
+# Landing state depends on auth: either the login screen or the main app.
+- runFlow:
+    when:
+      visible: "Enter your email"
+    commands:
+      - assertVisible: "Developer login"
+- runFlow:
+    when:
+      visible: "Your delivery dashboard"
+    commands:
+      - assertVisible: "Home"
+- takeScreenshot: 00-landing-state

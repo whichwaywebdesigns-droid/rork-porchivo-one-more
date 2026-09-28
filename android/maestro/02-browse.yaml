@@ -1,0 +1,33 @@
+appId: com.whichwayweblabs.porchivo
+name: "02 — Browse main tabs"
+---
+# Idempotent: signs in via Developer login only if not already signed in.
+- runFlow: 01-login.yaml
+
+- extendedWaitUntil:
+    visible: "Home"
+    timeout: 15000
+
+# Payments tab
+- tapOn: "Payments"
+- waitForAnimationToEnd:
+    timeout: 6000
+- takeScreenshot: 02-tab-payments
+
+# Requests tab
+- tapOn: "Requests"
+- waitForAnimationToEnd:
+    timeout: 6000
+- takeScreenshot: 02-tab-requests
+
+# More tab
+- tapOn: "More"
+- waitForAnimationToEnd:
+    timeout: 6000
+- takeScreenshot: 02-tab-more
+
+# Back to Home
+- tapOn: "Home"
+- extendedWaitUntil:
+    visible: "Your delivery dashboard"
+    timeout: 10000

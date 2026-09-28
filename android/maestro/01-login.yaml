@@ -1,0 +1,44 @@
+appId: com.whichwayweblabs.porchivo
+name: "01 — Login (Developer login bypass, optional email OTP)"
+# Idempotent: safe to run on its own or as a prerequisite of 02/03/04.
+# If already signed in, it does nothing.
+---
+- launchApp:
+    appId: com.whichwayweblabs.porchivo
+- waitForAnimationToEnd:
+    timeout: 8000
+
+- runFlow:
+    when:
+      visible: "Enter your email"
+    commands:
+      # Preferred deterministic path: the app's built-in developer bypass.
+      - runFlow:
+          when:
+            visible: "Developer login"
+          commands:
+            - tapOn: "Developer login"
+            - extendedWaitUntil:
+                visible: "Home"
+                timeout: 20000
+
+      # Fallback path (only if Developer login is unavailable): send the
+      # magic link to the test account. Fully automating the 6-digit code
+      # needs an inbox hook — this flow stops at the code screen by design.
+      - runFlow:
+          when:
+            notVisible: "Developer login"
+          commands:
+            - tapOn: "Enter your email"
+            - inputText: ${TEST_EMAIL}
+            - tapOn: "Send magic link"
+            - extendedWaitUntil:
+                visible: "Check your email for a 6-digit code."
+                timeout: 15000
+
+- runFlow:
+    when:
+      visible: "Your delivery dashboard"
+    commands:
+      - assertVisible: "Home"
+- takeScreenshot: 01-login-state
