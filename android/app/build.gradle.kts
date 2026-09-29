@@ -36,8 +36,8 @@ android {
         applicationId = "com.whichwayweblabs.porchivo"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1788441601
-        versionName = "1.0.9"
+        versionCode = 1788441602
+        versionName = "1.0.10"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // Supabase credentials — read from local.properties, system env vars,
@@ -77,7 +77,14 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            signingConfig = signingConfigs.getByName("debug")
+            // Sign with the upload key from keystore.properties when present
+            // (owner's local release builds). Builds without it (CI/sandbox)
+            // keep the debug key so nothing breaks.
+            signingConfig = if (keystorePropsFile.exists()) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
