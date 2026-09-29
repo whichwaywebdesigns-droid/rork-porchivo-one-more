@@ -256,6 +256,20 @@ fun UpgradeScreen(
             RevenueCatService.Plan.MONTHLY -> "Subscribe — ${selectedOption.price}/mo"
         }
 
+        // Google Play requires subscription purchase screens to disclose the
+        // renewal terms, price, and cancellation path before purchase.
+        val disclosureText = when (selectedPlan) {
+            RevenueCatService.Plan.MONTHLY ->
+                "Renews automatically at ${selectedOption.price} every month through Google Play unless canceled. " +
+                    "Cancel anytime in Google Play → Payments & subscriptions → Subscriptions."
+            RevenueCatService.Plan.ANNUAL, RevenueCatService.Plan.FAMILY ->
+                "7-day free trial, then renews automatically at ${selectedOption.price} every year through Google Play " +
+                    "unless canceled at least 24 hours before the trial ends. " +
+                    "Cancel anytime in Google Play → Payments & subscriptions → Subscriptions."
+            RevenueCatService.Plan.LIFETIME ->
+                "One-time payment. No subscription and no auto-renewal."
+        }
+
         Button(
             onClick = {
                 if (isPurchasing) return@Button
@@ -304,6 +318,17 @@ fun UpgradeScreen(
                 )
             }
         }
+
+        Text(
+            text = disclosureText,
+            color = c.textMuted,
+            fontSize = 12.sp,
+            lineHeight = 16.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 4.dp),
+        )
 
         TextButton(
             onClick = {
