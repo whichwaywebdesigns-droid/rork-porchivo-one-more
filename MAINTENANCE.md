@@ -422,6 +422,53 @@ Nothing to change in the code — wait for it to recover.
 
 ---
 
+## Keystore Verification
+
+The Google Play upload key is the one file Porchivo cannot live without: if `porchivo-upload.jks`
+is lost, no future Android release can be signed — recovery means a limited, identity-verified
+Google reset request and release downtime. Verify it before every local release build, and
+re-verify your backups a couple of times a year. Passwords are NEVER written in this repo —
+they live only in the password manager.
+
+### Verify the keystore before signing anything
+
+Run (from wherever the keystore lives on your PC):
+
+```
+keytool -list -v -keystore porchivo-upload.jks
+```
+
+It must print **exactly** these identities:
+
+| Check | Must be |
+|-------|---------|
+| Cert SHA-1 | `15:E4:E6:59:03:D3:09:D8:A6:F1:EF:9C:4E:8E:13:75:27:C4:C3:A8` |
+| CN | `WhichWay Weblabs` |
+| Alias | `porchivo-upload` |
+
+Full SHA-256 values (cert + file) are stored with the password-manager record for byte-level
+verification. If your only copy is a `.b64` file, decode it first
+(`base64 -d file.b64 > porchivo-upload.jks`, Windows: `certutil -decode file.b64 file.jks`)
+and then verify.
+
+### STOP — do not sign or upload if you see
+
+- SHA-1 starting `92:F7:41:…` → the RETIRED Sep-2026 Google-reset key
+  (`new-upload-keystore.jks` / alias `upload2026`). Any AAB signed with it is rejected by Play.
+- `CN=Android Debug` → a debug key. Never upload a debug-signed release.
+
+### Backup rules (do once, verify twice)
+
+1. Two copies exist at all times: the password manager (attach the `.jks` to a secure note,
+   plus store password, alias, and hashes as fields) and one USB stick kept elsewhere.
+2. After every backup, restore a copy to a temp folder and re-run the `keytool` check — an
+   unverified backup is a hope, not a backup.
+3. Delete loose copies (`.b64`, downloads, Desktop) once verified, and empty the recycle bin.
+4. Never commit, zip, email, or host the keystore — `BACKUP-README.txt` in the project root
+   records the same identities if you need a second reference.
+
+---
+
 ## Support Tickets + AI-Drafted Replies (2026-07-18)
 
 The `public.support_tickets` table is now defined in
