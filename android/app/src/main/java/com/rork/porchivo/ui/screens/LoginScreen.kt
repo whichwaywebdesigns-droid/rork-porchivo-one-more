@@ -31,9 +31,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -48,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.rork.porchivo.BuildConfig
 import com.rork.porchivo.R
 import com.rork.porchivo.data.AuthState
 import com.rork.porchivo.ui.theme.PorchivoTheme
@@ -56,7 +55,12 @@ import com.rork.porchivo.ui.viewmodel.AppViewModel
 /**
  * Auth screen — magic link authentication with the Porchivo welcome-porch hero.
  * Email → 6-digit OTP code → verified. No passwords.
- * A developer login link sits under the magic link button for internal testing bypass.
+ * A developer login link sits under the magic link button for internal testing bypass
+ * (debug builds only — hidden in release).
+ *
+ * NOTE: never launch auth or post-login loading in a rememberCoroutineScope here —
+ * it dies when navigation leaves this screen. All auth/loading runs in AppViewModel's
+ * viewModelScope via callback-based functions.
  */
 @Composable
 fun LoginScreen(
@@ -74,7 +78,6 @@ fun LoginScreen(
     var linkSent by remember { mutableStateOf(false) }
 
     val isLoading = authState is AuthState.Loading
-    val scope = rememberCoroutineScope()
 
     // Side-effect: navigate out once authenticated.
     LaunchedEffect(authState) {
@@ -124,8 +127,7 @@ fun LoginScreen(
                 authError = authError,
                 isLoading = isLoading,
                 onSendMagicLink = {
-                    scope.launch {
-                        val ok = appViewModel.sendMagicLink(email)
+                    appViewModel.sendMagicLink(email) { ok ->
                         if (ok) {
                             linkSent = true
                             phase = AuthPhase.CODE
@@ -133,8 +135,7 @@ fun LoginScreen(
                     }
                 },
                 onVerifyOtp = {
-                    scope.launch {
-                        val ok = appViewModel.verifyOtp(email, otpCode)
+                    appViewModel.verifyOtp(email, otpCode) { ok ->
                         if (!ok) {
                             // AuthFail only for errors that clearly mean "no account
                             // exists" — timeouts, rate limits, and server hiccups must
@@ -149,9 +150,7 @@ fun LoginScreen(
                     }
                 },
                 onDeveloperLogin = {
-                    scope.launch {
-                        appViewModel.developerLogin()
-                    }
+                    appViewModel.developerLogin()
                 },
             )
         }
@@ -320,14 +319,17 @@ private fun EmailPhase(
 
     Spacer(modifier = Modifier.height(12.dp))
 
-    TextButton(onClick = onDeveloperLogin) {
-        Text(
-            text = "Developer login",
-            color = c.textSecondary,
-            fontSize = 13.sp,
-            fontWeight = FontWeight.Medium,
-            textDecoration = TextDecoration.Underline,
-        )
+    // Debug builds + automated tests only — never visible in release builds.
+    if (BuildConfig.DEBUG) {
+        TextButton(onClick = onDeveloperLogin) {
+            Text(
+                text = "Developer login",
+                color = c.textSecondary,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Medium,
+                textDecoration = TextDecoration.Underline,
+            )
+        }
     }
 
     authError?.let { errorMsg ->

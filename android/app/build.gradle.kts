@@ -36,8 +36,8 @@ android {
         applicationId = "com.whichwayweblabs.porchivo"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1788441602
-        versionName = "1.0.10"
+        versionCode = 1788441603
+        versionName = "1.0.11"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // Supabase credentials — read from local.properties, system env vars,

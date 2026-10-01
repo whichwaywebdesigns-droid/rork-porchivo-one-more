@@ -48,6 +48,7 @@ class AppViewModel : ViewModel() {
     val language: StateFlow<AppLanguage> = repo.language
     val authError: StateFlow<String?> = repo.authError
     val isReadyToShowUI: StateFlow<Boolean> = repo.isReadyToShowUI
+    val initialLoadError: StateFlow<String?> = repo.initialLoadError
 
     // ── Language transition (fade) ─────────────────────────────────────
     private val _languageTransitioning = MutableStateFlow(false)
@@ -72,16 +73,24 @@ class AppViewModel : ViewModel() {
         viewModelScope.launch { repo.signUp(email, password) }
     }
 
-    suspend fun sendMagicLink(email: String): Boolean {
-        return repo.sendMagicLink(email)
+    /** Runs in [viewModelScope] so auth + initial data loading survives navigation. */
+    fun sendMagicLink(email: String, onResult: (Boolean) -> Unit) {
+        viewModelScope.launch { onResult(repo.sendMagicLink(email)) }
     }
 
-    suspend fun verifyOtp(email: String, token: String): Boolean {
-        return repo.verifyOtp(email, token)
+    /** Runs in [viewModelScope] so auth + initial data loading survives navigation. */
+    fun verifyOtp(email: String, token: String, onResult: (Boolean) -> Unit) {
+        viewModelScope.launch { onResult(repo.verifyOtp(email, token)) }
     }
 
-    suspend fun developerLogin() {
-        repo.developerLogin()
+    /** Runs in [viewModelScope] so auth + initial data loading survives navigation. */
+    fun developerLogin() {
+        viewModelScope.launch { repo.developerLogin() }
+    }
+
+    /** Splash "Try again" — re-runs the post-login initial load. */
+    fun retryInitialLoad() {
+        viewModelScope.launch { repo.retryInitialLoad() }
     }
 
     fun signOut() {

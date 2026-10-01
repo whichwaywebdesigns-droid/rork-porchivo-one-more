@@ -133,6 +133,11 @@ class AppRepository(context: Context) {
     private val _isReadyToShowUI = MutableStateFlow(false)
     val isReadyToShowUI: StateFlow<Boolean> = _isReadyToShowUI.asStateFlow()
 
+    /** Non-null when the post-login initial load failed (profile fetch) —
+     *  surfaces the splash retry ("Try again") state. Cleared on each retry. */
+    private val _initialLoadError = MutableStateFlow<String?>(null)
+    val initialLoadError: StateFlow<String?> = _initialLoadError.asStateFlow()
+
     // ── Language preference ────────────────────────────────────────────
     private val _language = MutableStateFlow(AppLanguage.DEFAULT)
     val language: StateFlow<AppLanguage> = _language.asStateFlow()
@@ -501,6 +506,9 @@ class AppRepository(context: Context) {
         _packages.value = MockData.trackedPackages
         saveLocalPackages(_packages.value)
         _authState.value = AuthState.Authenticated(MockData.CURRENT_USER_ID)
+        // Demo data is fully local — no async load to wait for, so lift the
+        // splash immediately instead of stalling until the 30s watchdog.
+        _isReadyToShowUI.value = true
     }
 
     /**
@@ -562,6 +570,7 @@ class AppRepository(context: Context) {
     }
 
     private suspend fun loadInitialData(userId: String) {
+        _initialLoadError.value = null
         // Hard deadline: one stalled network call must never hold the root
         // splash up forever (Ktor has no default request timeout). On timeout
         // we lift the splash with whatever loaded; refreshers and queue sync
@@ -587,11 +596,18 @@ class AppRepository(context: Context) {
                 val shipmentsJob = async { loadShipments(userId) }
                 val notificationsJob = async { loadNotifications(userId) }
                 val orgJob = async { loadOrgContext() }
-                profileJob.await()
+                val profileOk = profileJob.await()
                 shipmentsJob.await()
                 notificationsJob.await()
                 orgJob.await()
                 communityJob.await()
+
+                // Surface a retry state instead of silently landing the user on a
+                // dashboard with no profile behind it.
+                if (!profileOk) {
+                    Log.w("Porchivo", "loadProfile failed during initial load — surfacing retry state")
+                    _initialLoadError.value = "We couldn't load your profile. Check your connection and try again."
+                }
 
                 // One-time email-locale sync: push the locally-saved language so choices
                 // made before sign-in — or before this sync shipped — reach
@@ -624,8 +640,9 @@ class AppRepository(context: Context) {
 
     // ── Profile ─────────────────────────────────────────────────────────
 
-    suspend fun loadProfile(userId: String) {
-        val client = supabase ?: return
+    /** Returns true when the profile loaded (or no backend is configured). */
+    suspend fun loadProfile(userId: String): Boolean {
+        val client = supabase ?: return true
         val result = client.fetchProfile(userId)
         if (result.isSuccess) {
             val dbProfile = result.getOrNull()
@@ -633,9 +650,20 @@ class AppRepository(context: Context) {
                 _user.value = Mappers.dbProfileToUser(dbProfile)
                 _tier.value = if (dbProfile.isPremium) SubscriptionTier.PREMIUM else SubscriptionTier.FREE
             }
+            return true
         } else {
             Log.w("Porchivo", "loadProfile failed for $userId: ${result.exceptionOrNull()?.message}")
+            return false
         }
+    }
+
+    /**
+     * Re-run the post-login initial load (splash "Try again"). Resolves the
+     * signed-in user from the current auth state; no-op when signed out.
+     */
+    suspend fun retryInitialLoad() {
+        val userId = (_authState.value as? AuthState.Authenticated)?.userId ?: return
+        loadInitialData(userId)
     }
 
     suspend fun updateRole(role: UserRole) {
