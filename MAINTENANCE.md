@@ -681,7 +681,7 @@ user action, so tapping a button never waits on email.
 | Theft resolved | incident status → resolved trigger |
 | Referral reward credited | referred user completes first verified activity |
 
-### Scheduled jobs (7 digests/alerts + support jobs)
+### Scheduled jobs (9 digests/alerts + support jobs)
 
 | Job (pg_cron) | Schedule | What it sends |
 |------|------|------|
@@ -692,6 +692,7 @@ user action, so tapping a button never waits on email.
 | `email-review-request` | daily 15:20 UTC | Review ask 3 days after a hand-off (skips if already reviewed) |
 | `email-risk-spike` | every 6h | Theft-spike warning vs neighborhood baseline |
 | `email-safety-digest` | Mon 14:00 UTC | Weekly Safety Digest per community |
+| `email-onboarding-reminder` | daily 15:25 UTC | "Finish setting up" nudge — 24h+ after signup if onboarding never completed (once per user, ever; marketing opt-out respected) |
 | `email-incident-escalation` | hourly :30 | Moves missing→confirmed-stolen after 24h (fires the stolen email) |
 | `drain-email-queue` | every minute | Sends queued email through Resend |
 

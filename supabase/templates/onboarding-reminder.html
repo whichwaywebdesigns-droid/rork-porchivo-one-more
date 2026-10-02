@@ -1,0 +1,86 @@
+<!--
+  Porchivo — "Finish setting up" onboarding reminder (v1)
+  Paste into Resend as a new template. Suggested:
+    Name:  Finish setting up (onboarding reminder)
+    Alias: onboarding-reminder
+  Subject: {{first_name}}, finish setting up Porchivo (2 min)
+  Preheader: One step left — then Porchivo starts protecting your packages.
+
+  Variables (passed by enqueue_template_email): {{first_name}}, {{setup_url}}
+  Do NOT add an unsubscribe footer — enqueue_template_email merges it.
+  Spanish: deliberately not published yet — pipeline falls back to English.
+-->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Finish setting up Porchivo</title>
+  </head>
+  <body style="margin:0; padding:0; background:#F5F7FA; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F5F7FA; padding:24px 12px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px; background:#FFFFFF; border-radius:12px; overflow:hidden;">
+            <!-- Header -->
+            <tr>
+              <td style="background:#1B3A6B; padding:28px 32px;">
+                <span style="font-size:22px; font-weight:700; color:#FFFFFF; letter-spacing:0.5px;">Porchivo</span>
+              </td>
+            </tr>
+            <!-- Body -->
+            <tr>
+              <td style="padding:32px;">
+                <h1 style="margin:0 0 16px; font-size:22px; line-height:1.3; color:#1B3A6B;">
+                  One step left, {{first_name}}
+                </h1>
+                <p style="margin:0 0 16px; font-size:16px; line-height:1.6; color:#3D4F63;">
+                  You created your Porchivo account — great start! Your setup isn't
+                  finished yet, so Porchivo can't start protecting your packages.
+                </p>
+                <p style="margin:0 0 24px; font-size:16px; line-height:1.6; color:#3D4F63;">
+                  It takes about <strong>2 minutes</strong>. Once you're done, you'll get:
+                </p>
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 28px;">
+                  <tr>
+                    <td style="padding:6px 0; font-size:15px; line-height:1.5; color:#3D4F63;">
+                      &#9989;&nbsp; A <strong>Safety Score</strong> for your address, based on real package-theft risk
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:6px 0; font-size:15px; line-height:1.5; color:#3D4F63;">
+                      &#9989;&nbsp; Automatic tracking the moment a package is on its way
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:6px 0; font-size:15px; line-height:1.5; color:#3D4F63;">
+                      &#9989;&nbsp; Alerts if something looks off on your porch
+                    </td>
+                  </tr>
+                </table>
+                <!-- CTA -->
+                <table role="presentation" cellpadding="0" cellspacing="0" align="center">
+                  <tr>
+                    <td style="border-radius:8px; background:#E8611A;">
+                      <a href="{{setup_url}}"
+                         style="display:inline-block; padding:14px 32px; font-size:16px; font-weight:600; color:#FFFFFF; text-decoration:none;">
+                        Finish setting up&nbsp;&rarr;
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin:24px 0 0; font-size:13px; line-height:1.5; color:#6B7F99;">
+                  If the button doesn't work, copy this link into your browser:<br />
+                  <a href="{{setup_url}}" style="color:#1B3A6B; word-break:break-all;">{{setup_url}}</a>
+                </p>
+              </td>
+            </tr>
+          </table>
+          <p style="margin:16px 0 0; font-size:12px; color:#9AAABB;">
+            You're receiving this because you started signing up for Porchivo.
+          </p>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
