@@ -98,9 +98,12 @@ begin
       perform public.enqueue_template_email(
         'onboarding-reminder', v_u.email, v_u.id, 'marketing',
         'onboard-reminder:' || v_u.id::text,   -- permanent: once, ever
+        -- Resend templates require UPPERCASE variable keys (FIRST_NAME is
+        -- reserved there), and the RECIPIENT_NAME dashboard fallback is 'there'.
+        -- nullif handles empty-string names, not just NULL ones.
         jsonb_build_object(
-          'first_name', coalesce(split_part(v_u.name, ' ', 1), 'there'),
-          'setup_url',  public.email_web_base() || '/app/onboarding-setup'
+          'RECIPIENT_NAME', coalesce(nullif(split_part(coalesce(v_u.name, ''), ' ', 1), ''), 'there'),
+          'SETUP_URL',      public.email_web_base() || '/app/onboarding-setup'
         ),
         'profiles', v_u.id
       );
